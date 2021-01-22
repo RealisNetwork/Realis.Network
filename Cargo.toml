@@ -1,0 +1,17 @@
+[profile.release]
+panic = 'unwind'
+
+[workspace]
+members = [
+    "bin/node/bench",
+    "bin/node/browser-testing",
+    "bin/node/cli",
+    "bin/node/executor",
+    "bin/node/primitives",
+    "bin/node/rpc",
+    "bin/node/rpc-client",
+    "bin/node/runtime",
+    "bin/node/testing",
+    "bin/utils/chain-spec-builder",
+    "bin/utils/subkey",
+]
