@@ -374,13 +374,54 @@ fn local_testnet_genesis() -> GenesisConfig {
 	)
 }
 
+fn soul_testnet_genesis() -> GenesisConfig {
+
+	let initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId, ImOnlineId, AuthorityDiscoveryId)> = vec![(
+		hex!["94d20ac3e0b833ac931fb457cb4bdffb297f59ab6d3557deb6ea7e36e784f653"].into(),
+		hex!["2ae4fa12bcbd10726dfd9f813df54fe9cb4c549af9c75588bc06e675669b9451"].into(),
+		hex!["dee9c6900317d455ff3f484b71e430b3f66aaad943fb93abbd7f0128e8d5417a"].unchecked_into(),
+		hex!["ca5ec6121c6c8b37832a2bdf337fc07e79abf3c85f312e8ad9b6947d9c909602"].unchecked_into(),
+		hex!["ca5ec6121c6c8b37832a2bdf337fc07e79abf3c85f312e8ad9b6947d9c909602"].unchecked_into(),
+		hex!["ca5ec6121c6c8b37832a2bdf337fc07e79abf3c85f312e8ad9b6947d9c909602"].unchecked_into(),
+		), (
+		hex!["94b587d9acf51ea822c7dc54fb34aa21450287b53ec594b4aca8b6e03c5e1f53"].into(),
+		hex!["7a8a92b77ca183a238a19acb1f7188e7a83904b19d0b34cd3052ce950e05f14d"].into(),
+		hex!["ca64107c3fa732f9c18d2ddf9bdca5343938cfbac461a0b36e2b3f7511d9f929"].unchecked_into(),
+		hex!["349e17ec1782e0a1d0cf6fda869047eb6502e0fb783e58452270d44b84f10e6f"].unchecked_into(),
+		hex!["349e17ec1782e0a1d0cf6fda869047eb6502e0fb783e58452270d44b84f10e6f"].unchecked_into(),
+		hex!["349e17ec1782e0a1d0cf6fda869047eb6502e0fb783e58452270d44b84f10e6f"].unchecked_into(),
+		)];
+
+	let root_key: AccountId = hex!["2ae4fa12bcbd10726dfd9f813df54fe9cb4c549af9c75588bc06e675669b9451"].into();
+	testnet_genesis(
+		initial_authorities,
+		root_key,
+		None,
+		false,
+	)
+}
+
 /// Local testnet config (multivalidator Alice + Bob)
 pub fn local_testnet_config() -> ChainSpec {
 	ChainSpec::from_genesis(
 		"Local Testnet",
 		"local_testnet",
-		ChainType::Local,
+		ChainType::Live,
 		local_testnet_genesis,
+		vec![],
+		None,
+		None,
+		None,
+		Default::default(),
+	)
+}
+
+pub fn soul_testnet_config() -> ChainSpec {
+	ChainSpec::from_genesis(
+		"Local Testnet",
+		"local_testnet",
+		ChainType::Live,
+		soul_testnet_genesis,
 		vec![],
 		None,
 		None,
