@@ -377,22 +377,23 @@ fn local_testnet_genesis() -> GenesisConfig {
 fn soul_testnet_genesis() -> GenesisConfig {
 
 	let initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId, ImOnlineId, AuthorityDiscoveryId)> = vec![(
-		hex!["94d20ac3e0b833ac931fb457cb4bdffb297f59ab6d3557deb6ea7e36e784f653"].into(),
-		hex!["2ae4fa12bcbd10726dfd9f813df54fe9cb4c549af9c75588bc06e675669b9451"].into(),
-		hex!["dee9c6900317d455ff3f484b71e430b3f66aaad943fb93abbd7f0128e8d5417a"].unchecked_into(),
-		hex!["ca5ec6121c6c8b37832a2bdf337fc07e79abf3c85f312e8ad9b6947d9c909602"].unchecked_into(),
-		hex!["ca5ec6121c6c8b37832a2bdf337fc07e79abf3c85f312e8ad9b6947d9c909602"].unchecked_into(),
-		hex!["ca5ec6121c6c8b37832a2bdf337fc07e79abf3c85f312e8ad9b6947d9c909602"].unchecked_into(),
+		hex!["a42d93e19b09c6e998a90fd3f4c3830c4239f8e32f94dc32335c85752cae107a"].into(),
+		hex!["c2f1dc244866b6a02afcc8f8c13242eebd1c58981085fa8d69805d814a00f501"].into(),
+		hex!["6cc169abfa106c852bbb77779076d0490e1783ed06d88f42a2f55e0a2f91ab3c"].unchecked_into(),
+		hex!["c2f1dc244866b6a02afcc8f8c13242eebd1c58981085fa8d69805d814a00f501"].unchecked_into(),
+		hex!["c2f1dc244866b6a02afcc8f8c13242eebd1c58981085fa8d69805d814a00f501"].unchecked_into(),
+		hex!["c2f1dc244866b6a02afcc8f8c13242eebd1c58981085fa8d69805d814a00f501"].unchecked_into(),
 		), (
-		hex!["94b587d9acf51ea822c7dc54fb34aa21450287b53ec594b4aca8b6e03c5e1f53"].into(),
-		hex!["7a8a92b77ca183a238a19acb1f7188e7a83904b19d0b34cd3052ce950e05f14d"].into(),
-		hex!["ca64107c3fa732f9c18d2ddf9bdca5343938cfbac461a0b36e2b3f7511d9f929"].unchecked_into(),
-		hex!["349e17ec1782e0a1d0cf6fda869047eb6502e0fb783e58452270d44b84f10e6f"].unchecked_into(),
-		hex!["349e17ec1782e0a1d0cf6fda869047eb6502e0fb783e58452270d44b84f10e6f"].unchecked_into(),
-		hex!["349e17ec1782e0a1d0cf6fda869047eb6502e0fb783e58452270d44b84f10e6f"].unchecked_into(),
-		)];
+		hex!["dab9b5b1a815e65a9140c7c98c33cc901d711c0354ecf3d89dea69d3a9ae3b2b"].into(),
+		hex!["7c4016b089ffa9d0755569ef68d925d9720fa3952d9212cbcdc0de295863177f"].into(),
+		hex!["c3b35d3053ff309655c2316b8bb7ea2566fd7bcaa3b99b5080a4ca8119324f11"].unchecked_into(),
+		hex!["7c4016b089ffa9d0755569ef68d925d9720fa3952d9212cbcdc0de295863177f"].unchecked_into(),
+		hex!["7c4016b089ffa9d0755569ef68d925d9720fa3952d9212cbcdc0de295863177f"].unchecked_into(),
+		hex!["7c4016b089ffa9d0755569ef68d925d9720fa3952d9212cbcdc0de295863177f"].unchecked_into(),
+		),
+	];
 
-	let root_key: AccountId = hex!["2ae4fa12bcbd10726dfd9f813df54fe9cb4c549af9c75588bc06e675669b9451"].into();
+	let root_key: AccountId = hex!["54be42d451ec1d670c5d4cc784185954e116224d99b59160a9d597ff6f114a70"].into();
 	testnet_genesis(
 		initial_authorities,
 		root_key,
