@@ -112,7 +112,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 261,
+	spec_version: 264,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 2,
@@ -283,7 +283,7 @@ impl Default for ProxyType { fn default() -> Self { Self::Any } }
 // 		}
 // 	}
 // }
-
+//
 // impl pallet_proxy::Config for Runtime {
 // 	type Event = Event;
 // 	type Call = Call;
@@ -319,6 +319,8 @@ impl pallet_scheduler::Config for Runtime {
 parameter_types! {
 	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS;
 	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK;
+	pub const ReportLongevity: u64 =
+		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
 }
 
 impl pallet_babe::Config for Runtime {
@@ -339,7 +341,7 @@ impl pallet_babe::Config for Runtime {
 	)>>::IdentificationTuple;
 
 	type HandleEquivocation =
-		pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences>;
+	pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
 
 	type WeightInfo = ();
 }
@@ -385,7 +387,7 @@ impl pallet_transaction_payment::Config for Runtime {
 	type TransactionByteFee = TransactionByteFee;
 	type WeightToFee = IdentityFee<Balance>;
 	type FeeMultiplierUpdate =
-		TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
+	TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
 }
 
 parameter_types! {
@@ -479,13 +481,13 @@ impl pallet_staking::Config for Runtime {
 	type SessionsPerEra = SessionsPerEra;
 	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
+	type SlashCancelOrigin = EnsureRoot<AccountId>;
 	/// A super-majority of the council can cancel the slash.
 	// type SlashCancelOrigin = EnsureOneOf<
 	// 	AccountId,
 	// 	EnsureRoot<AccountId>,
 	// 	pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>
 	// >;
-	type SlashCancelOrigin = EnsureRoot<AccountId>;
 	type SessionInterface = Self;
 	type RewardCurve = RewardCurve;
 	type NextNewSession = Session;
@@ -580,7 +582,10 @@ parameter_types! {
 
 parameter_types! {
 	pub const CandidacyBond: Balance = 10 * DOLLARS;
-	pub const VotingBond: Balance = 1 * DOLLARS;
+	// 1 storage item created, key size is 32 bytes, value size is 16+16.
+	pub const VotingBondBase: Balance = deposit(1, 64);
+	// additional data per vote is 32 bytes (account id).
+	pub const VotingBondFactor: Balance = deposit(0, 32);
 	pub const TermDuration: BlockNumber = 7 * DAYS;
 	pub const DesiredMembers: u32 = 13;
 	pub const DesiredRunnersUp: u32 = 7;
@@ -600,9 +605,9 @@ const_assert!(DesiredMembers::get() <= CouncilMaxMembers::get());
 // 	type InitializeMembers = Council;
 // 	type CurrencyToVote = U128CurrencyToVote;
 // 	type CandidacyBond = CandidacyBond;
-// 	type VotingBond = VotingBond;
+// 	type VotingBondBase = VotingBondBase;
+// 	type VotingBondFactor = VotingBondFactor;
 // 	type LoserCandidate = ();
-// 	type BadReport = ();
 // 	type KickedMember = ();
 // 	type DesiredMembers = DesiredMembers;
 // 	type DesiredRunnersUp = DesiredRunnersUp;
@@ -627,7 +632,7 @@ parameter_types! {
 // 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 // 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 // }
-
+//
 // type EnsureRootOrHalfCouncil = EnsureOneOf<
 // 	AccountId,
 // 	EnsureRoot<AccountId>,
@@ -635,7 +640,6 @@ parameter_types! {
 // >;
 
 type EnsureRootOrHalfCouncil = EnsureRoot<AccountId>;
-
 // impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
 // 	type Event = Event;
 // 	type AddOrigin = EnsureRootOrHalfCouncil;
@@ -688,7 +692,7 @@ parameter_types! {
 // 	type SpendFunds = Bounties;
 // 	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
 // }
-
+//
 // impl pallet_bounties::Config for Runtime {
 // 	type Event = Event;
 // 	type BountyDepositBase = BountyDepositBase;
@@ -700,7 +704,7 @@ parameter_types! {
 // 	type MaximumReasonLength = MaximumReasonLength;
 // 	type WeightInfo = pallet_bounties::weights::SubstrateWeight<Runtime>;
 // }
-
+//
 // impl pallet_tips::Config for Runtime {
 // 	type Event = Event;
 // 	type DataDepositPerByte = DataDepositPerByte;
@@ -831,6 +835,7 @@ impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime where
 impl pallet_im_online::Config for Runtime {
 	type AuthorityId = ImOnlineId;
 	type Event = Event;
+	type ValidatorSet = Historical;
 	type SessionDuration = SessionDuration;
 	type ReportUnresponsiveness = Offences;
 	type UnsignedPriority = ImOnlineUnsignedPriority;
@@ -858,7 +863,7 @@ impl pallet_grandpa::Config for Runtime {
 	type KeyOwnerProofSystem = Historical;
 
 	type KeyOwnerProof =
-		<Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
+	<Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
 
 	type KeyOwnerIdentification = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(
 		KeyTypeId,
@@ -866,7 +871,7 @@ impl pallet_grandpa::Config for Runtime {
 	)>>::IdentificationTuple;
 
 	type HandleEquivocation =
-		pallet_grandpa::EquivocationHandler<Self::KeyOwnerIdentification, Offences>;
+	pallet_grandpa::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
 
 	type WeightInfo = ();
 }
@@ -889,8 +894,8 @@ impl pallet_identity::Config for Runtime {
 	type MaxSubAccounts = MaxSubAccounts;
 	type MaxAdditionalFields = MaxAdditionalFields;
 	type MaxRegistrars = MaxRegistrars;
-	type Slashed = ();
-	// Treasury;
+	type Slashed = () ;
+	// Treasury
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type RegistrarOrigin = EnsureRootOrHalfCouncil;
 	type WeightInfo = pallet_identity::weights::SubstrateWeight<Runtime>;
@@ -1019,13 +1024,13 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		Staking: pallet_staking::{Module, Call, Config<T>, Storage, Event<T>, ValidateUnsigned},
 		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
-		// Democracy: pallet_democracy::{Module, Call, /* Storage,*/ Config, Event<T>},
-		// Council: pallet_collective::<Instance1>::{Module, /*Call, Storage,*/ Origin<T>, Event<T>, Config<T>},
-		// TechnicalCommittee: pallet_collective::<Instance2>::{Module, /*Call, Storage,*/ Origin<T>, Event<T>, Config<T>},
-		// Elections: pallet_elections_phragmen::{Module, /* Call, Storage,*/ Event<T>, Config<T>},
-		// TechnicalMembership: pallet_membership::<Instance1>::{Module, /*Call, Storage,*/ Event<T>, Config<T>},
+		// Democracy: pallet_democracy::{Module, Call, Storage, Config, Event<T>},
+		// Council: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		// TechnicalCommittee: pallet_collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		// Elections: pallet_elections_phragmen::{Module, Call, Storage, Event<T>, Config<T>},
+		// TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event, ValidateUnsigned},
-		// Treasury: pallet_treasury::{Module, /* Call, Storage, */ Config, Event<T>},
+		// Treasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
 		Contracts: pallet_contracts::{Module, Call, Config<T>, Storage, Event<T>},
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 		ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
@@ -1034,7 +1039,7 @@ construct_runtime!(
 		Historical: pallet_session_historical::{Module},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
-		// Society: pallet_society::{Module, /*Call, Storage,*/ Event<T>, Config<T>},
+		// Society: pallet_society::{Module, Call, Storage, Event<T>, Config<T>},
 		Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
 		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 		Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
@@ -1080,6 +1085,20 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllModules>;
+
+/// MMR helper types.
+mod mmr {
+	use super::Runtime;
+	pub use pallet_mmr::primitives::*;
+
+	pub type Leaf = <
+	<Runtime as pallet_mmr::Config>::LeafData
+	as
+	LeafDataProvider
+	>::LeafData;
+	pub type Hash = <Runtime as pallet_mmr::Config>::Hash;
+	pub type Hashing = <Runtime as pallet_mmr::Config>::Hashing;
+}
 
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
@@ -1188,7 +1207,7 @@ impl_runtime_apis! {
 			}
 		}
 
-		fn current_epoch_start() -> sp_consensus_babe::SlotNumber {
+		fn current_epoch_start() -> sp_consensus_babe::Slot {
 			Babe::current_epoch_start()
 		}
 
@@ -1201,7 +1220,7 @@ impl_runtime_apis! {
 		}
 
 		fn generate_key_ownership_proof(
-			_slot_number: sp_consensus_babe::SlotNumber,
+			_slot: sp_consensus_babe::Slot,
 			authority_id: sp_consensus_babe::AuthorityId,
 		) -> Option<sp_consensus_babe::OpaqueKeyOwnershipProof> {
 			use codec::Encode;
@@ -1275,6 +1294,29 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl pallet_mmr::primitives::MmrApi<
+		Block,
+		mmr::Leaf,
+		mmr::Hash,
+	> for Runtime {
+		fn generate_proof(leaf_index: u64) -> Result<(mmr::Leaf, mmr::Proof<mmr::Hash>), mmr::Error> {
+			Mmr::generate_proof(leaf_index)
+		}
+
+		fn verify_proof(leaf: mmr::Leaf, proof: mmr::Proof<mmr::Hash>) -> Result<(), mmr::Error> {
+			Mmr::verify_leaf(leaf, proof)
+		}
+
+		fn verify_proof_stateless(
+			root: mmr::Hash,
+			leaf: Vec<u8>,
+			proof: mmr::Proof<mmr::Hash>
+		) -> Result<(), mmr::Error> {
+			let node = mmr::DataOrHash::Data(mmr::OpaqueLeaf(leaf));
+			pallet_mmr::verify_leaf_proof::<mmr::Hashing, _>(root, node, proof)
+		}
+	}
+
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
 			SessionKeys::generate(seed)
@@ -1287,72 +1329,72 @@ impl_runtime_apis! {
 		}
 	}
 
-	#[cfg(feature = "runtime-benchmarks")]
-	impl frame_benchmarking::Benchmark<Block> for Runtime {
-		fn dispatch_benchmark(
-			config: frame_benchmarking::BenchmarkConfig
-		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
-			// Trying to add benchmarks directly to the Session Pallet caused cyclic dependency issues.
-			// To get around that, we separated the Session benchmarks into its own crate, which is why
-			// we need these two lines below.
-			use pallet_session_benchmarking::Module as SessionBench;
-			use pallet_offences_benchmarking::Module as OffencesBench;
-			use frame_system_benchmarking::Module as SystemBench;
-
-			impl pallet_session_benchmarking::Config for Runtime {}
-			impl pallet_offences_benchmarking::Config for Runtime {}
-			impl frame_system_benchmarking::Config for Runtime {}
-
-			let whitelist: Vec<TrackedStorageKey> = vec![
-				// Block Number
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
-				// Total Issuance
-				hex_literal::hex!("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80").to_vec().into(),
-				// Execution Phase
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7ff553b5a9862a516939d82b3d3d8661a").to_vec().into(),
-				// Event Count
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef70a98fdbe9ce6c55837576c60c7af3850").to_vec().into(),
-				// System Events
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7").to_vec().into(),
-				// Treasury Account
-				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7b99d880ec681799c0cf30e8886371da95ecffd7b6c0f78751baa9d281e0bfa3a6d6f646c70792f74727372790000000000000000000000000000000000000000").to_vec().into(),
-			];
-
-			let mut batches = Vec::<BenchmarkBatch>::new();
-			let params = (&config, &whitelist);
-
-			add_benchmark!(params, batches, pallet_assets, Assets);
-			add_benchmark!(params, batches, pallet_babe, Babe);
-			add_benchmark!(params, batches, pallet_balances, Balances);
-			// add_benchmark!(params, batches, pallet_bounties, Bounties);
-			// add_benchmark!(params, batches, pallet_collective, Council);
-			add_benchmark!(params, batches, pallet_contracts, Contracts);
-			// add_benchmark!(params, batches, pallet_democracy, Democracy);
-			// add_benchmark!(params, batches, pallet_elections_phragmen, Elections);
-			add_benchmark!(params, batches, pallet_grandpa, Grandpa);
-			add_benchmark!(params, batches, pallet_identity, Identity);
-			add_benchmark!(params, batches, pallet_im_online, ImOnline);
-			add_benchmark!(params, batches, pallet_indices, Indices);
-			add_benchmark!(params, batches, pallet_lottery, Lottery);
-			add_benchmark!(params, batches, pallet_mmr, Mmr);
-			add_benchmark!(params, batches, pallet_multisig, Multisig);
-			add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
-			add_benchmark!(params, batches, pallet_proxy, Proxy);
-			add_benchmark!(params, batches, pallet_scheduler, Scheduler);
-			add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
-			add_benchmark!(params, batches, pallet_staking, Staking);
-			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
-			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
-			// add_benchmark!(params, batches, pallet_tips, Tips);
-			// add_benchmark!(params, batches, pallet_treasury, Treasury);
-			add_benchmark!(params, batches, pallet_utility, Utility);
-			add_benchmark!(params, batches, pallet_vesting, Vesting);
-
-			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
-			Ok(batches)
-		}
-	}
+	// #[cfg(feature = "runtime-benchmarks")]
+	// impl frame_benchmarking::Benchmark<Block> for Runtime {
+	// 	fn dispatch_benchmark(
+	// 		config: frame_benchmarking::BenchmarkConfig
+	// 	) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
+	// 		use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
+	// 		// Trying to add benchmarks directly to the Session Pallet caused cyclic dependency issues.
+	// 		// To get around that, we separated the Session benchmarks into its own crate, which is why
+	// 		// we need these two lines below.
+	// 		use pallet_session_benchmarking::Module as SessionBench;
+	// 		use pallet_offences_benchmarking::Module as OffencesBench;
+	// 		use frame_system_benchmarking::Module as SystemBench;
+	//
+	// 		impl pallet_session_benchmarking::Config for Runtime {}
+	// 		impl pallet_offences_benchmarking::Config for Runtime {}
+	// 		impl frame_system_benchmarking::Config for Runtime {}
+	//
+	// 		let whitelist: Vec<TrackedStorageKey> = vec![
+	// 			// Block Number
+	// 			hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
+	// 			// Total Issuance
+	// 			hex_literal::hex!("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80").to_vec().into(),
+	// 			// Execution Phase
+	// 			hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7ff553b5a9862a516939d82b3d3d8661a").to_vec().into(),
+	// 			// Event Count
+	// 			hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef70a98fdbe9ce6c55837576c60c7af3850").to_vec().into(),
+	// 			// System Events
+	// 			hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7").to_vec().into(),
+	// 			// Treasury Account
+	// 			hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7b99d880ec681799c0cf30e8886371da95ecffd7b6c0f78751baa9d281e0bfa3a6d6f646c70792f74727372790000000000000000000000000000000000000000").to_vec().into(),
+	// 		];
+	//
+	// 		let mut batches = Vec::<BenchmarkBatch>::new();
+	// 		let params = (&config, &whitelist);
+	//
+	// 		add_benchmark!(params, batches, pallet_assets, Assets);
+	// 		add_benchmark!(params, batches, pallet_babe, Babe);
+	// 		add_benchmark!(params, batches, pallet_balances, Balances);
+	// 		add_benchmark!(params, batches, pallet_bounties, Bounties);
+	// 		add_benchmark!(params, batches, pallet_collective, Council);
+	// 		add_benchmark!(params, batches, pallet_contracts, Contracts);
+	// 		add_benchmark!(params, batches, pallet_democracy, Democracy);
+	// 		add_benchmark!(params, batches, pallet_elections_phragmen, Elections);
+	// 		add_benchmark!(params, batches, pallet_grandpa, Grandpa);
+	// 		add_benchmark!(params, batches, pallet_identity, Identity);
+	// 		add_benchmark!(params, batches, pallet_im_online, ImOnline);
+	// 		add_benchmark!(params, batches, pallet_indices, Indices);
+	// 		add_benchmark!(params, batches, pallet_lottery, Lottery);
+	// 		add_benchmark!(params, batches, pallet_mmr, Mmr);
+	// 		add_benchmark!(params, batches, pallet_multisig, Multisig);
+	// 		add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
+	// 		add_benchmark!(params, batches, pallet_proxy, Proxy);
+	// 		add_benchmark!(params, batches, pallet_scheduler, Scheduler);
+	// 		add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
+	// 		add_benchmark!(params, batches, pallet_staking, Staking);
+	// 		add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
+	// 		add_benchmark!(params, batches, pallet_timestamp, Timestamp);
+	// 		add_benchmark!(params, batches, pallet_tips, Tips);
+	// 		add_benchmark!(params, batches, pallet_treasury, Treasury);
+	// 		add_benchmark!(params, batches, pallet_utility, Utility);
+	// 		add_benchmark!(params, batches, pallet_vesting, Vesting);
+	//
+	// 		if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
+	// 		Ok(batches)
+	// 	}
+	// }
 }
 
 #[cfg(test)]
