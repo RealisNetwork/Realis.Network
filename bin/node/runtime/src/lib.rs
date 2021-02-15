@@ -390,6 +390,8 @@ impl pallet_transaction_payment::Config for Runtime {
 	TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
 }
 
+/// Configure the template pallet in pallets/template.
+
 parameter_types! {
 	pub const MinimumPeriod: Moment = SLOT_DURATION / 2;
 }
@@ -502,6 +504,7 @@ impl pallet_staking::Config for Runtime {
 	type OffchainSolutionWeightLimit = OffchainSolutionWeightLimit;
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
+
 
 parameter_types! {
 	pub const LaunchPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
@@ -1008,6 +1011,11 @@ impl pallet_assets::Config for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_types! {
+    pub const MaxAssetLimit: u128 = 2^64;
+    pub const MaxAssetPerUser: u64 = 256;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1050,6 +1058,7 @@ construct_runtime!(
 		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Mmr: pallet_mmr::{Module, Storage},
 		Lottery: pallet_lottery::{Module, Call, Storage, Event<T>},
+
 	}
 );
 
