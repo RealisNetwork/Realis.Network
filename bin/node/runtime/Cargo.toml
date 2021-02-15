@@ -82,6 +82,7 @@ pallet-utility = { version = "2.0.0", default-features = false, path = "../../..
 pallet-transaction-payment = { version = "2.0.0", default-features = false, path = "../../../frame/transaction-payment" }
 pallet-transaction-payment-rpc-runtime-api = { version = "2.0.0", default-features = false, path = "../../../frame/transaction-payment/rpc/runtime-api/" }
 pallet-vesting = { version = "2.0.0", default-features = false, path = "../../../frame/vesting" }
+pallet-nft = {version = "0.0.1", default-features = false, path = "../../../frame/nft"}
 
 [build-dependencies]
 substrate-wasm-builder = { version = "3.0.0", path = "../../../utils/wasm-builder" }
@@ -151,6 +152,7 @@ std = [
 	"pallet-society/std",
 	"pallet-recovery/std",
 	"pallet-vesting/std",
+	"pallet-nft/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",
