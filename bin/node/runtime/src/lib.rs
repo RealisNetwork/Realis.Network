@@ -46,6 +46,7 @@ use sp_core::{
 	u32_trait::{_1, _2, _3, _4, _5},
 	OpaqueMetadata,
 };
+use pallet_commodities;
 pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 use sp_api::impl_runtime_apis;
@@ -229,6 +230,20 @@ impl pallet_multisig::Config for Runtime {
 	type DepositFactor = DepositFactor;
 	type MaxSignatories = MaxSignatories;
 	type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+    pub const MaxAssetLimit: u128 = 2^64;
+    pub const MaxAssetPerUser: u64 = 256;
+}
+
+// Use the default commodity instance.
+impl pallet_commodities::Trait for Runtime {
+	type CommodityAdmin = frame_system::EnsureRoot<Self::AccountId>;
+	type CommodityInfo = Vec<u8>;
+	type CommodityLimit = MaxAssetLimit;
+	type UserCommodityLimit = MaxAssetPerUser;
+	type Event = Event;
 }
 
 parameter_types! {
@@ -1011,11 +1026,6 @@ impl pallet_assets::Config for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
-    pub const MaxAssetLimit: u128 = 2^64;
-    pub const MaxAssetPerUser: u64 = 256;
-}
-
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1058,6 +1068,7 @@ construct_runtime!(
 		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Mmr: pallet_mmr::{Module, Storage},
 		Lottery: pallet_lottery::{Module, Call, Storage, Event<T>},
+		Commodities: pallet_commodities::{Module, Call, Storage, Event<T>},
 
 	}
 );
