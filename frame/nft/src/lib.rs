@@ -4,8 +4,14 @@
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
 
-use frame_support::{decl_module, decl_storage, decl_event, decl_error, dispatch, traits::Get};
+use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::Get};
 use frame_system::ensure_signed;
+use frame_system::ensure_root;
+use frame_support::traits::Vec;
+// use std::collections::HashSet;
+
+pub mod nft;
+pub use crate::nft::Nft;
 
 #[cfg(test)]
 mod mock;
@@ -13,10 +19,21 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+type token_id = u32;
+
 /// Configure the pallet by specifying the parameters and types on which it depends.
 pub trait Config: frame_system::Config {
     /// Because this pallet emits events, it depends on the runtime's definition of an event.
     type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
+}
+
+impl <T: Config> Module<T> {
+// show tokens
+// #[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+    fn get_tokens(user_id: T::AccountId) -> Vec<token_id> {
+    // OwnedTokensArray::get(&user_id)
+        <Module<T>>::tokens_of_owner_by_index(user_id)
+    }
 }
 
 // The pallet's runtime storage items.
@@ -28,7 +45,13 @@ decl_storage! {
 	trait Store for Module<T: Config> as TemplateModule {
 		// Learn more about declaring storage items:
 		// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
-		Something get(fn something): Option<u32>;
+		Something get(fn something): Option<token_id>;
+		TokensForAccount get(fn tokens_of_owner_by_index): map hasher(opaque_blake2_256) T::AccountId => Vec<token_id>;
+		// OwnedTokensArray get(fn tokens_of_owner_by_index): map hasher(opaque_blake2_256) T::AccountId => HashSet<token_id>;
+        // pub SomeMap get(fn some_map): map hasher(blake2_128_concat) T::AccountId => token_id;
+		// Tok
+        AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) token_id => T::AccountId;
+
 	}
 }
 
@@ -38,7 +61,8 @@ decl_event!(
 	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
-		SomethingStored(u32, AccountId),
+		SomethingStored(token_id, AccountId),
+		TokenMinted(AccountId, token_id),
 	}
 );
 
@@ -49,6 +73,8 @@ decl_error! {
 		NoneValue,
 		/// Errors should have helpful documentation associated with them.
 		StorageOverflow,
+		///
+		TokenExist,
 	}
 }
 
@@ -66,7 +92,7 @@ decl_module! {
 		/// An example dispatchable that takes a singles value as a parameter, writes the value to
 		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
 		#[weight = 10_000 + T::DbWeight::get().writes(1)]
-		pub fn do_something(origin, something: u32) -> dispatch::DispatchResult {
+		pub fn do_something(origin, something: token_id) -> dispatch::DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://substrate.dev/docs/en/knowledgebase/runtime/origin
@@ -99,8 +125,56 @@ decl_module! {
 				},
 			}
 		}
+
+		/// mint token
+		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+		pub fn mint(origin, target_account: T::AccountId, token_info: token_id) ->dispatch::DispatchResult {
+		    let _who = ensure_signed(origin)?;
+
+            let id_of_token = <Self as Nft<_>>::mint(&target_account, token_info)?;
+		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), id_of_token));
+            Ok(())
+
+		}
+
+		// show tokens
+		// #[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+		// pub fn get_tokens(origin, user_id: token_id) -> Vec<token_id> {
+		//     // OwnedTokensArray::get(&user_id)
+		//     Self::tokens_of_owner_by_index(user_id)
+		// }
+
 	}
 }
+
+impl<T: Config> Nft<T::AccountId> for Module<T> {
+    type TokenId = token_id;
+
+    fn mint(target_account: &T::AccountId, token_info: Self::TokenId) -> dispatch::result::Result<Self::TokenId, dispatch::DispatchError> {
+    // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
+
+        // if AccountForToken::contains_key(&token_id) {
+        // Err(Error::<T>::TokenExist)
+        // }
+
+        // ensure!(!AccountForToken::<T>::contains_key(&token_info),
+        //       Error::<T>::TokenExist
+        //         );
+
+        TokensForAccount::<T>::mutate(target_account, |tokens| {
+            match tokens.binary_search(&token_info) {
+                Ok(_pos) => {},
+                Err(pos) => tokens.insert(pos, token_info)
+            }
+        });
+        // hash_set_of_tokens.insert(token_id);
+        AccountForToken::<T>::insert(&token_info, &target_account);
+        // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
+        Ok(token_info)
+    }
+}
+
+
 
 
 // #![cfg_attr(not(feature = "std"), no_std)]
@@ -116,7 +190,7 @@ decl_module! {
 // #[cfg(test)]
 // mod tests;
 //
-// // type TokenId = u32;
+// // type TokenId = token_id;
 // // pub enum TokenRarity {
 // // 	A,
 // // 	B,
@@ -143,12 +217,12 @@ decl_module! {
 // 	// This name may be updated, but each pallet in the runtime must use a unique name.
 // 	// ---------------------------------vvvvvvvvvvvvvv
 // 	trait Store for Module<T: Config> as TemplateModule {
-// 		MyU32: u32;
+// 		MyU32: token_id;
 //         MyBool get(my_bool_getter): bool;
 // 		// pub TokensArray: Vec<Token>
 // 		// // Learn more about declaring storage items:
 // 		// // https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
-// 		// Something get(fn something): Option<u32>;
+// 		// Something get(fn something): Option<token_id>;
 // 		// getAllTokens get(fn some):
 // 	}
 // }
@@ -159,7 +233,7 @@ decl_module! {
 // 	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId {
 // 		/// Event documentation should end with an array that provides descriptive names for event
 // 		/// parameters. [something, who]
-// 		SomethingStored(u32, AccountId),
+// 		SomethingStored(token_id, AccountId),
 // 	}
 // );
 //
@@ -187,7 +261,7 @@ decl_module! {
 // 		/// An example dispatchable that takes a singles value as a parameter, writes the value to
 // 		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
 // 		#[weight = 10_000 + T::DbWeight::get().writes(1)]
-// 		pub fn do_something(origin, something: u32) -> dispatch::DispatchResult {
+// 		pub fn do_something(origin, something: token_id) -> dispatch::DispatchResult {
 // 			// Check that the extrinsic was signed and get the signer.
 // 			// This function will return an error if the extrinsic is not signed.
 // 			// https://substrate.dev/docs/en/knowledgebase/runtime/origin
@@ -233,7 +307,7 @@ decl_module! {
 // // }
 // // #[derive(Encode, Decode, Clone, PartialEq, Eq, Default)]
 // // pub struct Token /*<Hash , Balance> */ {
-// //     id: u32,
+// //     id: token_id,
 // //     rarity: rarity
 // //     // dna: Hash,
 // //     // price: Balance,

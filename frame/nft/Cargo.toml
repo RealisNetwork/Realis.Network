@@ -23,6 +23,7 @@ frame-support = { version = "2.0.0", default-features = false, path = "../suppor
 frame-system = { version = "2.0.0", default-features = false, path = "../system" }
 pallet-balances = { version = "2.0.0", default-features = false, path = "../balances" }
 sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
+sp-std = { version = "2.0.0", default-features = false, path = "../../primitives/std" }
 
 
 [dev-dependencies]
@@ -38,5 +39,6 @@ std = [
     'frame-support/std',
     'frame-system/std',
     'pallet-balances/std',
-    "sp-runtime/std",
+    'sp-runtime/std',
+    'sp-std/std'
 ]
