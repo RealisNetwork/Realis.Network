@@ -51,7 +51,7 @@ decl_storage! {
         // pub SomeMap get(fn some_map): map hasher(blake2_128_concat) T::AccountId => token_id;
 		// Tok
         AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) token_id => T::AccountId;
-
+        TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u32;
 	}
 }
 
@@ -63,6 +63,8 @@ decl_event!(
 		/// parameters. [something, who]
 		SomethingStored(token_id, AccountId),
 		TokenMinted(AccountId, token_id),
+		TokenBurned(token_id),
+		TokenTransferred(token_id, AccountId),
 	}
 );
 
@@ -75,6 +77,10 @@ decl_error! {
 		StorageOverflow,
 		///
 		TokenExist,
+		///
+		NotTokenOwner,
+		///
+		NonExistentToken,
 	}
 }
 
@@ -137,6 +143,26 @@ decl_module! {
 
 		}
 
+		///burn token
+		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+		pub fn burn(origin, token_id: token_id) -> dispatch::DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
+			let id_of_token = <Self as Nft<_>>::burn(token_id)?;
+		    Self::deposit_event(RawEvent::TokenBurned(id_of_token.clone()));
+            Ok(())
+        }
+
+        #[weight = 10_000]
+        pub fn transfer(origin, dest_account: T::AccountId, token_id: token_id) -> dispatch::DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
+
+            <Self as Nft<_>>::transfer(&dest_account, &token_id)?;
+            Self::deposit_event(RawEvent::TokenTransferred(token_id.clone(), dest_account.clone()));
+            Ok(())
+        }
+
 		// show tokens
 		// #[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
 		// pub fn get_tokens(origin, user_id: token_id) -> Vec<token_id> {
@@ -157,9 +183,9 @@ impl<T: Config> Nft<T::AccountId> for Module<T> {
         // Err(Error::<T>::TokenExist)
         // }
 
-        // ensure!(!AccountForToken::<T>::contains_key(&token_info),
-        //       Error::<T>::TokenExist
-        //         );
+        ensure!(!AccountForToken::<T>::contains_key(&token_info),
+              Error::<T>::TokenExist
+                );
 
         TokensForAccount::<T>::mutate(target_account, |tokens| {
             match tokens.binary_search(&token_info) {
@@ -168,9 +194,64 @@ impl<T: Config> Nft<T::AccountId> for Module<T> {
             }
         });
         // hash_set_of_tokens.insert(token_id);
+        TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
         AccountForToken::<T>::insert(&token_info, &target_account);
         // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
         Ok(token_info)
+    }
+
+    fn burn(tokens_id: token_id) -> dispatch::result::Result<token_id, dispatch::DispatchError> {
+        let owner = Self::owner_of(&tokens_id);
+        // ensure!(
+        //     owner != T::AccountId::default(),
+        //     Error::<T, I>::NonexistentToken
+        // );
+
+        let burn_token = (&tokens_id/*<T as Config<T>>::token_info::default(), */);
+
+        // TokensForAccount::<T>::mutate(|total| *total -= 1);
+        // TokenBurned::<I>::mutate(|total| *total += 1);
+        TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+        TokensForAccount::<T>::mutate(owner, |tokens| {
+            let pos = tokens
+                .binary_search(&burn_token)
+                .expect("We already checked that we have the correct owner; qed");
+            tokens.remove(pos);
+        });
+        AccountForToken::<T>::remove(&tokens_id);
+
+        Ok(tokens_id)
+    }
+
+    fn transfer(dest_account: &T::AccountId, token_info: &token_id) -> dispatch::DispatchResult
+    {
+        let owner = Self::owner_of(token_info);
+        ensure!(
+                owner != T::AccountId::default(),
+                Error::<T>::NonExistentToken
+            );
+
+        TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+        TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
+        let token = TokensForAccount::<T>::mutate(owner, |tokens| {
+            let pos = tokens
+                .binary_search(token_info)
+                .expect("We already checked that we have the correct owner; qed");
+            tokens.remove(pos)
+        });
+        TokensForAccount::<T>::mutate(dest_account, |tokens| {
+            match tokens.binary_search(&token) {
+                Ok(_pos) => {} // should never happen
+                Err(pos) => tokens.insert(pos, token),
+            }
+        });
+        AccountForToken::<T>::insert(&token_info, &dest_account);
+
+        Ok(())
+    }
+
+    fn owner_of(token_id: &token_id) -> T::AccountId {
+        Self::account_for_token(token_id)
     }
 }
 
