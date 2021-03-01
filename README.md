@@ -1,4 +1,4 @@
-# Substrate Node Template
+# ReAlis Network
 
 A fresh FRAME-based [Substrate](https://www.substrate.io/) node
 
