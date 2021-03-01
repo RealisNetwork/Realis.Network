@@ -1,12 +1,11 @@
 [package]
 name = "node-runtime"
 version = "2.0.1"
-authors = ["Parity Technologies <admin@parity.io>"]
+authors = ["ReAlis Technologies "]
 edition = "2018"
 build = "build.rs"
 license = "Apache-2.0"
-homepage = "https://substrate.dev"
-repository = "https://github.com/paritytech/substrate/"
+repository = "https://github.com/cryptosoulgame/ReAlis-Network"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
