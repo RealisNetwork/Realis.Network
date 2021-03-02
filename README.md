@@ -47,6 +47,11 @@ subcommands:
 
 The `make run` command will launch a temporary node and its state will be discarded after you
 terminate the process. After the project has been built, there are other ways to launch the node.
+## Connect to ReAlis TestNet
+Connect to the global ReAlis TestNet network by running:
+```
+./target/release/realis --chain=realis
+```
 
 ### Single-Node Development Chain
 
