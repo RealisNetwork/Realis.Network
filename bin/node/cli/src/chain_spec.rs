@@ -52,6 +52,8 @@ type AccountPublic = <Signature as Verify>::Signer;
 
 const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
+pub type RealisChainSpec = sc_service::GenericChainSpec<node_runtime::GenesisConfig, Extensions>;
+
 /// Node `ChainSpec` extensions.
 ///
 /// Additional parameters for some Substrate core modules,
@@ -399,6 +401,9 @@ fn realis_testnet_genesis() -> GenesisConfig {
 		None,
 		false,
 	)
+}
+pub fn realis_config() -> Result<ChainSpec, String> {
+	ChainSpec::from_json_bytes(&include_bytes!("../../../../realis.json")[..])
 }
 
 /// Local testnet config (multivalidator Alice + Bob)
