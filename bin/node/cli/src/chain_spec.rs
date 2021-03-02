@@ -374,8 +374,7 @@ fn local_testnet_genesis() -> GenesisConfig {
 	)
 }
 
-fn soul_testnet_genesis() -> GenesisConfig {
-
+fn realis_testnet_genesis() -> GenesisConfig {
 	let initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId, ImOnlineId, AuthorityDiscoveryId)> = vec![(
 		hex!["1aa0d5c594a4581ec17069ec9631cd6225d5fb403fe4d85c8ec8aa51833fdf7f"].into(),
 		hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].into(),
@@ -417,12 +416,12 @@ pub fn local_testnet_config() -> ChainSpec {
 	)
 }
 
-pub fn soul_testnet_config() -> ChainSpec {
+pub fn realis_testnet_config() -> ChainSpec {
 	ChainSpec::from_genesis(
 		"ReAlis Network",
 		"realis_network",
 		ChainType::Live,
-		soul_testnet_genesis,
+		realis_testnet_genesis,
 		vec![],
 		None,
 		None,
