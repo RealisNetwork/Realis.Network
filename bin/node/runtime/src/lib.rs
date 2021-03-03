@@ -32,7 +32,7 @@ use frame_support::{
 	},
 	traits::{
 		Currency, Imbalance, KeyOwnerProofSystem, OnUnbalanced, Randomness, LockIdentifier,
-		U128CurrencyToVote,
+		U128CurrencyToVote, Get,
 	},
 };
 use frame_system::{
@@ -1004,13 +1004,13 @@ impl pallet_assets::Config for Runtime {
 }
 
 
-parameter_types! {
-	pub const TokenId: u32 = 0;
-}
+// parameter_types! {
+// 	pub const TokenId: u32 = Get<u32>;
+// }
 
 impl pallet_nft::Config for Runtime {
 	type Event = Event;
-	type TokenId = TokenId;
+	type TokenId = u32;
 }
 
 construct_runtime!(
