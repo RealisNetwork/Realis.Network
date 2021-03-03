@@ -1003,8 +1003,14 @@ impl pallet_assets::Config for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 }
 
+
+parameter_types! {
+	pub const TokenId: u32 = 0;
+}
+
 impl pallet_nft::Config for Runtime {
 	type Event = Event;
+	type TokenId = TokenId;
 }
 
 construct_runtime!(

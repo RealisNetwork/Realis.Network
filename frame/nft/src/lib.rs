@@ -62,6 +62,7 @@ pub struct Token {
 pub trait Config: frame_system::Config {
     /// Because this pallet emits events, it depends on the runtime's definition of an event.
     type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
+    type TokenId;
 }
 
 // impl <T: Config> Module<T> {
@@ -87,6 +88,7 @@ decl_storage! {
 		// OwnedTokensArray get(fn tokens_of_owner_by_index): map hasher(opaque_blake2_256) T::AccountId => HashSet<token_id>;
         // pub SomeMap get(fn some_map): map hasher(blake2_128_concat) T::AccountId => token_id;
 		// Tok
+        AllTokensInAccount get(fn all_tokens_in_account): map hasher(opaque_blake2_256) AcccountId => Vec<Token>;
         AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) TokenId => T::AccountId;
         TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u32;
 	}
