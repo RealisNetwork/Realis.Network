@@ -444,12 +444,12 @@ macro_rules! ss58_address_format {
 ss58_address_format!(
 	PolkadotAccount =>
 		(0, "polkadot", "Polkadot Relay-chain, standard account (*25519).")
-	Reserved1 =>
-		(1, "reserved1", "Reserved for future use (1).")
+	BareSr25519 =>
+		(1, "sr25519", "Bare 32-bit Schnorr/Ristretto 25519 (S/R 25519) key.")
 	KusamaAccount =>
 		(2, "kusama", "Kusama Relay-chain, standard account (*25519).")
-	Reserved3 =>
-		(3, "reserved3", "Reserved for future use (3).")
+	BareEd25519 =>
+		(3, "ed25519", "Bare 32-bit Edwards Ed25519 key.")
 	KatalChainAccount =>
 		(4, "katalchain", "Katal Chain, standard account (*25519).")
 	PlasmAccount =>
@@ -501,7 +501,7 @@ ss58_address_format!(
 	SubsocialAccount =>
 		(28, "subsocial", "Subsocial network, standard account (*25519).")
 	DhiwayAccount =>
-		(29, "cord", "Dhiway CORD network, standard account (*25519).")	
+		(29, "cord", "Dhiway CORD network, standard account (*25519).")
 	PhalaAccount =>
 		(30, "phala", "Phala Network, standard account (*25519).")
 	LitentryAccount =>
@@ -510,6 +510,8 @@ ss58_address_format!(
 		(32, "robonomics", "Any Robonomics network standard account (*25519).")
 	DataHighwayAccount =>
 		(33, "datahighway", "DataHighway mainnet, standard account (*25519).")
+	AresAccount =>
+		(34, "ares", "Ares Protocol, standard account (*25519).")
 	ValiuAccount =>
 		(35, "vln", "Valiu Liquidity Network mainnet, standard account (*25519).")
 	CentrifugeAccount =>
@@ -522,8 +524,8 @@ ss58_address_format!(
 		(41, "poli", "Polimec Chain mainnet, standard account (*25519).")
 	SubstrateAccount =>
 		(42, "substrate", "Any Substrate network, standard account (*25519).")
-	Reserved43 =>
-		(43, "reserved43", "Reserved for future use (43).")
+	BareSecp256k1 =>
+		(43, "secp256k1", "Bare ECDSA SECP256k1 key.")
 	ChainXAccount =>
 		(44, "chainx", "ChainX mainnet, standard account (*25519).")
 	UniartsAccount =>
@@ -532,6 +534,18 @@ ss58_address_format!(
 		(46, "reserved46", "Reserved for future use (46).")
 	Reserved47 =>
 		(47, "reserved47", "Reserved for future use (47).")
+	NeatcoinAccount =>
+		(48, "neatcoin", "Neatcoin mainnet, standard account (*25519).")
+	SoraAccount =>
+		(49, "sora", "SORA Network, standard account (*25519).")
+	HydraDXAccount =>
+		(63, "hydradx", "HydraDX standard account (*25519).")
+	AventusAccount =>
+		(65, "aventus", "Aventus Chain mainnet, standard account (*25519).")
+	CrustAccount =>
+		(66, "crust", "Crust Network, standard account (*25519).")
+	ReAlisAccount =>
+		(67, "realis", "ReAlis Network standard account (*25519).")
 	// Note: 48 and above are reserved.
 );
 
