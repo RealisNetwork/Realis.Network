@@ -1010,7 +1010,6 @@ impl pallet_assets::Config for Runtime {
 
 impl pallet_nft::Config for Runtime {
 	type Event = Event;
-	type TokenId = u32;
 }
 
 construct_runtime!(
@@ -1055,7 +1054,7 @@ construct_runtime!(
 		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Mmr: pallet_mmr::{Module, Storage},
 		Lottery: pallet_lottery::{Module, Call, Storage, Event<T>},
-		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
+		Nft: pallet_nft::{Module, Call, Storage, Event<T>, Config<T>},
 	}
 );
 
