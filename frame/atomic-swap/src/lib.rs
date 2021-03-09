@@ -200,7 +200,7 @@ decl_event!(
 );
 
 decl_module! {
-	/// Module definition of atomic swap pallet.
+	/// Module definition of atomic swap pall/et.
 	pub struct Module<T: Config> for enum Call where origin: T::Origin {
 		type Error = Error<T>;
 
