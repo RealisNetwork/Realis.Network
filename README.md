@@ -74,7 +74,7 @@ RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/realis -lruntime=debug --dev
 ```
 ## Connect to ReAlis TestNet
 Connect to the global ReAlis TestNet network by running:
-./target/release/realis --chain=soul (if you have error, some "permission denied", add sudo to the begining)
+./target/release/realis --chain=realis (if you have error, some "permission denied", add sudo to the begining)
 
 ## Template Structure
 
