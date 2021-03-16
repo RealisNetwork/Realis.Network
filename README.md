@@ -47,11 +47,6 @@ subcommands:
 
 The `make run` command will launch a temporary node and its state will be discarded after you
 terminate the process. After the project has been built, there are other ways to launch the node.
-## Connect to ReAlis TestNet
-Connect to the global ReAlis TestNet network by running:
-```
-./target/release/realis --chain=realis
-```
 
 ### Single-Node Development Chain
 
@@ -74,8 +69,9 @@ RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/realis -lruntime=debug --dev
 ```
 ## Connect to ReAlis TestNet
 Connect to the global ReAlis TestNet network by running:
-./target/release/realis --chain=soul (if you have error, some "permission denied", add sudo to the begining)
-
+```
+./target/release/realis --chain=realis
+```
 ## Template Structure
 
 A ReAlis Network such as this consists of a number of components that are spread across a few
@@ -175,21 +171,20 @@ First, install [Docker](https://docs.docker.com/get-docker/) and
 Then run the following command to start a single node development chain.
 
 ```bash
-./scripts/docker_run.sh
+bash ./docker/run-realis.sh
 ```
 
-This command will firstly compile your code, and then start a local development network. You can
-also replace the default command (`cargo build --release && ./target/release/realis --dev --ws-external`)
-by appending your own. A few useful ones are as follow.
+This command will firstly compile your code, and then start a local development network.
+ A few useful ones are as follow.
 
 ```bash
 # Run Substrate node without re-compiling
-./scripts/docker_run.sh ./target/release/realis --dev --ws-external
+./docker/run-realis.sh ./target/release/realis --dev --ws-external
 
 # Purge the local dev chain
-./scripts/docker_run.sh ./target/release/realis purge-chain --dev
+./docker/run-realis.sh ./target/release/realis purge-chain --dev
 
 # Check whether the code is compilable
-./scripts/docker_run.sh cargo check
+./docker/run-realis.sh cargo check
 ```
 # ReAlis Network
