@@ -14,4 +14,4 @@ services:
       - type: bind
         source: ./.local
         target: /root/.local
-    command: bash -c "cargo build --release && ./target/release/node-template --dev --ws-external"
+    command: bash -c "./target/release/realis --chain=realis --ws-port 9944  --rpc-port 9933  --validator  --rpc-methods=Unsafe  --listen-addr /ip4/0.0.0.0/tcp/30333 --name MyNode01 --unsafe-ws-external --unsafe-rpc-external --rpc-cors '*' -d ../soul/nikita"
