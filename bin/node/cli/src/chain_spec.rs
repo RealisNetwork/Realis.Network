@@ -52,6 +52,8 @@ type AccountPublic = <Signature as Verify>::Signer;
 
 const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
+pub type RealisChainSpec = sc_service::GenericChainSpec<node_runtime::GenesisConfig, Extensions>;
+
 /// Node `ChainSpec` extensions.
 ///
 /// Additional parameters for some Substrate core modules,
@@ -333,6 +335,7 @@ pub fn testnet_genesis(
 		// 	max_members: 999,
 		// }),
 		pallet_vesting: Some(Default::default()),
+		pallet_nft: Some(Default::default()),
 	}
 }
 
@@ -374,32 +377,34 @@ fn local_testnet_genesis() -> GenesisConfig {
 	)
 }
 
-fn soul_testnet_genesis() -> GenesisConfig {
-
+fn realis_testnet_genesis() -> GenesisConfig {
 	let initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId, ImOnlineId, AuthorityDiscoveryId)> = vec![(
-		hex!["a42d93e19b09c6e998a90fd3f4c3830c4239f8e32f94dc32335c85752cae107a"].into(),
-		hex!["c2f1dc244866b6a02afcc8f8c13242eebd1c58981085fa8d69805d814a00f501"].into(),
-		hex!["6cc169abfa106c852bbb77779076d0490e1783ed06d88f42a2f55e0a2f91ab3c"].unchecked_into(),
-		hex!["c2f1dc244866b6a02afcc8f8c13242eebd1c58981085fa8d69805d814a00f501"].unchecked_into(),
-		hex!["c2f1dc244866b6a02afcc8f8c13242eebd1c58981085fa8d69805d814a00f501"].unchecked_into(),
-		hex!["c2f1dc244866b6a02afcc8f8c13242eebd1c58981085fa8d69805d814a00f501"].unchecked_into(),
+		hex!["1aa0d5c594a4581ec17069ec9631cd6225d5fb403fe4d85c8ec8aa51833fdf7f"].into(),
+		hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].into(),
+		hex!["b7606f13fb700cdabffd98bf466557a9faeb68bc773ef6e2bf681b9913079d37"].unchecked_into(),
+		hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].unchecked_into(),
+		hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].unchecked_into(),
+		hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].unchecked_into(),
 		), (
-		hex!["dab9b5b1a815e65a9140c7c98c33cc901d711c0354ecf3d89dea69d3a9ae3b2b"].into(),
-		hex!["7c4016b089ffa9d0755569ef68d925d9720fa3952d9212cbcdc0de295863177f"].into(),
-		hex!["c3b35d3053ff309655c2316b8bb7ea2566fd7bcaa3b99b5080a4ca8119324f11"].unchecked_into(),
-		hex!["7c4016b089ffa9d0755569ef68d925d9720fa3952d9212cbcdc0de295863177f"].unchecked_into(),
-		hex!["7c4016b089ffa9d0755569ef68d925d9720fa3952d9212cbcdc0de295863177f"].unchecked_into(),
-		hex!["7c4016b089ffa9d0755569ef68d925d9720fa3952d9212cbcdc0de295863177f"].unchecked_into(),
+		hex!["cc32b24b66c8636b31394dce95949a27022c901d2597c5584554aa5d81db7416"].into(),
+		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
+		hex!["4a9e6cc2606a74d65ee2ba026e986024de8b60a22890023552b6cf6c977c8420"].unchecked_into(),
+		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].unchecked_into(),
+		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].unchecked_into(),
+		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].unchecked_into(),
 		),
 	];
 
-	let root_key: AccountId = hex!["54be42d451ec1d670c5d4cc784185954e116224d99b59160a9d597ff6f114a70"].into();
+	let root_key: AccountId = hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
 	testnet_genesis(
 		initial_authorities,
 		root_key,
 		None,
 		false,
 	)
+}
+pub fn realis_config() -> Result<ChainSpec, String> {
+	ChainSpec::from_json_bytes(&include_bytes!("../../../../realis.json")[..])
 }
 
 /// Local testnet config (multivalidator Alice + Bob)
@@ -417,12 +422,12 @@ pub fn local_testnet_config() -> ChainSpec {
 	)
 }
 
-pub fn soul_testnet_config() -> ChainSpec {
+pub fn realis_testnet_config() -> ChainSpec {
 	ChainSpec::from_genesis(
-		"Local Testnet",
-		"local_testnet",
+		"ReAlis Network",
+		"realis_network",
 		ChainType::Live,
-		soul_testnet_genesis,
+		realis_testnet_genesis,
 		vec![],
 		None,
 		None,

@@ -25,7 +25,7 @@ use crate::service::new_partial;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Substrate Node".into()
+		"ReAlis Network".into()
 	}
 
 	fn impl_version() -> String {
@@ -41,18 +41,19 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/paritytech/substrate/issues/new".into()
+		"https://github.com/cryptosoulgame/SOUL-Blockchain/issues/new".into()
 	}
 
 	fn copyright_start_year() -> i32 {
-		2017
+		2020
 	}
 
 	fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 		Ok(match id {
 			"dev" => Box::new(chain_spec::development_config()),
 			"local" => Box::new(chain_spec::local_testnet_config()),
-                      	"soul" => Box::new(chain_spec::soul_testnet_config()),
+			"realis" => Box::new(chain_spec::realis_config()?),
+			"realis2" => Box::new(chain_spec::realis_testnet_config()),
 			"" | "fir" | "flaming-fir" => Box::new(chain_spec::flaming_fir_config()?),
 			"staging" => Box::new(chain_spec::staging_testnet_config()),
 			path => Box::new(chain_spec::ChainSpec::from_json_file(

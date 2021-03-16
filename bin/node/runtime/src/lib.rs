@@ -32,7 +32,7 @@ use frame_support::{
 	},
 	traits::{
 		Currency, Imbalance, KeyOwnerProofSystem, OnUnbalanced, Randomness, LockIdentifier,
-		U128CurrencyToVote,
+		U128CurrencyToVote, Get,
 	},
 };
 use frame_system::{
@@ -1003,6 +1003,15 @@ impl pallet_assets::Config for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 }
 
+
+// parameter_types! {
+// 	pub const TokenId: u32 = Get<u32>;
+// }
+
+impl pallet_nft::Config for Runtime {
+	type Event = Event;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1045,6 +1054,7 @@ construct_runtime!(
 		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Mmr: pallet_mmr::{Module, Storage},
 		Lottery: pallet_lottery::{Module, Call, Storage, Event<T>},
+		Nft: pallet_nft::{Module, Call, Storage, Event<T>, Config<T>},
 	}
 );
 
