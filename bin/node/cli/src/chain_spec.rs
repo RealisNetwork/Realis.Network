@@ -22,10 +22,10 @@ use sc_chain_spec::ChainSpecExtension;
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 use serde::{Serialize, Deserialize};
 use node_runtime::{
-	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig, CouncilConfig,
-	DemocracyConfig,GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
-	StakingConfig, ElectionsConfig, IndicesConfig, SocietyConfig, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig, wasm_binary_unwrap,
+	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig, /*CouncilConfig*/
+	/*DemocracyConfig*/GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
+	StakingConfig, /*ElectionsConfig*/ IndicesConfig, /*SocietyConfig*/ SudoConfig, SystemConfig,
+	/*TechnicalCommitteeConfig*/ wasm_binary_unwrap,
 };
 use node_runtime::Block;
 use node_runtime::constants::currency::*;
@@ -44,6 +44,9 @@ pub use node_runtime::GenesisConfig;
 type AccountPublic = <Signature as Verify>::Signer;
 
 const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
+
+pub type RealisChainSpec = sc_service::GenericChainSpec<node_runtime::GenesisConfig, Extensions>;
+
 
 /// Node `ChainSpec` extensions.
 ///
@@ -278,22 +281,22 @@ pub fn testnet_genesis(
 			slash_reward_fraction: Perbill::from_percent(10),
 			.. Default::default()
 		},
-		pallet_democracy: DemocracyConfig::default(),
-		pallet_elections_phragmen: ElectionsConfig {
-			members: endowed_accounts.iter()
-						.take((num_endowed_accounts + 1) / 2)
-						.cloned()
-						.map(|member| (member, STASH))
-						.collect(),
-		},
-		pallet_collective_Instance1: CouncilConfig::default(),
-		pallet_collective_Instance2: TechnicalCommitteeConfig {
-			members: endowed_accounts.iter()
-						.take((num_endowed_accounts + 1) / 2)
-						.cloned()
-						.collect(),
-			phantom: Default::default(),
-		},
+		// pallet_democracy: DemocracyConfig::default(),
+		// pallet_elections_phragmen: ElectionsConfig {
+			// members: endowed_accounts.iter()
+						// .take((num_endowed_accounts + 1) / 2)
+						// .cloned()
+						// .map(|member| (member, STASH))
+						// .collect(),
+		// },
+		// pallet_collective_Instance1: CouncilConfig::default(),
+		// pallet_collective_Instance2: TechnicalCommitteeConfig {
+			// members: endowed_accounts.iter()
+						// .take((num_endowed_accounts + 1) / 2)
+						// .cloned()
+						// .collect(),
+			// phantom: Default::default(),
+		// },
 		pallet_contracts: ContractsConfig {
 			current_schedule: pallet_contracts::Schedule {
 				enable_println, // this should only be enabled on development chains
@@ -316,21 +319,22 @@ pub fn testnet_genesis(
 		pallet_grandpa: GrandpaConfig {
 			authorities: vec![],
 		},
-		pallet_membership_Instance1: Default::default(),
-		pallet_treasury: Default::default(),
-		pallet_society: SocietyConfig {
-			members: endowed_accounts.iter()
-						.take((num_endowed_accounts + 1) / 2)
-						.cloned()
-						.collect(),
-			pot: 0,
-			max_members: 999,
-		},
+		// pallet_membership_Instance1: Default::default(),
+		// pallet_treasury: Default::default(),
+		// pallet_society: SocietyConfig {
+			// members: endowed_accounts.iter()
+						// .take((num_endowed_accounts + 1) / 2)
+						// .cloned()
+						// .collect(),
+			// pot: 0,
+			// max_members: 999,
+		// },
 		pallet_vesting: Default::default(),
 		pallet_gilt: Default::default(),
 		pallet_nft: Default::default(),
 	}
 }
+
 
 fn development_config_genesis() -> GenesisConfig {
 	testnet_genesis(
@@ -417,7 +421,7 @@ pub fn local_testnet_config() -> ChainSpec {
 
 pub fn realis_testnet_config() -> ChainSpec {
 	ChainSpec::from_genesis(
-		"ReAlis Network",
+		"Realis Network",
 		"realis_network",
 		ChainType::Live,
 		realis_testnet_genesis,

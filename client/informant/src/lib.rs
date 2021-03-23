@@ -159,7 +159,7 @@ where
 			}
 
 			info!(
-				target: "substrate",
+				target: "realis",
 				"✨ Imported #{} ({})",
 				Colour::White.bold().paint(format!("{}", n.header.number())),
 				n.hash,
