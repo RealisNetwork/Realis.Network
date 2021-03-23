@@ -27,7 +27,7 @@ use crate::{
 use sp_arithmetic::{
 	helpers_128bit::multiply_by_rational,
 	traits::{Bounded, Zero},
-	InnerOf, Rational128,
+	Rational128,
 };
 use sp_std::prelude::*;
 
@@ -63,15 +63,16 @@ const DEN: ExtendedBalance = ExtendedBalance::max_value();
 /// `expect` this to return `Ok`.
 ///
 /// This can only fail if the normalization fails.
+///
+/// Note that rounding errors can potentially cause the output of this function to fail a t-PJR
+/// check where t is the standard threshold. The underlying algorithm is sound, but the conversions
+/// between numeric types can be lossy.
 pub fn seq_phragmen<AccountId: IdentifierT, P: PerThing128>(
 	rounds: usize,
 	initial_candidates: Vec<AccountId>,
 	initial_voters: Vec<(AccountId, VoteWeight, Vec<AccountId>)>,
 	balance: Option<(usize, ExtendedBalance)>,
-) -> Result<ElectionResult<AccountId, P>, crate::Error>
-where
-	ExtendedBalance: From<InnerOf<P>>,
-{
+) -> Result<ElectionResult<AccountId, P>, crate::Error> {
 	let (candidates, voters) = setup_inputs(initial_candidates, initial_voters);
 
 	let (candidates, mut voters) = seq_phragmen_core::<AccountId>(

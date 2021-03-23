@@ -36,12 +36,13 @@ use sc_client_db::{
 };
 use sc_block_builder::BlockBuilderProvider;
 use sc_service::client::{self, Client, LocalCallExecutor, new_in_mem};
-use sp_runtime::traits::{
-	BlakeTwo256, Block as BlockT, Header as HeaderT,
+use sp_runtime::{
+	ConsensusEngineId,
+	traits::{BlakeTwo256, Block as BlockT, Header as HeaderT},
 };
 use substrate_test_runtime::TestAPI;
 use sp_state_machine::backend::Backend as _;
-use sp_api::{ProvideRuntimeApi, OffchainOverlayedChanges};
+use sp_api::ProvideRuntimeApi;
 use sp_core::{H256, ChangesTrieConfiguration, blake2_256, testing::TaskExecutor};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -51,11 +52,13 @@ use sp_consensus::{
 };
 use sp_storage::StorageKey;
 use sp_trie::{TrieConfiguration, trie_types::Layout};
-use sp_runtime::{generic::BlockId, DigestItem};
+use sp_runtime::{generic::BlockId, DigestItem, Justifications};
 use hex_literal::hex;
 
 mod light;
 mod db;
+
+const TEST_ENGINE_ID: ConsensusEngineId = *b"TEST";
 
 native_executor_instance!(
 	Executor,
@@ -163,7 +166,6 @@ fn construct_block(
 	};
 	let hash = header.hash();
 	let mut overlay = OverlayedChanges::default();
-	let mut offchain_overlay = OffchainOverlayedChanges::default();
 	let backend_runtime_code = sp_state_machine::backend::BackendRuntimeCode::new(&backend);
 	let runtime_code = backend_runtime_code.runtime_code().expect("Code is part of the backend");
 	let task_executor = Box::new(TaskExecutor::new());
@@ -172,7 +174,6 @@ fn construct_block(
 		backend,
 		sp_state_machine::disabled_changes_trie_state::<_, u64>(),
 		&mut overlay,
-		&mut offchain_overlay,
 		&executor(),
 		"Core_initialize_block",
 		&header.encode(),
@@ -188,7 +189,6 @@ fn construct_block(
 			backend,
 			sp_state_machine::disabled_changes_trie_state::<_, u64>(),
 			&mut overlay,
-			&mut offchain_overlay,
 			&executor(),
 			"BlockBuilder_apply_extrinsic",
 			&tx.encode(),
@@ -204,7 +204,6 @@ fn construct_block(
 		backend,
 		sp_state_machine::disabled_changes_trie_state::<_, u64>(),
 		&mut overlay,
-		&mut offchain_overlay,
 		&executor(),
 		"BlockBuilder_finalize_block",
 		&[],
@@ -252,13 +251,11 @@ fn construct_genesis_should_work_with_native() {
 	let runtime_code = backend_runtime_code.runtime_code().expect("Code is part of the backend");
 
 	let mut overlay = OverlayedChanges::default();
-	let mut offchain_overlay = OffchainOverlayedChanges::default();
 
 	let _ = StateMachine::new(
 		&backend,
 		sp_state_machine::disabled_changes_trie_state::<_, u64>(),
 		&mut overlay,
-		&mut offchain_overlay,
 		&executor(),
 		"Core_execute_block",
 		&b1data,
@@ -288,13 +285,11 @@ fn construct_genesis_should_work_with_wasm() {
 	let runtime_code = backend_runtime_code.runtime_code().expect("Code is part of the backend");
 
 	let mut overlay = OverlayedChanges::default();
-	let mut offchain_overlay = OffchainOverlayedChanges::default();
 
 	let _ = StateMachine::new(
 		&backend,
 		sp_state_machine::disabled_changes_trie_state::<_, u64>(),
 		&mut overlay,
-		&mut offchain_overlay,
 		&executor(),
 		"Core_execute_block",
 		&b1data,
@@ -324,13 +319,11 @@ fn construct_genesis_with_bad_transaction_should_panic() {
 	let runtime_code = backend_runtime_code.runtime_code().expect("Code is part of the backend");
 
 	let mut overlay = OverlayedChanges::default();
-	let mut offchain_overlay = OffchainOverlayedChanges::default();
 
 	let r = StateMachine::new(
 		&backend,
 		sp_state_machine::disabled_changes_trie_state::<_, u64>(),
 		&mut overlay,
-		&mut offchain_overlay,
 		&executor(),
 		"Core_execute_block",
 		&b1data,
@@ -998,10 +991,13 @@ fn key_changes_works() {
 			None,
 			&StorageKey(key),
 		).unwrap();
-		match actual_result == expected_result {
-			true => (),
-			false => panic!(format!("Failed test {}: actual = {:?}, expected = {:?}",
-			                        index, actual_result, expected_result)),
+		if actual_result != expected_result {
+			panic!(
+				"Failed test {}: actual = {:?}, expected = {:?}",
+				index,
+				actual_result,
+				expected_result,
+			);
 		}
 	}
 }
@@ -1023,7 +1019,7 @@ fn import_with_justification() {
 	client.import(BlockOrigin::Own, a2.clone()).unwrap();
 
 	// A2 -> A3
-	let justification = vec![1, 2, 3];
+	let justification = Justifications::from((TEST_ENGINE_ID, vec![1, 2, 3]));
 	let a3 = client.new_block_at(
 		&BlockId::Hash(a2.hash()),
 		Default::default(),
@@ -1037,17 +1033,17 @@ fn import_with_justification() {
 	);
 
 	assert_eq!(
-		client.justification(&BlockId::Hash(a3.hash())).unwrap(),
+		client.justifications(&BlockId::Hash(a3.hash())).unwrap(),
 		Some(justification),
 	);
 
 	assert_eq!(
-		client.justification(&BlockId::Hash(a1.hash())).unwrap(),
+		client.justifications(&BlockId::Hash(a1.hash())).unwrap(),
 		None,
 	);
 
 	assert_eq!(
-		client.justification(&BlockId::Hash(a2.hash())).unwrap(),
+		client.justifications(&BlockId::Hash(a2.hash())).unwrap(),
 		None,
 	);
 }
@@ -1095,7 +1091,7 @@ fn importing_diverged_finalized_block_should_trigger_reorg() {
 	);
 
 	// importing B1 as finalized should trigger a re-org and set it as new best
-	let justification = vec![1, 2, 3];
+	let justification = Justifications::from((TEST_ENGINE_ID, vec![1, 2, 3]));
 	client.import_justified(BlockOrigin::Own, b1.clone(), justification).unwrap();
 
 	assert_eq!(
@@ -1337,7 +1333,9 @@ fn doesnt_import_blocks_that_revert_finality() {
 
 	let import_err = client.import(BlockOrigin::Own, b3).err().unwrap();
 	let expected_err = ConsensusError::ClientImport(
-		sp_blockchain::Error::NotInFinalizedChain.to_string()
+		sp_blockchain::Error::RuntimeApiError(
+			sp_api::ApiError::Application(Box::new(sp_blockchain::Error::NotInFinalizedChain))
+		).to_string()
 	);
 
 	assert_eq!(
@@ -1747,6 +1745,7 @@ fn cleans_up_closed_notification_sinks_on_block_import() {
 		>(
 			substrate_test_runtime_client::new_native_executor(),
 			&substrate_test_runtime_client::GenesisParameters::default().genesis_storage(),
+			None,
 			None,
 			None,
 			Box::new(TaskExecutor::new()),

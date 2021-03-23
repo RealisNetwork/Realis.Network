@@ -191,7 +191,7 @@ decl_event!(
 	{
 		/// Swap created. \[account, proof, swap\]
 		NewSwap(AccountId, HashedProof, PendingSwap),
-		/// Swap claimed. The last parameter indicates whether the execution succeeds. 
+		/// Swap claimed. The last parameter indicates whether the execution succeeds.
 		/// \[account, proof, success\]
 		SwapClaimed(AccountId, HashedProof, bool),
 		/// Swap cancelled. \[account, proof\]
@@ -200,7 +200,7 @@ decl_event!(
 );
 
 decl_module! {
-	/// Module definition of atomic swap pall/et.
+	/// Module definition of atomic swap pallet.
 	pub struct Module<T: Config> for enum Call where origin: T::Origin {
 		type Error = Error<T>;
 
@@ -237,7 +237,7 @@ decl_module! {
 			let swap = PendingSwap {
 				source,
 				action,
-				end_block: frame_system::Module::<T>::block_number() + duration,
+				end_block: frame_system::Pallet::<T>::block_number() + duration,
 			};
 			PendingSwaps::<T>::insert(target.clone(), hashed_proof.clone(), swap.clone());
 
@@ -307,7 +307,7 @@ decl_module! {
 				Error::<T>::SourceMismatch,
 			);
 			ensure!(
-				frame_system::Module::<T>::block_number() >= swap.end_block,
+				frame_system::Pallet::<T>::block_number() >= swap.end_block,
 				Error::<T>::DurationNotPassed,
 			);
 

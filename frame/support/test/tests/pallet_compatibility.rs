@@ -15,8 +15,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use sp_runtime::traits::Block as _;
-
 pub trait SomeAssociation {
 	type A: frame_support::dispatch::Parameter + Default;
 }
@@ -108,7 +106,7 @@ pub mod pallet {
 	}
 
 	#[pallet::pallet]
-	pub struct Pallet<T>(PhantomData<T>);
+	pub struct Pallet<T>(_);
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {
@@ -249,10 +247,10 @@ frame_support::construct_runtime!(
 		NodeBlock = Block,
 		UncheckedExtrinsic = UncheckedExtrinsic
 	{
-		System: frame_system::{Module, Call, Event<T>},
+		System: frame_system::{Pallet, Call, Event<T>},
 		// NOTE: name Example here is needed in order to have same module prefix
-		Example: pallet::{Module, Call, Event<T>, Config<T>, Storage},
-		PalletOld: pallet_old::{Module, Call, Event<T>, Config<T>, Storage},
+		Example: pallet::{Pallet, Call, Event<T>, Config<T>, Storage},
+		PalletOld: pallet_old::{Pallet, Call, Event<T>, Config<T>, Storage},
 	}
 );
 

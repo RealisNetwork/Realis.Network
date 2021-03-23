@@ -18,11 +18,12 @@
 //! - [`seq_phragmen`]: Implements the Phragmén Sequential Method. An un-ranked, relatively fast
 //!   election method that ensures PJR, but does not provide a constant factor approximation of the
 //!   maximin problem.
-//! - [`phragmms()`]: Implements a hybrid approach inspired by Phragmén which is executed faster but
-//!   it can achieve a constant factor approximation of the maximin problem, similar to that of the
-//!   MMS algorithm.
-//! - [`balance`]: Implements the star balancing algorithm. This iterative process can push a
-//!   solution toward being more `balances`, which in turn can increase its score.
+//! - [`phragmms`](phragmms::phragmms): Implements a hybrid approach inspired by Phragmén which is
+//!   executed faster but it can achieve a constant factor approximation of the maximin problem,
+//!   similar to that of the MMS algorithm.
+//! - [`balance`](balancing::balance): Implements the star balancing algorithm. This iterative
+//!   process can push a solution toward being more "balanced", which in turn can increase its
+//!   score.
 //!
 //! ### Terminology
 //!
@@ -75,7 +76,7 @@
 
 use sp_arithmetic::{
 	traits::{Bounded, UniqueSaturatedInto, Zero},
-	InnerOf, Normalizable, PerThing, Rational128, ThresholdOrd,
+	Normalizable, PerThing, Rational128, ThresholdOrd,
 };
 use sp_std::{
 	cell::RefCell,
@@ -98,24 +99,28 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-mod phragmen;
-mod balancing;
-mod phragmms;
-mod node;
-mod reduce;
-mod helpers;
+pub mod phragmen;
+pub mod balancing;
+pub mod phragmms;
+pub mod node;
+pub mod reduce;
+pub mod helpers;
+pub mod pjr;
 
 pub use reduce::reduce;
 pub use helpers::*;
 pub use phragmen::*;
 pub use phragmms::*;
 pub use balancing::*;
+pub use pjr::*;
 
 // re-export the compact macro, with the dependencies of the macro.
 #[doc(hidden)]
 pub use codec;
 #[doc(hidden)]
 pub use sp_arithmetic;
+#[doc(hidden)]
+pub use sp_std;
 
 /// Simple Extension trait to easily convert `None` from index closures to `Err`.
 ///
@@ -139,10 +144,22 @@ pub trait CompactSolution: Sized {
 	const LIMIT: usize;
 
 	/// The voter type. Needs to be an index (convert to usize).
-	type Voter: UniqueSaturatedInto<usize> + TryInto<usize> + TryFrom<usize> + Debug + Copy + Clone;
+	type Voter: UniqueSaturatedInto<usize>
+		+ TryInto<usize>
+		+ TryFrom<usize>
+		+ Debug
+		+ Copy
+		+ Clone
+		+ Bounded;
 
 	/// The target type. Needs to be an index (convert to usize).
-	type Target: UniqueSaturatedInto<usize> + TryInto<usize> + TryFrom<usize> + Debug + Copy + Clone;
+	type Target: UniqueSaturatedInto<usize>
+		+ TryInto<usize>
+		+ TryFrom<usize>
+		+ Debug
+		+ Copy
+		+ Clone
+		+ Bounded;
 
 	/// The weight/accuracy type of each vote.
 	type Accuracy: PerThing128;
@@ -209,7 +226,6 @@ pub trait CompactSolution: Sized {
 	where
 		for<'r> FS: Fn(&'r A) -> VoteWeight,
 		A: IdentifierT,
-		ExtendedBalance: From<InnerOf<Self::Accuracy>>,
 	{
 		let ratio = self.into_assignment(voter_at, target_at)?;
 		let staked = helpers::assignment_ratio_to_staked_normalized(ratio, stake_of)?;
@@ -283,6 +299,12 @@ pub struct Candidate<AccountId> {
 	round: usize,
 }
 
+impl<AccountId> Candidate<AccountId> {
+	pub fn to_ptr(self) -> CandidatePtr<AccountId> {
+		Rc::new(RefCell::new(self))
+	}
+}
+
 /// A vote being casted by a [`Voter`] to a [`Candidate`] is an `Edge`.
 #[derive(Clone, Default)]
 pub struct Edge<AccountId> {
@@ -327,19 +349,31 @@ impl<A: IdentifierT> std::fmt::Debug for Voter<A> {
 }
 
 impl<AccountId: IdentifierT> Voter<AccountId> {
+	/// Create a new `Voter`.
+	pub fn new(who: AccountId) -> Self {
+		Self { who, ..Default::default() }
+	}
+
+	/// Returns `true` if `self` votes for `target`.
+	///
+	/// Note that this does not take into account if `target` is elected (i.e. is *active*) or not.
+	pub fn votes_for(&self, target: &AccountId) -> bool {
+		self.edges.iter().any(|e| &e.who == target)
+	}
+
 	/// Returns none if this voter does not have any non-zero distributions.
 	///
 	/// Note that this might create _un-normalized_ assignments, due to accuracy loss of `P`. Call
 	/// site might compensate by calling `normalize()` on the returned `Assignment` as a
 	/// post-precessing.
-	pub fn into_assignment<P: PerThing>(self) -> Option<Assignment<AccountId, P>>
-	where
-		ExtendedBalance: From<InnerOf<P>>,
-	{
+	pub fn into_assignment<P: PerThing>(self) -> Option<Assignment<AccountId, P>> {
 		let who = self.who;
 		let budget = self.budget;
-		let distribution = self.edges.into_iter().filter_map(|e| {
-			let per_thing = P::from_rational_approximation(e.weight, budget);
+		let distribution = self
+			.edges
+			.into_iter()
+			.filter_map(|e| {
+				let per_thing = P::from_rational(e.weight, budget);
 			// trim zero edges.
 			if per_thing.is_zero() { None } else { Some((e.who, per_thing)) }
 		}).collect::<Vec<_>>();
@@ -401,6 +435,12 @@ impl<AccountId: IdentifierT> Voter<AccountId> {
 				candidate.backed_stake = candidate.backed_stake.saturating_add(edge.weight);
 			}
 		})
+	}
+
+	/// This voter's budget
+	#[inline]
+	pub fn budget(&self) -> ExtendedBalance {
+		self.budget
 	}
 }
 
@@ -507,14 +547,13 @@ impl<AccountId> StakedAssignment<AccountId> {
 	/// can never be re-created and does not mean anything useful anymore.
 	pub fn into_assignment<P: PerThing>(self) -> Assignment<AccountId, P>
 	where
-		ExtendedBalance: From<InnerOf<P>>,
 		AccountId: IdentifierT,
 	{
 		let stake = self.total();
 		let distribution = self.distribution
 			.into_iter()
 			.filter_map(|(target, w)| {
-				let per_thing = P::from_rational_approximation(w, stake);
+				let per_thing = P::from_rational(w, stake);
 				if per_thing == Bounded::min_value() {
 					None
 				} else {
@@ -706,10 +745,7 @@ where
 /// greater or less than `that`.
 ///
 /// Note that the third component should be minimized.
-pub fn is_score_better<P: PerThing>(this: ElectionScore, that: ElectionScore, epsilon: P) -> bool
-where
-	ExtendedBalance: From<InnerOf<P>>,
-{
+pub fn is_score_better<P: PerThing>(this: ElectionScore, that: ElectionScore, epsilon: P) -> bool {
 	match this
 		.iter()
 		.zip(that.iter())
@@ -739,7 +775,7 @@ where
 /// This will perform some cleanup that are most often important:
 /// - It drops any votes that are pointing to non-candidates.
 /// - It drops duplicate targets within a voter.
-pub(crate) fn setup_inputs<AccountId: IdentifierT>(
+pub fn setup_inputs<AccountId: IdentifierT>(
 	initial_candidates: Vec<AccountId>,
 	initial_voters: Vec<(AccountId, VoteWeight, Vec<AccountId>)>,
 ) -> (Vec<CandidatePtr<AccountId>>, Vec<Voter<AccountId>>) {
@@ -751,7 +787,7 @@ pub(crate) fn setup_inputs<AccountId: IdentifierT>(
 		.enumerate()
 		.map(|(idx, who)| {
 			c_idx_cache.insert(who.clone(), idx);
-			Rc::new(RefCell::new(Candidate { who, ..Default::default() }))
+			Candidate { who, ..Default::default() }.to_ptr()
 		})
 		.collect::<Vec<CandidatePtr<AccountId>>>();
 
