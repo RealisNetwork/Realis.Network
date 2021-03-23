@@ -17,6 +17,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::block_request_handler::BlockRequestHandler;
+use crate::light_client_requests::handler::LightClientRequestHandler;
 use crate::gossip::QueuedSender;
 use crate::{config,  Event, NetworkService, NetworkWorker};
 
@@ -51,7 +52,7 @@ fn build_test_full_node(network_config: config::NetworkConfiguration)
 			&mut self,
 			origin: sp_consensus::BlockOrigin,
 			header: B::Header,
-			justification: Option<sp_runtime::Justification>,
+			justifications: Option<sp_runtime::Justifications>,
 			body: Option<Vec<B::Extrinsic>>,
 		) -> Result<
 			(
@@ -78,7 +79,7 @@ fn build_test_full_node(network_config: config::NetworkConfiguration)
 			let mut import = sp_consensus::BlockImportParams::new(origin, header);
 			import.body = body;
 			import.finalized = self.0;
-			import.justification = justification;
+			import.justifications = justifications;
 			import.fork_choice = Some(sp_consensus::ForkChoiceStrategy::LongestChain);
 			Ok((import, maybe_keys))
 		}
@@ -96,7 +97,17 @@ fn build_test_full_node(network_config: config::NetworkConfiguration)
 
 	let block_request_protocol_config = {
 		let (handler, protocol_config) = BlockRequestHandler::new(
-			protocol_id.clone(),
+			&protocol_id,
+			client.clone(),
+			50,
+		);
+		async_std::task::spawn(handler.run().boxed());
+		protocol_config
+	};
+
+	let light_client_request_protocol_config = {
+		let (handler, protocol_config) = LightClientRequestHandler::new(
+			&protocol_id,
 			client.clone(),
 		);
 		async_std::task::spawn(handler.run().boxed());
@@ -106,6 +117,7 @@ fn build_test_full_node(network_config: config::NetworkConfiguration)
 	let worker = NetworkWorker::new(config::Params {
 		role: config::Role::Full,
 		executor: None,
+		transactions_handler_executor: Box::new(|task| { async_std::task::spawn(task); }),
 		network_config,
 		chain: client.clone(),
 		on_demand: None,
@@ -117,6 +129,7 @@ fn build_test_full_node(network_config: config::NetworkConfiguration)
 		),
 		metrics_registry: None,
 		block_request_protocol_config,
+		light_client_request_protocol_config,
 	})
 	.unwrap();
 

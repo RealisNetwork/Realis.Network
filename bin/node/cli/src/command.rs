@@ -25,7 +25,7 @@ use crate::service::new_partial;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"ReAlis Network".into()
+		"Realis Network".into()
 	}
 
 	fn impl_version() -> String {

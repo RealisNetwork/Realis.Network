@@ -22,17 +22,10 @@ use sc_chain_spec::ChainSpecExtension;
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 use serde::{Serialize, Deserialize};
 use node_runtime::{
-	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig,
-	// CouncilConfig,
-	// DemocracyConfig,
-	GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
-	StakingConfig,
-	// ElectionsConfig,
-	IndicesConfig,
-	// SocietyConfig,
-	SudoConfig, SystemConfig,
-	// TechnicalCommitteeConfig,
-	wasm_binary_unwrap,
+	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig, /*CouncilConfig*/
+	/*DemocracyConfig*/GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
+	StakingConfig, /*ElectionsConfig*/ IndicesConfig, /*SocietyConfig*/ SudoConfig, SystemConfig,
+	/*TechnicalCommitteeConfig*/ wasm_binary_unwrap,
 };
 use node_runtime::Block;
 use node_runtime::constants::currency::*;
@@ -53,6 +46,7 @@ type AccountPublic = <Signature as Verify>::Signer;
 const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
 pub type RealisChainSpec = sc_service::GenericChainSpec<node_runtime::GenesisConfig, Extensions>;
+
 
 /// Node `ChainSpec` extensions.
 ///
@@ -255,19 +249,19 @@ pub fn testnet_genesis(
 	const STASH: Balance = ENDOWMENT / 1000;
 
 	GenesisConfig {
-		frame_system: Some(SystemConfig {
+		frame_system: SystemConfig {
 			code: wasm_binary_unwrap().to_vec(),
 			changes_trie_config: Default::default(),
-		}),
-		pallet_balances: Some(BalancesConfig {
+		},
+		pallet_balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned()
 				.map(|x| (x, ENDOWMENT))
 				.collect()
-		}),
-		pallet_indices: Some(IndicesConfig {
+		},
+		pallet_indices: IndicesConfig {
 			indices: vec![],
-		}),
-		pallet_session: Some(SessionConfig {
+		},
+		pallet_session: SessionConfig {
 			keys: initial_authorities.iter().map(|x| {
 				(x.0.clone(), x.0.clone(), session_keys(
 					x.2.clone(),
@@ -276,8 +270,8 @@ pub fn testnet_genesis(
 					x.5.clone(),
 				))
 			}).collect::<Vec<_>>(),
-		}),
-		pallet_staking: Some(StakingConfig {
+		},
+		pallet_staking: StakingConfig {
 			validator_count: initial_authorities.len() as u32 * 2,
 			minimum_validator_count: initial_authorities.len() as u32,
 			stakers: initial_authorities.iter().map(|x| {
@@ -286,58 +280,61 @@ pub fn testnet_genesis(
 			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
 			slash_reward_fraction: Perbill::from_percent(10),
 			.. Default::default()
-		}),
-		// pallet_democracy: Some(DemocracyConfig::default()),
-		// pallet_elections_phragmen: Some(ElectionsConfig {
-		// 	members: endowed_accounts.iter()
-		// 				.take((num_endowed_accounts + 1) / 2)
-		// 				.cloned()
-		// 				.map(|member| (member, STASH))
-		// 				.collect(),
-		// }),
-		// pallet_collective_Instance1: Some(CouncilConfig::default()),
-		// pallet_collective_Instance2: Some(TechnicalCommitteeConfig {
-		// 	members: endowed_accounts.iter()
-		// 				.take((num_endowed_accounts + 1) / 2)
-		// 				.cloned()
-		// 				.collect(),
-		// 	phantom: Default::default(),
-		// }),
-		pallet_contracts: Some(ContractsConfig {
+		},
+		// pallet_democracy: DemocracyConfig::default(),
+		// pallet_elections_phragmen: ElectionsConfig {
+			// members: endowed_accounts.iter()
+						// .take((num_endowed_accounts + 1) / 2)
+						// .cloned()
+						// .map(|member| (member, STASH))
+						// .collect(),
+		// },
+		// pallet_collective_Instance1: CouncilConfig::default(),
+		// pallet_collective_Instance2: TechnicalCommitteeConfig {
+			// members: endowed_accounts.iter()
+						// .take((num_endowed_accounts + 1) / 2)
+						// .cloned()
+						// .collect(),
+			// phantom: Default::default(),
+		// },
+		pallet_contracts: ContractsConfig {
 			current_schedule: pallet_contracts::Schedule {
 				enable_println, // this should only be enabled on development chains
 				..Default::default()
 			},
-		}),
-		pallet_sudo: Some(SudoConfig {
+		},
+		pallet_sudo: SudoConfig {
 			key: root_key,
-		}),
-		pallet_babe: Some(BabeConfig {
+		},
+		pallet_babe: BabeConfig {
 			authorities: vec![],
-		}),
-		pallet_im_online: Some(ImOnlineConfig {
+			epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
+		},
+		pallet_im_online: ImOnlineConfig {
 			keys: vec![],
-		}),
-		pallet_authority_discovery: Some(AuthorityDiscoveryConfig {
+		},
+		pallet_authority_discovery: AuthorityDiscoveryConfig {
 			keys: vec![],
-		}),
-		pallet_grandpa: Some(GrandpaConfig {
+		},
+		pallet_grandpa: GrandpaConfig {
 			authorities: vec![],
-		}),
-		// pallet_membership_Instance1: Some(Default::default()),
-		// pallet_treasury: Some(Default::default()),
-		// pallet_society: Some(SocietyConfig {
-		// 	members: endowed_accounts.iter()
-		// 				.take((num_endowed_accounts + 1) / 2)
-		// 				.cloned()
-		// 				.collect(),
-		// 	pot: 0,
-		// 	max_members: 999,
-		// }),
-		pallet_vesting: Some(Default::default()),
-		pallet_nft: Some(Default::default()),
+		},
+		// pallet_membership_Instance1: Default::default(),
+		// pallet_treasury: Default::default(),
+		// pallet_society: SocietyConfig {
+			// members: endowed_accounts.iter()
+						// .take((num_endowed_accounts + 1) / 2)
+						// .cloned()
+						// .collect(),
+			// pot: 0,
+			// max_members: 999,
+		// },
+		pallet_vesting: Default::default(),
+		pallet_gilt: Default::default(),
+		pallet_nft: Default::default(),
 	}
 }
+
 
 fn development_config_genesis() -> GenesisConfig {
 	testnet_genesis(
@@ -412,7 +409,7 @@ pub fn local_testnet_config() -> ChainSpec {
 	ChainSpec::from_genesis(
 		"Local Testnet",
 		"local_testnet",
-		ChainType::Live,
+		ChainType::Local,
 		local_testnet_genesis,
 		vec![],
 		None,
@@ -424,7 +421,7 @@ pub fn local_testnet_config() -> ChainSpec {
 
 pub fn realis_testnet_config() -> ChainSpec {
 	ChainSpec::from_genesis(
-		"ReAlis Network",
+		"Realis Network",
 		"realis_network",
 		ChainType::Live,
 		realis_testnet_genesis,

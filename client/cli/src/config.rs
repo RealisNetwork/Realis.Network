@@ -21,8 +21,8 @@
 use crate::arg_enums::Database;
 use crate::error::Result;
 use crate::{
-	init_logger, DatabaseParams, ImportParams, KeystoreParams, NetworkParams, NodeKeyParams,
-	OffchainWorkerParams, PruningParams, SharedParams, SubstrateCli, InitLoggerParams,
+	DatabaseParams, ImportParams, KeystoreParams, NetworkParams, NodeKeyParams,
+	OffchainWorkerParams, PruningParams, SharedParams, SubstrateCli,
 };
 use log::warn;
 use names::{Generator, Name};
@@ -32,7 +32,8 @@ use sc_service::config::{
 	NodeKeyConfig, OffchainWorkerConfig, PrometheusConfig, PruningMode, Role, RpcMethods,
 	TaskExecutor, TelemetryEndpoints, TransactionPoolOptions, WasmExecutionMethod,
 };
-use sc_service::{ChainSpec, TracingReceiver, KeepBlocks, TransactionStorageMode };
+use sc_service::{ChainSpec, TracingReceiver, KeepBlocks, TransactionStorageMode};
+use sc_tracing::logging::LoggerBuilder;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 
@@ -483,8 +484,9 @@ pub trait CliConfiguration<DCV: DefaultConfigurationValues = ()>: Sized {
 		let node_key = self.node_key(&net_config_dir)?;
 		let role = self.role(is_dev)?;
 		let max_runtime_instances = self.max_runtime_instances()?.unwrap_or(8);
-		let is_validator = role.is_network_authority();
+		let is_validator = role.is_authority();
 		let (keystore_remote, keystore) = self.keystore_config(&config_dir)?;
+		let telemetry_endpoints = self.telemetry_endpoints(&chain_spec)?;
 
 		let unsafe_pruning = self
 			.import_params()
@@ -523,7 +525,7 @@ pub trait CliConfiguration<DCV: DefaultConfigurationValues = ()>: Sized {
 			rpc_ws_max_connections: self.rpc_ws_max_connections()?,
 			rpc_cors: self.rpc_cors(is_dev)?,
 			prometheus_config: self.prometheus_config(DCV::prometheus_listen_port())?,
-			telemetry_endpoints: self.telemetry_endpoints(&chain_spec)?,
+			telemetry_endpoints,
 			telemetry_external_transport: self.telemetry_external_transport()?,
 			default_heap_pages: self.default_heap_pages()?,
 			offchain_worker: self.offchain_worker(&role)?,
@@ -570,27 +572,27 @@ pub trait CliConfiguration<DCV: DefaultConfigurationValues = ()>: Sized {
 	/// 2. Initializes the logger
 	/// 3. Raises the FD limit
 	fn init<C: SubstrateCli>(&self) -> Result<()> {
-		let logger_pattern = self.log_filters()?;
-		let tracing_receiver = self.tracing_receiver()?;
-		let tracing_targets = self.tracing_targets()?;
-		let disable_log_reloading = self.is_log_filter_reloading_disabled()?;
-		let disable_log_color = self.disable_log_color()?;
-
 		sp_panic_handler::set(&C::support_url(), &C::impl_version());
 
-		init_logger(InitLoggerParams {
-			pattern: logger_pattern,
-			tracing_receiver,
-			tracing_targets,
-			disable_log_reloading,
-			disable_log_color,
-		})?;
+		let mut logger = LoggerBuilder::new(self.log_filters()?);
+		logger.with_log_reloading(!self.is_log_filter_reloading_disabled()?);
+
+		if let Some(tracing_targets) = self.tracing_targets()? {
+			let tracing_receiver = self.tracing_receiver()?;
+			logger.with_profiling(tracing_receiver, tracing_targets);
+		}
+
+		if self.disable_log_color()? {
+			logger.with_colors(false);
+		}
+
+		logger.init()?;
 
 		if let Some(new_limit) = fdlimit::raise_fd_limit() {
 			if new_limit < RECOMMENDED_OPEN_FILE_DESCRIPTOR_LIMIT {
 				warn!(
 					"Low open file descriptor limit configured for the process. \
-					 Current value: {:?}, recommended value: {:?}.",
+					Current value: {:?}, recommended value: {:?}.",
 					new_limit, RECOMMENDED_OPEN_FILE_DESCRIPTOR_LIMIT,
 				);
 			}
