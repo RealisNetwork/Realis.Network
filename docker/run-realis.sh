@@ -1,15 +1,19 @@
 #!/bin/bash
-docker run -d --name=realis-test --net=host \
- -v /blockchain_soul/soul/nikita2:/realis/chain \
-realis:1 \
+IMAGE="daelon02/realis-network"
+CONTAINER="realis-test"
+docker rm -f ${CONTAINER}
+docker rmi ${IMAGE}
+docker run -d --name=${CONTAINER} --net=host \
+ -v /blockchain_soul/soul/nikita1:/realis/chain \
+${IMAGE} \
 /realis/realis \
---chain=realis \
---ws-port 9945  \
---rpc-port 9934  \
+--chain ./realis.json \
+--ws-port 9944 \
+--rpc-port 9933  \
 --validator  \
 --rpc-methods=Unsafe  \
---reserved-nodes /ip4/144.91.101.91/tcp/30333/p2p/12D3KooWDPdX6yG1PpEUBJsoAZeo2wvhBo9GF3ZaGj4huA6xqGVC \
---name MyNode02 \
+ --listen-addr /ip4/0.0.0.0/tcp/30333 \
+--name MyNode01 \
 --unsafe-ws-external \
 --unsafe-rpc-external \
 --rpc-cors '*' \
