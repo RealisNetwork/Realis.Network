@@ -3,11 +3,13 @@ IMAGE="daelon02/realis-network"
 CONTAINER="realis-test"
 docker rm -f ${CONTAINER}
 docker rmi ${IMAGE}
+docker build -t ${IMAGE} .
+docker push ${IMAGE}
 docker run -d --name=${CONTAINER} --net=host \
  -v /blockchain_soul/soul/nikita1:/realis/chain \
 ${IMAGE} \
 /realis/realis \
---chain ./realis.json \
+--chain=realis \
 --ws-port 9944 \
 --rpc-port 9933  \
 --validator  \
