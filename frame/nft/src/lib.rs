@@ -112,6 +112,7 @@ decl_event!(
 		TokenBurned(Token),
 		TokenTransferred(TokenId, AccountId),
         TokenBreeded(TokenId),
+        // TokensTransferred(TokenId, AccountId, TokenId, AccountId),
 	}
 );
 
@@ -145,7 +146,7 @@ decl_module! {
 		fn deposit_event() = default;
 
 		/// Mint token
-		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+		#[weight = 10_000]
 		pub fn mint(origin, target_account: T::AccountId,
 		token_id: TokenId,
         rarity: Rarity,
@@ -169,6 +170,21 @@ decl_module! {
             Ok(())
 
 		}
+
+        // #[weight = 0]
+		// pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId, token_info: InfoToken) -> dispatch::DispatchResult {
+        //     let who = ensure_signed(origin)?;
+		//     ensure!(
+        //         Self::nft_masters().contains(&who),
+        //         Error::<T>::NotNftMaster
+        //     );
+
+        //     let token_info = 0;
+        //     <Self as Nft<_>>::mint_basic(&target_account, token_id, token_info)?;
+		//     Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
+        //     Ok(())
+
+		// }
         
 		///Burn token(only owner)
 		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
@@ -200,6 +216,17 @@ decl_module! {
             Self::deposit_event(RawEvent::TokenTransferred(token_id.clone(), dest_account.clone()));
             Ok(())
         }
+
+        // #[weight = 10_000]
+        // pub fn transfer_two_nft(origin, dest_account: T::AccountId token_id: TokenId, dest_account_2: T::AccountId, token_id_2: TokenId) -> dispatch::DispatchResult {
+        //     let who = ensure_signed(origin)?;
+        //     ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
+        //     ensure!(who == Self::account_for_token(&token_id_2), Error::<T>::NotTokenOwner);
+
+        //     <Self as Nft<_>>::transfer_two_nft(&dest_account, &dest_account_2, token_id, token_id_2)?;
+        //     Self::deposit_event(RawEvent::TokensTransferred(token_id.clone(), dest_account.clone(), token_id_2.clone(), dest_account_2.clone()));
+        //     Ok(())
+        // }
 
         // ///Breed tokens(only owner)
         // #[weight = 10_000]
@@ -241,6 +268,22 @@ impl<T: Config> Nft<T::AccountId> for Module<T> {
             // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
             Ok(token_id)
     }
+
+
+    // fn mint_basic(target_account: &T::AccountId, token_id: Self::TokenId, token_info: InfoToken) -> dispatch::result::Result<Self::TokenId, dispatch::DispatchError> {
+    //     // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
+    //         ensure!(
+    //             !AccountForToken::<T>::contains_key(token_id),
+    //              Error::<T>::TokenExist
+    //              );
+    //              let token_info:u32 = 0;
+    //         TokensForAccount::<T>::insert(target_account, token_id, token_info);
+    //         // hash_set_of_tokens.insert(token_id);
+    //         TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+    //         AccountForToken::<T>::insert(token_id, &target_account);
+    //         // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
+    //         Ok(token_id)
+    // }
     
     fn burn(token_id: Self::TokenId) -> dispatch::result::Result<Token, dispatch::DispatchError> {
         let owner = Self::owner_of(token_id);
@@ -279,6 +322,32 @@ impl<T: Config> Nft<T::AccountId> for Module<T> {
 
         Ok(())
     }
+
+
+    // fn transfer_two_nft(dest_account: &T::AccountId, token_id: TokenId, dest_account_2: &T::AccountId, token_id_2: TokenId) -> dispatch::DispatchResult
+    // {
+    //     let owner = Self::owner_of(token_id);
+    //     ensure!(
+    //             owner != T::AccountId::default(),
+    //             Error::<T>::NonExistentToken
+    //         );
+    //         let owner = Self::owner_of(token_id_2);
+    //     ensure!(
+    //             owner != T::AccountId::default(),
+    //             Error::<T>::NonExistentToken
+    //         );
+
+    //     TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+    //     TotalForAccount::<T>::mutate(dest_account, dest_account_2, |total| *total += 1);
+    //     AccountForToken::<T>::remove(token_id, token_id_2);
+
+    //     let transferred_tokens = TokensForAccount::<T>::take(owner, token_id< token_id_2).unwrap();
+
+    //     TokensForAccount::<T>::insert(dest_account, dest_account_2, token_id, token_id_2, transferred_tokens);
+    //     AccountForToken::<T>::insert(token_id, token_id_2, &dest_account, &dest_account_2);
+
+    //     Ok(())
+    // }
 
     // fn breed_token(token_id: TokenId, token_id2: TokenId) -> dispatch::result::Result<another_token, dispatch::DispatchError> {
     //     let owner = Self::owner_of(token_id);

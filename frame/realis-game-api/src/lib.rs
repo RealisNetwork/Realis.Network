@@ -65,7 +65,6 @@ decl_error! {
 
 decl_module! {
 	pub struct Module<T: Config> for enum Call where origin: T::Origin {
-        trait Config : nft::Config { 
         		// Errors must be initialized if they are used by the pallet.
 		type Error = Error<T>;
 
@@ -119,7 +118,6 @@ decl_module! {
         // fn update_balance() {
 
         // }
-        }
     }
 }
 

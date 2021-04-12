@@ -10,6 +10,7 @@ pub trait Nft<AccountId> {
 
     type TokenId;
 
+
     fn mint(target_account: &AccountId, token_info: Self::Token, token_id: Self::TokenId) -> Result<Self::TokenId, DispatchError>;
 
     fn burn(token_id: Self::TokenId) -> Result<Self::Token, DispatchError>;
