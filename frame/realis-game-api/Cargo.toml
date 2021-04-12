@@ -1,0 +1,46 @@
+[package]
+name = "websocket"
+version = "2.0.0"
+authors = ["Nikolay Kim <fafhrd91@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "websocket-server"
+path = "src/main.rs"
+
+[dependencies.codec]
+default-features = false
+features = ['derive']
+package = 'parity-scale-codec'
+version = '2.0.0'
+
+[dependencies]
+jsonrpc = "0.12.0"
+clap = "2.29"
+reqwest = "0.11.2"
+prettytable-rs = "0.8"
+serde = { version = "1.0.102", optional = true }
+serde_derive = "1.0"
+serde_json = "1.0"
+frame-support = { version = "3.0.0", default-features = false, path = "../support" }
+frame-system = { version = "3.0.0", default-features = false, path = "../system" }
+pallet-balances = { version = "3.0.0", default-features = false, path = "../balances" }
+sp-runtime = { version = "3.0.0", default-features = false, path = "../../primitives/runtime" }
+sp-std = { version = "3.0.0", default-features = false, path = "../../primitives/std" }
+pallet-nft = { version = "0.0.1", default-features = false, path="../nft" }
+
+[dev-dependencies]
+sp-core = { version = "3.0.0", default-features = false, path = "../../primitives/core" }
+sp-io ={ version = "3.0.0", path = "../../primitives/io" }
+
+[features]
+default = ['std']
+std = [
+    'serde',
+    'codec/std',
+    'frame-support/std',
+    'frame-system/std',
+    'pallet-balances/std',
+    'sp-runtime/std',
+    'sp-std/std'
+]
