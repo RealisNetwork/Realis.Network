@@ -52,9 +52,9 @@ pub enum Socket {
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
 pub struct Params {
-    strength: u8,
-    agility: u8,
-    intelligence: u8,
+    pub strength: u8,
+    pub agility: u8,
+    pub intelligence: u8,
 }
 
 

@@ -1,12 +1,15 @@
 [package]
-name = "websocket"
-version = "2.0.0"
-authors = ["Nikolay Kim <fafhrd91@gmail.com>"]
-edition = "2018"
+authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
+description = 'FRAME pallet template for defining custom runtime logic.'
+edition = '2018'
+homepage = 'https://substrate.dev'
+license = 'Unlicense'
+name = 'pallet-api'
+repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
+version = '0.0.1'
 
-[[bin]]
-name = "websocket-server"
-path = "src/main.rs"
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
 
 [dependencies.codec]
 default-features = false
@@ -15,10 +18,6 @@ package = 'parity-scale-codec'
 version = '2.0.0'
 
 [dependencies]
-jsonrpc = "0.12.0"
-clap = "2.29"
-reqwest = "0.11.2"
-prettytable-rs = "0.8"
 serde = { version = "1.0.102", optional = true }
 serde_derive = "1.0"
 serde_json = "1.0"

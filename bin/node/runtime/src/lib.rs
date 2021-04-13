@@ -1065,6 +1065,10 @@ impl pallet_nft::Config for Runtime {
 	type Event = Event;
 }
 
+impl pallet_api::Config for Runtime {
+	type Event = Event;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1110,6 +1114,7 @@ construct_runtime!(
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
+		Api: pallet_api::{Pallet, Call, Event<T>, Config<T>},
 	}
 );
 

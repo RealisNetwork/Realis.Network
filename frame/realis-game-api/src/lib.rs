@@ -11,9 +11,9 @@ use pallet_balances;
 use pallet_nft::{Token, Params, Socket, Rarity, TokenId};
 use pallet_nft as NFT;
 use pallet_nft::Nft;
+use sp_runtime::traits::StaticLookup;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
-use serde::{Serialize, Deserialize};
 
 // extern crate clap;
 // #[macro_use]
@@ -24,12 +24,8 @@ use serde::{Serialize, Deserialize};
 // extern crate serde_derive;
 // extern crate serde_json;
 
-use clap::App;
-
-pub static URL: &str = "161.97.142.255:9933";
-
 /// Configure the pallet by specifying the parameters and types on which it depends.
-pub trait Config: frame_system::Config {
+pub trait Config: frame_system::Config + pallet_nft::Config + pallet_balances::Config {
     /// Because this pallet emits events, it depends on the runtime's definition of an event.
     type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
 }
@@ -71,55 +67,44 @@ decl_module! {
 		// Events must be initialized if they are used by the pallet.
 		fn deposit_event() = default;
 
-        // #[weight = 10_000]
-        // pub fn mint_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
-        //     let token_id = 3;
-        //     let rarity = NFT::Rarity::Legendary;
-        //     let socket = NFT::Socket::Head;
-        //     let params = NFT::Params{strength: 2,
-        //         agility: 2,
-        //         intelligence: 9 };
-        //    return NFT::Module::mint(origin, target_account, token_id, rarity, socket, params);
-        // Ok(())
-        // }
+        #[weight = 10_000]
+        pub fn mint_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
+            let token_id = 3;
+            let rarity = NFT::Rarity::Legendary;
+            let socket = NFT::Socket::Head;
+            let params = NFT::Params{strength: 2,
+                agility: 2,
+                intelligence: 9 };
+           return NFT::Module::<T>::mint(origin, target_account, token_id, rarity, socket, params);
+        }
 
-        // #[weight = 10_000, Pays::No]
-        // fn breed_nft() {
-        //     let json_nft = get_from_json();
-        //     let burn_nft = NFT::burn(json_nft);
-        //     let burn_nft_2 = NFT::burn(json_nft);
-        //     return NFT::mint(json_nft);
-        // }
+        #[weight = 10_000]
+        fn breed_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
+            let token_id = 3;
+            let rarity = NFT::Rarity::Legendary;
+            let socket = NFT::Socket::Head;
+            let params = NFT::Params{strength: 2,
+                agility: 2,
+                intelligence: 9 };
+            NFT::Module::<T>::burn(origin.clone(), 1);
+            NFT::Module::<T>::burn(origin.clone(), 2);
+            return NFT::Module::<T>::mint(origin, target_account, token_id, rarity, socket, params);
+        }
+
         #[weight = 10_000]
         fn transfer_nft(origin, dest_account: T::AccountId) {
             let json_nft = 123;
-            return NFT::Module::<T>::transfer(&dest_account, json_nft);
+            return NFT::Module::<T>::transfer(origin, dest_account, json_nft);
         }
 
-        // #[weight = 10_000, Pays::No]
-        // fn transfer() {
-        //     let from = get_from_json();
-        //     let to = get_from_json();
-        //     let golds = get_from_json();
-        //     return pallet_balances::transfer(from, to, golds);
-		// }
 
-        // #[weight = (10000, Pays::No)]
-        // fn get_balance() {
-
-        // }
-
-        // #[weight = (10000, Pays::No)]
-        // fn get_nft() {
-
-        // }
-
-        // #[weight = (10000, Pays::No)]
-        // fn update_balance() {
-
-        // }
+        #[weight = 10_000]
+        fn transfer(origin, dest: <T::Lookup as StaticLookup>::Source, value: T::Balance) -> dispatch::DispatchResultWithPostInfo {
+            return pallet_balances::Pallet::<T>::transfer(origin, dest, value);
+		}
     }
 }
+
 
 // fn get_from_json() -> Token {
 //     let client = reqwest::Client::new();
