@@ -30,7 +30,7 @@ use frame_support::traits::StorageMapShim;
 use frame_support::weights::{Weight, DispatchInfo, IdentityFee};
 use crate::{
 	self as pallet_balances,
-	Module, Config, decl_tests,
+	Pallet, Config, decl_tests,
 };
 use pallet_transaction_payment::CurrencyAdapter;
 
@@ -43,8 +43,8 @@ frame_support::construct_runtime!(
 		NodeBlock = Block,
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
-		System: frame_system::{Module, Call, Config, Storage, Event<T>},
-		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 	}
 );
 
@@ -82,7 +82,7 @@ parameter_types! {
 	pub const TransactionByteFee: u64 = 1;
 }
 impl pallet_transaction_payment::Config for Test {
-	type OnChargeTransaction = CurrencyAdapter<Module<Test>, ()>;
+	type OnChargeTransaction = CurrencyAdapter<Pallet<Test>, ()>;
 	type TransactionByteFee = TransactionByteFee;
 	type WeightToFee = IdentityFee<u64>;
 	type FeeMultiplierUpdate = ();
@@ -184,8 +184,8 @@ fn emit_events_with_no_existential_deposit_suicide_with_dust() {
 			assert_eq!(
 				events(),
 				[
+					Event::frame_system(system::Event::KilledAccount(1)),
 					Event::pallet_balances(crate::Event::DustLost(1, 1)),
-					Event::frame_system(system::Event::KilledAccount(1))
 				]
 			);
 		});

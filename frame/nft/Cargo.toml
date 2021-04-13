@@ -1,32 +1,37 @@
 [package]
+authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
+description = 'FRAME pallet template for defining custom runtime logic.'
 edition = '2018'
-name = 'pallet-commodities'
-version = '3.0.0'
-authors = ['Dan Forbes <dan@parity.io>']
+homepage = 'https://substrate.dev'
 license = 'Unlicense'
-description = 'A unique asset (NFT) interface and a Substrate FRAME implementation optimized for commodity assets.'
-homepage = 'https://github.com/danforbes/pallet-nft'
-repository = 'https://github.com/danforbes/pallet-nft'
-readme = 'README.md'
-keywords = ['substrate', 'frame', 'nft', 'blockchain', 'asset']
-categories = ['cryptography::cryptocurrencies', 'data-structures', 'no-std']
+name = 'pallet-nft'
+repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
+version = '0.0.1'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
 
+# alias "parity-scale-code" to "codec"
+[dependencies.codec]
+default-features = false
+features = ['derive']
+package = 'parity-scale-codec'
+version = '2.0.0'
+
 [dependencies]
 serde = { version = "1.0.102", optional = true }
-
-# Substrate dependencies
-codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
 frame-support = { version = "3.0.0", default-features = false, path = "../support" }
 frame-system = { version = "3.0.0", default-features = false, path = "../system" }
+pallet-balances = { version = "3.0.0", default-features = false, path = "../balances" }
 sp-runtime = { version = "3.0.0", default-features = false, path = "../../primitives/runtime" }
 sp-std = { version = "3.0.0", default-features = false, path = "../../primitives/std" }
 
+
 [dev-dependencies]
 sp-core = { version = "3.0.0", default-features = false, path = "../../primitives/core" }
-sp-io = { version = "3.0.0", path = "../../primitives/io" }
+sp-io ={ version = "3.0.0", path = "../../primitives/io" }
+#sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
+
 
 [features]
 default = ['std']
@@ -35,6 +40,7 @@ std = [
     'codec/std',
     'frame-support/std',
     'frame-system/std',
+    'pallet-balances/std',
     'sp-runtime/std',
-    'sp-std/std',
+    'sp-std/std'
 ]

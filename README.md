@@ -1,15 +1,15 @@
-# Substrate Node Template
+# ReAlis Network
 
-A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
+A fresh FRAME-based [Substrate](https://www.substrate.io/) node
 
 ## Getting Started
 
-This project contains some configuration files to help get started :hammer_and_wrench:
+This is the node of the ReAlis Blockchain Network
 
 ### Rust Setup
 
 Follow the [Rust setup instructions](./doc/rust-setup.md) before using the included Makefile to
-build the Node Template.
+build the Node.
 
 ### Makefile
 
@@ -40,7 +40,7 @@ Once the project has been built, the following command can be used to explore al
 subcommands:
 
 ```sh
-./target/release/node-template -h
+./target/release/realis -h
 ```
 
 ## Run
@@ -53,29 +53,28 @@ terminate the process. After the project has been built, there are other ways to
 This command will start the single-node development chain with persistent state:
 
 ```bash
-./target/release/node-template --dev
+./target/release/realis --dev
 ```
 
 Purge the development chain's state:
 
 ```bash
-./target/release/node-template purge-chain --dev
+./target/release/realis purge-chain --dev
 ```
 
 Start the development chain with detailed logging:
 
 ```bash
-RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/node-template -lruntime=debug --dev
+RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/realis -lruntime=debug --dev
 ```
-
-### Multi-Node Local Testnet
-
-If you want to see the multi-node consensus algorithm in action, refer to
-[our Start a Private Network tutorial](https://substrate.dev/docs/en/tutorials/start-a-private-network/).
-
+## Connect to ReAlis TestNet
+Connect to the global ReAlis TestNet network by running:
+```
+./target/release/realis --chain=realis
+```
 ## Template Structure
 
-A Substrate project such as this consists of a number of components that are spread across a few
+A ReAlis Network such as this consists of a number of components that are spread across a few
 directories.
 
 ### Node
@@ -116,7 +115,7 @@ After the node has been [built](#build), refer to the embedded documentation to 
 capabilities and configuration parameters that it exposes:
 
 ```shell
-./target/release/node-template --help
+./target/release/realis --help
 ```
 
 ### Runtime
@@ -172,21 +171,20 @@ First, install [Docker](https://docs.docker.com/get-docker/) and
 Then run the following command to start a single node development chain.
 
 ```bash
-./scripts/docker_run.sh
+bash ./docker/run-realis.sh
 ```
 
-This command will firstly compile your code, and then start a local development network. You can
-also replace the default command (`cargo build --release && ./target/release/node-template --dev --ws-external`)
-by appending your own. A few useful ones are as follow.
+This command will firstly compile your code, and then start a local development network.
+ A few useful ones are as follow.
 
 ```bash
 # Run Substrate node without re-compiling
-./scripts/docker_run.sh ./target/release/node-template --dev --ws-external
+./docker/run-realis.sh ./target/release/realis --dev --ws-external
 
 # Purge the local dev chain
-./scripts/docker_run.sh ./target/release/node-template purge-chain --dev
+./docker/run-realis.sh ./target/release/realis purge-chain --dev
 
 # Check whether the code is compilable
-./scripts/docker_run.sh cargo check
+./docker/run-realis.sh cargo check
 ```
-# SOUL-Blockchain
+# ReAlis Network

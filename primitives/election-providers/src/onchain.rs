@@ -17,6 +17,7 @@
 
 //! An implementation of [`ElectionProvider`] that does an on-chain sequential phragmen.
 
+use sp_arithmetic::InnerOf;
 use crate::{ElectionDataProvider, ElectionProvider};
 use sp_npos_elections::*;
 use sp_std::{collections::btree_map::BTreeMap, marker::PhantomData, prelude::*};
@@ -57,7 +58,10 @@ pub trait Config {
 	type DataProvider: ElectionDataProvider<Self::AccountId, Self::BlockNumber>;
 }
 
-impl<T: Config> ElectionProvider<T::AccountId, T::BlockNumber> for OnChainSequentialPhragmen<T> {
+impl<T: Config> ElectionProvider<T::AccountId, T::BlockNumber> for OnChainSequentialPhragmen<T>
+where
+	ExtendedBalance: From<InnerOf<T::Accuracy>>,
+{
 	type Error = Error;
 	type DataProvider = T::DataProvider;
 

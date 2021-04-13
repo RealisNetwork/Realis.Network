@@ -1,53 +1,18 @@
-//! # Unique Assets Implementation: Commodities
-//!
-//! This pallet exposes capabilities for managing unique assets, also known as
-//! non-fungible tokens (NFTs).
-//!
-//! - [`pallet_commodities::Trait`](./trait.Trait.html)
-//! - [`Calls`](./enum.Call.html)
-//! - [`Errors`](./enum.Error.html)
-//! - [`Events`](./enum.RawEvent.html)
-//!
-//! ## Overview
-//!
-//! Assets that share a common metadata structure may be created and distributed
-//! by an asset admin. Asset owners may burn assets or transfer their
-//! ownership. Configuration parameters are used to limit the total number of a
-//! type of asset that may exist as well as the number that any one account may
-//! own. Assets are uniquely identified by the hash of the info that defines
-//! them, as calculated by the runtime system's hashing algorithm.
-//!
-//! This pallet implements the [`UniqueAssets`](./nft/trait.UniqueAssets.html)
-//! trait in a way that is optimized for assets that are expected to be traded
-//! frequently.
-//!
-//! ### Dispatchable Functions
-//!
-//! * [`mint`](./enum.Call.html#variant.mint) - Use the provided commodity info
-//!   to create a new commodity for the specified user. May only be called by
-//!   the commodity admin.
-//!
-//! * [`burn`](./enum.Call.html#variant.burn) - Destroy a commodity. May only be
-//!   called by commodity owner.
-//!
-//! * [`transfer`](./enum.Call.html#variant.transfer) - Transfer ownership of
-//!   a commodity to another account. May only be called by current commodity
-//!   owner.
-
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use codec::FullCodec;
-use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure,
-    traits::{EnsureOrigin, Get},
-    Hashable,
-};
+/// Edit this file to define custom logic or remove it if it is not needed.
+/// Learn more about FRAME and the core library of Substrate FRAME pallets:
+/// https://substrate.dev/docs/en/knowledgebase/runtime/frame
+
+use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::Get};
 use frame_system::ensure_signed;
-use sp_runtime::traits::{Hash, Member};
-use sp_std::{cmp::Eq, fmt::Debug, vec::Vec};
+use frame_system::ensure_root;
+use frame_support::traits::Vec;
+// use std::collections::HashSet;
+use codec::{Decode, Encode, EncodeLike};
 
 pub mod nft;
-pub use crate::nft::UniqueAssets;
+pub use crate::nft::Nft;
 
 #[cfg(test)]
 mod mock;
@@ -55,268 +20,349 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-pub trait Trait<I = DefaultInstance>: frame_system::Config {
-    /// The dispatch origin that is able to mint new instances of this type of commodity.
-    type CommodityAdmin: EnsureOrigin<Self::Origin>;
-    /// The data type that is used to describe this type of commodity.
-    type CommodityInfo: Hashable + Member + Debug + Default + FullCodec + Ord;
-    /// The maximum number of this type of commodity that may exist (minted - burned).
-    type CommodityLimit: Get<u128>;
-    /// The maximum number of this type of commodity that any single account may own.
-    type UserCommodityLimit: Get<u64>;
-    type Event: From<Event<Self, I>> + Into<<Self as frame_system::Config>::Event>;
+pub type TokenId = u32;
+
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+pub enum Rarity {
+    Common,
+    Uncommon,
+    Rare,
+    Mythical,
+    Legendary,
 }
 
-/// The runtime system's hashing algorithm is used to uniquely identify commodities.
-pub type CommodityId<T> = <T as frame_system::Config>::Hash;
+// impl Default for Rarity {
+//     fn default() -> Self { Rarity::Common }
+// }
 
-/// Associates a commodity with its ID.
-pub type Commodity<T, I> = (CommodityId<T>, <T as Trait<I>>::CommodityInfo);
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+pub enum Socket {
+    Head,
+    Body,
+    LegLeft,
+    LegRight,
+    ArmLeft,
+    ArmRight,
+    Weapon,
+}
 
+// impl Default for Socket {
+//     fn default() -> Self { Socket::Head }
+// }
+
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+pub struct Params {
+    pub strength: u8,
+    pub agility: u8,
+    pub intelligence: u8,
+}
+
+
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+pub struct Token {
+    rarity: Rarity,
+    socket: Socket,
+    params: Params,
+}
+
+
+
+/// Configure the pallet by specifying the parameters and types on which it depends.
+pub trait Config: frame_system::Config {
+    /// Because this pallet emits events, it depends on the runtime's definition of an event.
+    type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
+    // type TokenId;
+}
+
+// impl <T: Config> Module<T> {
+// // show tokens
+// // #[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+//     fn get_tokens(user_id: T::AccountId) -> Vec<TokenId> {
+//     // OwnedTokensArray::get(&user_id)
+//         <Module<T>>::tokens_of_owner_by_index(user_id)
+//     }
+// }
+
+// The pallet's runtime storage items.
+// https://substrate.dev/docs/en/knowledgebase/runtime/storage
 decl_storage! {
-    trait Store for Module<T: Trait<I>, I: Instance = DefaultInstance> as Commodity {
-        /// The total number of this type of commodity that exists (minted - burned).
-        Total get(fn total): u128 = 0;
-        /// The total number of this type of commodity that has been burned (may overflow).
-        Burned get(fn burned): u128 = 0;
-        /// The total number of this type of commodity owned by an account.
-        TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u64 = 0;
-        /// A mapping from an account to a list of all of the commodities of this type that are owned by it.
-        CommoditiesForAccount get(fn commodities_for_account): map hasher(blake2_128_concat) T::AccountId => Vec<Commodity<T, I>>;
-        /// A mapping from a commodity ID to the account that owns it.
-        AccountForCommodity get(fn account_for_commodity): map hasher(identity) CommodityId<T> => T::AccountId;
-    }
-
-    add_extra_genesis {
-        config(balances): Vec<(T::AccountId, Vec<T::CommodityInfo>)>;
-        build(|config: &GenesisConfig<T, I>| {
-            for (who, assets) in config.balances.iter() {
-                for asset in assets {
-                    match <Module::<T, I> as UniqueAssets::<T::AccountId>>::mint(who, asset.clone()) {
-                        Ok(_) => {}
-                        Err(err) => { panic!(err) },
-                    }
-                }
-            }
-        });
-    }
+	// A unique name is used to ensure that the pallet's storage items are isolated.
+	// This name may be updated, but each pallet in the runtime must use a unique name.
+	// ---------------------------------vvvvvvvvvvvvvv
+	trait Store for Module<T: Config> as TemplateModule {
+		// Learn more about declaring storage items:
+		// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
+		Something get(fn something): Option<TokenId>;
+		TokensForAccount get(fn tokens_of_owner_by_index): double_map hasher(opaque_blake2_256) T::AccountId, hasher(opaque_blake2_256) TokenId => Option<Token>;
+        AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) TokenId => T::AccountId;
+        TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u32;
+        AllTokensInAccount get(fn all_tokens_in_account): map hasher(opaque_blake2_256) TokenId => Vec<Token>;
+        NftMasters get(fn nft_masters) config(): Vec<T::AccountId>;
+	}
 }
 
+// Pallets use events to inform users when important changes are made.
+// https://substrate.dev/docs/en/knowledgebase/runtime/events
 decl_event!(
-    pub enum Event<T, I = DefaultInstance>
-    where
-        CommodityId = <T as frame_system::Config>::Hash,
-        AccountId = <T as frame_system::Config>::AccountId,
-    {
-        /// The commodity has been burned.
-        Burned(CommodityId),
-        /// The commodity has been minted and distributed to the account.
-        Minted(CommodityId, AccountId),
-        /// Ownership of the commodity has been transferred to the account.
-        Transferred(CommodityId, AccountId),
-    }
+	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId {
+		/// Event documentation should end with an array that provides descriptive names for event
+		/// parameters. [something, who]
+		SomethingStored(TokenId, AccountId),
+		TokenMinted(AccountId, TokenId),
+		TokenBurned(Token),
+		TokenTransferred(TokenId, AccountId),
+        TokenBreeded(TokenId),
+        // TokensTransferred(TokenId, AccountId, TokenId, AccountId),
+	}
 );
 
+// Errors inform users that something went wrong.
 decl_error! {
-    pub enum Error for Module<T: Trait<I>, I: Instance> {
-        // Thrown when there is an attempt to mint a duplicate commodity.
-        CommodityExists,
-        // Thrown when there is an attempt to burn or transfer a nonexistent commodity.
-        NonexistentCommodity,
-        // Thrown when someone who is not the owner of a commodity attempts to transfer or burn it.
-        NotCommodityOwner,
-        // Thrown when the commodity admin attempts to mint a commodity and the maximum number of this
-        // type of commodity already exists.
-        TooManyCommodities,
-        // Thrown when an attempt is made to mint or transfer a commodity to an account that already
-        // owns the maximum number of this type of commodity.
-        TooManyCommoditiesForAccount,
-    }
+	pub enum Error for Module<T: Config> {
+		/// Error names should be descriptive.
+		NoneValue,
+		/// Errors should have helpful documentation associated with them.
+		StorageOverflow,
+		///
+		TokenExist,
+		///
+		NotTokenOwner,
+		///
+		NonExistentToken,
+		///
+		NotNftMaster
+	}
 }
 
+// Dispatchable functions allows users to interact with the pallet and invoke state changes.
+// These functions materialize as "extrinsics", which are often compared to transactions.
+// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 decl_module! {
-    pub struct Module<T: Trait<I>, I: Instance = DefaultInstance> for enum Call where origin: T::Origin {
-        type Error = Error<T, I>;
-        fn deposit_event() = default;
+	pub struct Module<T: Config> for enum Call where origin: T::Origin {
+		// Errors must be initialized if they are used by the pallet.
+		type Error = Error<T>;
 
-        /// Create a new commodity from the provided commodity info and identify the specified
-        /// account as its owner. The ID of the new commodity will be equal to the hash of the info
-        /// that defines it, as calculated by the runtime system's hashing algorithm.
-        ///
-        /// The dispatch origin for this call must be the commodity admin.
-        ///
-        /// This function will throw an error if it is called with commodity info that describes
-        /// an existing (duplicate) commodity, if the maximum number of this type of commodity already
-        /// exists or if the specified owner already owns the maximum number of this type of
-        /// commodity.
-        ///
-        /// - `owner_account`: Receiver of the commodity.
-        /// - `commodity_info`: The information that defines the commodity.
-        #[weight = 10_000]
-        pub fn mint(origin, owner_account: T::AccountId, commodity_info: T::CommodityInfo) -> dispatch::DispatchResult {
-            T::CommodityAdmin::ensure_origin(origin)?;
+		// Events must be initialized if they are used by the pallet.
+		fn deposit_event() = default;
 
-            let commodity_id = <Self as UniqueAssets<_>>::mint(&owner_account, commodity_info)?;
-            Self::deposit_event(RawEvent::Minted(commodity_id, owner_account.clone()));
-            Ok(())
-        }
-
-        /// Destroy the specified commodity.
-        ///
-        /// The dispatch origin for this call must be the commodity owner.
-        ///
-        /// - `commodity_id`: The hash (calculated by the runtime system's hashing algorithm)
-        ///   of the info that defines the commodity to destroy.
-        #[weight = 10_000]
-        pub fn burn(origin, commodity_id: CommodityId<T>) -> dispatch::DispatchResult {
+		/// Mint token
+		#[weight = 10_000]
+		pub fn mint(origin, target_account: T::AccountId,
+		token_id: TokenId,
+        rarity: Rarity,
+        socket: Socket,
+        params: Params,
+        ) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
-            ensure!(who == Self::account_for_commodity(&commodity_id), Error::<T, I>::NotCommodityOwner);
+		    ensure!(
+                Self::nft_masters().contains(&who),
+                Error::<T>::NotNftMaster
+            );
 
-            <Self as UniqueAssets<_>>::burn(&commodity_id)?;
-            Self::deposit_event(RawEvent::Burned(commodity_id.clone()));
+		    let token_info = Token {
+		        rarity,
+		        socket,
+		        params
+		    };
+
+            <Self as Nft<_>>::mint(&target_account, token_info, token_id)?;
+		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
             Ok(())
-        }
 
-        /// Transfer a commodity to a new owner.
-        ///
-        /// The dispatch origin for this call must be the commodity owner.
-        ///
-        /// This function will throw an error if the new owner already owns the maximum
-        /// number of this type of commodity.
-        ///
-        /// - `dest_account`: Receiver of the commodity.
-        /// - `commodity_id`: The hash (calculated by the runtime system's hashing algorithm)
-        ///   of the info that defines the commodity to destroy.
-        #[weight = 10_000]
-        pub fn transfer(origin, dest_account: T::AccountId, commodity_id: CommodityId<T>) -> dispatch::DispatchResult {
+		}
+
+        // #[weight = 0]
+		// pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId, token_info: InfoToken) -> dispatch::DispatchResult {
+        //     let who = ensure_signed(origin)?;
+		//     ensure!(
+        //         Self::nft_masters().contains(&who),
+        //         Error::<T>::NotNftMaster
+        //     );
+
+        //     let token_info = 0;
+        //     <Self as Nft<_>>::mint_basic(&target_account, token_id, token_info)?;
+		//     Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
+        //     Ok(())
+
+		// }
+        
+		///Burn token(only owner)
+		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+		pub fn burn(origin, token_id: TokenId) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
-            ensure!(who == Self::account_for_commodity(&commodity_id), Error::<T, I>::NotCommodityOwner);
 
-            <Self as UniqueAssets<_>>::transfer(&dest_account, &commodity_id)?;
-            Self::deposit_event(RawEvent::Transferred(commodity_id.clone(), dest_account.clone()));
+            // ensure!(
+            //     who != T::AccountId::default(),
+            //     Error::<T>::NonExistentToken
+            // );
+
+            ensure!(
+                who == Self::account_for_token(&token_id),
+                Error::<T>::NotTokenOwner
+            );
+
+			let id_of_token = <Self as Nft<_>>::burn(token_id)?;
+		    Self::deposit_event(RawEvent::TokenBurned(id_of_token.clone()));
             Ok(())
         }
-    }
+
+        ///Transfer token(only owner)
+        #[weight = 10_000]
+        pub fn transfer(origin, dest_account: T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
+
+            <Self as Nft<_>>::transfer(&dest_account, token_id)?;
+            Self::deposit_event(RawEvent::TokenTransferred(token_id.clone(), dest_account.clone()));
+            Ok(())
+        }
+
+        // #[weight = 10_000]
+        // pub fn transfer_two_nft(origin, dest_account: T::AccountId token_id: TokenId, dest_account_2: T::AccountId, token_id_2: TokenId) -> dispatch::DispatchResult {
+        //     let who = ensure_signed(origin)?;
+        //     ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
+        //     ensure!(who == Self::account_for_token(&token_id_2), Error::<T>::NotTokenOwner);
+
+        //     <Self as Nft<_>>::transfer_two_nft(&dest_account, &dest_account_2, token_id, token_id_2)?;
+        //     Self::deposit_event(RawEvent::TokensTransferred(token_id.clone(), dest_account.clone(), token_id_2.clone(), dest_account_2.clone()));
+        //     Ok(())
+        // }
+
+        // ///Breed tokens(only owner)
+        // #[weight = 10_000]
+        // pub fn breed_token(origin, token_id: TokenId, token_id2: TokenId) -> dispatch::DispatchResult {
+        //     let who = ensure_signed(origin)?;
+        //     ensure!(who == Self::account_for_token(&token_id), Error::NotTokenOwner);
+        //     ensure!(who == Self::account_for_token(&token_id2), Error::NotTokenOwner);
+
+        //     let another_token = <Self as Nft<_>>::breed_token(token_id, token_id2)?;
+        //     Self::deposit_event(RawEvent::TokenBreeded(another_token.clone()));
+        // }
+
+		// show tokens
+		// #[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+		// pub fn get_tokens(origin, user_id: token_id) -> Vec<token_id> {
+		//     // OwnedTokensArray::get(&user_id)
+		//     Self::tokens_of_owner_by_index(user_id)
+		// }
+
+	}
 }
 
-impl<T: Trait<I>, I: Instance> UniqueAssets<T::AccountId> for Module<T, I> {
-    type AssetId = CommodityId<T>;
-    type AssetInfo = T::CommodityInfo;
-    type AssetLimit = T::CommodityLimit;
-    type UserAssetLimit = T::UserCommodityLimit;
+impl<T: Config> Nft<T::AccountId> for Module<T> {
+    type Token = Token;
 
-    fn total() -> u128 {
-        Self::total()
+    type TokenId = TokenId;
+
+    fn mint(target_account: &T::AccountId, token_info: Self::Token, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, dispatch::DispatchError> {
+        // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
+            ensure!(
+                !AccountForToken::<T>::contains_key(token_id),
+                 Error::<T>::TokenExist
+                 );
+
+            TokensForAccount::<T>::insert(target_account, token_id, token_info);
+            // hash_set_of_tokens.insert(token_id);
+            TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+            AccountForToken::<T>::insert(token_id, &target_account);
+            // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
+            Ok(token_id)
     }
 
-    fn burned() -> u128 {
-        Self::burned()
+
+    // fn mint_basic(target_account: &T::AccountId, token_id: Self::TokenId, token_info: InfoToken) -> dispatch::result::Result<Self::TokenId, dispatch::DispatchError> {
+    //     // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
+    //         ensure!(
+    //             !AccountForToken::<T>::contains_key(token_id),
+    //              Error::<T>::TokenExist
+    //              );
+    //              let token_info:u32 = 0;
+    //         TokensForAccount::<T>::insert(target_account, token_id, token_info);
+    //         // hash_set_of_tokens.insert(token_id);
+    //         TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+    //         AccountForToken::<T>::insert(token_id, &target_account);
+    //         // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
+    //         Ok(token_id)
+    // }
+    
+    fn burn(token_id: Self::TokenId) -> dispatch::result::Result<Token, dispatch::DispatchError> {
+        let owner = Self::owner_of(token_id);
+
+
+        TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+
+        let deleted_token = TokensForAccount::<T>::take(&owner, token_id);
+        // TokensForAccount::<T>::mutate(&owner, &token_id, |tokens| {
+        //     let pos = tokens
+        //         .binary_search(&token_id)
+        //         .expect("We already checked that we have the correct owner; qed");
+        //     tokens.remove(pos);
+        // });
+        AccountForToken::<T>::remove(&token_id);
+
+        Ok(deleted_token.unwrap())
     }
 
-    fn total_for_account(account: &T::AccountId) -> u64 {
-        Self::total_for_account(account)
-    }
-
-    fn assets_for_account(account: &T::AccountId) -> Vec<Commodity<T, I>> {
-        Self::commodities_for_account(account)
-    }
-
-    fn owner_of(commodity_id: &CommodityId<T>) -> T::AccountId {
-        Self::account_for_commodity(commodity_id)
-    }
-
-    fn mint(
-        owner_account: &T::AccountId,
-        commodity_info: <T as Trait<I>>::CommodityInfo,
-    ) -> dispatch::result::Result<CommodityId<T>, dispatch::DispatchError> {
-        let commodity_id = T::Hashing::hash_of(&commodity_info);
-
+    fn transfer(dest_account: &T::AccountId, token_id: TokenId) -> dispatch::DispatchResult
+    {
+        let owner = Self::owner_of(token_id);
         ensure!(
-            !AccountForCommodity::<T, I>::contains_key(&commodity_id),
-            Error::<T, I>::CommodityExists
-        );
+                owner != T::AccountId::default(),
+                Error::<T>::NonExistentToken
+            );
 
-        ensure!(
-            Self::total_for_account(owner_account) < T::UserCommodityLimit::get(),
-            Error::<T, I>::TooManyCommoditiesForAccount
-        );
+        TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+        TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
+        AccountForToken::<T>::remove(token_id);
 
-        ensure!(
-            Self::total() < T::CommodityLimit::get(),
-            Error::<T, I>::TooManyCommodities
-        );
+        let transferred_token = TokensForAccount::<T>::take(owner, token_id).unwrap();
 
-        let new_commodity = (commodity_id, commodity_info);
-
-        Total::<I>::mutate(|total| *total += 1);
-        TotalForAccount::<T, I>::mutate(owner_account, |total| *total += 1);
-        CommoditiesForAccount::<T, I>::mutate(owner_account, |commodities| {
-            match commodities.binary_search(&new_commodity) {
-                Ok(_pos) => {} // should never happen
-                Err(pos) => commodities.insert(pos, new_commodity),
-            }
-        });
-        AccountForCommodity::<T, I>::insert(commodity_id, &owner_account);
-
-        Ok(commodity_id)
-    }
-
-    fn burn(commodity_id: &CommodityId<T>) -> dispatch::DispatchResult {
-        let owner = Self::owner_of(commodity_id);
-        ensure!(
-            owner != T::AccountId::default(),
-            Error::<T, I>::NonexistentCommodity
-        );
-
-        let burn_commodity = (*commodity_id, <T as Trait<I>>::CommodityInfo::default());
-
-        Total::<I>::mutate(|total| *total -= 1);
-        Burned::<I>::mutate(|total| *total += 1);
-        TotalForAccount::<T, I>::mutate(&owner, |total| *total -= 1);
-        CommoditiesForAccount::<T, I>::mutate(owner, |commodities| {
-            let pos = commodities
-                .binary_search(&burn_commodity)
-                .expect("We already checked that we have the correct owner; qed");
-            commodities.remove(pos);
-        });
-        AccountForCommodity::<T, I>::remove(&commodity_id);
+        TokensForAccount::<T>::insert(dest_account, token_id, transferred_token);
+        AccountForToken::<T>::insert(token_id, &dest_account);
 
         Ok(())
     }
 
-    fn transfer(
-        dest_account: &T::AccountId,
-        commodity_id: &CommodityId<T>,
-    ) -> dispatch::DispatchResult {
-        let owner = Self::owner_of(&commodity_id);
-        ensure!(
-            owner != T::AccountId::default(),
-            Error::<T, I>::NonexistentCommodity
-        );
 
-        ensure!(
-            Self::total_for_account(dest_account) < T::UserCommodityLimit::get(),
-            Error::<T, I>::TooManyCommoditiesForAccount
-        );
+    // fn transfer_two_nft(dest_account: &T::AccountId, token_id: TokenId, dest_account_2: &T::AccountId, token_id_2: TokenId) -> dispatch::DispatchResult
+    // {
+    //     let owner = Self::owner_of(token_id);
+    //     ensure!(
+    //             owner != T::AccountId::default(),
+    //             Error::<T>::NonExistentToken
+    //         );
+    //         let owner = Self::owner_of(token_id_2);
+    //     ensure!(
+    //             owner != T::AccountId::default(),
+    //             Error::<T>::NonExistentToken
+    //         );
 
-        let xfer_commodity = (*commodity_id, <T as Trait<I>>::CommodityInfo::default());
+    //     TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+    //     TotalForAccount::<T>::mutate(dest_account, dest_account_2, |total| *total += 1);
+    //     AccountForToken::<T>::remove(token_id, token_id_2);
 
-        TotalForAccount::<T, I>::mutate(&owner, |total| *total -= 1);
-        TotalForAccount::<T, I>::mutate(dest_account, |total| *total += 1);
-        let commodity = CommoditiesForAccount::<T, I>::mutate(owner, |commodities| {
-            let pos = commodities
-                .binary_search(&xfer_commodity)
-                .expect("We already checked that we have the correct owner; qed");
-            commodities.remove(pos)
-        });
-        CommoditiesForAccount::<T, I>::mutate(dest_account, |commodities| {
-            match commodities.binary_search(&commodity) {
-                Ok(_pos) => {} // should never happen
-                Err(pos) => commodities.insert(pos, commodity),
-            }
-        });
-        AccountForCommodity::<T, I>::insert(&commodity_id, &dest_account);
+    //     let transferred_tokens = TokensForAccount::<T>::take(owner, token_id< token_id_2).unwrap();
 
-        Ok(())
+    //     TokensForAccount::<T>::insert(dest_account, dest_account_2, token_id, token_id_2, transferred_tokens);
+    //     AccountForToken::<T>::insert(token_id, token_id_2, &dest_account, &dest_account_2);
+
+    //     Ok(())
+    // }
+
+    // fn breed_token(token_id: TokenId, token_id2: TokenId) -> dispatch::result::Result<another_token, dispatch::DispatchError> {
+    //     let owner = Self::owner_of(token_id);
+    //     ensure!(
+    //             owner != T::AccountId::default(),
+    //             Error::<T>::NonExistentToken
+    //         );
+    //     let another_token = token_id;
+    //     burn(token_id);
+    //     burn(token_id2);
+    //     mint(owner, another_token);
+    //     Ok(another_token);
+    // }
+
+    fn owner_of(token_id: TokenId) -> T::AccountId {
+        Self::account_for_token(token_id)
     }
 }
