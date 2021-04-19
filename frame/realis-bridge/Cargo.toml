@@ -1,0 +1,41 @@
+[package]
+name = 'pallet-realis-bridge'
+version = '0.1.0'
+authors = ['exlead@gmail.com']
+edition = '2018'
+
+[dependencies]
+# third-party dependencies
+codec = { package = 'parity-scale-codec', version = '2.0.0', default-features = false, features = ['derive'] }
+serde = { version = '1.0.114', optional = true }
+
+chainbridge = { version = '0.0.1', default-features = false, path = '../chainbridge' }
+frame-support = { version = '3.0.0', default-features = false, path = '../support' }
+frame-system = { version = '3.0.0', default-features = false, path = '../system' }
+pallet-nft = { version = '0.0.1', default-features = false, path = '../nft' }
+sp-std = { version = '3.0.0', default-features = false, path = '../../primitives/std' }
+sp-runtime = { version = '3.0.0', default-features = false, path = '../../primitives/runtime' }
+sp-io = { version = '3.0.0', default-features = false, path = '../../primitives/io' }
+sp-core = { version = '3.0.0', default-features = false, path = '../../primitives/core' }
+sp-arithmetic = { version = '3.0.0', default-features = false, path = '../../primitives/arithmetic' }
+
+[dev-dependencies]
+pallet-balances = { version = '3.0.0', default-features = false, path = '../balances' }
+
+[build-dependencies]
+wasm-builder-runner = { version = '3.0.0', package = 'substrate-wasm-builder-runner' }
+[features]
+default = ['std']
+std = [
+	'codec/std',
+	'serde',
+	'sp-std/std',
+	'sp-runtime/std',
+	'sp-io/std',
+	'sp-core/std',
+	'sp-arithmetic/std',
+	'frame-support/std',
+	'frame-system/std',
+	'chainbridge/std',
+	'pallet-nft/std',
+]

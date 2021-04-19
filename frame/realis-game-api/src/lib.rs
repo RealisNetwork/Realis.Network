@@ -79,7 +79,7 @@ decl_module! {
         }
 
         #[weight = 10_000]
-        fn breed_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
+        pub fn breed_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
             let token_id = 3;
             let rarity = NFT::Rarity::Legendary;
             let socket = NFT::Socket::Head;
@@ -92,14 +92,14 @@ decl_module! {
         }
 
         #[weight = 10_000]
-        fn transfer_nft(origin, dest_account: T::AccountId) {
+        pub fn transfer_nft(origin, dest_account: T::AccountId) {
             let json_nft = 123;
             return NFT::Module::<T>::transfer(origin, dest_account, json_nft);
         }
 
 
         #[weight = 10_000]
-        fn transfer(origin, dest: <T::Lookup as StaticLookup>::Source, value: T::Balance) -> dispatch::DispatchResultWithPostInfo {
+        pub fn transfer(origin, dest: <T::Lookup as StaticLookup>::Source, value: T::Balance) -> dispatch::DispatchResultWithPostInfo {
             return pallet_balances::Pallet::<T>::transfer(origin, dest, value);
 		}
     }

@@ -1061,12 +1061,44 @@ impl pallet_gilt::Config for Runtime {
 	type WeightInfo = pallet_gilt::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_nft::Config for Runtime {
-	type Event = Event;
+parameter_types! {
+	pub const ExistentialDepositOfRealisTokens: u128 = 1;
 }
 
-impl pallet_api::Config for Runtime {
+impl pallet_nft::Config for Runtime {
 	type Event = Event;
+	type Balance = u128;
+	type ExistentialDeposit = ExistentialDepositOfRealisTokens;
+	type OnNewAccount = ();
+	type RealisTokenId = u32;
+}
+
+parameter_types! {
+    pub const ChainId: u8 = 5;
+    pub const ProposalLifetime: u32 = 50;
+}
+
+impl chainbridge::Config for Runtime {
+	type Event = Event;
+    type AdminOrigin = EnsureRoot<Self::AccountId>;
+    type Proposal = Call;
+    type ChainId = ChainId;
+    type ProposalLifetime = ProposalLifetime;
+}
+
+parameter_types! {
+	pub HashId: chainbridge::ResourceId = chainbridge::derive_resource_id(ChainId::get(), b"NET_HASH");
+	pub NativeTokenId: chainbridge::ResourceId = chainbridge::derive_resource_id(ChainId::get(), b"NET");
+	pub Erc721Id: chainbridge::ResourceId = chainbridge::derive_resource_id(ChainId::get(), b"NET_NFT");
+}
+
+impl pallet_realis_bridge::Config for Runtime {
+	type Event = Event;
+	type BridgeOrigin = chainbridge::EnsureBridge<Self>;
+	type Currency = Balances;
+	type HashId = HashId;
+	type NativeTokenId = NativeTokenId;
+	type Erc721Id = Erc721Id;
 }
 
 construct_runtime!(
@@ -1114,7 +1146,8 @@ construct_runtime!(
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
-		Api: pallet_api::{Pallet, Call, Event<T>, Config<T>},
+		ChainBridge: chainbridge::{Pallet, Call, Storage, Event<T>},
+		RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
 	}
 );
 
