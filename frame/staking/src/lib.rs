@@ -354,7 +354,7 @@ static_assertions::const_assert!(size_of::<NominatorIndex>() <= size_of::<u32>()
 pub const MAX_NOMINATIONS: usize =
 	<CompactAssignments as sp_npos_elections::CompactSolution>::LIMIT;
 
-pub const MAX_UNLOCKING_CHUNKS: usize = 32;
+pub const MAX_UNLOCKING_CHUNKS: usize = 16;
 
 /// Counter for the number of eras that have passed.
 pub type EraIndex = u32;
