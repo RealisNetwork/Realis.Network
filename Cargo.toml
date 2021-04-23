@@ -14,5 +14,5 @@ members = [
     "bin/node/testing",
     "bin/utils/chain-spec-builder",
     "bin/utils/subkey",
-    "frame/realis-game-api",
+    # "frame/realis-game-api",
 ]

@@ -124,5 +124,6 @@ pub fn config_endowed(
 		pallet_vesting: Default::default(),
 		pallet_gilt: Default::default(),
 		pallet_nft: Default::default(),
+		// pallet_realis_game_api: Default::default(),
 	}
 }

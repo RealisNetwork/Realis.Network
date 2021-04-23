@@ -332,7 +332,7 @@ pub fn testnet_genesis(
 		pallet_vesting: Default::default(),
 		pallet_gilt: Default::default(),
 		pallet_nft: Default::default(),
-		pallet_api: Default::default(),
+		// pallet_realis_game_api: Default::default(),
 	}
 }
 

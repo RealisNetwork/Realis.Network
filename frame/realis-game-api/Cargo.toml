@@ -4,23 +4,23 @@ description = 'FRAME pallet template for defining custom runtime logic.'
 edition = '2018'
 homepage = 'https://substrate.dev'
 license = 'Unlicense'
-name = 'pallet-api'
+name = 'pallet-realis-game-api'
 repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
 version = '0.0.1'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
 
-[dependencies.codec]
-default-features = false
-features = ['derive']
-package = 'parity-scale-codec'
-version = '2.0.0'
+# # alias "parity-scale-code" to "codec"
+# [dependencies.codec]
+# default-features = false
+# features = ['derive']
+# package = 'parity-scale-codec'
+# version = '2.0.0'
 
 [dependencies]
 serde = { version = "1.0.102", optional = true }
-serde_derive = "1.0"
-serde_json = "1.0"
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
 frame-support = { version = "3.0.0", default-features = false, path = "../support" }
 frame-system = { version = "3.0.0", default-features = false, path = "../system" }
 pallet-balances = { version = "3.0.0", default-features = false, path = "../balances" }
@@ -31,6 +31,8 @@ pallet-nft = { version = "0.0.1", default-features = false, path="../nft" }
 [dev-dependencies]
 sp-core = { version = "3.0.0", default-features = false, path = "../../primitives/core" }
 sp-io ={ version = "3.0.0", path = "../../primitives/io" }
+#sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
+
 
 [features]
 default = ['std']
