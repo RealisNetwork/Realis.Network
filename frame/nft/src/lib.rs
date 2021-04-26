@@ -310,20 +310,19 @@ decl_module! {
 
 		}
 
-        // #[weight = 0]
-		// pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId, token_info: InfoToken) -> dispatch::DispatchResult {
-        //     let who = ensure_signed(origin)?;
-		//     ensure!(
-        //         Self::nft_masters().contains(&who),
-        //         Error::<T>::NotNftMaster
-        //     );
+        #[weight = 10_000]
+		pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
+            let who = ensure_signed(origin)?;
+		    ensure!(
+                Self::nft_masters().contains(&who),
+                Error::<T>::NotNftMaster
+            );
 
-        //     let token_info = 0;
-        //     <Self as Nft<_>>::mint_basic(&target_account, token_id, token_info)?;
-		//     Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
-        //     Ok(())
+            <Self as Nft<_>>::mint_basic(&target_account, token_id)?;
+		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
+            Ok(())
 
-		// }
+		}
         
 		///Burn token(only owner)
 		#[weight = 10_000]
@@ -375,21 +374,21 @@ impl<T: Config> Module<T> {
             Ok(token_id)
     }
 
-
-    // fn mint_basic(target_account: &T::AccountId, token_id: Self::TokenId, token_info: InfoToken) -> dispatch::result::Result<Self::TokenId, dispatch::DispatchError> {
-    //     // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
-    //         ensure!(
-    //             !AccountForToken::<T>::contains_key(token_id),
-    //              Error::<T>::TokenExist
-    //              );
-    //              let token_info:u32 = 0;
-    //         TokensForAccount::<T>::insert(target_account, token_id, token_info);
-    //         // hash_set_of_tokens.insert(token_id);
-    //         TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
-    //         AccountForToken::<T>::insert(token_id, &target_account);
-    //         // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
-    //         Ok(token_id)
-    // }
+    fn mint_basic(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, dispatch::DispatchError> {
+        // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
+            ensure!(
+                !AccountForToken::<T>::contains_key(token_id),
+                 Error::<T>::TokenExist
+                 );
+                 
+                 let token_info:u32 = 0;
+                 
+            // hash_set_of_tokens.insert(token_id);
+            TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+            AccountForToken::<T>::insert(token_id, &target_account);
+            // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
+            Ok(token_id)
+    }
     
     pub fn burn_nft(token_id: TokenId) -> dispatch::result::Result<Token, dispatch::DispatchError> {
         let owner = Self::owner_of(token_id);
