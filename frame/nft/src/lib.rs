@@ -202,6 +202,7 @@ decl_event!(
 		SomethingStored(TokenId, AccountId),
 		TokenMinted(AccountId, TokenId),
 		TokenBurned(Token),
+        BasicTokenBurned(TokenId),
 		TokenTransferred(TokenId, AccountId),
         TokenBreeded(TokenId),
                 /// An account was created with some free balance. \[account, free_balance\]
@@ -318,7 +319,7 @@ decl_module! {
                 Error::<T>::NotNftMaster
             );
 
-            <Self as Nft<_>>::mint_basic(&target_account, token_id)?;
+            Self::mint_basic_nft(&target_account, token_id)?;
 		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
             Ok(())
 
@@ -355,6 +356,16 @@ decl_module! {
             Ok(())
         }
 
+        #[weight = 10_000]
+        pub fn transfer_basic(origin, dest_account: T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
+
+            Self::transfer_basic_nft(&dest_account, token_id)?;
+            Self::deposit_event(RawEvent::TokenTransferred(token_id.clone(), dest_account.clone()));
+            Ok(())
+        }
+
     }
 }
 
@@ -367,22 +378,20 @@ impl<T: Config> Module<T> {
                  );
 
             TokensForAccount::<T>::insert(target_account, token_id, token_info);
-            // hash_set_of_tokens.insert(token_id);
+            // hash_set_of_tokens.insert(token_id)
             TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
             AccountForToken::<T>::insert(token_id, &target_account);
             // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
             Ok(token_id)
     }
 
-    fn mint_basic(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, dispatch::DispatchError> {
+     pub fn mint_basic_nft(target_account: &T::AccountId, token_id: TokenId) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
         // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
             ensure!(
                 !AccountForToken::<T>::contains_key(token_id),
                  Error::<T>::TokenExist
                  );
-                 
-                 let token_info:u32 = 0;
-                 
+            
             // hash_set_of_tokens.insert(token_id);
             TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
             AccountForToken::<T>::insert(token_id, &target_account);
@@ -408,6 +417,7 @@ impl<T: Config> Module<T> {
         Ok(deleted_token.unwrap())
     }
 
+
     fn transfer_nft(dest_account: &T::AccountId, token_id: TokenId) -> dispatch::DispatchResult
     {
         let owner = Self::owner_of(token_id);
@@ -423,6 +433,25 @@ impl<T: Config> Module<T> {
         let transferred_token = TokensForAccount::<T>::take(owner, token_id).unwrap();
 
         TokensForAccount::<T>::insert(dest_account, token_id, transferred_token);
+        AccountForToken::<T>::insert(token_id, &dest_account);
+
+        Ok(())
+    }
+
+    pub fn transfer_basic_nft(dest_account: &T::AccountId, token_id: TokenId) -> dispatch::DispatchResult
+    {
+        let owner = Self::owner_of(token_id);
+        ensure!(
+                owner != T::AccountId::default(),
+                Error::<T>::NonExistentToken
+            );
+
+        TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+        TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
+        AccountForToken::<T>::remove(token_id);
+
+        let transferred_token = AccountForToken::<T>::take(token_id);
+
         AccountForToken::<T>::insert(token_id, &dest_account);
 
         Ok(())

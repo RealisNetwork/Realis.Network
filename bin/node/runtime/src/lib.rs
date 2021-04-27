@@ -1101,6 +1101,10 @@ impl pallet_realis_bridge::Config for Runtime {
 	type Erc721Id = Erc721Id;
 }
 
+impl pallet_api::Config for Runtime {
+	type Event = Event;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1148,6 +1152,7 @@ construct_runtime!(
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		ChainBridge: chainbridge::{Pallet, Call, Storage, Event<T>},
 		RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
+		Api: pallet_api::{Pallet, Call, Event<T>, Config<T>},
 	}
 );
 

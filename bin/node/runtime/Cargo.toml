@@ -89,6 +89,7 @@ pallet-vesting = { version = "3.0.0", default-features = false, path = "../../..
 pallet-nft = {version = "0.0.1", default-features = false, path = "../../../frame/nft"}
 pallet-realis-bridge = { version = "0.1.0", default-features = false, path = "../../../frame/realis-bridge" }
 chainbridge = { version = "0.0.1", default-features = false, path = "../../../frame/chainbridge"}
+pallet-api = {version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api"}
 
 [build-dependencies]
 substrate-wasm-builder = { version = "4.0.0", path = "../../../utils/wasm-builder" }
@@ -165,6 +166,7 @@ std = [
 	"pallet-nft/std",
 	"chainbridge/std",
     "pallet-realis-bridge/std",
+	"pallet-api/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",
