@@ -1063,6 +1063,10 @@ impl pallet_gilt::Config for Runtime {
 
 impl pallet_nft::Config for Runtime {
 	type Event = Event;
+	type Balance = u128;
+	type ExistentialDeposit = ExistentialDepositOfRealisTokens;
+	type OnNewAccount = ();
+	type RealisTokenId = u32;
 }
 
 // impl pallet_api::Config for Runtime {
