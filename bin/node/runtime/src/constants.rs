@@ -59,7 +59,7 @@ pub mod time {
 	// 1 in 4 blocks (on average, not counting collisions) will be primary BABE blocks.
 	pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
 
-	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 10 * MINUTES;
+	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 1 * HOURS;
 	pub const EPOCH_DURATION_IN_SLOTS: BlockNumber = 1 * HOURS;
 
 	// These time units are defined in number of blocks.

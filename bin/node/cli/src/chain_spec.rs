@@ -24,7 +24,7 @@ use serde::{Serialize, Deserialize};
 use node_runtime::{
 	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig, /*CouncilConfig*/
 	/*DemocracyConfig*/GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
-	StakingConfig, /*ElectionsConfig*/ IndicesConfig, /*SocietyConfig*/ SudoConfig, SystemConfig, NftConfig,
+	StakingConfig, /*ElectionsConfig*/ IndicesConfig, /*SocietyConfig*/ SudoConfig, SystemConfig,
 	/*TechnicalCommitteeConfig*/ wasm_binary_unwrap,
 };
 use node_runtime::Block;
@@ -331,9 +331,7 @@ pub fn testnet_genesis(
 		// },
 		pallet_vesting: Default::default(),
 		pallet_gilt: Default::default(),
-		pallet_nft: NftConfig {
-			nft_masters: endowed_accounts,
-		},
+		pallet_nft: Default::default(),
 		// pallet_api: Default::default(),
 	}
 }
