@@ -87,8 +87,6 @@ pallet-transaction-payment = { version = "3.0.0", default-features = false, path
 pallet-transaction-payment-rpc-runtime-api = { version = "3.0.0", default-features = false, path = "../../../frame/transaction-payment/rpc/runtime-api/" }
 pallet-vesting = { version = "3.0.0", default-features = false, path = "../../../frame/vesting" }
 pallet-nft = {version = "0.0.1", default-features = false, path = "../../../frame/nft"}
-pallet-realis-bridge = { version = "0.1.0", default-features = false, path = "../../../frame/realis-bridge" }
-chainbridge = { version = "0.0.1", default-features = false, path = "../../../frame/chainbridge"}
 pallet-api = {version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api"}
 
 [build-dependencies]
@@ -164,8 +162,6 @@ std = [
 	"log/std",
 	"frame-try-runtime/std",
 	"pallet-nft/std",
-	"chainbridge/std",
-    "pallet-realis-bridge/std",
 	"pallet-api/std"
 ]
 runtime-benchmarks = [

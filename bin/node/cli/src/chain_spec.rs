@@ -334,7 +334,7 @@ pub fn testnet_genesis(
 		pallet_nft: NftConfig {
 			nft_masters: endowed_accounts,
 		},
-		pallet_api: Default::default(),
+		// pallet_api: Default::default(),
 	}
 }
 

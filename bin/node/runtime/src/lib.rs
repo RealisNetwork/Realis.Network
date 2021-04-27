@@ -325,7 +325,7 @@ impl pallet_scheduler::Config for Runtime {
 }
 
 parameter_types! {
-	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS;
+	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS as u64;
 	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK;
 	pub const ReportLongevity: u64 =
 		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
@@ -1073,37 +1073,9 @@ impl pallet_nft::Config for Runtime {
 	type RealisTokenId = u32;
 }
 
-parameter_types! {
-    pub const ChainId: u8 = 5;
-    pub const ProposalLifetime: u32 = 50;
-}
-
-impl chainbridge::Config for Runtime {
-	type Event = Event;
-    type AdminOrigin = EnsureRoot<Self::AccountId>;
-    type Proposal = Call;
-    type ChainId = ChainId;
-    type ProposalLifetime = ProposalLifetime;
-}
-
-parameter_types! {
-	pub HashId: chainbridge::ResourceId = chainbridge::derive_resource_id(ChainId::get(), b"NET_HASH");
-	pub NativeTokenId: chainbridge::ResourceId = chainbridge::derive_resource_id(ChainId::get(), b"NET");
-	pub Erc721Id: chainbridge::ResourceId = chainbridge::derive_resource_id(ChainId::get(), b"NET_NFT");
-}
-
-impl pallet_realis_bridge::Config for Runtime {
-	type Event = Event;
-	type BridgeOrigin = chainbridge::EnsureBridge<Self>;
-	type Currency = Balances;
-	type HashId = HashId;
-	type NativeTokenId = NativeTokenId;
-	type Erc721Id = Erc721Id;
-}
-
-impl pallet_api::Config for Runtime {
-	type Event = Event;
-}
+// impl pallet_api::Config for Runtime {
+// 	type Event = Event;
+// }
 
 construct_runtime!(
 	pub enum Runtime where
@@ -1150,9 +1122,7 @@ construct_runtime!(
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
-		ChainBridge: chainbridge::{Pallet, Call, Storage, Event<T>},
-		RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
-		Api: pallet_api::{Pallet, Call, Event<T>, Config<T>},
+		// Api: pallet_api::{Pallet, Call, Event<T>, Config<T>},
 	}
 );
 
