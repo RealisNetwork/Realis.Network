@@ -10,7 +10,6 @@ use frame_support::traits::Vec;
 use pallet_balances;
 use pallet_nft::{Token, Params, Socket, Rarity, TokenId};
 use pallet_nft as NFT;
-use pallet_nft::Nft;
 use sp_runtime::traits::StaticLookup;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
@@ -68,40 +67,35 @@ decl_module! {
 		fn deposit_event() = default;
 
         #[weight = 10_000]
-        pub fn mint_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
-            let token_id = 3;
-            let rarity = NFT::Rarity::Legendary;
-            let socket = NFT::Socket::Head;
-            let params = NFT::Params{strength: 2,
-                agility: 2,
-                intelligence: 9 };
-           return NFT::Module::<T>::mint(origin, target_account, token_id, rarity, socket, params);
+        pub fn mint_nft(origin, target_account: <T as frame_system::Config>::AccountId, token_id: pallet_nft::TokenId) -> dispatch::DispatchResult {
+           let minted_token = pallet_nft::Module::<T>::mint_basic_nft(&target_account, token_id);
+           Ok(())
         }
 
-        #[weight = 10_000]
-        fn breed_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
-            let token_id = 3;
-            let rarity = NFT::Rarity::Legendary;
-            let socket = NFT::Socket::Head;
-            let params = NFT::Params{strength: 2,
-                agility: 2,
-                intelligence: 9 };
-            NFT::Module::<T>::burn(origin.clone(), 1);
-            NFT::Module::<T>::burn(origin.clone(), 2);
-            return NFT::Module::<T>::mint(origin, target_account, token_id, rarity, socket, params);
-        }
+        // #[weight = 10_000]
+        // pub fn breed_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
+        //     let token_id = 3;
+        //     let rarity = NFT::Rarity::Legendary;
+        //     let socket = NFT::Socket::Head;
+        //     let params = NFT::Params{strength: 2,
+        //         agility: 2,
+        //         intelligence: 9 };
+        //     NFT::Module::<T>::burn(origin.clone(), 1);
+        //     NFT::Module::<T>::burn(origin.clone(), 2);
+        //     return NFT::Module::<T>::mint(origin, target_account, token_id, rarity, socket, params);
+        // }
 
         #[weight = 10_000]
-        fn transfer_nft(origin, dest_account: T::AccountId) {
+        pub fn transfer_nft(origin, dest_account: T::AccountId, token_id: pallet_nft::TokenId) {
             let json_nft = 123;
-            return NFT::Module::<T>::transfer(origin, dest_account, json_nft);
+            return NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
         }
 
 
-        #[weight = 10_000]
-        fn transfer(origin, dest: <T::Lookup as StaticLookup>::Source, value: T::Balance) -> dispatch::DispatchResultWithPostInfo {
-            return pallet_balances::Pallet::<T>::transfer(origin, dest, value);
-		}
+        // #[weight = 10_000]
+        // pub fn transfer(origin, dest: <T::Lookup as StaticLookup>::Source, value: pallet_balances::Balance) -> dispatch::DispatchResultWithPostInfo {
+        //     return pallet_balances::Pallet::<T>::transfer(origin, dest, value);
+		// }
     }
 }
 

@@ -305,7 +305,7 @@ use frame_support::{
 use pallet_session::historical;
 use sp_runtime::{
 	Percent, Perbill, PerU16, RuntimeDebug, DispatchError,
-	curve::PiecewiseLinear,
+	curve::PiecewiseLinear, ModuleId, traits::AccountIdConversion,
 	traits::{
 		Convert, Zero, StaticLookup, CheckedSub, Saturating, SaturatedConversion,
 		AtLeast32BitUnsigned,
@@ -323,7 +323,7 @@ use frame_system::{
 };
 use frame_election_provider_support::{ElectionProvider, VoteWeight, Supports, data_provider};
 pub use weights::WeightInfo;
-
+const PALLET_ID: ModuleId = ModuleId(*b"Staking!");
 const STAKING_ID: LockIdentifier = *b"staking ";
 pub(crate) const LOG_TARGET: &'static str = "runtime::staking";
 
@@ -1869,6 +1869,14 @@ decl_module! {
 				+ T::DbWeight::get().reads_writes(3, 2)
 			).into())
 		}
+
+		// pub fn account_id(origin) -> T::AccountId {
+		// 	PALLET_ID.into_account()
+		// }
+	
+		// fn pot() -> BalanceOf<T> {
+		// 	T::Currency::free_balance(&Self::account_id())
+		// }
 
 		/// Set `HistoryDepth` value. This function will delete any history information
 		/// when `HistoryDepth` is reduced.
