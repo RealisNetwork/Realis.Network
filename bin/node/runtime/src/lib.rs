@@ -1061,6 +1061,10 @@ impl pallet_gilt::Config for Runtime {
 	type WeightInfo = pallet_gilt::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_types! {
+	pub const ExistentialDepositOfRealisTokens: u128 = 1;
+}
+
 impl pallet_nft::Config for Runtime {
 	type Event = Event;
 	type Balance = u128;
