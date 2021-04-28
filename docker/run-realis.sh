@@ -9,7 +9,7 @@ docker run -d --name=${CONTAINER} --net=host \
  -v /blockchain_soul/soul/nikita1:/realis/chain \
 ${IMAGE} \
 /realis/realis \
---chain=realis \
+--chain=realis2 \
 --ws-port 9944 \
 --rpc-port 9933  \
 --validator  \
