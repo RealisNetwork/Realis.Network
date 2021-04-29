@@ -24,7 +24,7 @@ use serde::{Serialize, Deserialize};
 use node_runtime::{
 	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig, /*CouncilConfig*/
 	/*DemocracyConfig*/GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
-	StakingConfig, /*ElectionsConfig*/ IndicesConfig, /*SocietyConfig*/ SudoConfig, SystemConfig,
+	StakingConfig, /*ElectionsConfig*/ IndicesConfig, /*SocietyConfig*/ SudoConfig, SystemConfig, NftConfig,
 	/*TechnicalCommitteeConfig*/ wasm_binary_unwrap,
 };
 use node_runtime::Block;
@@ -41,11 +41,15 @@ use sp_runtime::{Perbill, traits::{Verify, IdentifyAccount}};
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::GenesisConfig;
 
+use serde_json::Map;
+
 type AccountPublic = <Signature as Verify>::Signer;
 
 const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
-pub type RealisChainSpec = sc_service::GenericChainSpec<node_runtime::GenesisConfig, Extensions>;
+const TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
+
+pub type RealisChainSpec = sc_service::GenericChainSpec<node_runtime::GenesisConfig>;
 
 
 /// Node `ChainSpec` extensions.
@@ -62,10 +66,8 @@ pub struct Extensions {
 }
 
 /// Specialized `ChainSpec`.
-pub type ChainSpec = sc_service::GenericChainSpec<
-	GenesisConfig,
-	Extensions,
->;
+pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
+
 /// Flaming Fir testnet generator
 pub fn flaming_fir_config() -> Result<ChainSpec, String> {
 	ChainSpec::from_json_bytes(&include_bytes!("../res/flaming-fir.json")[..])
@@ -79,6 +81,8 @@ fn session_keys(
 ) -> SessionKeys {
 	SessionKeys { grandpa, babe, im_online, authority_discovery }
 }
+
+const DEFAULT_PROTOCOL_ID: &str = "lis";
 
 fn staging_testnet_config_genesis() -> GenesisConfig {
 	// stash, controller, session-key
@@ -336,6 +340,137 @@ pub fn testnet_genesis(
 	}
 }
 
+pub fn realis_genesis(
+	initial_authorities: Vec<(
+		AccountId,
+		AccountId,
+		GrandpaId,
+		BabeId,
+		ImOnlineId,
+		AuthorityDiscoveryId,
+	)>,
+	root_key: AccountId,
+	nft_master: AccountId,
+	endowed_accounts: Option<Vec<AccountId>>,
+	enable_println: bool,
+) -> GenesisConfig {
+	let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
+		vec![
+			get_account_id_from_seed::<sr25519::Public>("Alice"),
+			get_account_id_from_seed::<sr25519::Public>("Bob"),
+			get_account_id_from_seed::<sr25519::Public>("Charlie"),
+			get_account_id_from_seed::<sr25519::Public>("Dave"),
+			get_account_id_from_seed::<sr25519::Public>("Eve"),
+			get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+			get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+			get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+			get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+			get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+			get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+			get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+		]
+	});
+	initial_authorities.iter().for_each(|x|
+		if !endowed_accounts.contains(&x.0) {
+			endowed_accounts.push(x.0.clone())
+		}
+	);
+
+	let num_endowed_accounts = endowed_accounts.len();
+
+	const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
+	const STASH: Balance = ENDOWMENT / 1000;
+
+	GenesisConfig {
+		frame_system: SystemConfig {
+			code: wasm_binary_unwrap().to_vec(),
+			changes_trie_config: Default::default(),
+		},
+		pallet_balances: BalancesConfig {
+			balances: endowed_accounts.iter().cloned()
+				.map(|x| (x, ENDOWMENT))
+				.collect()
+		},
+		pallet_indices: IndicesConfig {
+			indices: vec![],
+		},
+		pallet_session: SessionConfig {
+			keys: initial_authorities.iter().map(|x| {
+				(x.0.clone(), x.0.clone(), session_keys(
+					x.2.clone(),
+					x.3.clone(),
+					x.4.clone(),
+					x.5.clone(),
+				))
+			}).collect::<Vec<_>>(),
+		},
+		pallet_staking: StakingConfig {
+			validator_count: initial_authorities.len() as u32 * 2,
+			minimum_validator_count: initial_authorities.len() as u32,
+			stakers: initial_authorities.iter().map(|x| {
+				(x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator)
+			}).collect(),
+			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
+			slash_reward_fraction: Perbill::from_percent(10),
+			.. Default::default()
+		},
+		// pallet_democracy: DemocracyConfig::default(),
+		// pallet_elections_phragmen: ElectionsConfig {
+			// members: endowed_accounts.iter()
+						// .take((num_endowed_accounts + 1) / 2)
+						// .cloned()
+						// .map(|member| (member, STASH))
+						// .collect(),
+		// },
+		// pallet_collective_Instance1: CouncilConfig::default(),
+		// pallet_collective_Instance2: TechnicalCommitteeConfig {
+			// members: endowed_accounts.iter()
+						// .take((num_endowed_accounts + 1) / 2)
+						// .cloned()
+						// .collect(),
+			// phantom: Default::default(),
+		// },
+		pallet_contracts: ContractsConfig {
+			current_schedule: pallet_contracts::Schedule {
+				enable_println, // this should only be enabled on development chains
+				..Default::default()
+			},
+		},
+		pallet_sudo: SudoConfig {
+			key: root_key,
+		},
+		pallet_babe: BabeConfig {
+			authorities: vec![],
+			epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
+		},
+		pallet_im_online: ImOnlineConfig {
+			keys: vec![],
+		},
+		pallet_authority_discovery: AuthorityDiscoveryConfig {
+			keys: vec![],
+		},
+		pallet_grandpa: GrandpaConfig {
+			authorities: vec![],
+		},
+		// pallet_membership_Instance1: Default::default(),
+		pallet_treasury: Default::default(),
+		// pallet_society: SocietyConfig {
+			// members: endowed_accounts.iter()
+						// .take((num_endowed_accounts + 1) / 2)
+						// .cloned()
+						// .collect(),
+			// pot: 0,
+			// max_members: 999,
+		// },
+		pallet_vesting: Default::default(),
+		pallet_gilt: Default::default(),
+		pallet_nft: NftConfig {
+			nft_masters: vec![nft_master],
+		},
+		// pallet_realis_game_api: Default::default(),
+	}
+}
+
 
 fn development_config_genesis() -> GenesisConfig {
 	testnet_genesis(
@@ -375,32 +510,52 @@ fn local_testnet_genesis() -> GenesisConfig {
 	)
 }
 
-fn realis_testnet_genesis() -> GenesisConfig {
-	let initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId, ImOnlineId, AuthorityDiscoveryId)> = vec![(
-		hex!["1aa0d5c594a4581ec17069ec9631cd6225d5fb403fe4d85c8ec8aa51833fdf7f"].into(),
-		hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].into(),
-		hex!["b7606f13fb700cdabffd98bf466557a9faeb68bc773ef6e2bf681b9913079d37"].unchecked_into(),
-		hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].unchecked_into(),
-		hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].unchecked_into(),
-		hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].unchecked_into(),
-		), (
-		hex!["cc32b24b66c8636b31394dce95949a27022c901d2597c5584554aa5d81db7416"].into(),
-		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
-		hex!["4a9e6cc2606a74d65ee2ba026e986024de8b60a22890023552b6cf6c977c8420"].unchecked_into(),
-		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].unchecked_into(),
-		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].unchecked_into(),
-		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].unchecked_into(),
-		),
-	];
+pub fn realis_testnet_config() -> ChainSpec {
+	let mut properties = Map::new();
+	properties.insert("tokenDecimals".into(), 10.into());
+	properties.insert("tokenSymbol".into(), "LIS".into());
+	properties.insert("ss58Format".into(), 42.into());
 
-	let root_key: AccountId = hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
-	testnet_genesis(
-		initial_authorities,
-		root_key,
+	ChainSpec::from_genesis(
+		"Realis Network",
+		"realis",
+		ChainType::Live,
+		realis_testnet_genesis,
+		vec![],
 		None,
-		false,
+		Some(DEFAULT_PROTOCOL_ID),
+		Some(properties),
+		Default::default(),
 	)
 }
+
+pub fn realis_testnet_genesis() -> GenesisConfig {
+			realis_genesis(
+				vec![
+					(
+						hex!["1aa0d5c594a4581ec17069ec9631cd6225d5fb403fe4d85c8ec8aa51833fdf7f"].into(),
+						hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].into(),
+						hex!["b7606f13fb700cdabffd98bf466557a9faeb68bc773ef6e2bf681b9913079d37"].unchecked_into(),
+						hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].unchecked_into(),
+						hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].unchecked_into(),
+						hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].unchecked_into(),
+						), (
+						hex!["cc32b24b66c8636b31394dce95949a27022c901d2597c5584554aa5d81db7416"].into(),
+						hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
+						hex!["4a9e6cc2606a74d65ee2ba026e986024de8b60a22890023552b6cf6c977c8420"].unchecked_into(),
+						hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].unchecked_into(),
+						hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].unchecked_into(),
+						hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].unchecked_into(),
+						),
+					],
+		//sudo account
+		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
+		//NFT Master
+		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
+		None,
+		false
+	)}
+
 pub fn realis_config() -> Result<ChainSpec, String> {
 	ChainSpec::from_json_bytes(&include_bytes!("../../../../realis.json")[..])
 }
@@ -412,20 +567,6 @@ pub fn local_testnet_config() -> ChainSpec {
 		"local_testnet",
 		ChainType::Local,
 		local_testnet_genesis,
-		vec![],
-		None,
-		None,
-		None,
-		Default::default(),
-	)
-}
-
-pub fn realis_testnet_config() -> ChainSpec {
-	ChainSpec::from_genesis(
-		"Realis Network",
-		"realis_network",
-		ChainType::Live,
-		realis_testnet_genesis,
 		vec![],
 		None,
 		None,
