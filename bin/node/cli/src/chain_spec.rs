@@ -320,7 +320,7 @@ pub fn testnet_genesis(
 			authorities: vec![],
 		},
 		// pallet_membership_Instance1: Default::default(),
-		// pallet_treasury: Default::default(),
+		pallet_treasury: Default::default(),
 		// pallet_society: SocietyConfig {
 			// members: endowed_accounts.iter()
 						// .take((num_endowed_accounts + 1) / 2)

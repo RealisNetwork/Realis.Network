@@ -451,12 +451,53 @@ impl pallet_session::historical::Config for Runtime {
 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
 }
 
+// pallet_staking_reward_curve::build! {
+// 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
+// 		min_inflation: 0_025_000,
+// 		max_inflation: 0_100_000,
+// 		ideal_stake: 0_500_000,
+// 		falloff: 0_050_000,
+// 		max_piece_count: 40,
+// 		test_precision: 0_005_000,
+// 	);
+// }
+
+// parameter_types! {
+// 	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
+// 	pub const BondingDuration: pallet_staking::EraIndex = 24 * 28;
+// 	pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
+// 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
+// 	pub const MaxNominatorRewardedPerValidator: u32 = 256;
+// }
+
+// impl pallet_staking::Config for Runtime {
+// 	type Currency = Balances;
+// 	type UnixTime = Timestamp;
+// 	type CurrencyToVote = U128CurrencyToVote;
+// 	type RewardRemainder = ();
+// 	type Event = Event;
+// 	type Slash = (); // send the slashed funds to the treasury.
+// 	type Reward = (); // rewards are minted from the void
+// 	type SessionsPerEra = SessionsPerEra;
+// 	type BondingDuration = BondingDuration;
+// 	type SlashDeferDuration = SlashDeferDuration;
+// 	/// A super-majority of the council can cancel the slash.
+// 	// type SlashCancelOrigin = ();
+// 	type SessionInterface = Self;
+// 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
+// 	type NextNewSession = Session;
+// 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+// 	type ElectionProvider = ElectionProviderMultiPhase;
+// 	type SlashCancelOrigin = EnsureRoot<AccountId>;
+// 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
+// }
+
 pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-		min_inflation: 0_025_000,
-		max_inflation: 0_100_000,
-		ideal_stake: 0_500_000,
-		falloff: 0_050_000,
+		min_inflation: 0_040_000,
+		max_inflation: 0_080_000,
+		ideal_stake: 0_160_000,
+		falloff: 1_000_000,
 		max_piece_count: 40,
 		test_precision: 0_005_000,
 	);
@@ -465,31 +506,44 @@ pallet_staking_reward_curve::build! {
 parameter_types! {
 	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
 	pub const BondingDuration: pallet_staking::EraIndex = 24 * 28;
-	pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
+	pub const SlashDeferDuration: pallet_staking::EraIndex =  24 * 28 - 1; //SlashDeferDuration should be less than BondingDuration https://github.com/paritytech/substrate/blob/49a4103f4bfef55be20a5c6d26e18ff3003c3353/frame/staking/src/lib.rs#L1402
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
-	pub const MaxNominatorRewardedPerValidator: u32 = 256;
+	pub const MaxNominatorRewardedPerValidator: u32 = 64;
+	pub const ElectionLookahead: BlockNumber = EPOCH_DURATION_IN_BLOCKS / 4;
+	pub const MaxIterations: u32 = 10;
+	// 0.05%. The higher the value, the more strict solution acceptance becomes.
+	pub MinSolutionScoreBump: Perbill = Perbill::from_rational_approximation(5u32, 10_000);
 }
+
+type SlashCancelOrigin =
+	EnsureOneOf<AccountId, EnsureRoot<AccountId>, EnsureRoot<AccountId>>;
 
 impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
 	type UnixTime = Timestamp;
 	type CurrencyToVote = U128CurrencyToVote;
-	type RewardRemainder = ();
+	type ElectionProvider = ElectionProviderMultiPhase;
+	type RewardRemainder = Treasury;
 	type Event = Event;
-	type Slash = (); // send the slashed funds to the treasury.
-	type Reward = (); // rewards are minted from the void
+	type Slash = Treasury;
+	type Reward = ();
 	type SessionsPerEra = SessionsPerEra;
 	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
-	/// A super-majority of the council can cancel the slash.
-	// type SlashCancelOrigin = ();
+	// A super-majority of the council can cancel the slash.
+	type SlashCancelOrigin = SlashCancelOrigin;
 	type SessionInterface = Self;
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
+	// type RewardCurve = RewardCurve;
 	type NextNewSession = Session;
+	// type ElectionLookahead = ElectionLookahead;
+	// type Call = Call;
+	// type MaxIterations = MaxIterations;
+	// type MinSolutionScoreBump = MinSolutionScoreBump;
 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
-	type ElectionProvider = ElectionProviderMultiPhase;
-	type SlashCancelOrigin = EnsureRoot<AccountId>;
-	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
+	// type UnsignedPriority = StakingUnsignedPriority;
+	// type OffchainSolutionWeightLimit = OffchainSolutionWeightLimit;
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -675,23 +729,23 @@ type EnsureRootOrHalfCouncil = EnsureRoot<AccountId>;
 // 	type MembershipChanged = TechnicalCommittee;
 // }
 
-parameter_types! {
-	pub const ProposalBond: Permill = Permill::from_percent(5);
-	pub const ProposalBondMinimum: Balance = 1 * DOLLARS;
-	pub const SpendPeriod: BlockNumber = 1 * DAYS;
-	pub const Burn: Permill = Permill::from_percent(50);
-	pub const TipCountdown: BlockNumber = 1 * DAYS;
-	pub const TipFindersFee: Percent = Percent::from_percent(20);
-	pub const TipReportDepositBase: Balance = 1 * DOLLARS;
-	pub const DataDepositPerByte: Balance = 1 * CENTS;
-	pub const BountyDepositBase: Balance = 1 * DOLLARS;
-	pub const BountyDepositPayoutDelay: BlockNumber = 1 * DAYS;
-	pub const TreasuryModuleId: ModuleId = ModuleId(*b"py/trsry");
-	pub const BountyUpdatePeriod: BlockNumber = 14 * DAYS;
-	pub const MaximumReasonLength: u32 = 16384;
-	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
-	pub const BountyValueMinimum: Balance = 5 * DOLLARS;
-}
+// parameter_types! {
+// 	pub const ProposalBond: Permill = Permill::from_percent(5);
+// 	pub const ProposalBondMinimum: Balance = 1 * DOLLARS;
+// 	pub const SpendPeriod: BlockNumber = 1 * DAYS;
+// 	pub const Burn: Permill = Permill::from_percent(50);
+// 	pub const TipCountdown: BlockNumber = 1 * DAYS;
+// 	pub const TipFindersFee: Percent = Percent::from_percent(20);
+// 	pub const TipReportDepositBase: Balance = 1 * DOLLARS;
+// 	pub const DataDepositPerByte: Balance = 1 * CENTS;
+// 	pub const BountyDepositBase: Balance = 1 * DOLLARS;
+// 	pub const BountyDepositPayoutDelay: BlockNumber = 1 * DAYS;
+// 	pub const TreasuryModuleId: ModuleId = ModuleId(*b"py/trsry");
+// 	pub const BountyUpdatePeriod: BlockNumber = 14 * DAYS;
+// 	pub const MaximumReasonLength: u32 = 16384;
+// 	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
+// 	pub const BountyValueMinimum: Balance = 5 * DOLLARS;
+// }
 
 // impl pallet_treasury::Config for Runtime {
 // 	type ModuleId = TreasuryModuleId;
@@ -716,6 +770,51 @@ parameter_types! {
 // 	type SpendFunds = Bounties;
 // 	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
 // }
+
+parameter_types! {
+	pub const ProposalBond: Permill = Permill::from_percent(5);
+	pub const ProposalBondMinimum: Balance = DOLLARS;
+	pub const SpendPeriod: BlockNumber = DAYS;
+	pub const Burn: Permill = Permill::from_percent(50);
+	pub const DataDepositPerByte: Balance = CENTS;
+	pub const TipCountdown: BlockNumber = DAYS;
+	pub const TipFindersFee: Percent = Percent::from_percent(20);
+	pub const TipReportDepositBase: Balance = DOLLARS;
+	pub const TipReportDepositPerByte: Balance = CENTS;
+	pub const MaximumReasonLength: u32 = 16384;
+	pub const TreasuryModuleId: ModuleId = ModuleId(*b"py/trsry");
+	// pub OffchainSolutionWeightLimit: Weight = BlockWeights::get().max_block
+	// 			  .saturating_sub(BlockExecutionWeight::get())
+	// 			  .saturating_sub(ExtrinsicBaseWeight::get());
+}
+
+impl pallet_treasury::Config for Runtime {
+	type ModuleId = TreasuryModuleId;
+	type Currency = Balances;
+	type ApproveOrigin = EnsureOneOf<
+		AccountId,
+		EnsureRoot<AccountId>,
+		EnsureRoot<AccountId>,
+		// pallet_collective::EnsureMembers<_4, AccountId, CouncilCollective>,
+	>;
+	type RejectOrigin = EnsureOneOf<
+		AccountId,
+		EnsureRoot<AccountId>,
+		EnsureRoot<AccountId>,
+		// pallet_collective::EnsureMembers<_2, AccountId, CouncilCollective>,
+	>;
+	//type TipReportDepositPerByte = TipReportDepositPerByte;
+	type Event = Event;
+	type OnSlash = ();
+	//type ProposalRejection = ();
+	type ProposalBond = ProposalBond;
+	type ProposalBondMinimum = ProposalBondMinimum;
+	type SpendPeriod = SpendPeriod;
+	type Burn = Burn;
+	type BurnDestination = ();
+	type WeightInfo = ();
+	type SpendFunds = ();
+}
 
 // impl pallet_bounties::Config for Runtime {
 // 	type Event = Event;
@@ -1092,7 +1191,7 @@ construct_runtime!(
 		// Elections: pallet_elections_phragmen::{Pallet, Call, Storage, Event<T>, Config<T>},
 		// TechnicalMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
 		Grandpa: pallet_grandpa::{Pallet, Call, Storage, Config, Event, ValidateUnsigned},
-		// Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
+		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
 		Contracts: pallet_contracts::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
 		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
