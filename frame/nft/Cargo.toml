@@ -25,10 +25,9 @@ frame-system = { version = "3.0.0", default-features = false, path = "../system"
 pallet-balances = { version = "3.0.0", default-features = false, path = "../balances" }
 sp-runtime = { version = "3.0.0", default-features = false, path = "../../primitives/runtime" }
 sp-std = { version = "3.0.0", default-features = false, path = "../../primitives/std" }
-
+sp-core = { version = "3.0.0", default-features = false, path = "../../primitives/core" }
 
 [dev-dependencies]
-sp-core = { version = "3.0.0", default-features = false, path = "../../primitives/core" }
 sp-io ={ version = "3.0.0", path = "../../primitives/io" }
 #sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
 
