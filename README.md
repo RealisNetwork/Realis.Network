@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/Daelon02/realis/blob/main/744774474757.png" width="460">
+  <img src="https://github.com/Daelon02/realis/blob/main/REALIS3.png" width="460">
 </p>
 
 <div align="center">
