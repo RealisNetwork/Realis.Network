@@ -4,10 +4,10 @@
 
 <div align="center">
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AcalaNetwork/Acala/Test?label=Actions&logo=github)](https://github.com/cryptosoulgame/ReAlis-Network/actions?query=workflow%3ATest)
-[![GitHub tag (latest by date)](https://img.shields.io/badge/tag-v1.0.8-blue)](https://github.com/cryptosoulgame/ReAlis-Network/tags)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AcalaNetwork/Acala/Test?label=Actions&logo=github)](https://github.com/cryptosoulgame/Realis.Network/actions?query=workflow%3ATest)
+[![GitHub tag (latest by date)](https://img.shields.io/badge/tag-v1.0.8-blue)](https://github.com/cryptosoulgame/Realis.Network/tags)
 [![Substrate version](https://img.shields.io/badge/Substrate-3.0.0-brightgreen?logo=Parity%20Substrate)](https://substrate.dev/)
-[![License](https://img.shields.io/github/license/AcalaNetwork/Acala?color=green)](https://github.com/cryptosoulgame/ReAlis-Network/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/AcalaNetwork/Acala?color=green)](https://github.com/cryptosoulgame/Realis.Network/blob/main/LICENSE)
  <br />
 [![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FAcalaNetwork)](https://twitter.com/realisnetwork)
 [![Telegram](https://img.shields.io/badge/Telegram-gray?logo=telegram)](https://t.me/RealisNetwork)
@@ -21,7 +21,7 @@ A fresh FRAME-based [Substrate](https://www.substrate.io/) node
 
 ## Getting Started
 
-This is the node of the ReAlis Blockchain Network
+This is the node of the Realis Blockchain Network
 
 ### Rust Setup
 
@@ -84,14 +84,14 @@ Start the development chain with detailed logging:
 ```bash
 RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/realis -lruntime=debug --dev
 ```
-## Connect to ReAlis TestNet
-Connect to the global ReAlis TestNet network by running:
+## Connect to Realis TestNet
+Connect to the global Realis TestNet network by running:
 ```
 ./target/release/realis --chain=realis
 ```
 ## Template Structure
 
-A ReAlis Network such as this consists of a number of components that are spread across a few
+A Realis Network such as this consists of a number of components that are spread across a few
 directories.
 
 ### Node
@@ -204,4 +204,4 @@ This command will firstly compile your code, and then start a local development 
 # Check whether the code is compilable
 ./docker/run-realis.sh cargo check
 ```
-# ReAlis Network
+# Realis Network
