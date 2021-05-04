@@ -18,7 +18,7 @@ frame-support = { git = "https://github.com/paritytech/substrate", branch = "roc
 frame-system = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", default-features = false }
 
 orml-traits = { path = "../traits", version = "0.4.1-dev", default-features = false }
-orml-utilities = { path = "../utilities", version = "0.4.1-dev", default-features = false }
+orml-utilities = { git = "https://github.com/AcalaNetwork/Acala", branch = "master", default-features = false }
 
 [dev-dependencies]
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1" }
