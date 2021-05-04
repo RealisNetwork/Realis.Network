@@ -34,7 +34,7 @@ use frame_support::{
 	traits::{
 		Currency, Imbalance, KeyOwnerProofSystem, OnUnbalanced, Randomness, LockIdentifier,
 		U128CurrencyToVote,
-	},
+	}, PalletId,
 };
 use frame_system::{
 	EnsureRoot, EnsureOneOf,
@@ -161,6 +161,19 @@ const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 /// We allow for 2 seconds of compute with a 6 second average block time.
 const MAXIMUM_BLOCK_WEIGHT: Weight = 2 * WEIGHT_PER_SECOND;
+
+// Pallet accounts of runtime
+parameter_types! {
+	pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+	pub const StakingPoolPalletId: PalletId = PalletId(*b"lis/stkp");
+}
+
+pub fn get_all_module_accounts() -> Vec<AccountId> {
+	vec![
+		TreasuryPalletId::get().into_account(),
+		StakingPoolPalletId::get().into_account(),
+	]
+}
 
 parameter_types! {
 	pub const BlockHashCount: BlockNumber = 2400;
@@ -1176,6 +1189,27 @@ impl pallet_realis_game_api::Config for Runtime {
 	type Event = Event;
 }
 
+parameter_types! {
+	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
+	pub const GetStakingCurrencyId: CurrencyId = DOT;
+	pub DefaultExchangeRate: ExchangeRate = ExchangeRate::saturating_from_rational(10, 100);	// 1 : 10
+	pub PoolAccountIndexes: Vec<u32> = vec![1, 2, 3, 4];
+}
+
+impl module_staking_pool::Config for Runtime {
+	type Event = Event;
+	type StakingCurrencyId = GetStakingCurrencyId;
+	type LiquidCurrencyId = GetLiquidCurrencyId;
+	type DefaultExchangeRate = DefaultExchangeRate;
+	type PalletId = StakingPoolPalletId;
+	type PoolAccountIndexes = PoolAccountIndexes;
+	type UpdateOrigin = EnsureRootOrHalfHomaCouncil;
+	type FeeModel = CurveFeeModel;
+	type Nominees = NomineesElection;
+	type Bridge = PolkadotBridge;
+	type Currency = Currencies;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1222,6 +1256,7 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		RealisApi: pallet_realis_game_api::{Pallet, Call, Event<T>},
+		StakingPool: module_staking_pool::{Pallet, Call, Storage, Event<T>, Config<T>},
 	}
 );
 

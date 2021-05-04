@@ -1,0 +1,72 @@
+   Compiling ring v0.16.19
+   Compiling snow v0.7.2
+   Compiling blake3 v0.3.7
+   Compiling zstd-sys v1.4.20+zstd.1.4.9
+   Compiling zstd-safe v3.0.1+zstd.1.4.9
+   Compiling libloading v0.5.2
+   Compiling xcm v0.8.30 (https://github.com/paritytech//polkadot?rev=127eb17a25bbe2a9f2731ff11a65d7f8170f2373#127eb17a)
+   Compiling sp-wasm-interface v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+error: Invalid attribute only `#[codec(dumb_trait_bound)]` is accepted as top attribute
+  --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/v0/order.rs:27:9
+   |
+27 | #[codec(encode_bound())]
+   |         ^^^^^^^^^^^^^^
+
+   Compiling sp-arithmetic v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling fork-tree v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+error: Invalid attribute only `#[codec(dumb_trait_bound)]` is accepted as top attribute
+  --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/v0/mod.rs:72:9
+   |
+72 | #[codec(encode_bound())]
+   |         ^^^^^^^^^^^^^^
+
+error: Invalid attribute only `#[codec(dumb_trait_bound)]` is accepted as top attribute
+  --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/double_encoded.rs:21:9
+   |
+21 | #[codec(encode_bound())]
+   |         ^^^^^^^^^^^^^^
+
+error: Invalid attribute only `#[codec(dumb_trait_bound)]` is accepted as top attribute
+  --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/lib.rs:37:9
+   |
+37 | #[codec(encode_bound())]
+   |         ^^^^^^^^^^^^^^
+
+   Compiling finality-grandpa v0.14.0
+   Compiling jsonrpc-core-client v15.1.0
+   Compiling primitive-types v0.9.0
+   Compiling ethbloom v0.11.0
+error[E0277]: the trait bound `v0::Xcm<()>: WrapperTypeEncode` is not satisfied
+   --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/v0/traits.rs:40:40
+    |
+40  |     CannotReachDestination(MultiLocation, Xcm<()>),
+    |                                           ^^^^^^^ the trait `WrapperTypeEncode` is not implemented for `v0::Xcm<()>`
+    | 
+   ::: /home/substrate/.cargo/registry/src/github.com-1ecc6299db9ec823/parity-scale-codec-2.0.1/src/codec.rs:216:21
+    |
+216 |     fn encode_to<T: Output + ?Sized>(&self, dest: &mut T) {
+    |                     ------ required by this bound in `encode_to`
+    |
+    = note: required because of the requirements on the impl of `Encode` for `v0::Xcm<()>`
+
+error[E0277]: the trait bound `v0::Xcm<()>: WrapperTypeDecode` is not satisfied
+   --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/v0/traits.rs:40:40
+    |
+40  |     CannotReachDestination(MultiLocation, Xcm<()>),
+    |                                           ^^^^^^^ the trait `WrapperTypeDecode` is not implemented for `v0::Xcm<()>`
+    | 
+   ::: /home/substrate/.cargo/registry/src/github.com-1ecc6299db9ec823/parity-scale-codec-2.0.1/src/codec.rs:277:18
+    |
+277 |     fn decode<I: Input>(input: &mut I) -> Result<Self, Error>;
+    |                  ----- required by this bound in `_::_parity_scale_codec::Decode::decode`
+    |
+    = note: required because of the requirements on the impl of `Decode` for `v0::Xcm<()>`
+
+   Compiling sp-externalities v0.9.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `xcm`
+
+To learn more, run the command again with --verbose.
+warning: build failed, waiting for other jobs to finish...

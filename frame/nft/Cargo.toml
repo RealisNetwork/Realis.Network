@@ -20,15 +20,15 @@ version = '2.0.0'
 
 [dependencies]
 serde = { version = "1.0.102", optional = true }
-frame-support = { version = "3.0.0", default-features = false, path = "../support" }
-frame-system = { version = "3.0.0", default-features = false, path = "../system" }
-pallet-balances = { version = "3.0.0", default-features = false, path = "../balances" }
-sp-runtime = { version = "3.0.0", default-features = false, path = "../../primitives/runtime" }
-sp-std = { version = "3.0.0", default-features = false, path = "../../primitives/std" }
-sp-core = { version = "3.0.0", default-features = false, path = "../../primitives/core" }
+frame-support = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+frame-system = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true}
+pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-std = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
 
 [dev-dependencies]
-sp-io ={ version = "3.0.0", path = "../../primitives/io" }
+sp-io = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
 #sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
 
 
@@ -43,3 +43,4 @@ std = [
     'sp-runtime/std',
     'sp-std/std'
 ]
+

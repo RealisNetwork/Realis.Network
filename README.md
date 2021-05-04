@@ -1,4 +1,21 @@
-# ReAlis Network
+<p align="center">
+  <img src="https://github.com/Daelon02/realis/blob/main/744774474757.png" width="460">
+</p>
+
+<div align="center">
+
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AcalaNetwork/Acala/Test?label=Actions&logo=github)](https://github.com/cryptosoulgame/ReAlis-Network/actions?query=workflow%3ATest)
+[![GitHub tag (latest by date)](https://img.shields.io/badge/tag-v1.0.8-blue)](https://github.com/cryptosoulgame/ReAlis-Network/tags)
+[![Substrate version](https://img.shields.io/badge/Substrate-3.0.0-brightgreen?logo=Parity%20Substrate)](https://substrate.dev/)
+[![License](https://img.shields.io/github/license/AcalaNetwork/Acala?color=green)](https://github.com/cryptosoulgame/ReAlis-Network/blob/main/LICENSE)
+ <br />
+[![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FAcalaNetwork)](https://twitter.com/realisnetwork)
+[![Telegram](https://img.shields.io/badge/Telegram-gray?logo=telegram)](https://t.me/RealisNetwork)
+[![Medium](https://img.shields.io/badge/Medium-gray?logo=medium)](https://realisnetwork.medium.com/)
+
+</div>
+
+# Realis Network
 
 A fresh FRAME-based [Substrate](https://www.substrate.io/) node
 

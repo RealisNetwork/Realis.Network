@@ -47,9 +47,6 @@ pub enum Socket {
     Weapon,
 }
 
-// impl Default for Socket {
-//     fn default() -> Self { Socket::Head }
-// }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
 pub struct Params {
@@ -58,12 +55,20 @@ pub struct Params {
     pub intelligence: u8,
 }
 
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+pub enum Types {
+    Mergeble,
+    Stakeble,
+    Common,
+}
+
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
 pub struct Token {
     pub rarity: Rarity,
     pub socket: Socket,
     pub params: Params,
+    pub types: Types,
 }
 
 /// Simplified reasons for withdrawing balance.
@@ -292,6 +297,7 @@ decl_module! {
         rarity: Rarity,
         socket: Socket,
         params: Params,
+        types: Types,
         ) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
 		    ensure!(
@@ -302,7 +308,8 @@ decl_module! {
 		    let token_info = Token {
 		        rarity,
 		        socket,
-		        params
+		        params,
+                types
 		    };
 
             Self::mint_nft(&target_account, token_info, token_id)?;
@@ -312,15 +319,15 @@ decl_module! {
 		}
 
         #[weight = 10_000]
-		pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
+		pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId, types: Types) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
 		    ensure!(
                 Self::nft_masters().contains(&who),
                 Error::<T>::NotNftMaster
             );
 
-            Self::mint_basic_nft(&target_account, token_id)?;
-		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
+            Self::mint_basic_nft(&target_account, token_id, types)?;
+		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id, types));
             Ok(())
 
 		}
@@ -385,7 +392,7 @@ impl<T: Config> Module<T> {
             Ok(token_id)
     }
 
-     pub fn mint_basic_nft(target_account: &T::AccountId, token_id: TokenId) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
+     pub fn mint_basic_nft(target_account: &T::AccountId, token_id: TokenId, types: Types) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
         // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
             ensure!(
                 !AccountForToken::<T>::contains_key(token_id),
@@ -395,6 +402,7 @@ impl<T: Config> Module<T> {
             // hash_set_of_tokens.insert(token_id);
             TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
             AccountForToken::<T>::insert(token_id, &target_account);
+            TokensForAccount::<T>::insert(target_account, token_id, types);
             // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
             Ok(token_id)
     }

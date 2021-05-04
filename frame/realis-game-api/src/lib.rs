@@ -91,7 +91,6 @@ decl_module! {
             return NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
         }
 
-
         #[weight = 10_000]
         pub fn transfer(origin, dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> dispatch::DispatchResultWithPostInfo {
             return pallet_balances::Pallet::<T>::transfer(origin, dest, value);
