@@ -8,11 +8,11 @@ members = [
     "bin/node/testing",
     # "frame/realis-game-api",
 
-	"modules/*",
+	# "modules/*",
 
-	"orml/currencies",
-	"orml/tokens",
-	"orml/traits",
+	# "orml/currencies",
+	# "orml/tokens",
+	# "orml/traits",
 	# "orml/xtokens",
 	# "orml/xcm-support",
 	# "orml/unknown-tokens",

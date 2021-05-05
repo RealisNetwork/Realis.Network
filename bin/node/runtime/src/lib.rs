@@ -1189,26 +1189,26 @@ impl pallet_realis_game_api::Config for Runtime {
 	type Event = Event;
 }
 
-parameter_types! {
-	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
-	pub const GetStakingCurrencyId: CurrencyId = DOT;
-	pub DefaultExchangeRate: ExchangeRate = ExchangeRate::saturating_from_rational(10, 100);	// 1 : 10
-	pub PoolAccountIndexes: Vec<u32> = vec![1, 2, 3, 4];
-}
+// parameter_types! {
+// 	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
+// 	pub const GetStakingCurrencyId: CurrencyId = DOT;
+// 	pub DefaultExchangeRate: ExchangeRate = ExchangeRate::saturating_from_rational(10, 100);	// 1 : 10
+// 	pub PoolAccountIndexes: Vec<u32> = vec![1, 2, 3, 4];
+// }
 
-impl module_staking_pool::Config for Runtime {
-	type Event = Event;
-	type StakingCurrencyId = GetStakingCurrencyId;
-	type LiquidCurrencyId = GetLiquidCurrencyId;
-	type DefaultExchangeRate = DefaultExchangeRate;
-	type PalletId = StakingPoolPalletId;
-	type PoolAccountIndexes = PoolAccountIndexes;
-	type UpdateOrigin = EnsureRootOrHalfHomaCouncil;
-	type FeeModel = CurveFeeModel;
-	type Nominees = NomineesElection;
-	type Bridge = PolkadotBridge;
-	type Currency = Currencies;
-}
+// impl module_staking_pool::Config for Runtime {
+// 	type Event = Event;
+// 	type StakingCurrencyId = GetStakingCurrencyId;
+// 	type LiquidCurrencyId = GetLiquidCurrencyId;
+// 	type DefaultExchangeRate = DefaultExchangeRate;
+// 	type PalletId = StakingPoolPalletId;
+// 	type PoolAccountIndexes = PoolAccountIndexes;
+// 	type UpdateOrigin = EnsureRootOrHalfHomaCouncil;
+// 	type FeeModel = CurveFeeModel;
+// 	type Nominees = NomineesElection;
+// 	type Bridge = PolkadotBridge;
+// 	type Currency = Currencies;
+// }
 
 construct_runtime!(
 	pub enum Runtime where
@@ -1256,7 +1256,7 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		RealisApi: pallet_realis_game_api::{Pallet, Call, Event<T>},
-		StakingPool: module_staking_pool::{Pallet, Call, Storage, Event<T>, Config<T>},
+		// StakingPool: module_staking_pool::{Pallet, Call, Storage, Event<T>, Config<T>},
 	}
 );
 

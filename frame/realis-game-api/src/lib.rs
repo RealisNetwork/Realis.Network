@@ -6,7 +6,7 @@
 
 use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::Get};
 use frame_system::ensure_root;
-use frame_support::traits::Vec;
+use std::vec::Vec;
 use pallet_balances;
 use pallet_nft::{Token, Params, Socket, Rarity, TokenId};
 use pallet_nft as NFT;

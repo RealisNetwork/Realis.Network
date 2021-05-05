@@ -90,8 +90,8 @@ pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/parityt
 pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
 pallet-nft = {version = "0.0.1", default-features = false, path = "../../../frame/nft"}
 pallet-realis-game-api = {version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api"}
-module-staking-pool = { package = "module-staking-pool", default-features = false, path = "../../../modules/staking-pool"}
-module-staking-pool-rpc-runtime-api = { package = "module-staking-pool-rpc-runtime-api", default-features = false, path = "../../../modules/staking-pool/rpc/runtime-api"}
+# module-staking-pool = { package = "module-staking-pool", default-features = false, path = "../../../modules/staking-pool"}
+# module-staking-pool-rpc-runtime-api = { package = "module-staking-pool-rpc-runtime-api", default-features = false, path = "../../../modules/staking-pool/rpc/runtime-api"}
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
@@ -166,8 +166,8 @@ std = [
 	"frame-try-runtime/std",
 	"pallet-nft/std",
 	"pallet-realis-game-api/std",
-	"module-staking-pool/std",
-	"module-staking-pool-rpc-runtime-api/std",
+	# "module-staking-pool/std",
+	# "module-staking-pool-rpc-runtime-api/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",

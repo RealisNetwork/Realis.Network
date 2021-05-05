@@ -5,13 +5,14 @@
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
 
 use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::{
-    ExistenceRequirement, ExistenceRequirement::AllowDeath, Vec, StoredMap, WithdrawReasons, OnNewAccount, Get,
+    ExistenceRequirement, ExistenceRequirement::AllowDeath, StoredMap, WithdrawReasons, OnNewAccount, Get,
 }, Parameter};
+use std::vec::Vec;
 use sp_runtime::{traits::{AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
     StoredMapError, Zero,}, RuntimeDebug};
 use frame_system::{ensure_signed, split_inner, RefCount, ensure_root};
 use pallet_balances;
-use sp_core::U256;
+pub use primitive_types::U256;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
 
@@ -55,12 +56,12 @@ pub struct Params {
     pub intelligence: u8,
 }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
-pub enum Types {
-    Mergeble,
-    Stakeble,
-    Common,
-}
+// #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+// pub enum Types {
+//     Mergeble,
+//     Stakeble,
+//     Common,
+// }
 
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
@@ -68,7 +69,6 @@ pub struct Token {
     pub rarity: Rarity,
     pub socket: Socket,
     pub params: Params,
-    pub types: Types,
 }
 
 /// Simplified reasons for withdrawing balance.
@@ -297,7 +297,7 @@ decl_module! {
         rarity: Rarity,
         socket: Socket,
         params: Params,
-        types: Types,
+        // types: Types,
         ) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
 		    ensure!(
@@ -309,7 +309,7 @@ decl_module! {
 		        rarity,
 		        socket,
 		        params,
-                types
+                // types
 		    };
 
             Self::mint_nft(&target_account, token_info, token_id)?;
@@ -319,15 +319,15 @@ decl_module! {
 		}
 
         #[weight = 10_000]
-		pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId, types: Types) -> dispatch::DispatchResult {
+		pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId/*, types: Types */) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
 		    ensure!(
                 Self::nft_masters().contains(&who),
                 Error::<T>::NotNftMaster
             );
 
-            Self::mint_basic_nft(&target_account, token_id, types)?;
-		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id, types));
+            Self::mint_basic_nft(&target_account, token_id/*, types */)?;
+		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id/*, types */));
             Ok(())
 
 		}
@@ -392,7 +392,7 @@ impl<T: Config> Module<T> {
             Ok(token_id)
     }
 
-     pub fn mint_basic_nft(target_account: &T::AccountId, token_id: TokenId, types: Types) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
+     pub fn mint_basic_nft(target_account: &T::AccountId, token_id: TokenId/*, types: Types */) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
         // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
             ensure!(
                 !AccountForToken::<T>::contains_key(token_id),
@@ -402,7 +402,7 @@ impl<T: Config> Module<T> {
             // hash_set_of_tokens.insert(token_id);
             TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
             AccountForToken::<T>::insert(token_id, &target_account);
-            TokensForAccount::<T>::insert(target_account, token_id, types);
+            // TokensForAccount::<T>::insert(target_account, token_id, types);
             // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
             Ok(token_id)
     }
