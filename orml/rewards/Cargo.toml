@@ -1,10 +1,10 @@
 [package]
-name = "orml-traits"
-description = "Shared traits including `BasicCurrency`, `MultiCurrency`, `Auction` and more."
-repository = "https://github.com/open-web3-stack/open-runtime-module-library/tree/master/traits"
+name = "orml-rewards"
+description = "Store and manage shares and rewards"
+repository = "https://github.com/open-web3-stack/open-runtime-module-library/tree/master/rewards"
 license = "Apache-2.0"
 version = "0.4.1-dev"
-authors = ["Laminar Developers <hello@laminar.one>"]
+authors = ["Acala Developers"]
 edition = "2018"
 
 [dependencies]
@@ -13,11 +13,12 @@ codec = { package = "parity-scale-codec", version = "2.0.0", default-features = 
 sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", default-features = false }
 sp-io = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", default-features = false }
-num-traits = { version = "0.2.14", default-features = false }
-impl-trait-for-tuples = "0.2.1"
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", default-features = false }
-orml-utilities = { path = "../utilities", version = "0.4.1-dev", default-features = false }
-xcm = { git = "https://github.com/paritytech/polkadot", branch = "rococo-v1", default-features = false }
+frame-system = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", default-features = false }
+orml-traits = { path = "../traits", version = "0.4.1-dev", default-features = false }
+
+[dev-dependencies]
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1" }
 
 [features]
 default = ["std"]
@@ -27,8 +28,7 @@ std = [
 	"sp-runtime/std",
 	"sp-io/std",
 	"sp-std/std",
-	"num-traits/std",
 	"frame-support/std",
-	"orml-utilities/std",
-	"xcm/std",
+	"frame-system/std",
+	"orml-traits/std",
 ]
