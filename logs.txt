@@ -1,72 +1,138 @@
-   Compiling ring v0.16.19
-   Compiling snow v0.7.2
-   Compiling blake3 v0.3.7
+cargo build --release
+warning: Patch `beefy-gadget v0.1.0 (https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da)` was not used in the crate graph.
+Patch `beefy-gadget-rpc v0.1.0 (https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da)` was not used in the crate graph.
+Patch `beefy-primitives v0.1.0 (https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da)` was not used in the crate graph.
+Patch `pallet-beefy v0.1.0 (https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da)` was not used in the crate graph.
+Patch `pallet-aura v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)` was not used in the crate graph.
+Patch `pallet-nicks v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)` was not used in the crate graph.
+Patch `sc-consensus-aura v0.9.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)` was not used in the crate graph.
+Patch `sc-consensus-manual-seal v0.9.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)` was not used in the crate graph.
+Patch `sc-executor-wasmtime v0.9.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)` was not used in the crate graph.
+Patch `kusama-runtime v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-cli v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-core-primitives v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-node-core-pvf v0.1.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-node-network-protocol v0.1.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-node-primitives v0.1.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-node-subsystem v0.1.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-overseer v0.1.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-parachain v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-primitives v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-runtime v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-runtime-common v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-runtime-parachains v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-service v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `polkadot-statement-table v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `rococo-runtime v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `westend-runtime v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `xcm-builder v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `xcm-executor v0.9.0 (https://github.com/paritytech//polkadot?branch=master#e86cad93)` was not used in the crate graph.
+Patch `cumulus-client-consensus-relay-chain v0.1.0 (https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac)` was not used in the crate graph.
+Patch `cumulus-client-network v0.1.0 (https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac)` was not used in the crate graph.
+Patch `cumulus-client-service v0.1.0 (https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac)` was not used in the crate graph.
+Patch `cumulus-pallet-parachain-system v0.1.0 (https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac)` was not used in the crate graph.
+Patch `cumulus-primitives-core v0.1.0 (https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac)` was not used in the crate graph.
+Patch `cumulus-primitives-parachain-inherent v0.1.0 (https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac)` was not used in the crate graph.
+Patch `cumulus-test-relay-sproof-builder v0.1.0 (https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac)` was not used in the crate graph.
+Patch `parachain-info v0.1.0 (https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac)` was not used in the crate graph.
+Check that the patched package version and available features are compatible
+with the dependency requirements. If the patch has a different version from
+what is locked in the Cargo.lock file, run `cargo update` to use the new
+version. This may also occur with an optional dependency that is not enabled.
+warning: profile package spec `cranelift-codegen` in profile `dev` did not match any packages
+warning: profile package spec `cranelift-wasm` in profile `dev` did not match any packages
    Compiling zstd-sys v1.4.20+zstd.1.4.9
    Compiling zstd-safe v3.0.1+zstd.1.4.9
-   Compiling libloading v0.5.2
-   Compiling xcm v0.8.30 (https://github.com/paritytech//polkadot?rev=127eb17a25bbe2a9f2731ff11a65d7f8170f2373#127eb17a)
-   Compiling sp-wasm-interface v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
-error: Invalid attribute only `#[codec(dumb_trait_bound)]` is accepted as top attribute
-  --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/v0/order.rs:27:9
+   Compiling librocksdb-sys v6.17.3
+   Compiling pallet-sudo v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-indices v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-proxy v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-recovery v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling frame-executive v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-collective v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-society v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-lottery v3.0.0 (https://github.com/paritytech/substrate?branch=master#6bfdabac)
+   Compiling pallet-utility v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-vesting v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-elections-phragmen v4.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-multisig v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-contracts v3.0.0 (https://github.com/paritytech/substrate?branch=master#6bfdabac)
+   Compiling pallet-randomness-collective-flip v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling node-primitives v2.0.0 (/root/bridge-to-eth/Realis.Network/bin/node/primitives)
+   Compiling node-primitives v2.0.0 (https://github.com/paritytech/substrate?branch=master#6bfdabac)
+   Compiling pallet-balances v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-timestamp v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling orml-traits v0.4.1-dev (/root/bridge-to-eth/Realis.Network/orml/traits)
+   Compiling pallet-identity v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-scheduler v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-membership v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-gilt v3.0.0 (https://github.com/paritytech/substrate?branch=master#6bfdabac)
+   Compiling pallet-democracy v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
+   Compiling pallet-assets v3.0.0 (https://github.com/paritytech/substrate?branch=master#6bfdabac)
+error[E0769]: tuple variant `Parachain` written as struct variant
+  --> orml/traits/src/location.rs:15:41
    |
-27 | #[codec(encode_bound())]
-   |         ^^^^^^^^^^^^^^
-
-   Compiling sp-arithmetic v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
-   Compiling fork-tree v3.0.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
-error: Invalid attribute only `#[codec(dumb_trait_bound)]` is accepted as top attribute
-  --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/v0/mod.rs:72:9
+15 |     matches!(junction, Some(Parent) | Some(Parachain { id: _ }))
+   |                                            ^^^^^^^^^^^^^^^^^^^
    |
-72 | #[codec(encode_bound())]
-   |         ^^^^^^^^^^^^^^
-
-error: Invalid attribute only `#[codec(dumb_trait_bound)]` is accepted as top attribute
-  --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/double_encoded.rs:21:9
+help: use the tuple variant pattern syntax instead
    |
-21 | #[codec(encode_bound())]
-   |         ^^^^^^^^^^^^^^
+15 |     matches!(junction, Some(Parent) | Some(Parachain(_)))
+   |                                                     ^^^
 
-error: Invalid attribute only `#[codec(dumb_trait_bound)]` is accepted as top attribute
-  --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/lib.rs:37:9
+error[E0769]: tuple variant `Parachain` written as struct variant
+  --> orml/traits/src/location.rs:21:24
    |
-37 | #[codec(encode_bound())]
-   |         ^^^^^^^^^^^^^^
+21 |             (Some(Parent), Some(Parachain { id })) => Some((Parent, Parachain { id: *id }).into()),
+   |                                 ^^^^^^^^^^^^^^^^
+   |
+help: use the tuple variant pattern syntax instead
+   |
+21 |             (Some(Parent), Some(Parachain(id))) => Some((Parent, Parachain { id: *id }).into()),
+   |                                          ^^^^
 
-   Compiling finality-grandpa v0.14.0
-   Compiling jsonrpc-core-client v15.1.0
-   Compiling primitive-types v0.9.0
-   Compiling ethbloom v0.11.0
-error[E0277]: the trait bound `v0::Xcm<()>: WrapperTypeEncode` is not satisfied
-   --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/v0/traits.rs:40:40
-    |
-40  |     CannotReachDestination(MultiLocation, Xcm<()>),
-    |                                           ^^^^^^^ the trait `WrapperTypeEncode` is not implemented for `v0::Xcm<()>`
-    | 
-   ::: /home/substrate/.cargo/registry/src/github.com-1ecc6299db9ec823/parity-scale-codec-2.0.1/src/codec.rs:216:21
-    |
-216 |     fn encode_to<T: Output + ?Sized>(&self, dest: &mut T) {
-    |                     ------ required by this bound in `encode_to`
-    |
-    = note: required because of the requirements on the impl of `Encode` for `v0::Xcm<()>`
+error[E0769]: tuple variant `Parachain` written as struct variant
+  --> orml/traits/src/location.rs:23:10
+   |
+23 |             (Some(Parachain { id }), _) => Some(Parachain { id: *id }.into()),
+   |                   ^^^^^^^^^^^^^^^^
+   |
+help: use the tuple variant pattern syntax instead
+   |
+23 |             (Some(Parachain(id)), _) => Some(Parachain { id: *id }.into()),
+   |                            ^^^^
 
-error[E0277]: the trait bound `v0::Xcm<()>: WrapperTypeDecode` is not satisfied
-   --> /home/substrate/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/127eb17/xcm/src/v0/traits.rs:40:40
-    |
-40  |     CannotReachDestination(MultiLocation, Xcm<()>),
-    |                                           ^^^^^^^ the trait `WrapperTypeDecode` is not implemented for `v0::Xcm<()>`
-    | 
-   ::: /home/substrate/.cargo/registry/src/github.com-1ecc6299db9ec823/parity-scale-codec-2.0.1/src/codec.rs:277:18
-    |
-277 |     fn decode<I: Input>(input: &mut I) -> Result<Self, Error>;
-    |                  ----- required by this bound in `_::_parity_scale_codec::Decode::decode`
-    |
-    = note: required because of the requirements on the impl of `Decode` for `v0::Xcm<()>`
+error[E0559]: variant `Junction::Parachain` has no field named `id`
+  --> orml/traits/src/location.rs:21:72
+   |
+21 |             (Some(Parent), Some(Parachain { id })) => Some((Parent, Parachain { id: *id }).into()),
+   |                                                                     ---------   ^^ field does not exist
+   |                                                                     |
+   |                                                                     help: `Junction::Parachain` is a tuple variant, use the appropriate syntax: `Junction::Parachain(/* fields */)`
+   | 
+  ::: /root/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/e86cad9/xcm/src/v0/junction.rs:97:5
+   |
+97 |     Parachain(#[codec(compact)] u32),
+   |     --------- `Junction::Parachain` defined here
 
-   Compiling sp-externalities v0.9.0 (https://github.com/paritytech//substrate?rev=2be8fcc4236d32786c62f6f27a98e7fe7e550807#2be8fcc4)
-error: aborting due to 6 previous errors
+error[E0559]: variant `Junction::Parachain` has no field named `id`
+  --> orml/traits/src/location.rs:23:52
+   |
+23 |             (Some(Parachain { id }), _) => Some(Parachain { id: *id }.into()),
+   |                                                 ---------   ^^ field does not exist
+   |                                                 |
+   |                                                 help: `Junction::Parachain` is a tuple variant, use the appropriate syntax: `Junction::Parachain(/* fields */)`
+   | 
+  ::: /root/.cargo/git/checkouts/polkadot-9da13ac14bbabc7b/e86cad9/xcm/src/v0/junction.rs:97:5
+   |
+97 |     Parachain(#[codec(compact)] u32),
+   |     --------- `Junction::Parachain` defined here
 
-For more information about this error, try `rustc --explain E0277`.
-error: could not compile `xcm`
+error: aborting due to 5 previous errors
+
+Some errors have detailed explanations: E0559, E0769.
+For more information about an error, try `rustc --explain E0559`.
+error: could not compile `orml-traits`
 
 To learn more, run the command again with --verbose.
 warning: build failed, waiting for other jobs to finish...
