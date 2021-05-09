@@ -9952,24 +9952,44 @@ dependencies = [
 ]
 
 [[patch.unused]]
-name = "beefy-gadget"
+name = "cumulus-client-consensus-relay-chain"
 version = "0.1.0"
-source = "git+https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da52cc9bc9804a23e111d003413b268faf"
+source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
 
 [[patch.unused]]
-name = "beefy-gadget-rpc"
+name = "cumulus-client-network"
 version = "0.1.0"
-source = "git+https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da52cc9bc9804a23e111d003413b268faf"
+source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
 
 [[patch.unused]]
-name = "beefy-primitives"
+name = "cumulus-client-service"
 version = "0.1.0"
-source = "git+https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da52cc9bc9804a23e111d003413b268faf"
+source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
 
 [[patch.unused]]
-name = "pallet-beefy"
+name = "cumulus-pallet-parachain-system"
 version = "0.1.0"
-source = "git+https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da52cc9bc9804a23e111d003413b268faf"
+source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
+
+[[patch.unused]]
+name = "cumulus-primitives-core"
+version = "0.1.0"
+source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
+
+[[patch.unused]]
+name = "cumulus-primitives-parachain-inherent"
+version = "0.1.0"
+source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
+
+[[patch.unused]]
+name = "cumulus-test-relay-sproof-builder"
+version = "0.1.0"
+source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
+
+[[patch.unused]]
+name = "parachain-info"
+version = "0.1.0"
+source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
 
 [[patch.unused]]
 name = "pallet-aura"
@@ -10097,41 +10117,21 @@ version = "0.9.0"
 source = "git+https://github.com/paritytech//polkadot?branch=master#e86cad931facb385669cabef05803309eb490472"
 
 [[patch.unused]]
-name = "cumulus-client-consensus-relay-chain"
+name = "beefy-gadget"
 version = "0.1.0"
-source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
+source = "git+https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da52cc9bc9804a23e111d003413b268faf"
 
 [[patch.unused]]
-name = "cumulus-client-network"
+name = "beefy-gadget-rpc"
 version = "0.1.0"
-source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
+source = "git+https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da52cc9bc9804a23e111d003413b268faf"
 
 [[patch.unused]]
-name = "cumulus-client-service"
+name = "beefy-primitives"
 version = "0.1.0"
-source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
+source = "git+https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da52cc9bc9804a23e111d003413b268faf"
 
 [[patch.unused]]
-name = "cumulus-pallet-parachain-system"
+name = "pallet-beefy"
 version = "0.1.0"
-source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
-
-[[patch.unused]]
-name = "cumulus-primitives-core"
-version = "0.1.0"
-source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
-
-[[patch.unused]]
-name = "cumulus-primitives-parachain-inherent"
-version = "0.1.0"
-source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
-
-[[patch.unused]]
-name = "cumulus-test-relay-sproof-builder"
-version = "0.1.0"
-source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
-
-[[patch.unused]]
-name = "parachain-info"
-version = "0.1.0"
-source = "git+https://github.com/paritytech//cumulus?rev=da4c3bac6e9584e65740ef5db4dbd2c31c1a91db#da4c3bac6e9584e65740ef5db4dbd2c31c1a91db"
+source = "git+https://github.com/paritytech//grandpa-bridge-gadget?rev=b0e5f2da52cc9bc9804a23e111d003413b268faf#b0e5f2da52cc9bc9804a23e111d003413b268faf"
