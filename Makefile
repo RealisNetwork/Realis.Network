@@ -20,7 +20,7 @@ build:
 
 .PHONY: clean
 clean:
-	cd ../soul/nikita/chains/realis_network/ && rm -rf db && cd ../../../vlad/chains/realis_network/ && rm -rf db && cd ../../../../ReAlis-Network
+	cd ../soul/nikita/chains/realis_network/ && rm -rf db && cd ../../../vlad/chains/realis_network/ && rm -rf db && cd ../../../../Realis.Network
 
 .PHONY: docker 
 docker:
