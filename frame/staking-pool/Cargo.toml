@@ -32,12 +32,12 @@ log = { version = "0.4.14", default-features = false }
 substrate-fixed = { default-features = false, git = "https://github.com/encointer/substrate-fixed", branch = "master" }
 num-traits = { version = "0.2.14", default-features = false }
 [dev-dependencies]
-pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-frame-support = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-pallet-timestamp = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-sp-storage = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-sp-tracing = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-substrate-test-utils = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+frame-support = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+pallet-timestamp = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+sp-storage = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+sp-tracing = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+substrate-test-utils = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
 
 [features]
 default = ["std"]
