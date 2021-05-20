@@ -1182,7 +1182,7 @@ parameter_types! {
 //	pub MinSolutionScoreBump: Perbill = Perbill::from_rational_approximation(5u32, 10_000);
 }
 
-//impl realis_staking::Config for Runtime {
+impl realis_staking::Config for Runtime {
 	type Event = Event;
 	type ModuleId = StakingPoolModuleId;
 	type SessionPerEra = SessionPerEra;
