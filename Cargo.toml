@@ -8,15 +8,6 @@ members = [
     "bin/node/testing",
     # "frame/realis-game-api",
 
-	# "modules/*",
-
-	# "orml/currencies",
-	# "orml/tokens",
-	# "orml/traits",
-	# "orml/xtokens",
-	# "orml/xcm-support",
-	# "orml/unknown-tokens",
-
 ]
 
 resolver = "2"
@@ -25,24 +16,8 @@ resolver = "2"
 split-debuginfo = "unpacked"
 
 [profile.release]
-# Acala runtime requires unwinding.
 panic = "unwind"
 
-# The list of dependencies below (which can be both direct and indirect dependencies) are crates
-# that are suspected to be CPU-intensive, and that are unlikely to require debugging (as some of
-# their debug info might be missing) or to require to be frequently recompiled. We compile these
-# dependencies with `opt-level=3` even in "dev" mode in order to make "dev" mode more usable.
-# The majority of these crates are cryptographic libraries.
-#
-# Note that this does **not** affect crates that depend on Substrate. In other words, if you add
-# a dependency on Substrate, you have to copy-paste this list in your own `Cargo.toml` (assuming
-# that you want the same list). This list is only relevant when running `cargo build` from within
-# the Substrate workspace.
-#
-# If you see an error mentioning "profile package spec ... did not match any packages", it
-# probably concerns this list.
-#
-# This list is ordered alphabetically.
 [profile.dev.package]
 aes-soft = { opt-level = 3 }
 aesni = { opt-level = 3 }
@@ -218,42 +193,3 @@ pallet-election-provider-multi-phase = { git = "https://github.com/paritytech//s
 pallet-aura = { git = "https://github.com/paritytech//substrate", rev = "2be8fcc4236d32786c62f6f27a98e7fe7e550807" }
 sp-consensus-aura = { git = "https://github.com/paritytech//substrate", rev = "2be8fcc4236d32786c62f6f27a98e7fe7e550807" }
 sc-consensus-aura = { git = "https://github.com/paritytech//substrate", rev = "2be8fcc4236d32786c62f6f27a98e7fe7e550807" }
-
-[patch."https://github.com/paritytech/polkadot"]
-xcm = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-xcm-executor = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-xcm-builder = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-parachain = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-primitives = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-core-primitives = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-runtime = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-runtime-common = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-rococo-runtime = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-westend-runtime = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-kusama-runtime = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-runtime-parachains = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-node-network-protocol = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-node-subsystem = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-statement-table = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-overseer = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-node-primitives = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-service = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-cli = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-polkadot-node-core-pvf = { git = "https://github.com/paritytech//polkadot", branch = "master" }
-
-[patch."https://github.com/paritytech/cumulus"]
-cumulus-primitives-core = { git = "https://github.com/paritytech//cumulus", rev = "da4c3bac6e9584e65740ef5db4dbd2c31c1a91db" }
-cumulus-pallet-parachain-system  = { git = "https://github.com/paritytech//cumulus", rev = "da4c3bac6e9584e65740ef5db4dbd2c31c1a91db" }
-parachain-info  = { git = "https://github.com/paritytech//cumulus", rev = "da4c3bac6e9584e65740ef5db4dbd2c31c1a91db" }
-cumulus-client-network = { git = "https://github.com/paritytech//cumulus", rev = "da4c3bac6e9584e65740ef5db4dbd2c31c1a91db" }
-cumulus-client-service = { git = "https://github.com/paritytech//cumulus", rev = "da4c3bac6e9584e65740ef5db4dbd2c31c1a91db" }
-cumulus-client-consensus-relay-chain = { git = "https://github.com/paritytech//cumulus", rev = "da4c3bac6e9584e65740ef5db4dbd2c31c1a91db" }
-# cumulus-pallet-xcm-handler = { git = "https://github.com/paritytech//cumulus", rev = "da4c3bac6e9584e65740ef5db4dbd2c31c1a91db" }
-cumulus-primitives-parachain-inherent = { git = "https://github.com/paritytech//cumulus", rev = "da4c3bac6e9584e65740ef5db4dbd2c31c1a91db" }
-cumulus-test-relay-sproof-builder = { git = "https://github.com/paritytech//cumulus", rev = "da4c3bac6e9584e65740ef5db4dbd2c31c1a91db" }
-
-[patch."https://github.com/paritytech/grandpa-bridge-gadget"]
-pallet-beefy = { git = "https://github.com/paritytech//grandpa-bridge-gadget", rev = "b0e5f2da52cc9bc9804a23e111d003413b268faf" }
-beefy-primitives = { git = "https://github.com/paritytech//grandpa-bridge-gadget", rev = "b0e5f2da52cc9bc9804a23e111d003413b268faf" }
-beefy-gadget = { git = "https://github.com/paritytech//grandpa-bridge-gadget", rev = "b0e5f2da52cc9bc9804a23e111d003413b268faf" }
-beefy-gadget-rpc = { git = "https://github.com/paritytech//grandpa-bridge-gadget", rev = "b0e5f2da52cc9bc9804a23e111d003413b268faf" }

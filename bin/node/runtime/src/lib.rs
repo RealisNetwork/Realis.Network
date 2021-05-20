@@ -34,7 +34,7 @@ use frame_support::{
 	traits::{
 		Currency, Imbalance, KeyOwnerProofSystem, OnUnbalanced, Randomness, LockIdentifier,
 		U128CurrencyToVote,
-	}, PalletId,
+	},
 };
 use frame_system::{
 	EnsureRoot, EnsureOneOf,
@@ -161,19 +161,6 @@ const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 /// We allow for 2 seconds of compute with a 6 second average block time.
 const MAXIMUM_BLOCK_WEIGHT: Weight = 2 * WEIGHT_PER_SECOND;
-
-// Pallet accounts of runtime
-parameter_types! {
-	pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
-	pub const StakingPoolPalletId: PalletId = PalletId(*b"lis/stkp");
-}
-
-pub fn get_all_module_accounts() -> Vec<AccountId> {
-	vec![
-		TreasuryPalletId::get().into_account(),
-		StakingPoolPalletId::get().into_account(),
-	]
-}
 
 parameter_types! {
 	pub const BlockHashCount: BlockNumber = 2400;
@@ -397,7 +384,7 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
-	pub const TransactionByteFee: Balance = 10 * MILLICENTS;
+	pub const TransactionByteFee: Balance = 10 * DOLLARS;
 	pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
 	pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(1, 100_000);
 	pub MinimumMultiplier: Multiplier = Multiplier::saturating_from_rational(1, 1_000_000_000u128);
@@ -517,8 +504,8 @@ pallet_staking_reward_curve::build! {
 }
 
 parameter_types! {
-	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-	pub const BondingDuration: pallet_staking::EraIndex = 8;
+	pub const SessionsPerEra: sp_staking::SessionIndex = 1;
+	pub const BondingDuration: pallet_staking::EraIndex = 2;
 	pub const SlashDeferDuration: pallet_staking::EraIndex =  27; //SlashDeferDuration should be less than BondingDuration https://github.com/paritytech/substrate/blob/49a4103f4bfef55be20a5c6d26e18ff3003c3353/frame/staking/src/lib.rs#L1402
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const MaxNominatorRewardedPerValidator: u32 = 64;
@@ -531,33 +518,27 @@ parameter_types! {
 type SlashCancelOrigin =
 	EnsureOneOf<AccountId, EnsureRoot<AccountId>, EnsureRoot<AccountId>>;
 
-impl pallet_staking::Config for Runtime {
-	type Currency = Balances;
-	type UnixTime = Timestamp;
-	type CurrencyToVote = U128CurrencyToVote;
-	type ElectionProvider = ElectionProviderMultiPhase;
-	type RewardRemainder = Treasury;
-	type Event = Event;
-	type Slash = Treasury;
-	type Reward = ();
-	type SessionsPerEra = SessionsPerEra;
-	type BondingDuration = BondingDuration;
-	type SlashDeferDuration = SlashDeferDuration;
-	// A super-majority of the council can cancel the slash.
-	type SlashCancelOrigin = SlashCancelOrigin;
-	type SessionInterface = Self;
-	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
-	// type RewardCurve = RewardCurve;
-	type NextNewSession = Session;
-	// type ElectionLookahead = ElectionLookahead;
-	// type Call = Call;
-	// type MaxIterations = MaxIterations;
-	// type MinSolutionScoreBump = MinSolutionScoreBump;
-	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
-	// type UnsignedPriority = StakingUnsignedPriority;
-	// type OffchainSolutionWeightLimit = OffchainSolutionWeightLimit;
-	type WeightInfo = ();
-}
+//impl pallet_staking::Config for Runtime {
+//	type Currency = Balances;
+//	type UnixTime = Timestamp;
+//	type CurrencyToVote = U128CurrencyToVote;
+//	type RewardRemainder = ();
+//	type Event = Event;
+//	type Slash = (); // send the slashed funds to the treasury.
+//	type Reward = (); // rewards are minted from the void
+//	type SessionsPerEra = SessionsPerEra;
+//	type BondingDuration = BondingDuration;
+//	type SlashDeferDuration = SlashDeferDuration;
+//	/// A super-majority of the council can cancel the slash.
+//	// type SlashCancelOrigin = ();
+//	type SessionInterface = Self;
+//	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
+//	type NextNewSession = Session;
+//	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+//	type ElectionProvider = ElectionProviderMultiPhase;
+//	type SlashCancelOrigin = EnsureRoot<AccountId>;
+//	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
+//}
 
 parameter_types! {
 	// phase durations. 1/4 of the last session for each.
@@ -787,8 +768,8 @@ type EnsureRootOrHalfCouncil = EnsureRoot<AccountId>;
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
 	pub const ProposalBondMinimum: Balance = DOLLARS;
-	pub const SpendPeriod: BlockNumber = DAYS;
-	pub const Burn: Permill = Permill::from_percent(50);
+	pub const SpendPeriod: BlockNumber = MINUTES;
+	pub const Burn: Permill = Permill::from_percent(100);
 	pub const DataDepositPerByte: Balance = CENTS;
 	pub const TipCountdown: BlockNumber = DAYS;
 	pub const TipFindersFee: Percent = Percent::from_percent(20);
@@ -1189,26 +1170,29 @@ impl pallet_realis_game_api::Config for Runtime {
 	type Event = Event;
 }
 
-// parameter_types! {
-// 	pub const GetLiquidCurrencyId: CurrencyId = LDOT;
-// 	pub const GetStakingCurrencyId: CurrencyId = DOT;
-// 	pub DefaultExchangeRate: ExchangeRate = ExchangeRate::saturating_from_rational(10, 100);	// 1 : 10
-// 	pub PoolAccountIndexes: Vec<u32> = vec![1, 2, 3, 4];
-// }
+parameter_types! {
+	StakingPoolModuleId: ModuleId = (*b"py/stakg");
+	pub const BondingDurationInBlockNumber: u32 = 64;
+//	pub const SlashDeferDuration: realis_staking::EraIndex =  27; //SlashDeferDuration should be less than BondingDuration https://github.com/paritytech/substrate/blob/49a4103f4bfef55be20a5c6d26e18ff3003c3353/frame/staking/src/lib.rs#L1402
+//	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
+//	pub const MaxNominatorRewardedPerValidator: u32 = 64;
+//	pub const ElectionLookahead: BlockNumber = EPOCH_DURATION_IN_BLOCKS / 4;
+//	pub const MaxIterations: u32 = 10;
+//	// 0.05%. The higher the value, the more strict solution acceptance becomes.
+//	pub MinSolutionScoreBump: Perbill = Perbill::from_rational_approximation(5u32, 10_000);
+}
 
-// impl module_staking_pool::Config for Runtime {
-// 	type Event = Event;
-// 	type StakingCurrencyId = GetStakingCurrencyId;
-// 	type LiquidCurrencyId = GetLiquidCurrencyId;
-// 	type DefaultExchangeRate = DefaultExchangeRate;
-// 	type PalletId = StakingPoolPalletId;
-// 	type PoolAccountIndexes = PoolAccountIndexes;
-// 	type UpdateOrigin = EnsureRootOrHalfHomaCouncil;
-// 	type FeeModel = CurveFeeModel;
-// 	type Nominees = NomineesElection;
-// 	type Bridge = PolkadotBridge;
-// 	type Currency = Currencies;
-// }
+//impl realis_staking::Config for Runtime {
+	type Event = Event;
+	type ModuleId = StakingPoolModuleId;
+	type SessionPerEra = SessionPerEra;
+	type BondingDurationInEra = BondingDuration;
+	type BondingDurationInBlockNumber = ();
+	type SlashDeferDuration = SlashDeferDuration;
+	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+	type Cap = ();
+	type Power = ();
+}
 
 construct_runtime!(
 	pub enum Runtime where
@@ -1225,7 +1209,7 @@ construct_runtime!(
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase::{Pallet, Call, Storage, Event<T>, ValidateUnsigned},
-		Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
+		// Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 		// Democracy: pallet_democracy::{Pallet, Call, Storage, Config, Event<T>},
 		// Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
@@ -1256,7 +1240,7 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		RealisApi: pallet_realis_game_api::{Pallet, Call, Event<T>},
-		// StakingPool: module_staking_pool::{Pallet, Call, Storage, Event<T>, Config<T>},
+		StakingPool: staking_pool::{Pallet, Call, Event<T>, Config<T>, Storage},
 	}
 );
 

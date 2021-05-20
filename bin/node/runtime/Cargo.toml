@@ -21,23 +21,23 @@ hex-literal = { version = "0.3.1", optional = true }
 log = { version = "0.4.14", default-features = false }
 
 # primitives
-sp-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-consensus-babe = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
+sp-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-consensus-babe = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
 node-primitives = { version = "2.0.0", default-features = false, path = "../primitives" }
-sp-api = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-application-crypto = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-block-builder = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-consensus-aura = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-core = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-inherents = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-io = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-offchain = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-session = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-staking = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-std = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
-sp-version = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", optional = true }
+sp-api = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-application-crypto = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-block-builder = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-consensus-aura = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-inherents = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-io = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-offchain = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-session = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-staking = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-std = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+sp-version = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
 
 # frame dependencies
 frame-executive = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
@@ -90,14 +90,12 @@ pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/parityt
 pallet-vesting = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
 pallet-nft = {version = "0.0.1", default-features = false, path = "../../../frame/nft"}
 pallet-realis-game-api = {version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api"}
-# module-staking-pool = { package = "module-staking-pool", default-features = false, path = "../../../modules/staking-pool"}
-# module-staking-pool-rpc-runtime-api = { package = "module-staking-pool-rpc-runtime-api", default-features = false, path = "../../../modules/staking-pool/rpc/runtime-api"}
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
 
 [dev-dependencies]
-sp-io = { git = "https://github.com/paritytech/substrate", branch = "rococo-v1", default-features = false }
+sp-io = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
 
 [features]
 default = ["std"]

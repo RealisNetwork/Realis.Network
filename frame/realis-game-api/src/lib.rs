@@ -6,7 +6,7 @@
 
 use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::Get};
 use frame_system::ensure_root;
-use std::vec::Vec;
+use frame_support::traits::Vec;
 use pallet_balances;
 use pallet_nft::{Token, Params, Socket, Rarity, TokenId};
 use pallet_nft as NFT;
@@ -90,6 +90,7 @@ decl_module! {
             let json_nft = 123;
             return NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
         }
+
 
         #[weight = 10_000]
         pub fn transfer(origin, dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> dispatch::DispatchResultWithPostInfo {

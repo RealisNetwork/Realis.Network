@@ -5,14 +5,13 @@
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
 
 use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::{
-    ExistenceRequirement, ExistenceRequirement::AllowDeath, StoredMap, WithdrawReasons, OnNewAccount, Get,
+    ExistenceRequirement, ExistenceRequirement::AllowDeath, Vec, StoredMap, WithdrawReasons, OnNewAccount, Get,
 }, Parameter};
-use std::vec::Vec;
 use sp_runtime::{traits::{AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
     StoredMapError, Zero,}, RuntimeDebug};
 use frame_system::{ensure_signed, split_inner, RefCount, ensure_root};
 use pallet_balances;
-pub use primitive_types::U256;
+use sp_core::U256;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
 
@@ -48,20 +47,12 @@ pub enum Socket {
     Weapon,
 }
 
-
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
 pub struct Params {
     pub strength: u8,
     pub agility: u8,
     pub intelligence: u8,
 }
-
-// #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
-// pub enum Types {
-//     Mergeble,
-//     Stakeble,
-//     Common,
-// }
 
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
@@ -297,7 +288,6 @@ decl_module! {
         rarity: Rarity,
         socket: Socket,
         params: Params,
-        // types: Types,
         ) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
 		    ensure!(
@@ -308,8 +298,7 @@ decl_module! {
 		    let token_info = Token {
 		        rarity,
 		        socket,
-		        params,
-                // types
+		        params
 		    };
 
             Self::mint_nft(&target_account, token_info, token_id)?;
@@ -319,15 +308,15 @@ decl_module! {
 		}
 
         #[weight = 10_000]
-		pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId/*, types: Types */) -> dispatch::DispatchResult {
+		pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
 		    ensure!(
                 Self::nft_masters().contains(&who),
                 Error::<T>::NotNftMaster
             );
 
-            Self::mint_basic_nft(&target_account, token_id/*, types */)?;
-		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id/*, types */));
+            Self::mint_basic_nft(&target_account, token_id)?;
+		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
             Ok(())
 
 		}
@@ -348,6 +337,25 @@ decl_module! {
             );
 
 			let id_of_token = Self::burn_nft(token_id)?;
+		    Self::deposit_event(RawEvent::TokenBurned(id_of_token.clone()));
+            Ok(())
+        }
+
+        #[weight = 10_000]
+		pub fn burn_basic(origin, token_id: TokenId) -> dispatch::DispatchResult {
+            let who = ensure_signed(origin)?;
+
+            // ensure!(
+            //     who != T::AccountId::default(),
+            //     Error::<T>::NonExistentToken
+            // );
+
+            ensure!(
+                who == Self::account_for_token(&token_id),
+                Error::<T>::NotTokenOwner
+            );
+
+			let id_of_token = Self::burn_basic_nft(token_id)?;
 		    Self::deposit_event(RawEvent::TokenBurned(id_of_token.clone()));
             Ok(())
         }
@@ -392,7 +400,7 @@ impl<T: Config> Module<T> {
             Ok(token_id)
     }
 
-     pub fn mint_basic_nft(target_account: &T::AccountId, token_id: TokenId/*, types: Types */) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
+     pub fn mint_basic_nft(target_account: &T::AccountId, token_id: TokenId) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
         // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
             ensure!(
                 !AccountForToken::<T>::contains_key(token_id),
@@ -402,12 +410,29 @@ impl<T: Config> Module<T> {
             // hash_set_of_tokens.insert(token_id);
             TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
             AccountForToken::<T>::insert(token_id, &target_account);
-            // TokensForAccount::<T>::insert(target_account, token_id, types);
             // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
             Ok(token_id)
     }
     
     pub fn burn_nft(token_id: TokenId) -> dispatch::result::Result<Token, dispatch::DispatchError> {
+        let owner = Self::owner_of(token_id);
+
+
+        TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+
+        let deleted_token = TokensForAccount::<T>::take(&owner, token_id);
+        // TokensForAccount::<T>::mutate(&owner, &token_id, |tokens| {
+        //     let pos = tokens
+        //         .binary_search(&token_id)
+        //         .expect("We already checked that we have the correct owner; qed");
+        //     tokens.remove(pos);
+        // });
+        AccountForToken::<T>::remove(&token_id);
+
+        Ok(deleted_token.unwrap())
+    }
+
+    pub fn burn_basic_nft(token_id: TokenId) -> dispatch::result::Result<Token, dispatch::DispatchError> {
         let owner = Self::owner_of(token_id);
 
 
