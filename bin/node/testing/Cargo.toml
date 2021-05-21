@@ -24,7 +24,7 @@ pallet-indices = { git = "https://github.com/paritytech/substrate", branch = "ma
 sp-keyring = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
 node-executor = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
 node-primitives = { version = "2.0.0", path = "../primitives" }
-node-runtime = { version = "2.0.0", path = "../runtime" }
+node-runtime = { version = "2.0.1", path = "../runtime" }
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
 sp-io = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }

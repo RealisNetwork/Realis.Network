@@ -12,13 +12,13 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
-frame-system = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-sp-application-crypto = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-sp-core = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+frame-system = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-application-crypto = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-core = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 
 [dev-dependencies]
-sp-serializer = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+sp-serializer = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81"}
 pretty_assertions = "0.6.1"
 
 [features]

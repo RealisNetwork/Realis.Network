@@ -21,16 +21,16 @@ targets = ['x86_64-unknown-linux-gnu']
 [dependencies]
 serde = { version = "1.0.102", optional = true }
 codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
-frame-support = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-frame-system = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
-sp-std = { git = "https://github.com/paritytech/substrate", branch = "master", optional = true }
+frame-support = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+frame-system = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+sp-std = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 pallet-nft = { version = "0.0.1", default-features = false, path="../nft" }
 
 [dev-dependencies]
-sp-core = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
-sp-io = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+sp-core = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sp-io = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 #sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
 
 
