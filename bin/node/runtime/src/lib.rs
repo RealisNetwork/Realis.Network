@@ -1158,21 +1158,21 @@ parameter_types! {
 	pub const ExistentialDepositOfRealisTokens: u128 = 1;
 }
 
-// impl pallet_nft::Config for Runtime {
-// 	type Event = Event;
-// 	type Balance = u128;
-// 	type ExistentialDeposit = ExistentialDepositOfRealisTokens;
-// 	type OnNewAccount = ();
-// 	type RealisTokenId = u32;
-// }
+impl pallet_nft::Config for Runtime {
+	type Event = Event;
+	type Balance = u128;
+	type ExistentialDeposit = ExistentialDepositOfRealisTokens;
+	type OnNewAccount = ();
+	type RealisTokenId = u32;
+}
 
-// impl pallet_realis_game_api::Config for Runtime {
-// 	type Event = Event;
-// }
+impl pallet_realis_game_api::Config for Runtime {
+	type Event = Event;
+}
 
-// parameter_types! {
-// 	StakingPoolModuleId: ModuleId = (*b"py/stakg");
-// 	pub const BondingDurationInBlockNumber: u32 = 64;
+parameter_types! {
+	StakingPoolModuleId: ModuleId = (*b"py/stakg");
+	// pub const BondingDurationInBlockNumber: u32 = 64;
 // //	pub const SlashDeferDuration: realis_staking::EraIndex =  27; //SlashDeferDuration should be less than BondingDuration https://github.com/paritytech/substrate/blob/49a4103f4bfef55be20a5c6d26e18ff3003c3353/frame/staking/src/lib.rs#L1402
 // //	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 // //	pub const MaxNominatorRewardedPerValidator: u32 = 64;
@@ -1180,19 +1180,19 @@ parameter_types! {
 // //	pub const MaxIterations: u32 = 10;
 // //	// 0.05%. The higher the value, the more strict solution acceptance becomes.
 // //	pub MinSolutionScoreBump: Perbill = Perbill::from_rational_approximation(5u32, 10_000);
-// }
+}
 
-// impl realis_staking::Config for Runtime {
-// 	type Event = Event;
-// 	type ModuleId = StakingPoolModuleId;
-// 	type SessionPerEra = SessionPerEra;
-// 	type BondingDurationInEra = BondingDuration;
-// 	type BondingDurationInBlockNumber = ();
-// 	type SlashDeferDuration = SlashDeferDuration;
-// 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
-// 	type Cap = ();
-// 	type Power = ();
-// }
+impl realis_staking::Config for Runtime {
+	type Event = Event;
+	type ModuleId = StakingPoolModuleId;
+	type SessionPerEra = SessionPerEra;
+	type BondingDurationInEra = BondingDuration;
+	type BondingDurationInBlockNumber = ();
+	type SlashDeferDuration = SlashDeferDuration;
+	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+	type Cap = ();
+	type Power = ();
+}
 
 construct_runtime!(
 	pub enum Runtime where
@@ -1238,9 +1238,9 @@ construct_runtime!(
 		Mmr: pallet_mmr::{Pallet, Storage},
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
-		// Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
-		// RealisApi: pallet_realis_game_api::{Pallet, Call, Event<T>},
-		// StakingPool: staking_pool::{Pallet, Call, Event<T>, Config<T>, Storage},
+		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
+		RealisApi: pallet_realis_game_api::{Pallet, Call, Event<T>},
+		StakingPool: staking_pool::{Pallet, Call, Event<T>, Config<T>, Storage},
 	}
 );
 

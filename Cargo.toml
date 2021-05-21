@@ -4,9 +4,10 @@ cargo-features = ["resolver"]
 members = [
 	"bin/node/cli",
     "bin/node/runtime",
-    # "frame/realis-game-api",
-    # "frame/staking-pool",
-    # "frame/nft",
+    "frame/realis-game-api",
+    "frame/staking-pool",
+    "frame/nft",
+    "primitives",
 ]
 
 resolver = "2"

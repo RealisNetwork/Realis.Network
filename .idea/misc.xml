@@ -11,7 +11,7 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="\\wsl$\Ubuntu-18.04\home\seb\ReAlis-Network" />
+            <option value="\\wsl$\Ubuntu-18.04\home\substrate\Tools\Realis.Network" />
           </set>
         </option>
         <option name="version" value="2" />
