@@ -1,0 +1,527 @@
+   Compiling zstd-sys v1.4.20+zstd.1.4.9
+   Compiling nalgebra v0.25.4
+   Compiling tracing-subscriber v0.2.18
+   Compiling sp-api-proc-macro v3.0.0 (https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81#0bda8654)
+   Compiling pallet-nft v0.0.2 (/home/substrate/Tools/Realis.Network/frame/nft)
+error[E0433]: failed to resolve: use of undeclared crate or module `sp_std`
+  --> frame/nft/src/lib.rs:17:5
+   |
+17 | use sp_std::prelude::*;
+   |     ^^^^^^ use of undeclared crate or module `sp_std`
+
+error[E0433]: failed to resolve: use of undeclared crate or module `frame_support`
+ --> frame/nft/src/lib.rs:7:5
+  |
+7 | use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::{
+  |     ^^^^^^^^^^^^^ use of undeclared crate or module `frame_support`
+
+error[E0433]: failed to resolve: use of undeclared crate or module `sp_runtime`
+  --> frame/nft/src/lib.rs:10:5
+   |
+10 | use sp_runtime::{traits::{AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
+   |     ^^^^^^^^^^ use of undeclared crate or module `sp_runtime`
+
+error[E0432]: unresolved imports `frame_support`, `frame_support::traits::ExistenceRequirement`, `frame_support::traits::ExistenceRequirement::AllowDeath`, `frame_support::traits::StoredMap`, `frame_support::traits::WithdrawReasons`, `frame_support::traits::OnNewAccount`, `frame_support::traits::Get`, `sp_runtime::traits::AtLeast32BitUnsigned`, `sp_runtime::traits::Bounded`, `sp_runtime::traits::CheckedAdd`, `sp_runtime::traits::CheckedSub`, `sp_runtime::traits::Member`, `sp_runtime::traits::Saturating`, `sp_runtime::traits::StaticLookup`, `sp_runtime::traits::StoredMapError`, `sp_runtime::traits::Zero`
+  --> frame/nft/src/lib.rs:7:5
+   |
+7  | use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::{
+   |     ^^^^^^^^^^^^^ use of undeclared crate or module `frame_support`
+8  |     ExistenceRequirement, ExistenceRequirement::AllowDeath, StoredMap, WithdrawReasons, OnNewAccount, Get,
+   |     ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^  ^^^^^^^^^^^^^^^  ^^^^^^^^^^^^  ^^^
+9  | }, Parameter};
+10 | use sp_runtime::{traits::{AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
+   |                           ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^  ^^^^^^^^^^  ^^^^^^^^^^  ^^^^^^  ^^^^^^^^^^  ^^^^^^^^^^^^
+11 |     StoredMapError, Zero,}, RuntimeDebug};
+   |     ^^^^^^^^^^^^^^  ^^^^
+
+error[E0432]: unresolved import `sp_runtime`
+  --> frame/nft/src/lib.rs:10:5
+   |
+10 | use sp_runtime::{traits::{AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
+   |     ^^^^^^^^^^ use of undeclared crate or module `sp_runtime`
+
+error[E0432]: unresolved import `frame_system`
+  --> frame/nft/src/lib.rs:12:5
+   |
+12 | use frame_system::{ensure_signed, split_inner, RefCount, ensure_root};
+   |     ^^^^^^^^^^^^ use of undeclared crate or module `frame_system`
+
+error[E0432]: unresolved import `pallet_balances`
+  --> frame/nft/src/lib.rs:13:5
+   |
+13 | use pallet_balances;
+   |     ^^^^^^^^^^^^^^^ no external crate `pallet_balances`
+
+error: cannot determine resolution for the derive macro `RuntimeDebug`
+  --> frame/nft/src/lib.rs:67:54
+   |
+67 | #[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug)]
+   |                                                      ^^^^^^^^^^^^
+   |
+   = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the derive macro `RuntimeDebug`
+  --> frame/nft/src/lib.rs:89:41
+   |
+89 | #[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]
+   |                                         ^^^^^^^^^^^^
+   |
+   = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the derive macro `RuntimeDebug`
+   --> frame/nft/src/lib.rs:101:57
+    |
+101 | #[derive(Encode, Decode, Clone, PartialEq, Eq, Default, RuntimeDebug)]
+    |                                                         ^^^^^^^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `decl_storage`
+   --> frame/nft/src/lib.rs:171:1
+    |
+171 | decl_storage! {
+    | ^^^^^^^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `decl_event`
+   --> frame/nft/src/lib.rs:192:1
+    |
+192 | decl_event!(
+    | ^^^^^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `decl_error`
+   --> frame/nft/src/lib.rs:232:1
+    |
+232 | decl_error! {
+    | ^^^^^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `decl_module`
+   --> frame/nft/src/lib.rs:277:1
+    |
+277 | decl_module! {
+    | ^^^^^^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `ensure`
+   --> frame/nft/src/lib.rs:391:13
+    |
+391 |             ensure!(
+    |             ^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `ensure`
+   --> frame/nft/src/lib.rs:406:13
+    |
+406 |             ensure!(
+    |             ^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `ensure`
+   --> frame/nft/src/lib.rs:458:9
+    |
+458 |         ensure!(
+    |         ^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `ensure`
+   --> frame/nft/src/lib.rs:478:9
+    |
+478 |         ensure!(
+    |         ^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `ensure`
+   --> frame/nft/src/lib.rs:499:9
+    |
+499 |         ensure!(
+    |         ^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `ensure`
+   --> frame/nft/src/lib.rs:533:17
+    |
+533 |                 ensure!(to_account.total() >= ed, Error::<T>::ExistentialDeposit);
+    |                 ^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `ensure`
+   --> frame/nft/src/lib.rs:545:17
+    |
+545 |                 ensure!(
+    |                 ^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error: cannot determine resolution for the macro `ensure`
+   --> frame/nft/src/lib.rs:598:9
+    |
+598 |         ensure!(
+    |         ^^^^^^
+    |
+    = note: import resolution is stuck, try simplifying macro imports
+
+error[E0433]: failed to resolve: use of undeclared type `WithdrawReasons`
+  --> frame/nft/src/lib.rs:79:11
+   |
+79 |         if r == WithdrawReasons::from(WithdrawReasons::TRANSACTION_PAYMENT) {
+   |                 ^^^^^^^^^^^^^^^ use of undeclared type `WithdrawReasons`
+
+error[E0433]: failed to resolve: use of undeclared type `WithdrawReasons`
+  --> frame/nft/src/lib.rs:79:33
+   |
+79 |         if r == WithdrawReasons::from(WithdrawReasons::TRANSACTION_PAYMENT) {
+   |                                       ^^^^^^^^^^^^^^^ use of undeclared type `WithdrawReasons`
+
+error[E0433]: failed to resolve: use of undeclared type `WithdrawReasons`
+  --> frame/nft/src/lib.rs:81:24
+   |
+81 |         } else if r.contains(WithdrawReasons::TRANSACTION_PAYMENT) {
+   |                              ^^^^^^^^^^^^^^^ use of undeclared type `WithdrawReasons`
+
+error[E0433]: failed to resolve: use of undeclared crate or module `frame_system`
+   --> frame/nft/src/lib.rs:146:19
+    |
+146 | pub trait Config: frame_system::Config {
+    |                   ^^^^^^^^^^^^ use of undeclared crate or module `frame_system`
+
+error[E0433]: failed to resolve: use of undeclared crate or module `frame_system`
+   --> frame/nft/src/lib.rs:148:51
+    |
+148 |     type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
+    |                                                   ^^^^^^^^^^^^ use of undeclared crate or module `frame_system`
+
+error[E0433]: failed to resolve: use of undeclared type `TokensForAccount`
+   --> frame/nft/src/lib.rs:396:13
+    |
+396 |             TokensForAccount::<T>::insert(target_account, token_id, token_info);
+    |             ^^^^^^^^^^^^^^^^ use of undeclared type `TokensForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `TotalForAccount`
+   --> frame/nft/src/lib.rs:398:13
+    |
+398 |             TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+    |             ^^^^^^^^^^^^^^^ use of undeclared type `TotalForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `AccountForToken`
+   --> frame/nft/src/lib.rs:399:13
+    |
+399 |             AccountForToken::<T>::insert(token_id, &target_account);
+    |             ^^^^^^^^^^^^^^^ use of undeclared type `AccountForToken`
+
+error[E0433]: failed to resolve: use of undeclared type `TotalForAccount`
+   --> frame/nft/src/lib.rs:412:13
+    |
+412 |             TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+    |             ^^^^^^^^^^^^^^^ use of undeclared type `TotalForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `AccountForToken`
+   --> frame/nft/src/lib.rs:413:13
+    |
+413 |             AccountForToken::<T>::insert(token_id, &target_account);
+    |             ^^^^^^^^^^^^^^^ use of undeclared type `AccountForToken`
+
+error[E0433]: failed to resolve: use of undeclared type `TotalForAccount`
+   --> frame/nft/src/lib.rs:422:9
+    |
+422 |         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `TotalForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `TokensForAccount`
+   --> frame/nft/src/lib.rs:424:29
+    |
+424 |         let deleted_token = TokensForAccount::<T>::take(&owner, token_id);
+    |                             ^^^^^^^^^^^^^^^^ use of undeclared type `TokensForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `AccountForToken`
+   --> frame/nft/src/lib.rs:431:9
+    |
+431 |         AccountForToken::<T>::remove(&token_id);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `AccountForToken`
+
+error[E0433]: failed to resolve: use of undeclared type `TotalForAccount`
+   --> frame/nft/src/lib.rs:440:9
+    |
+440 |         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `TotalForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `TokensForAccount`
+   --> frame/nft/src/lib.rs:442:29
+    |
+442 |         let deleted_token = TokensForAccount::<T>::take(&owner, token_id);
+    |                             ^^^^^^^^^^^^^^^^ use of undeclared type `TokensForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `AccountForToken`
+   --> frame/nft/src/lib.rs:449:9
+    |
+449 |         AccountForToken::<T>::remove(&token_id);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `AccountForToken`
+
+error[E0433]: failed to resolve: use of undeclared type `TotalForAccount`
+   --> frame/nft/src/lib.rs:463:9
+    |
+463 |         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `TotalForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `TotalForAccount`
+   --> frame/nft/src/lib.rs:464:9
+    |
+464 |         TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `TotalForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `AccountForToken`
+   --> frame/nft/src/lib.rs:465:9
+    |
+465 |         AccountForToken::<T>::remove(token_id);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `AccountForToken`
+
+error[E0433]: failed to resolve: use of undeclared type `TokensForAccount`
+   --> frame/nft/src/lib.rs:467:33
+    |
+467 |         let transferred_token = TokensForAccount::<T>::take(owner, token_id).unwrap();
+    |                                 ^^^^^^^^^^^^^^^^ use of undeclared type `TokensForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `TokensForAccount`
+   --> frame/nft/src/lib.rs:469:9
+    |
+469 |         TokensForAccount::<T>::insert(dest_account, token_id, transferred_token);
+    |         ^^^^^^^^^^^^^^^^ use of undeclared type `TokensForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `AccountForToken`
+   --> frame/nft/src/lib.rs:470:9
+    |
+470 |         AccountForToken::<T>::insert(token_id, &dest_account);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `AccountForToken`
+
+error[E0433]: failed to resolve: use of undeclared type `TotalForAccount`
+   --> frame/nft/src/lib.rs:483:9
+    |
+483 |         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `TotalForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `TotalForAccount`
+   --> frame/nft/src/lib.rs:484:9
+    |
+484 |         TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `TotalForAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `AccountForToken`
+   --> frame/nft/src/lib.rs:485:9
+    |
+485 |         AccountForToken::<T>::remove(token_id);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `AccountForToken`
+
+error[E0433]: failed to resolve: use of undeclared type `AccountForToken`
+   --> frame/nft/src/lib.rs:487:33
+    |
+487 |         let transferred_token = AccountForToken::<T>::take(token_id);
+    |                                 ^^^^^^^^^^^^^^^ use of undeclared type `AccountForToken`
+
+error[E0433]: failed to resolve: use of undeclared type `AccountForToken`
+   --> frame/nft/src/lib.rs:489:9
+    |
+489 |         AccountForToken::<T>::insert(token_id, &dest_account);
+    |         ^^^^^^^^^^^^^^^ use of undeclared type `AccountForToken`
+
+error[E0433]: failed to resolve: use of undeclared type `Error`
+   --> frame/nft/src/lib.rs:523:28
+    |
+523 |                     .ok_or(Error::<T>::InsufficientBalance)?;
+    |                            ^^^^^ use of undeclared type `Error`
+
+error[E0433]: failed to resolve: use of undeclared type `Error`
+   --> frame/nft/src/lib.rs:530:28
+    |
+530 |                     .ok_or(Error::<T>::Overflow)?;
+    |                            ^^^^^ use of undeclared type `Error`
+
+error[E0433]: failed to resolve: use of undeclared type `WithdrawReasons`
+   --> frame/nft/src/lib.rs:539:21
+    |
+539 |                     WithdrawReasons::TRANSFER,
+    |                     ^^^^^^^^^^^^^^^ use of undeclared type `WithdrawReasons`
+
+error[E0433]: failed to resolve: use of undeclared type `ExistenceRequirement`
+   --> frame/nft/src/lib.rs:543:60
+    |
+543 |                 let allow_death = existence_requirement == ExistenceRequirement::AllowDeath;
+    |                                                            ^^^^^^^^^^^^^^^^^^^^ use of undeclared type `ExistenceRequirement`
+
+error[E0433]: failed to resolve: use of undeclared crate or module `frame_system`
+   --> frame/nft/src/lib.rs:544:50
+    |
+544 |                 let allow_death = allow_death && frame_system::Module::<T>::allow_death(transactor);
+    |                                                  ^^^^^^^^^^^^ use of undeclared crate or module `frame_system`
+
+error[E0433]: failed to resolve: use of undeclared type `RawEvent`
+   --> frame/nft/src/lib.rs:555:29
+    |
+555 |         Self::deposit_event(RawEvent::Transfer(
+    |                             ^^^^^^^^ use of undeclared type `RawEvent`
+
+error[E0433]: failed to resolve: use of undeclared type `RawEvent`
+   --> frame/nft/src/lib.rs:581:37
+    |
+581 |                 Self::deposit_event(RawEvent::Endowed(who.clone(), token_id, endowed));
+    |                                     ^^^^^^^^ use of undeclared type `RawEvent`
+
+error[E0433]: failed to resolve: use of undeclared type `SystemAccount`
+   --> frame/nft/src/lib.rs:609:9
+    |
+609 |         SystemAccount::<T>::try_mutate_exists(k, |maybe_value| {
+    |         ^^^^^^^^^^^^^ use of undeclared type `SystemAccount`
+
+error[E0433]: failed to resolve: use of undeclared type `RawEvent`
+   --> frame/nft/src/lib.rs:662:29
+    |
+662 |         Self::deposit_event(RawEvent::NewAccount(who.1, who.0));
+    |                             ^^^^^^^^ use of undeclared type `RawEvent`
+
+error[E0433]: failed to resolve: use of undeclared type `SystemAccount`
+   --> frame/nft/src/lib.rs:670:9
+    |
+670 |         SystemAccount::<T>::get(k).data
+    |         ^^^^^^^^^^^^^ use of undeclared type `SystemAccount`
+
+error[E0412]: cannot find type `WithdrawReasons` in this scope
+  --> frame/nft/src/lib.rs:77:11
+   |
+77 | impl From<WithdrawReasons> for Reasons {
+   |     -     ^^^^^^^^^^^^^^^ not found in this scope
+   |     |
+   |     help: you might be missing a type parameter: `<WithdrawReasons>`
+
+error[E0412]: cannot find type `WithdrawReasons` in this scope
+  --> frame/nft/src/lib.rs:78:13
+   |
+78 |     fn from(r: WithdrawReasons) -> Reasons {
+   |                ^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0405]: cannot find trait `Saturating` in this scope
+   --> frame/nft/src/lib.rs:124:15
+    |
+124 | impl<Balance: Saturating + Copy + Ord> AccountData<Balance> {
+    |               ^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `Event` in this scope
+   --> frame/nft/src/lib.rs:148:22
+    |
+148 |     type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
+    |                      ^^^^^------
+    |                      |
+    |                      help: you might have meant to use the associated type: `Self::Event`
+
+error[E0405]: cannot find trait `Member` in this scope
+   --> frame/nft/src/lib.rs:150:19
+    |
+150 |     type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy;
+    |                   ^^^^^^ not found in this scope
+
+error[E0405]: cannot find trait `AtLeast32BitUnsigned` in this scope
+   --> frame/nft/src/lib.rs:150:40
+    |
+150 |     type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy;
+    |                                        ^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0405]: cannot find trait `OnNewAccount` in this scope
+   --> frame/nft/src/lib.rs:152:24
+    |
+152 |     type OnNewAccount: OnNewAccount<(Self::RealisTokenId, Self::AccountId)>;
+    |                        ^^^^^^^^^^^^----------------------------------------
+    |                        |
+    |                        help: you might have meant to use the associated type: `Self::OnNewAccount`
+
+error[E0405]: cannot find trait `Get` in this scope
+   --> frame/nft/src/lib.rs:154:30
+    |
+154 |     type ExistentialDeposit: Get<Self::Balance>;
+    |                              ^^^ not found in this scope
+
+error[E0405]: cannot find trait `AtLeast32BitUnsigned` in this scope
+   --> frame/nft/src/lib.rs:156:37
+    |
+156 |     type RealisTokenId: Parameter + AtLeast32BitUnsigned + Default + Copy;
+    |                                     ^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `Module` in this scope
+   --> frame/nft/src/lib.rs:388:17
+    |
+388 | impl<T: Config> Module<T> {
+    |                 ^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `MinTokenId` in this scope
+   --> frame/nft/src/lib.rs:495:11
+    |
+25  | pub type TokenId = U256;
+    | ------------------------ similarly named type alias `TokenId` defined here
+...
+495 |         (<MinTokenId<T>>::get(), <MaxTokenId<T>>::get())
+    |           ^^^^^^^^^^ help: a type alias with a similar name exists: `TokenId`
+
+error[E0412]: cannot find type `MaxTokenId` in this scope
+   --> frame/nft/src/lib.rs:495:35
+    |
+25  | pub type TokenId = U256;
+    | ------------------------ similarly named type alias `TokenId` defined here
+...
+495 |         (<MinTokenId<T>>::get(), <MaxTokenId<T>>::get())
+    |                                   ^^^^^^^^^^ help: a type alias with a similar name exists: `TokenId`
+
+error[E0412]: cannot find type `ExistenceRequirement` in this scope
+   --> frame/nft/src/lib.rs:512:32
+    |
+512 |         existence_requirement: ExistenceRequirement,
+    |                                ^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `StoredMapError` in this scope
+   --> frame/nft/src/lib.rs:565:38
+    |
+388 | impl<T: Config> Module<T> {
+    |               - help: you might be missing a type parameter: `, StoredMapError`
+...
+565 |     fn try_mutate_account<R, E: From<StoredMapError>>(
+    |                                      ^^^^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `WithdrawReasons` in this scope
+   --> frame/nft/src/lib.rs:591:18
+    |
+591 |         reasons: WithdrawReasons,
+    |                  ^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `StoredMapError` in this scope
+   --> frame/nft/src/lib.rs:605:37
+    |
+388 | impl<T: Config> Module<T> {
+    |               - help: you might be missing a type parameter: `, StoredMapError`
+...
+605 |     fn try_mutate_exists<R, E: From<StoredMapError>>(
+    |                                     ^^^^^^^^^^^^^^ not found in this scope
+
+warning: unused import: `EncodeLike`
+  --> frame/nft/src/lib.rs:16:29
+   |
+16 | use codec::{Decode, Encode, EncodeLike};
+   |                             ^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+error: aborting due to 75 previous errors; 1 warning emitted
+
+Some errors have detailed explanations: E0405, E0412, E0432, E0433.
+For more information about an error, try `rustc --explain E0405`.
+error: could not compile `pallet-nft`
+
+To learn more, run the command again with --verbose.
+warning: build failed, waiting for other jobs to finish...
+error: build failed

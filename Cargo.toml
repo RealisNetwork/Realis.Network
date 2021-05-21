@@ -5,10 +5,9 @@ members = [
 	"bin/node/cli",
     "bin/node/primitives",
     "bin/node/runtime",
-    "bin/node/testing",
-    "frame/realis-game-api",
-    "frame/staking-pool",
-    "frame/nft",
+    # "frame/realis-game-api",
+    # "frame/staking-pool",
+    # "frame/nft",
 ]
 
 resolver = "2"
