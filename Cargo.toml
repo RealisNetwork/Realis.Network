@@ -7,7 +7,6 @@ members = [
     "frame/realis-game-api",
     "frame/staking-pool",
     "frame/nft",
-    "primitives",
 ]
 
 resolver = "2"

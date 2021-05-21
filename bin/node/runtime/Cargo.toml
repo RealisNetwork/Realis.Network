@@ -14,7 +14,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 [dependencies]
 
 # third-party dependencies
-codec = { package = "parity-scale-codec", version = "2.0.1", default-features = false, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
 serde = { version = "1.0.102", optional = true }
 static_assertions = "1.1.0"
 hex-literal = { version = "0.3.1", optional = true }
@@ -31,7 +31,6 @@ sp-block-builder = { git = "https://github.com/paritytech/substrate", rev = "0bd
 sp-consensus-aura = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 sp-core = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 sp-inherents = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
-sp-io = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 sp-offchain = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 sp-session = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
@@ -164,9 +163,9 @@ std = [
 	"pallet-vesting/std",
 	"log/std",
 	"frame-try-runtime/std",
-	# "pallet-nft/std",
-	# "pallet-realis-game-api/std",
-	# "staking-pool/std",
+	"pallet-nft/std",
+	"pallet-realis-game-api/std",
+	"staking-pool/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",

@@ -28,7 +28,8 @@ Realis.json
 REALIS.json
 ReAlIs.json
 ReaLIS.json
-.vs
+.vs/
 logs.txt
-.idea
-.devcontainer
+.idea/
+.devcontainer/
+.vscode/
