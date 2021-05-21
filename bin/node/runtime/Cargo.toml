@@ -19,11 +19,12 @@ serde = { version = "1.0.102", optional = true }
 static_assertions = "1.1.0"
 hex-literal = { version = "0.3.1", optional = true }
 log = { version = "0.4.14", default-features = false }
+getrandom = { version = "0.2", features = ["js"] }
 
 # primitives
 sp-authority-discovery = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 sp-consensus-babe = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
-node-primitives = { version = "2.0.0", default-features = false, path = "../primitives" }
+node-primitives = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 sp-api = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 sp-application-crypto = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 sp-block-builder = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
