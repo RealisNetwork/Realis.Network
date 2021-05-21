@@ -3852,6 +3852,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "node-cli"
+version = "2.0.0"
+dependencies = [
+ "frame-benchmarking-cli",
+ "futures 0.3.15",
+ "log",
+ "sc-cli",
+ "sc-service",
+ "sp-core",
+ "sp-trie",
+ "structopt",
+ "substrate-browser-utils",
+ "substrate-build-script-utils",
+ "thiserror",
+ "try-runtime-cli",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
 name = "node-primitives"
 version = "2.0.0"
 source = "git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81#0bda86540d44b09da6f1ea6656f3f52d5447db81"
@@ -5218,26 +5238,6 @@ name = "platforms"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "989d43012e2ca1c4a02507c67282691a0a3207f9dc67cec596b43fe925b3d325"
-
-[[package]]
-name = "polkadot-cli"
-version = "2.0.0"
-dependencies = [
- "frame-benchmarking-cli",
- "futures 0.3.15",
- "log",
- "sc-cli",
- "sc-service",
- "sp-core",
- "sp-trie",
- "structopt",
- "substrate-browser-utils",
- "substrate-build-script-utils",
- "thiserror",
- "try-runtime-cli",
- "wasm-bindgen",
- "wasm-bindgen-futures",
-]
 
 [[package]]
 name = "polling"
