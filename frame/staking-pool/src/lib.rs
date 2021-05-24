@@ -55,12 +55,12 @@ mod types {
 	/// The balance type of this module.
 	pub type CurBalance<T> = <CurCurrency<T> as Currency<AccountId<T>>>::Balance;
 	pub type CurPositiveImbalance<T> =
-		<CurCurrency<T> as Currency<AccountId<T>>>::PositiveImbalance;
+	<CurCurrency<T> as Currency<AccountId<T>>>::PositiveImbalance;
 	pub type CurNegativeImbalance<T> =
-		<CurCurrency<T> as Currency<AccountId<T>>>::NegativeImbalance;
+	<CurCurrency<T> as Currency<AccountId<T>>>::NegativeImbalance;
 
 	pub type StakingLedgerT<T> =
-		StakingLedger<AccountId<T>, CurBalance<T>, BlockNumber<T>>;
+	StakingLedger<AccountId<T>, CurBalance<T>, BlockNumber<T>>;
 	pub type StakingBalanceT<T> = StakingBalance<CurBalance<T>>;
 
 	pub type ExposureT<T> = Exposure<AccountId<T>, CurBalance<T>>;
@@ -300,15 +300,15 @@ pub trait SessionInterface<AccountId>: frame_system::Config {
 	fn prune_historical_up_to(up_to: SessionIndex);
 }
 impl<T: Config> SessionInterface<AccountId<T>> for T
-where
-	T: pallet_session::Config<ValidatorId = AccountId<T>>,
-	T: pallet_session::historical::Config<
-		FullIdentification = Exposure<AccountId<T>, CurBalance<T>>,
-		FullIdentificationOf = ExposureOf<T>,
-	>,
-	T::SessionHandler: pallet_session::SessionHandler<AccountId<T>>,
-	T::SessionManager: pallet_session::SessionManager<AccountId<T>>,
-	T::ValidatorIdOf: Convert<AccountId<T>, Option<AccountId<T>>>,
+	where
+		T: pallet_session::Config<ValidatorId = AccountId<T>>,
+		T: pallet_session::historical::Config<
+			FullIdentification = Exposure<AccountId<T>, CurBalance<T>>,
+			FullIdentificationOf = ExposureOf<T>,
+		>,
+		T::SessionHandler: pallet_session::SessionHandler<AccountId<T>>,
+		T::SessionManager: pallet_session::SessionManager<AccountId<T>>,
+		T::ValidatorIdOf: Convert<AccountId<T>, Option<AccountId<T>>>,
 {
 	fn disable_validator(validator: &AccountId<T>) -> Result<bool, ()> {
 		<pallet_session::Pallet<T>>::disable(validator)
@@ -1851,13 +1851,13 @@ impl<T: Config> Module<T> {
 			WithdrawReasons::all(),
 			KeepAlive,
 		)
-		.map_err(|_| <Error<T>>::PayoutIns)?;
+			.map_err(|_| <Error<T>>::PayoutIns)?;
 
 		debug_assert!(nominator_payout_count <= T::MaxNominatorRewardedPerValidator::get());
 		Ok(Some(T::WeightInfo::payout_stakers_alive_staked(
 			nominator_payout_count,
 		))
-		.into())
+			.into())
 	}
 
 	/// Update the ledger for a controller.
@@ -1978,7 +1978,7 @@ impl<T: Config> Module<T> {
 		// active era is one behind (i.e. in the *last session of the active era*, or *first session
 		// of the new current era*, depending on how you look at it).
 		if let Some(next_active_era_start_session_index) =
-			Self::eras_start_session_index(next_active_era)
+		Self::eras_start_session_index(next_active_era)
 		{
 			if next_active_era_start_session_index == start_session {
 				Self::start_era(start_session);
@@ -2137,12 +2137,12 @@ impl<T: Config> Module<T> {
 			// Session will panic if we ever return an empty validator set, thus max(1) ^^.
 			if current_era > 0 {
 				log!(
-						warn,
-						"chain does not have enough staking candidates to operate for era {:?} ({} elected, minimum is {})",
-						current_era,
-						elected_stashes.len(),
-						Self::minimum_validator_count(),
-					);
+					warn,
+					"chain does not have enough staking candidates to operate for era {:?} ({} elected, minimum is {})",
+					current_era,
+					elected_stashes.len(),
+					Self::minimum_validator_count(),
+				);
 			}
 			return Err(());
 		}
@@ -2210,11 +2210,11 @@ impl<T: Config> Module<T> {
 
 						let origin_cur_balance = Self::stake_of(&nominator);
 						let cur_balance = if let Ok(cur_balance) =
-							helpers_128bit::multiply_by_rational(
-								origin_cur_balance.saturated_into(),
-								power_u128,
-								origin_power_u128,
-							) {
+						helpers_128bit::multiply_by_rational(
+							origin_cur_balance.saturated_into(),
+							power_u128,
+							origin_power_u128,
+						) {
 							cur_balance.saturated_into()
 						} else {
 							log!(
@@ -2551,7 +2551,7 @@ impl<T: Config> pallet_session::SessionManager<T::AccountId> for Module<T> {
 }
 
 impl<T: Config> pallet_session::historical::SessionManager<T::AccountId, ExposureT<T>>
-	for Module<T>
+for Module<T>
 {
 	fn new_session(new_index: SessionIndex) -> Option<Vec<(T::AccountId, ExposureT<T>)>> {
 		<Self as pallet_session::SessionManager<_>>::new_session(new_index).map(|validators| {
@@ -2577,17 +2577,17 @@ impl<T: Config> pallet_session::historical::SessionManager<T::AccountId, Exposur
 }
 
 impl<T> OnOffenceHandler<T::AccountId, pallet_session::historical::IdentificationTuple<T>, Weight>
-	for Module<T>
-where
-	T: Config
+for Module<T>
+	where
+		T: Config
 		+ pallet_session::Config<ValidatorId = AccountId<T>>
 		+ pallet_session::historical::Config<
 			FullIdentification = ExposureT<T>,
 			FullIdentificationOf = ExposureOf<T>,
 		>,
-	T::SessionHandler: pallet_session::SessionHandler<AccountId<T>>,
-	T::SessionManager: pallet_session::SessionManager<AccountId<T>>,
-	T::ValidatorIdOf: Convert<AccountId<T>, Option<AccountId<T>>>,
+		T::SessionHandler: pallet_session::SessionHandler<AccountId<T>>,
+		T::SessionManager: pallet_session::SessionManager<AccountId<T>>,
+		T::ValidatorIdOf: Convert<AccountId<T>, Option<AccountId<T>>>,
 {
 	fn on_offence(
 		offenders: &[OffenceDetails<
@@ -2797,8 +2797,8 @@ impl<T: Config> OnDepositRedeem<T::AccountId, CurBalance<T>> for Module<T> {
 /// * 2 points to the block producer for each reference to a previously unreferenced uncle, and
 /// * 1 point to the producer of each referenced uncle block.
 impl<T> pallet_authorship::EventHandler<T::AccountId, T::BlockNumber> for Module<T>
-where
-	T: Config + pallet_authorship::Config + pallet_session::Config,
+	where
+		T: Config + pallet_authorship::Config + pallet_session::Config,
 {
 	fn note_author(author: T::AccountId) {
 		Self::reward_by_ids(vec![(author, 20)]);
@@ -2843,11 +2843,11 @@ pub struct FilterHistoricalOffences<T, R> {
 	_inner: PhantomData<(T, R)>,
 }
 impl<T, Reporter, Offender, R, O> ReportOffence<Reporter, Offender, O>
-	for FilterHistoricalOffences<Module<T>, R>
-where
-	T: Config,
-	R: ReportOffence<Reporter, Offender, O>,
-	O: Offence<Offender>,
+for FilterHistoricalOffences<Module<T>, R>
+	where
+		T: Config,
+		R: ReportOffence<Reporter, Offender, O>,
+		O: Offence<Offender>,
 {
 	fn report_offence(reporters: Vec<Reporter>, offence: O) -> Result<(), OffenceError> {
 		// disallow any slashing from before the current bonding period.
@@ -2943,14 +2943,14 @@ impl Default for Forcing {
 /// To unify *Cur* and *KTON* balances.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
 pub enum StakingBalance<CurBalance>
-where
-	CurBalance: HasCompact,
+	where
+		CurBalance: HasCompact,
 {
 	CurBalance(CurBalance),
 }
 impl<CurBalance> Default for StakingBalance<CurBalance>
-where
-	CurBalance: Zero + HasCompact,
+	where
+		CurBalance: Zero + HasCompact,
 {
 	fn default() -> Self {
 		StakingBalance::CurBalance(Zero::zero())
@@ -3004,8 +3004,8 @@ impl Default for ValidatorPrefs {
 /// The ledger of a (bonded) stash.
 #[derive(PartialEq, Eq, Clone, Default, Encode, Decode, RuntimeDebug)]
 pub struct StakingLedger<AccountId, CurBalance, BlockNumber>
-where
-	CurBalance: HasCompact,
+	where
+		CurBalance: HasCompact,
 {
 	/// The stash account whose balance is actually locked and at stake.
 	pub stash: AccountId,
@@ -3029,11 +3029,11 @@ where
 	pub claimed_rewards: Vec<EraIndex>,
 }
 impl<AccountId, CurBalance, BlockNumber>
-	StakingLedger<AccountId, CurBalance, BlockNumber>
-where
-	CurBalance: Copy + AtLeast32BitUnsigned + Saturating,
-	BlockNumber: Copy + PartialOrd,
-	TsInMs: PartialOrd,
+StakingLedger<AccountId, CurBalance, BlockNumber>
+	where
+		CurBalance: Copy + AtLeast32BitUnsigned + Saturating,
+		BlockNumber: Copy + PartialOrd,
+		TsInMs: PartialOrd,
 {
 	pub fn cur_locked_amount_at(&self, at: BlockNumber) -> CurBalance {
 		self.cur_staking_lock.locked_amount(at)
@@ -3092,15 +3092,15 @@ where
 		ts: TsInMs,
 	) -> (CurBalance) {
 		let slash_out_of = |active_cur: &mut CurBalance,
-		                    active_deposit_cur: &mut CurBalance,
-		                    deposit_item: &mut Vec<TimeDepositItem<CurBalance>>,
-		                    slash_cur: &mut CurBalance| {
+							active_deposit_cur: &mut CurBalance,
+							deposit_item: &mut Vec<TimeDepositItem<CurBalance>>,
+							slash_cur: &mut CurBalance| {
 			let slashable_active_cur = (*slash_cur).min(*active_cur);
 
 			if !slashable_active_cur.is_zero() {
 				let slashable_normal_cur = *active_cur - *active_deposit_cur;
 				if let Some(mut slashable_deposit_cur) =
-					slashable_active_cur.checked_sub(&slashable_normal_cur)
+				slashable_active_cur.checked_sub(&slashable_normal_cur)
 				{
 					*active_deposit_cur -= slashable_deposit_cur;
 
@@ -3112,7 +3112,7 @@ where
 								false
 							} else {
 								if let Some(new_slashable_deposit_cur) =
-									slashable_deposit_cur.checked_sub(&item.value)
+								slashable_deposit_cur.checked_sub(&item.value)
 								{
 									slashable_deposit_cur = new_slashable_deposit_cur;
 									true
@@ -3204,8 +3204,8 @@ pub struct Nominations<AccountId> {
 /// A snapshot of the stake backing a single validator in the system.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, Default, RuntimeDebug)]
 pub struct Exposure<AccountId, CurBalance>
-where
-	CurBalance: HasCompact,
+	where
+		CurBalance: HasCompact,
 {
 	/// The validator's own stash that is exposed.
 	#[codec(compact)]
@@ -3221,8 +3221,8 @@ where
 /// The amount of exposure (to slashing) than an individual nominator has.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
 pub struct IndividualExposure<AccountId, CurBalance>
-where
-	CurBalance: HasCompact,
+	where
+		CurBalance: HasCompact,
 {
 	/// The stash account of the nominator in question.
 	who: AccountId,
