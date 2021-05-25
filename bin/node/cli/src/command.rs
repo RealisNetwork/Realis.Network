@@ -25,7 +25,7 @@ use crate::service::new_partial;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Realis Network".into()
+		"Substrate Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -41,23 +41,26 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/cryptosoulgame/SOUL-Blockchain/issues/new".into()
+		"https://github.com/paritytech/substrate/issues/new".into()
 	}
 
 	fn copyright_start_year() -> i32 {
-		2020
+		2017
 	}
 
 	fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
-		Ok(match id {
-			"dev" => Box::new(chain_spec::development_config()),
-			"local" => Box::new(chain_spec::local_testnet_config()),
-			"realis" => Box::new(chain_spec::realis_config()?),
-			"realis2" => Box::new(chain_spec::realis_testnet_config()),
-			"" | "fir" | "flaming-fir" => Box::new(chain_spec::flaming_fir_config()?),
-			"staging" => Box::new(chain_spec::staging_testnet_config()),
-			path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path),)?),
-		})
+		let spec =
+			match id {
+				"" => return Err("Please specify which chain you want to run, e.g. --dev or --chain=local".into()),
+				"dev" => Box::new(chain_spec::development_config()),
+				"local" => Box::new(chain_spec::local_testnet_config()),
+				"fir" | "flaming-fir" => Box::new(chain_spec::flaming_fir_config()?),
+				"staging" => Box::new(chain_spec::staging_testnet_config()),
+				path => Box::new(chain_spec::ChainSpec::from_json_file(
+					std::path::PathBuf::from(path),
+				)?),
+			};
+		Ok(spec)
 	}
 
 	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
@@ -146,5 +149,20 @@ pub fn run() -> Result<()> {
 				Ok((cmd.run(client, backend), task_manager))
 			})
 		},
+		#[cfg(feature = "try-runtime")]
+		Some(Subcommand::TryRuntime(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			runner.async_run(|config| {
+				// we don't need any of the components of new_partial, just a runtime, or a task
+				// manager to do `async_run`.
+				let registry = config.prometheus_config.as_ref().map(|cfg| &cfg.registry);
+				let task_manager = sc_service::TaskManager::new(
+					config.task_executor.clone(),
+					registry,
+				).map_err(|e| sc_cli::Error::Service(sc_service::Error::Prometheus(e)))?;
+
+				Ok((cmd.run::<Block, Executor>(config), task_manager))
+			})
+		}
 	}
 }

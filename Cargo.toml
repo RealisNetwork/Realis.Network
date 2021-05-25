@@ -1,15 +1,18 @@
-cargo-features = ["resolver"]
-
 [workspace]
+resolver = "2"
+
 members = [
 	"bin/node/cli",
     "bin/node/runtime",
-    "frame/realis-game-api",
-    "frame/staking-pool",
-    "frame/nft",
+#    "frame/realis-game-api",
+#    "frame/staking-pool",
+#    "frame/nft",
 ]
 
-resolver = "2"
+# Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.
+# `node-executor` is a dependecy of a `node-cli` at `bin/node/cli`.
+[patch.'https://github.com/paritytech/substrate']
+node-runtime = { path = "bin/node/runtime" }
 
 [profile.dev]
 split-debuginfo = "unpacked"
