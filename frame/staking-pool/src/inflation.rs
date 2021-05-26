@@ -1,35 +1,26 @@
-// This file is part of Darwinia.
-//
-// Copyright (C) 2018-2021 Darwinia Network
-// SPDX-License-Identifier: GPL-3.0
-//
-// Darwinia is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Darwinia is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Darwinia. If not, see <https://www.gnu.org/licenses/>.
+// This file is part of Substrate.
 
-// --- github ---
-use substrate_fixed::{
-	transcendental::{pow, sqrt},
-	types::I64F64,
-};
-// --- substrate ---
-use sp_arithmetic::helpers_128bit::multiply_by_rational;
-use sp_core::U256;
-use sp_runtime::Perbill;
-// --- darwinia ---
-use crate::*;
+// Copyright (C) 2019-2021 Parity Technologies (UK) Ltd.
+// SPDX-License-Identifier: Apache-2.0
 
-// Milliseconds per year for the Julian year (365.25 days).
-pub const MILLISECONDS_PER_YEAR: TsInMs = (366 * 24 * 60 * 60) * 1000;
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+//! This module expose one function `P_NPoS` (Payout NPoS) or `compute_total_payout` which returns
+//! the total payout for the era given the era duration and the staking rate in NPoS.
+//! The staking rate in NPoS is the total amount of tokens staked by nominators and validators,
+//! divided by the total token supply.
+
+use sp_runtime::{Perbill, traits::AtLeast32BitUnsigned, curve::PiecewiseLinear};
 
 /// The total payout to all validators (and their nominators) per era and maximum payout.
 ///
@@ -38,83 +29,77 @@ pub const MILLISECONDS_PER_YEAR: TsInMs = (366 * 24 * 60 * 60) * 1000;
 /// `maximum-payout = max_yearly_inflation * total_tokens / era_per_year`
 ///
 /// `era_duration` is expressed in millisecond.
-pub fn compute_total_payout<T: Config>(
-	era_duration: TsInMs,
-	living_time: TsInMs,
-	total_left: CurBalance<T>,
-	payout_fraction: Perbill,
-) -> (CurBalance<T>, CurBalance<T>) {
-	log::info!(
-		target: "realis-staking",
-		"era_duration: {}, living_time: {}, total_left: {:?}, payout_fraction: {:?}",
-		era_duration,
-		living_time,
-		total_left,
-		payout_fraction,
+pub fn compute_total_payout<N>(
+	yearly_inflation: &PiecewiseLinear<'static>,
+	npos_token_staked: N,
+	total_tokens: N,
+	era_duration: u64
+) -> (N, N) where N: AtLeast32BitUnsigned + Clone {
+	// Milliseconds per year for the Julian year (365.25 days).
+	const MILLISECONDS_PER_YEAR: u64 = 1000 * 3600 * 24 * 36525 / 100;
+
+	let portion = Perbill::from_rational(era_duration as u64, MILLISECONDS_PER_YEAR);
+	let payout = portion * yearly_inflation.calculate_for_fraction_times_denominator(
+		npos_token_staked,
+		total_tokens.clone(),
 	);
-
-	let inflation = {
-		let maximum = {
-			let total_left = total_left.saturated_into::<Balance>();
-
-			multiply_by_rational(total_left, era_duration as _, MILLISECONDS_PER_YEAR as _)
-				.unwrap_or(0)
-		};
-		let year = {
-			let year = living_time / MILLISECONDS_PER_YEAR + 1;
-
-			year as u32
-		};
-
-		compute_inflation(maximum, year).unwrap_or(0)
-	};
-	let payout = payout_fraction * inflation;
-
-	(
-		<CurBalance<T>>::saturated_from::<Balance>(payout),
-		<CurBalance<T>>::saturated_from::<Balance>(inflation),
-	)
+	let maximum = portion * (yearly_inflation.maximum * total_tokens);
+	(payout, maximum)
 }
 
-/// Formula:
-/// 	1 - (99 / 100) ^ sqrt(year)
-pub fn compute_inflation(maximum: Balance, year: u32) -> Option<u128> {
-	type F64 = I64F64;
+#[cfg(test)]
+mod test {
+	use sp_runtime::curve::PiecewiseLinear;
 
-	if let Ok(a) = sqrt::<F64, F64>(F64::from_num(year)) {
-		let b: F64 = F64::from_num(99) / 100;
-
-		if let Ok(c) = pow::<F64, F64>(b, a) {
-			let d: F64 = F64::from_num(1) - c;
-			let e: F64 = F64::from_num(maximum) * d;
-
-			#[cfg(test)]
-			{
-				let a_f64 = (year as f64).sqrt();
-				// eprintln!("{}\n{}", a, a_f64);
-				let b_f64 = 0.99_f64;
-				// eprintln!("{}\n{}", b, b_f64);
-				let c_f64 = b_f64.powf(a_f64);
-				// eprintln!("{}\n{}", c, c_f64);
-				let d_f64 = 1.00_f64 - c_f64;
-				// eprintln!("{}\n{}", d, d_f64);
-				let e_f64 = maximum as f64 * d_f64;
-				// eprintln!("{}\n{}", e, e_f64);
-
-				sp_runtime::assert_eq_error_rate!(
-					e.floor(),
-					e_f64 as u128,
-					if e_f64 == 0.00_f64 { 0 } else { 3 }
-				);
-			}
-
-			return Some(e.floor().to_num());
-		} else {
-			log::error!(target: "realis-staking", "Compute Inflation Failed at Step 1");
-		}
-	} else {
-		log::error!(target: "realis-staking", "Compute Inflation Failed at Step 0");
+	pallet_staking_reward_curve::build! {
+		const I_NPOS: PiecewiseLinear<'static> = curve!(
+			min_inflation: 0_025_000,
+			max_inflation: 0_100_000,
+			ideal_stake: 0_500_000,
+			falloff: 0_050_000,
+			max_piece_count: 40,
+			test_precision: 0_005_000,
+		);
 	}
 
-	None
+	#[test]
+	fn npos_curve_is_sensible() {
+		const YEAR: u64 = 365 * 24 * 60 * 60 * 1000;
+
+		// check maximum inflation.
+		// not 10_000 due to rounding error.
+		assert_eq!(super::compute_total_payout(&I_NPOS, 0, 100_000u64, YEAR).1, 9_993);
+
+		//super::I_NPOS.calculate_for_fraction_times_denominator(25, 100)
+		assert_eq!(super::compute_total_payout(&I_NPOS, 0, 100_000u64, YEAR).0, 2_498);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 5_000, 100_000u64, YEAR).0, 3_248);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 25_000, 100_000u64, YEAR).0, 6_246);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 40_000, 100_000u64, YEAR).0, 8_494);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 50_000, 100_000u64, YEAR).0, 9_993);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 60_000, 100_000u64, YEAR).0, 4_379);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 75_000, 100_000u64, YEAR).0, 2_733);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 95_000, 100_000u64, YEAR).0, 2_513);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 100_000, 100_000u64, YEAR).0, 2_505);
+
+		const DAY: u64 = 24 * 60 * 60 * 1000;
+		assert_eq!(super::compute_total_payout(&I_NPOS, 25_000, 100_000u64, DAY).0, 17);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 50_000, 100_000u64, DAY).0, 27);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 75_000, 100_000u64, DAY).0, 7);
+
+		const SIX_HOURS: u64 = 6 * 60 * 60 * 1000;
+		assert_eq!(super::compute_total_payout(&I_NPOS, 25_000, 100_000u64, SIX_HOURS).0, 4);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 50_000, 100_000u64, SIX_HOURS).0, 7);
+		assert_eq!(super::compute_total_payout(&I_NPOS, 75_000, 100_000u64, SIX_HOURS).0, 2);
+
+		const HOUR: u64 = 60 * 60 * 1000;
+		assert_eq!(
+			super::compute_total_payout(
+				&I_NPOS,
+				2_500_000_000_000_000_000_000_000_000u128,
+				5_000_000_000_000_000_000_000_000_000u128,
+				HOUR
+			).0,
+			57_038_500_000_000_000_000_000
+		);
+	}
 }

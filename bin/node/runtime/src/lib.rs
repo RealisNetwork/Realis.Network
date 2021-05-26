@@ -62,7 +62,7 @@ use sp_runtime::traits::{
 	NumberFor,
 };
 use pallet_staking::*;
-// use staking_pool::weights::SubstrateWeight;
+// use pallet_staking::weights::SubstrateWeight;
 use sp_version::RuntimeVersion;
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
@@ -479,27 +479,27 @@ parameter_types! {
 	pub OffchainRepeat: BlockNumber = 5;
 }
 
-impl pallet_staking::Config for Runtime {
-	const MAX_NOMINATIONS: u32 = MAX_NOMINATIONS;
-	type Currency = Balances;
-	type UnixTime = Timestamp;
-	type CurrencyToVote = U128CurrencyToVote;
-	type RewardRemainder = ();
-	type Event = Event;
-	type Slash = (); // send the slashed funds to the treasury.
-	type Reward = (); // rewards are minted from the void
-	type SessionsPerEra = SessionsPerEra;
-	type BondingDuration = BondingDuration;
-	type SlashDeferDuration = SlashDeferDuration;
-	/// A super-majority of the council can cancel the slash.
-	type SlashCancelOrigin = EnsureRoot<AccountId>;
-	type SessionInterface = Self;
-	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
-	type NextNewSession = Session;
-	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
-	type ElectionProvider = ElectionProviderMultiPhase;
-	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
-}
+// impl pallet_staking::Config for Runtime {
+// 	const MAX_NOMINATIONS: u32 = MAX_NOMINATIONS;
+// 	type Currency = Balances;
+// 	type UnixTime = Timestamp;
+// 	type CurrencyToVote = U128CurrencyToVote;
+// 	type RewardRemainder = ();
+// 	type Event = Event;
+// 	type Slash = (); // send the slashed funds to the treasury.
+// 	type Reward = (); // rewards are minted from the void
+// 	type SessionsPerEra = SessionsPerEra;
+// 	type BondingDuration = BondingDuration;
+// 	type SlashDeferDuration = SlashDeferDuration;
+// 	/// A super-majority of the council can cancel the slash.
+// 	type SlashCancelOrigin = EnsureRoot<AccountId>;
+// 	type SessionInterface = Self;
+// 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
+// 	type NextNewSession = Session;
+// 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+// 	type ElectionProvider = ElectionProviderMultiPhase;
+// 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
+// }
 
 parameter_types! {
 	// phase durations. 1/4 of the last session for each.
@@ -1117,31 +1117,26 @@ parameter_types! {
 	// pub OffchainRepeat: BlockNumber = 5;
 }
 
-impl staking_pool::Config for Runtime {
-	type Event = Event;
-	type PalletId = StakingPalletId;
+impl pallet_staking::Config for Runtime {
+	const MAX_NOMINATIONS: u32 = MAX_NOMINATIONS;
+	type Currency = Balances;
 	type UnixTime = Timestamp;
+	type CurrencyToVote = U128CurrencyToVote;
+	type RewardRemainder = ();
+	type Event = Event;
+	type Slash = (); // send the slashed funds to the treasury.
+	type Reward = (); // rewards are minted from the void
 	type SessionsPerEra = SessionsPerEra;
-	type BondingDurationInEra = BondingDuration;
-	type BondingDurationInBlockNumber = BondingDurationInBlockNumber;
+	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
 	/// A super-majority of the council can cancel the slash.
-	type SlashCancelOrigin = EnsureRootOrHalfCouncil;
+	type SlashCancelOrigin = EnsureRoot<AccountId>;
 	type SessionInterface = Self;
+	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type NextNewSession = Session;
 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
 	type ElectionProvider = ElectionProviderMultiPhase;
-	type CurCurrency = Balance;
-	type CurRewardRemainder = ();
-	// send the slashed funds to the treasury.
-	type CurSlash = ();
-	// rewards are minted from the void
-	type CurReward = ();
-	// send the slashed funds to the treasury.
-	// rewards are minted from the void
-	type Cap = Cap;
-	type TotalPower = TotalPower;
-	type WeightInfo = SubstrateWeight<Runtime>;
+	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
 
 construct_runtime!(
@@ -1190,7 +1185,6 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		RealisApi: realis_game_api::{Pallet, Call, Event<T>},
-		StakingPool: staking_pool::{Pallet, Call, Event<T>, Config<T>, Storage},
 	}
 );
 

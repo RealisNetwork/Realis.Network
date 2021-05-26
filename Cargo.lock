@@ -3927,7 +3927,7 @@ dependencies = [
  "pallet-grandpa",
  "pallet-im-online",
  "pallet-indices",
- "pallet-staking",
+ "pallet-staking 3.0.0 (git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81)",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "parity-scale-codec",
@@ -4102,7 +4102,7 @@ dependencies = [
  "pallet-scheduler",
  "pallet-session",
  "pallet-session-benchmarking",
- "pallet-staking",
+ "pallet-staking 3.0.0",
  "pallet-staking-reward-curve",
  "pallet-sudo",
  "pallet-timestamp",
@@ -4682,7 +4682,7 @@ dependencies = [
  "pallet-im-online",
  "pallet-offences",
  "pallet-session",
- "pallet-staking",
+ "pallet-staking 3.0.0 (git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81)",
  "parity-scale-codec",
  "sp-runtime",
  "sp-staking",
@@ -4759,7 +4759,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "pallet-session",
- "pallet-staking",
+ "pallet-staking 3.0.0 (git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81)",
  "rand 0.7.3",
  "sp-runtime",
  "sp-session",
@@ -4788,6 +4788,38 @@ dependencies = [
  "sp-staking",
  "sp-std",
  "static_assertions",
+]
+
+[[package]]
+name = "pallet-staking"
+version = "3.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-election-provider-support",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "log",
+ "pallet-authorship",
+ "pallet-balances",
+ "pallet-session",
+ "pallet-staking-reward-curve",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "parking_lot 0.11.1",
+ "paste",
+ "rand_chacha 0.2.2",
+ "serde",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-staking",
+ "sp-std",
+ "sp-storage",
+ "sp-tracing",
+ "static_assertions",
+ "substrate-test-utils",
 ]
 
 [[package]]
@@ -8470,6 +8502,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "substrate-test-utils"
+version = "3.0.0"
+source = "git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81#0bda86540d44b09da6f1ea6656f3f52d5447db81"
+dependencies = [
+ "futures 0.3.15",
+ "substrate-test-utils-derive",
+ "tokio 0.2.25",
+]
+
+[[package]]
+name = "substrate-test-utils-derive"
+version = "0.9.0"
+source = "git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81#0bda86540d44b09da6f1ea6656f3f52d5447db81"
+dependencies = [
+ "proc-macro-crate 1.0.0",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "substrate-wasm-builder"
 version = "4.0.0"
 source = "git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81#0bda86540d44b09da6f1ea6656f3f52d5447db81"
@@ -8704,6 +8756,7 @@ dependencies = [
  "pin-project-lite 0.1.12",
  "signal-hook-registry",
  "slab",
+ "tokio-macros",
  "winapi 0.3.9",
 ]
 
@@ -8769,6 +8822,17 @@ dependencies = [
  "bytes 0.4.12",
  "futures 0.1.31",
  "log",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e44da00bfc73a25f814cd8d7e57a68a5c31b74b3152a0a1d1f590c97ed06265a"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
