@@ -4094,6 +4094,7 @@ dependencies = [
  "pallet-lottery",
  "pallet-mmr",
  "pallet-multisig",
+ "pallet-nft",
  "pallet-offences",
  "pallet-offences-benchmarking",
  "pallet-randomness-collective-flip",
@@ -4110,7 +4111,6 @@ dependencies = [
  "pallet-utility",
  "pallet-vesting",
  "parity-scale-codec",
- "realis-game-api",
  "realis-primitives",
  "sp-api",
  "sp-authority-discovery",
@@ -5769,23 +5769,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "678054eb77286b51581ba43620cc911abf02758c91f93f479767aed0f90458b2"
 dependencies = [
  "rand_core 0.3.1",
-]
-
-[[package]]
-name = "realis-game-api"
-version = "0.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "getrandom 0.2.3",
- "pallet-balances",
- "pallet-nft",
- "parity-scale-codec",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
 ]
 
 [[package]]

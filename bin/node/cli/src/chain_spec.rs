@@ -22,10 +22,10 @@ use sc_chain_spec::ChainSpecExtension;
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 use serde::{Serialize, Deserialize};
 use node_runtime::{
-	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, CouncilConfig,
-	DemocracyConfig, GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
-	StakingConfig, ElectionsConfig, IndicesConfig, SocietyConfig, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig, wasm_binary_unwrap, MAX_NOMINATIONS,
+	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, /*CouncilConfig*/
+	/*DemocracyConfig,*/ GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
+	StakingConfig, /*ElectionsConfig,*/ IndicesConfig, /*SocietyConfig,*/ SudoConfig, SystemConfig, NftConfig,
+	/*TechnicalCommitteeConfig,*/ wasm_binary_unwrap, MAX_NOMINATIONS,
 };
 use node_runtime::Block;
 use node_runtime::constants::currency::*;
@@ -291,22 +291,22 @@ pub fn testnet_genesis(
 			stakers,
 			.. Default::default()
 		},
-		pallet_democracy: DemocracyConfig::default(),
-		pallet_elections_phragmen: ElectionsConfig {
-			members: endowed_accounts.iter()
-						.take((num_endowed_accounts + 1) / 2)
-						.cloned()
-						.map(|member| (member, STASH))
-						.collect(),
-		},
-		pallet_collective_Instance1: CouncilConfig::default(),
-		pallet_collective_Instance2: TechnicalCommitteeConfig {
-			members: endowed_accounts.iter()
-						.take((num_endowed_accounts + 1) / 2)
-						.cloned()
-						.collect(),
-			phantom: Default::default(),
-		},
+		// pallet_democracy: DemocracyConfig::default(),
+		// pallet_elections_phragmen: ElectionsConfig {
+		// 	members: endowed_accounts.iter()
+		// 				.take((num_endowed_accounts + 1) / 2)
+		// 				.cloned()
+		// 				.map(|member| (member, STASH))
+		// 				.collect(),
+		// },
+		// pallet_collective_Instance1: CouncilConfig::default(),
+		// pallet_collective_Instance2: TechnicalCommitteeConfig {
+		// 	members: endowed_accounts.iter()
+		// 				.take((num_endowed_accounts + 1) / 2)
+		// 				.cloned()
+		// 				.collect(),
+		// 	phantom: Default::default(),
+		// },
 		pallet_sudo: SudoConfig {
 			key: root_key,
 		},
@@ -323,16 +323,16 @@ pub fn testnet_genesis(
 		pallet_grandpa: GrandpaConfig {
 			authorities: vec![],
 		},
-		pallet_membership_Instance1: Default::default(),
-		pallet_treasury: Default::default(),
-		pallet_society: SocietyConfig {
-			members: endowed_accounts.iter()
-						.take((num_endowed_accounts + 1) / 2)
-						.cloned()
-						.collect(),
-			pot: 0,
-			max_members: 999,
-		},
+		// pallet_membership_Instance1: Default::default(),
+		// pallet_treasury: Default::default(),
+		// pallet_society: SocietyConfig {
+		// 	members: endowed_accounts.iter()
+		// 				.take((num_endowed_accounts + 1) / 2)
+		// 				.cloned()
+		// 				.collect(),
+		// 	pot: 0,
+		// 	max_members: 999,
+		// },
 		pallet_vesting: Default::default(),
 		pallet_gilt: Default::default(),
 		pallet_nft: NftConfig {
@@ -371,11 +371,31 @@ pub fn realis_genesis(
 			get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 		]
 	});
-	initial_authorities.iter().for_each(|x|
-		if !endowed_accounts.contains(&x.0) {
-			endowed_accounts.push(x.0.clone())
+	// endow all authorities and nominators.
+	initial_authorities.iter().map(|x| &x.0).chain(initial_nominators.iter()).for_each(|x| {
+		if !endowed_accounts.contains(&x) {
+			endowed_accounts.push(x.clone())
 		}
-	);
+	});
+
+	// stakers: all validators and nominators.
+	let mut rng = rand::thread_rng();
+	let stakers = initial_authorities
+		.iter()
+		.map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+		.chain(initial_nominators.iter().map(|x| {
+			use rand::{seq::SliceRandom, Rng};
+			let limit = (MAX_NOMINATIONS as usize).min(initial_authorities.len());
+			let count = rng.gen::<usize>() % limit;
+			let nominations = initial_authorities
+				.as_slice()
+				.choose_multiple(&mut rng, count)
+				.into_iter()
+				.map(|choice| choice.0.clone())
+				.collect::<Vec<_>>();
+			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
+		}))
+		.collect::<Vec<_>>();
 
 	let num_endowed_accounts = endowed_accounts.len();
 
@@ -406,37 +426,29 @@ pub fn realis_genesis(
 			}).collect::<Vec<_>>(),
 		},
 		pallet_staking: StakingConfig {
-			validator_count: initial_authorities.len() as u32 * 2,
+			validator_count: initial_authorities.len() as u32,
 			minimum_validator_count: initial_authorities.len() as u32,
-			stakers: initial_authorities.iter().map(|x| {
-				(x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator)
-			}).collect(),
 			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
 			slash_reward_fraction: Perbill::from_percent(10),
+			stakers,
 			.. Default::default()
 		},
 		// pallet_democracy: DemocracyConfig::default(),
 		// pallet_elections_phragmen: ElectionsConfig {
-			// members: endowed_accounts.iter()
-						// .take((num_endowed_accounts + 1) / 2)
-						// .cloned()
-						// .map(|member| (member, STASH))
-						// .collect(),
+		// 	members: endowed_accounts.iter()
+		// 				.take((num_endowed_accounts + 1) / 2)
+		// 				.cloned()
+		// 				.map(|member| (member, STASH))
+		// 				.collect(),
 		// },
 		// pallet_collective_Instance1: CouncilConfig::default(),
 		// pallet_collective_Instance2: TechnicalCommitteeConfig {
-			// members: endowed_accounts.iter()
-						// .take((num_endowed_accounts + 1) / 2)
-						// .cloned()
-						// .collect(),
-			// phantom: Default::default(),
+		// 	members: endowed_accounts.iter()
+		// 				.take((num_endowed_accounts + 1) / 2)
+		// 				.cloned()
+		// 				.collect(),
+		// 	phantom: Default::default(),
 		// },
-		pallet_contracts: ContractsConfig {
-			current_schedule: pallet_contracts::Schedule {
-				enable_println, // this should only be enabled on development chains
-				..Default::default()
-			},
-		},
 		pallet_sudo: SudoConfig {
 			key: root_key,
 		},
@@ -454,21 +466,20 @@ pub fn realis_genesis(
 			authorities: vec![],
 		},
 		// pallet_membership_Instance1: Default::default(),
-		pallet_treasury: Default::default(),
+		// pallet_treasury: Default::default(),
 		// pallet_society: SocietyConfig {
-			// members: endowed_accounts.iter()
-						// .take((num_endowed_accounts + 1) / 2)
-						// .cloned()
-						// .collect(),
-			// pot: 0,
-			// max_members: 999,
+		// 	members: endowed_accounts.iter()
+		// 				.take((num_endowed_accounts + 1) / 2)
+		// 				.cloned()
+		// 				.collect(),
+		// 	pot: 0,
+		// 	max_members: 999,
 		// },
 		pallet_vesting: Default::default(),
 		pallet_gilt: Default::default(),
 		pallet_nft: NftConfig {
 			nft_masters: vec![nft_master],
 		},
-		// pallet_realis_game_api: Default::default(),
 	}
 }
 
@@ -485,7 +496,7 @@ pub fn realis_testnet_config() -> ChainSpec {
 		realis_testnet_genesis,
 		vec![],
 		None,
-		Some(DEFAULT_PROTOCOL_ID),
+		None,
 		Some(properties),
 		Default::default(),
 	)
@@ -514,14 +525,13 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
 		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
 		//NFT Master
 		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
+		vec!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"],
 		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
-		false
 	)}
 
 pub fn realis_config() -> Result<ChainSpec, String> {
 	ChainSpec::from_json_bytes(&include_bytes!("../../../../realis.json")[..])
 }
-
 
 fn development_config_genesis() -> GenesisConfig {
 	testnet_genesis(

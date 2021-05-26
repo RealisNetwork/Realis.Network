@@ -62,7 +62,6 @@ use sp_runtime::traits::{
 	NumberFor,
 };
 use pallet_staking::*;
-use realis_primitives::*;
 // use staking_pool::weights::SubstrateWeight;
 use sp_version::RuntimeVersion;
 #[cfg(any(feature = "std", test))]
@@ -1094,17 +1093,17 @@ parameter_types! {
 	pub const ExistentialDepositOfRealisTokens: u128 = 1;
 }
 
-//impl pallet_nft::Config for Runtime {
-//	type Event = Event;
-//	type Balance = u128;
-//	type ExistentialDeposit = ExistentialDepositOfRealisTokens;
-//	type OnNewAccount = ();
-//	type RealisTokenId = u32;
-//}
-
-impl pallet_realis_game_api::Config for Runtime {
+impl pallet_nft::Config for Runtime {
 	type Event = Event;
+	type Balance = u128;
+	type ExistentialDeposit = ExistentialDepositOfRealisTokens;
+	type OnNewAccount = ();
+	type RealisTokenId = u32;
 }
+
+// impl pallet_realis_game_api::Config for Runtime {
+// 	type Event = Event;
+// }
 
 parameter_types! {
 	pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
@@ -1189,8 +1188,8 @@ construct_runtime!(
 		Mmr: pallet_mmr::{Pallet, Storage},
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
-//		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
-		RealisApi: pallet_realis_game_api::{Pallet, Call, Event<T>},
+		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
+		// RealisApi: pallet_realis_game_api::{Pallet, Call, Event<T>},
 		// StakingPool: staking_pool::{Pallet, Call, Event<T>, Config<T>, Storage},
 	}
 );
