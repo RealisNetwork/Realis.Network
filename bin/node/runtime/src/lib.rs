@@ -1101,9 +1101,9 @@ impl pallet_nft::Config for Runtime {
 	type RealisTokenId = u32;
 }
 
-// impl pallet_realis_game_api::Config for Runtime {
-// 	type Event = Event;
-// }
+impl realis_game_api::Config for Runtime {
+	type Event = Event;
+}
 
 parameter_types! {
 	pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
@@ -1117,32 +1117,32 @@ parameter_types! {
 	// pub OffchainRepeat: BlockNumber = 5;
 }
 
-// impl staking_pool::Config for Runtime {
-// 	type Event = Event;
-// 	type PalletId = StakingPalletId;
-// 	type UnixTime = Timestamp;
-// 	type SessionsPerEra = SessionsPerEra;
-// 	type BondingDurationInEra = BondingDuration;
-// 	type BondingDurationInBlockNumber = BondingDurationInBlockNumber;
-// 	type SlashDeferDuration = SlashDeferDuration;
-// 	/// A super-majority of the council can cancel the slash.
-// 	type SlashCancelOrigin = EnsureRootOrHalfCouncil;
-// 	type SessionInterface = Self;
-// 	type NextNewSession = Session;
-// 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
-// 	type ElectionProvider = ElectionProviderMultiPhase;
-// 	type CurCurrency = Balance;
-// 	type CurRewardRemainder = ();
-// 	// send the slashed funds to the treasury.
-// 	type CurSlash = ();
-// 	// rewards are minted from the void
-// 	type CurReward = ();
-// 	// send the slashed funds to the treasury.
-// 	// rewards are minted from the void
-// 	type Cap = Cap;
-// 	type TotalPower = TotalPower;
-// 	type WeightInfo = SubstrateWeight<Runtime>;
-// }
+impl staking_pool::Config for Runtime {
+	type Event = Event;
+	type PalletId = StakingPalletId;
+	type UnixTime = Timestamp;
+	type SessionsPerEra = SessionsPerEra;
+	type BondingDurationInEra = BondingDuration;
+	type BondingDurationInBlockNumber = BondingDurationInBlockNumber;
+	type SlashDeferDuration = SlashDeferDuration;
+	/// A super-majority of the council can cancel the slash.
+	type SlashCancelOrigin = EnsureRootOrHalfCouncil;
+	type SessionInterface = Self;
+	type NextNewSession = Session;
+	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+	type ElectionProvider = ElectionProviderMultiPhase;
+	type CurCurrency = Balance;
+	type CurRewardRemainder = ();
+	// send the slashed funds to the treasury.
+	type CurSlash = ();
+	// rewards are minted from the void
+	type CurReward = ();
+	// send the slashed funds to the treasury.
+	// rewards are minted from the void
+	type Cap = Cap;
+	type TotalPower = TotalPower;
+	type WeightInfo = SubstrateWeight<Runtime>;
+}
 
 construct_runtime!(
 	pub enum Runtime where
@@ -1189,8 +1189,8 @@ construct_runtime!(
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
-		// RealisApi: pallet_realis_game_api::{Pallet, Call, Event<T>},
-		// StakingPool: staking_pool::{Pallet, Call, Event<T>, Config<T>, Storage},
+		RealisApi: realis_game_api::{Pallet, Call, Event<T>},
+		StakingPool: staking_pool::{Pallet, Call, Event<T>, Config<T>, Storage},
 	}
 );
 
