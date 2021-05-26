@@ -32,7 +32,7 @@ pub mod currency {
 
 /// Time.
 pub mod time {
-	use node_primitives::{Moment, BlockNumber};
+	use node_primitives::{Moment, BlockNumber, Balance};
 
 	/// Since BABE is probabilistic this is the average expected block time that
 	/// we are targeting. Blocks will be produced at a minimum duration defined
@@ -74,4 +74,9 @@ pub mod time {
 	pub const MINUTES: BlockNumber = 60 / (SECS_PER_BLOCK as BlockNumber);
 	pub const HOURS: BlockNumber = MINUTES * 60;
 	pub const DAYS: BlockNumber = HOURS * 24;
+
+	// pub const COIN: Balance = 1_000 * MILLISECS_PER_BLOCK;
+
+	// pub const CAP: Balance = 10_000_000_000 * COIN;
+	pub const TOTAL_POWER: u32 = 1_000_000_000;
 }

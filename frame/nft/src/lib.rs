@@ -671,3 +671,12 @@ impl<T: Config> Module<T> {
     }
 
 }
+
+#[cfg(test)]
+mod test {
+
+    #[test]
+    fn mint_nft_if_possible() {
+        assert_eq!(super::mint_nft(&1, &1, 222, Common, Head, {strength: 2, agility: 3, intelligence: 4}));
+    }
+}

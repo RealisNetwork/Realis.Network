@@ -50,26 +50,26 @@ pallet-authority-discovery = { git = "https://github.com/paritytech/substrate", 
 pallet-authorship = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-babe = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
-pallet-bounties = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
-pallet-collective = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+#pallet-bounties = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+#pallet-collective = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-contracts = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-contracts-primitives = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-contracts-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
-pallet-democracy = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+#pallet-democracy = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-election-provider-multi-phase = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
-pallet-elections-phragmen = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+#pallet-elections-phragmen = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-gilt = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-grandpa = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-im-online = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-indices = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-identity = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-lottery = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
-pallet-membership = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+#pallet-membership = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-mmr = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-multisig = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-offences = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-offences-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false, optional = true }
-pallet-proxy = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+#pallet-proxy = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-randomness-collective-flip = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-recovery = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-session = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", features = ["historical"], default-features = false }
@@ -77,18 +77,19 @@ pallet-session-benchmarking = { git = "https://github.com/paritytech/substrate",
 pallet-staking = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-scheduler = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
-pallet-society = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+#pallet-society = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-sudo = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
-pallet-tips = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
-pallet-treasury = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+#pallet-tips = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+#pallet-treasury = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-utility = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-vesting = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
-# pallet-nft = { path = "../../../frame/nft", default-features = false }
-# staking-pool = { path = "../../../frame/staking-pool" , default-features = false }
-# pallet-realis-game-api = { path = "../../../frame/realis-game-api", default-features = false }
+#pallet-nft = { path = "../../../frame/nft", default-features = false }
+realis-game-api = { path = "../../../frame/realis-game-api", default-features = false }
+# staking-pool = { path = "../../../frame/staking-pool", default-features = false }
+realis-primitives = { version = "0.0.1", default-features = false, path = "../primitives" }
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
@@ -107,15 +108,15 @@ std = [
 	"sp-consensus-babe/std",
 	"pallet-babe/std",
 	"pallet-balances/std",
-	"pallet-bounties/std",
+#	"pallet-bounties/std",
 	"sp-block-builder/std",
 	"codec/std",
-	"pallet-collective/std",
+#	"pallet-collective/std",
 	"pallet-contracts/std",
 	"pallet-contracts-primitives/std",
 	"pallet-contracts-rpc-runtime-api/std",
-	"pallet-democracy/std",
-	"pallet-elections-phragmen/std",
+#	"pallet-democracy/std",
+#	"pallet-elections-phragmen/std",
 	"frame-executive/std",
 	"pallet-gilt/std",
 	"pallet-grandpa/std",
@@ -123,7 +124,7 @@ std = [
 	"pallet-indices/std",
 	"sp-inherents/std",
 	"pallet-lottery/std",
-	"pallet-membership/std",
+#	"pallet-membership/std",
 	"pallet-mmr/std",
 	"pallet-multisig/std",
 	"pallet-identity/std",
@@ -131,7 +132,7 @@ std = [
 	"node-primitives/std",
 	"sp-offchain/std",
 	"pallet-offences/std",
-	"pallet-proxy/std",
+#	"pallet-proxy/std",
 	"sp-core/std",
 	"pallet-randomness-collective-flip/std",
 	"sp-std/std",
@@ -149,22 +150,23 @@ std = [
 	"frame-system/std",
 	"pallet-election-provider-multi-phase/std",
 	"pallet-timestamp/std",
-	"pallet-tips/std",
+#	"pallet-tips/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
-	"pallet-treasury/std",
+#	"pallet-treasury/std",
 	"sp-transaction-pool/std",
 	"pallet-utility/std",
 	"sp-version/std",
-	"pallet-society/std",
+#	"pallet-society/std",
 	"pallet-recovery/std",
 	"pallet-vesting/std",
 	"log/std",
 	"frame-try-runtime/std",
 	"sp-npos-elections/std",
-    # "pallet-nft/std",
-    # "pallet-realis-game-api/std",
-    # "staking-pool/std",
+ #   	"pallet-nft/std",
+   	"realis-game-api/std",
+  	# "staking-pool/std",
+	"realis-primitives/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",
@@ -175,27 +177,27 @@ runtime-benchmarks = [
 	"pallet-assets/runtime-benchmarks",
 	"pallet-babe/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
-	"pallet-bounties/runtime-benchmarks",
-	"pallet-collective/runtime-benchmarks",
+#	"pallet-bounties/runtime-benchmarks",
+#	"pallet-collective/runtime-benchmarks",
 	"pallet-contracts/runtime-benchmarks",
-	"pallet-democracy/runtime-benchmarks",
-	"pallet-elections-phragmen/runtime-benchmarks",
+#	"pallet-democracy/runtime-benchmarks",
+#	"pallet-elections-phragmen/runtime-benchmarks",
 	"pallet-gilt/runtime-benchmarks",
 	"pallet-grandpa/runtime-benchmarks",
 	"pallet-identity/runtime-benchmarks",
 	"pallet-im-online/runtime-benchmarks",
 	"pallet-indices/runtime-benchmarks",
 	"pallet-lottery/runtime-benchmarks",
-	"pallet-membership/runtime-benchmarks",
+#	"pallet-membership/runtime-benchmarks",
 	"pallet-mmr/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
-	"pallet-proxy/runtime-benchmarks",
+#	"pallet-proxy/runtime-benchmarks",
 	"pallet-scheduler/runtime-benchmarks",
-	"pallet-society/runtime-benchmarks",
+#	"pallet-society/runtime-benchmarks",
 	"pallet-staking/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
-	"pallet-tips/runtime-benchmarks",
-	"pallet-treasury/runtime-benchmarks",
+#	"pallet-tips/runtime-benchmarks",
+#	"pallet-treasury/runtime-benchmarks",
 	"pallet-utility/runtime-benchmarks",
 	"pallet-vesting/runtime-benchmarks",
 	"pallet-offences-benchmarking",
@@ -212,33 +214,33 @@ try-runtime = [
 	"pallet-authorship/try-runtime",
 	"pallet-babe/try-runtime",
 	"pallet-balances/try-runtime",
-	"pallet-bounties/try-runtime",
-	"pallet-collective/try-runtime",
+#	"pallet-bounties/try-runtime",
+#	"pallet-collective/try-runtime",
 	"pallet-contracts/try-runtime",
-	"pallet-democracy/try-runtime",
-	"pallet-elections-phragmen/try-runtime",
+#	"pallet-democracy/try-runtime",
+#	"pallet-elections-phragmen/try-runtime",
 	"pallet-grandpa/try-runtime",
 	"pallet-im-online/try-runtime",
 	"pallet-indices/try-runtime",
 	"pallet-lottery/try-runtime",
-	"pallet-membership/try-runtime",
+#	"pallet-membership/try-runtime",
 	"pallet-mmr/try-runtime",
 	"pallet-multisig/try-runtime",
 	"pallet-identity/try-runtime",
 	"pallet-scheduler/try-runtime",
 	"pallet-offences/try-runtime",
-	"pallet-proxy/try-runtime",
+#	"pallet-proxy/try-runtime",
 	"pallet-randomness-collective-flip/try-runtime",
 	"pallet-session/try-runtime",
 	"pallet-staking/try-runtime",
 	"pallet-sudo/try-runtime",
 	"pallet-election-provider-multi-phase/try-runtime",
 	"pallet-timestamp/try-runtime",
-	"pallet-tips/try-runtime",
+#	"pallet-tips/try-runtime",
 	"pallet-transaction-payment/try-runtime",
-	"pallet-treasury/try-runtime",
+#	"pallet-treasury/try-runtime",
 	"pallet-utility/try-runtime",
-	"pallet-society/try-runtime",
+#	"pallet-society/try-runtime",
 	"pallet-recovery/try-runtime",
 	"pallet-vesting/try-runtime",
 	"pallet-gilt/try-runtime",
