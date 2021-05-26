@@ -37,7 +37,7 @@ use sp_consensus_babe::{AuthorityId as BabeId};
 use pallet_im_online::sr25519::{AuthorityId as ImOnlineId};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_runtime::{Perbill, traits::{Verify, IdentifyAccount}};
-
+use sc_telemetry::serde_json::Map;
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::GenesisConfig;
 
@@ -336,7 +336,7 @@ pub fn testnet_genesis(
 		pallet_vesting: Default::default(),
 		pallet_gilt: Default::default(),
 		pallet_nft: NftConfig {
-			nft_masters: vec![nft_master],
+			nft_masters: vec![],
 		},
 	}
 }
@@ -352,7 +352,7 @@ pub fn realis_genesis(
 	)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
-	nft_master: AccountId,
+	nft_master: Vec<AccountId>,
 	endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
 	let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
@@ -478,7 +478,7 @@ pub fn realis_genesis(
 		pallet_vesting: Default::default(),
 		pallet_gilt: Default::default(),
 		pallet_nft: NftConfig {
-			nft_masters: vec![nft_master],
+			nft_masters: nft_master,
 		},
 	}
 }
@@ -522,11 +522,11 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
 						),
 					],
 		//sudo account
-		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
+		vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()],
 		//NFT Master
 		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
-		vec!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"],
-		hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
+		vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()],
+		None,
 	)}
 
 pub fn realis_config() -> Result<ChainSpec, String> {

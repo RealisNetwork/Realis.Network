@@ -1,9 +1,12 @@
+cargo-features = ["resolver"]
+
 [workspace]
 resolver = "2"
 
 members = [
 	"bin/node/cli",
     "bin/node/runtime",
+    # "frame/nft",
 ]
 
 # Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.

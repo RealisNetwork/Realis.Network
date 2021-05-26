@@ -121,6 +121,7 @@ sc-consensus = { git = "https://github.com/paritytech/substrate", rev = "0bda865
 sc-consensus-babe = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 sc-consensus-epochs = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 sc-service-test = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-io = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 futures = "0.3.9"
 tempfile = "3.1.0"
 assert_cmd = "1.0"
