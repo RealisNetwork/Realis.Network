@@ -4640,7 +4640,6 @@ version = "0.0.2"
 dependencies = [
  "frame-support",
  "frame-system",
- "getrandom 0.2.3",
  "pallet-balances",
  "parity-scale-codec",
  "primitive-types",
@@ -4769,30 +4768,6 @@ dependencies = [
 [[package]]
 name = "pallet-staking"
 version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81#0bda86540d44b09da6f1ea6656f3f52d5447db81"
-dependencies = [
- "frame-benchmarking",
- "frame-election-provider-support",
- "frame-support",
- "frame-system",
- "log",
- "pallet-authorship",
- "pallet-session",
- "parity-scale-codec",
- "paste",
- "rand_chacha 0.2.2",
- "serde",
- "sp-application-crypto",
- "sp-io",
- "sp-runtime",
- "sp-staking",
- "sp-std",
- "static_assertions",
-]
-
-[[package]]
-name = "pallet-staking"
-version = "3.0.0"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -4820,6 +4795,30 @@ dependencies = [
  "sp-tracing",
  "static_assertions",
  "substrate-test-utils",
+]
+
+[[package]]
+name = "pallet-staking"
+version = "3.0.0"
+source = "git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81#0bda86540d44b09da6f1ea6656f3f52d5447db81"
+dependencies = [
+ "frame-benchmarking",
+ "frame-election-provider-support",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-authorship",
+ "pallet-session",
+ "parity-scale-codec",
+ "paste",
+ "rand_chacha 0.2.2",
+ "serde",
+ "sp-application-crypto",
+ "sp-io",
+ "sp-runtime",
+ "sp-staking",
+ "sp-std",
+ "static_assertions",
 ]
 
 [[package]]
@@ -5810,12 +5809,12 @@ version = "0.0.1"
 dependencies = [
  "frame-support",
  "frame-system",
- "getrandom 0.2.3",
  "pallet-balances",
  "pallet-nft",
  "parity-scale-codec",
  "serde",
  "sp-core",
+ "sp-io",
  "sp-runtime",
  "sp-std",
 ]

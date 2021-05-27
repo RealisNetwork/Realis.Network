@@ -288,7 +288,7 @@ use sp_std::{
 };
 use codec::{HasCompact, Encode, Decode};
 use frame_support::{
-	decl_module, decl_event, decl_storage, ensure, decl_error,
+	decl_module, decl_event, decl_storage, ensure, decl_error, PalletId,
 	weights::{
 		Weight, WithPostDispatchInfo,
 		constants::{WEIGHT_PER_MICROS, WEIGHT_PER_NANOS},
@@ -298,9 +298,12 @@ use frame_support::{
 	traits::{
 		Currency, LockIdentifier, LockableCurrency, WithdrawReasons, OnUnbalanced, Imbalance, Get,
 		UnixTime, EstimateNextNewSession, EnsureOrigin, CurrencyToVote,
-	}, PalletId,
+	},
 };
 use pallet_session::historical;
+use sp_runtime::*;
+use sp_runtime::traits::AccountIdConversion;
+use frame_support::traits::ExistenceRequirement::{AllowDeath, KeepAlive};
 use sp_runtime::{
 	Percent, Perbill, RuntimeDebug, DispatchError,
 	curve::PiecewiseLinear,
@@ -398,9 +401,7 @@ pub enum RewardDestination<AccountId> {
 	/// Pay into the controller account.
 	Controller,
 	/// Pay into a specified account.
-	Account(AccountId),
-	/// Receive no reward.
-	None,
+	Account(AccountId)
 }
 
 impl<AccountId> Default for RewardDestination<AccountId> {
@@ -1939,8 +1940,9 @@ decl_module! {
 }
 
 impl<T: Config> Module<T> {
+
 	pub fn account_id() -> T::AccountId {
-		T::PalletId::get().into_account()
+		AccountIdConversion::into_account(&T::PalletId::get())
 	}
 	/// The total balance that can be slashed from a stash account as of right now.
 	pub fn slashable_balance_of(stash: &T::AccountId) -> BalanceOf<T> {
@@ -2049,11 +2051,8 @@ impl<T: Config> Module<T> {
 		let validator_staking_payout = validator_exposure_part * validator_leftover_payout;
 
 		// We can now make total validator payout:
-		if let Some(imbalance) = Self::make_payout(
-			&ledger.stash,
-			validator_staking_payout + validator_commission_payout
-		) {
-			Self::deposit_event(RawEvent::Reward(ledger.stash, imbalance.peek()));
+		if Self::make_payout(&ledger.stash, validator_staking_payout + validator_commission_payout).is_ok() {
+			Self::deposit_event(RawEvent::Reward(ledger.stash, validator_leftover_payout));
 		}
 
 		// Track the number of payout ops to nominators. Note: `WeightInfo::payout_stakers_alive_staked`
@@ -2063,17 +2062,14 @@ impl<T: Config> Module<T> {
 		// Lets now calculate how this is split to the nominators.
 		// Reward only the clipped exposures. Note this is not necessarily sorted.
 		for nominator in exposure.others.iter() {
-			let nominator_exposure_part = Perbill::from_rational(
-				nominator.value,
-				exposure.total,
-			);
+			let nominator_exposure_part =
+				Perbill::from_rational_approximation(nominator.value, exposure.total);
 
-			let nominator_reward: BalanceOf<T> = nominator_exposure_part * validator_leftover_payout;
+			let nominator_reward: BalanceOf<T> =
+				nominator_exposure_part * validator_leftover_payout;
 			// We can now make nominator payout:
-			if let Some(imbalance) = Self::make_payout(&nominator.who, nominator_reward) {
-				// Note: this logic does not count payouts for `RewardDestination::None`.
-				nominator_payout_count += 1;
-				Self::deposit_event(RawEvent::Reward(nominator.who.clone(), imbalance.peek()));
+			if Self::make_payout(&nominator.who, nominator_reward).is_ok() {
+				Self::deposit_event(RawEvent::Reward(nominator.who.clone(), nominator_reward));
 			}
 		}
 
@@ -2105,28 +2101,39 @@ impl<T: Config> Module<T> {
 
 	/// Actually make a payment to a staker. This uses the currency's reward function
 	/// to pay the right payee for the given staker account.
-	fn make_payout(stash: &T::AccountId, amount: BalanceOf<T>) -> Option<PositiveImbalanceOf<T>> {
-		let dest = Self::payee(stash);
-		match dest {
-			RewardDestination::Controller => Self::bonded(stash)
-				.and_then(|controller|
-					Some(<Module<T> as Trait>::Transfer::transfer(&Self::account_id(), &controller, amount))
-				),
-			RewardDestination::Stash =>
-				T::Currency::deposit_into_existing(stash, amount).ok(),
-			RewardDestination::Staked => Self::bonded(stash)
-				.and_then(|c| Self::ledger(&c).map(|l| (c, l)))
-				.and_then(|(controller, mut l)| {
-					l.active += amount;
-					l.total += amount;
-					let r = T::Currency::deposit_into_existing(stash, amount).ok();
-					Self::update_ledger(&controller, &l);
-					r
-				}),
-			RewardDestination::Account(dest_account) => {
-				Some(<Module<T> as Trait>::Transfer::transfer(&Self::account_id(), &dest_account, amount))
+	fn make_payout(stash: &T::AccountId, amount: BalanceOf<T>) -> result::Result<(), ()> {
+		let imbalance = T::Currency::withdraw(
+			&Self::account_id(),
+			amount,
+			WithdrawReasons::all(),
+			KeepAlive,
+		)
+			.map_err(|_| ())?;
+		match Self::payee(stash) {
+			RewardDestination::Controller => match Self::bonded(stash) {
+				Some(controller) => Ok(T::Currency::resolve_creating(&controller, imbalance)),
+				None => Err(()),
 			},
-			RewardDestination::None => None,
+			RewardDestination::Stash => {
+				T::Currency::resolve_into_existing(stash, imbalance).map_err(|_| ())
+			}
+			RewardDestination::Staked => {
+				match Self::bonded(stash).and_then(|c| Self::ledger(&c).map(|l| (c, l))) {
+					Some((controller, mut l)) => {
+						l.active += imbalance.peek();
+						l.total += imbalance.peek();
+						let r =
+							T::Currency::resolve_into_existing(stash, imbalance).map_err(|_| ());
+						Self::update_ledger(&controller, &l);
+						r
+					}
+					None => Err(()),
+				}
+			}
+			RewardDestination::Account(dest_account) => {
+				T::Currency::resolve_creating(&dest_account, imbalance);
+				Ok(())
+			}
 		}
 	}
 

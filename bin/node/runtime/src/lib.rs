@@ -1121,6 +1121,7 @@ impl pallet_staking::Config for Runtime {
 	const MAX_NOMINATIONS: u32 = MAX_NOMINATIONS;
 	type Currency = Balances;
 	type UnixTime = Timestamp;
+	type PalletId = StakingPalletId;
 	type CurrencyToVote = U128CurrencyToVote;
 	type RewardRemainder = ();
 	type Event = Event;

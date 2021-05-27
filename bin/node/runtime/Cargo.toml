@@ -76,6 +76,7 @@ pallet-recovery = { git = "https://github.com/paritytech/substrate", rev = "0bda
 pallet-session = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", features = ["historical"], default-features = false }
 pallet-session-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false, optional = true }
 pallet-staking = { path = "../../../frame/staking-pool", default-features = false }
+# pallet-staking = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-scheduler = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 #pallet-society = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
@@ -143,7 +144,7 @@ std = [
 	"sp-api/std",
 	"sp-runtime/std",
 	"sp-staking/std",
-	# "pallet-staking/std",
+	"pallet-staking/std",
 	"sp-keyring",
 	"sp-session/std",
 	"pallet-sudo/std",
@@ -168,7 +169,6 @@ std = [
 	"sp-npos-elections/std",
    	"pallet-nft/std",
    	"realis-game-api/std",
-  	# "staking-pool/std",
 	"realis-primitives/std",
 ]
 runtime-benchmarks = [
