@@ -27,6 +27,7 @@ use node_runtime::{
 	StakingConfig, /*ElectionsConfig,*/ IndicesConfig, /*SocietyConfig,*/ SudoConfig, SystemConfig, NftConfig,
 	/*TechnicalCommitteeConfig,*/ wasm_binary_unwrap, MAX_NOMINATIONS,
 };
+use node_runtime::Runtime;
 use node_runtime::Block;
 use node_runtime::constants::currency::*;
 use sc_service::ChainType;
@@ -40,6 +41,7 @@ use sp_runtime::{Perbill, traits::{Verify, IdentifyAccount}};
 use sc_telemetry::serde_json::Map;
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::GenesisConfig;
+use node_runtime::pallet_staking;
 
 type AccountPublic = <Signature as Verify>::Signer;
 
@@ -369,6 +371,7 @@ pub fn realis_genesis(
 			get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 			get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 			get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+			pallet_staking::Module::<Runtime>::account_id(),
 		]
 	});
 	// endow all authorities and nominators.
@@ -396,7 +399,6 @@ pub fn realis_genesis(
 			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
 		}))
 		.collect::<Vec<_>>();
-
 	let num_endowed_accounts = endowed_accounts.len();
 
 	const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
@@ -410,7 +412,7 @@ pub fn realis_genesis(
 		pallet_balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned()
 				.map(|x| (x, ENDOWMENT))
-				.collect()
+				.collect(),
 		},
 		pallet_indices: IndicesConfig {
 			indices: vec![],
@@ -432,6 +434,7 @@ pub fn realis_genesis(
 			slash_reward_fraction: Perbill::from_percent(10),
 			stakers,
 			.. Default::default()
+
 		},
 		// pallet_democracy: DemocracyConfig::default(),
 		// pallet_elections_phragmen: ElectionsConfig {

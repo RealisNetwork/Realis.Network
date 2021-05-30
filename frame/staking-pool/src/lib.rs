@@ -347,7 +347,7 @@ pub type RewardPoint = u32;
 
 /// The balance type of this module.
 pub type BalanceOf<T> =
-	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 type PositiveImbalanceOf<T> = <<T as Config>::Currency as Currency<
 	<T as frame_system::Config>::AccountId,
@@ -652,7 +652,7 @@ impl<T: Config> SessionInterface<<T as frame_system::Config>::AccountId> for T w
 	T::SessionHandler: pallet_session::SessionHandler<<T as frame_system::Config>::AccountId>,
 	T::SessionManager: pallet_session::SessionManager<<T as frame_system::Config>::AccountId>,
 	T::ValidatorIdOf:
-		Convert<<T as frame_system::Config>::AccountId, Option<<T as frame_system::Config>::AccountId>>,
+	Convert<<T as frame_system::Config>::AccountId, Option<<T as frame_system::Config>::AccountId>>,
 {
 	fn disable_validator(validator: &<T as frame_system::Config>::AccountId) -> Result<bool, ()> {
 		<pallet_session::Module<T>>::disable(validator)
@@ -834,7 +834,7 @@ enum Releases {
 
 impl Default for Releases {
 	fn default() -> Self {
-		Releases::V6_0_0
+		Releases::V5_0_0
 	}
 }
 
@@ -932,7 +932,6 @@ decl_storage! {
 		pub ErasValidatorPrefs get(fn eras_validator_prefs):
 			double_map hasher(twox_64_concat) EraIndex, hasher(twox_64_concat) T::AccountId
 			=> ValidatorPrefs;
-
 		/// The total validator era payout for the last `HISTORY_DEPTH` eras.
 		///
 		/// Eras that haven't finished yet or has been removed doesn't have reward.
@@ -1005,10 +1004,10 @@ decl_storage! {
 		/// This is set to v6.0.0 for new networks.
 		StorageVersion build(|_: &GenesisConfig<T>| Releases::V6_0_0): Releases;
 	}
-	add_extra_genesis {
-		config(stakers):
+		add_extra_genesis {
+			config(stakers):
 			Vec<(T::AccountId, T::AccountId, BalanceOf<T>, StakerStatus<T::AccountId>)>;
-		build(|config: &GenesisConfig<T>| {
+			build(|config: &GenesisConfig<T>| {
 			for &(ref stash, ref controller, balance, ref status) in &config.stakers {
 				assert!(
 					T::Currency::free_balance(&stash) >= balance,
@@ -1035,7 +1034,7 @@ decl_storage! {
 					}, _ => Ok(())
 				};
 			}
-		});
+		})
 	}
 }
 
@@ -1942,7 +1941,7 @@ decl_module! {
 impl<T: Config> Module<T> {
 
 	pub fn account_id() -> T::AccountId {
-		AccountIdConversion::into_account(&T::PalletId::get())
+		T::PalletId::get().into_account()
 	}
 	/// The total balance that can be slashed from a stash account as of right now.
 	pub fn slashable_balance_of(stash: &T::AccountId) -> BalanceOf<T> {
@@ -2181,7 +2180,7 @@ impl<T: Config> Module<T> {
 		// active era is one behind (i.e. in the *last session of the active era*, or *first session
 		// of the new current era*, depending on how you look at it).
 		if let Some(next_active_era_start_session_index) =
-			Self::eras_start_session_index(next_active_era)
+		Self::eras_start_session_index(next_active_era)
 		{
 			if next_active_era_start_session_index == start_session {
 				Self::start_era(start_session);
@@ -2198,7 +2197,7 @@ impl<T: Config> Module<T> {
 	fn end_session(session_index: SessionIndex) {
 		if let Some(active_era) = Self::active_era() {
 			if let Some(next_active_era_start_session_index) =
-				Self::eras_start_session_index(active_era.index + 1)
+			Self::eras_start_session_index(active_era.index + 1)
 			{
 				if next_active_era_start_session_index == session_index + 1 {
 					Self::end_era(active_era, session_index);
@@ -2395,7 +2394,7 @@ impl<T: Config> Module<T> {
 					.map(|(nominator, weight)| (nominator, to_currency(weight)))
 					.for_each(|(nominator, stake)| {
 						if nominator == validator {
-						own = own.saturating_add(stake);
+							own = own.saturating_add(stake);
 						} else {
 							others.push(IndividualExposure { who: nominator, value: stake });
 						}
@@ -2552,7 +2551,7 @@ impl<T: Config> Module<T> {
 }
 
 impl<T: Config> frame_election_provider_support::ElectionDataProvider<T::AccountId, T::BlockNumber>
-	for Module<T>
+for Module<T>
 {
 	const MAXIMUM_VOTES_PER_VOTER: u32 = T::MAX_NOMINATIONS;
 	fn desired_targets() -> data_provider::Result<(u32, Weight)> {
@@ -2693,7 +2692,7 @@ impl<T: Config> pallet_session::SessionManager<T::AccountId> for Module<T> {
 }
 
 impl<T: Config> historical::SessionManager<T::AccountId, Exposure<T::AccountId, BalanceOf<T>>>
-	for Module<T>
+for Module<T>
 {
 	fn new_session(
 		new_index: SessionIndex,
@@ -2722,8 +2721,8 @@ impl<T: Config> historical::SessionManager<T::AccountId, Exposure<T::AccountId, 
 /// * 2 points to the block producer for each reference to a previously unreferenced uncle, and
 /// * 1 point to the producer of each referenced uncle block.
 impl<T> pallet_authorship::EventHandler<T::AccountId, T::BlockNumber> for Module<T>
-where
-	T: Config + pallet_authorship::Config + pallet_session::Config,
+	where
+		T: Config + pallet_authorship::Config + pallet_session::Config,
 {
 	fn note_author(author: T::AccountId) {
 		Self::reward_by_ids(vec![(author, 20)])
@@ -2754,7 +2753,7 @@ impl<T: Config> Convert<T::AccountId, Option<T::AccountId>> for StashOf<T> {
 pub struct ExposureOf<T>(sp_std::marker::PhantomData<T>);
 
 impl<T: Config> Convert<T::AccountId, Option<Exposure<T::AccountId, BalanceOf<T>>>>
-	for ExposureOf<T>
+for ExposureOf<T>
 {
 	fn convert(validator: T::AccountId) -> Option<Exposure<T::AccountId, BalanceOf<T>>> {
 		<Module<T>>::active_era()
@@ -2764,20 +2763,20 @@ impl<T: Config> Convert<T::AccountId, Option<Exposure<T::AccountId, BalanceOf<T>
 
 /// This is intended to be used with `FilterHistoricalOffences`.
 impl<T: Config>
-	OnOffenceHandler<T::AccountId, pallet_session::historical::IdentificationTuple<T>, Weight>
-	for Module<T>
-where
-	T: pallet_session::Config<ValidatorId = <T as frame_system::Config>::AccountId>,
-	T: pallet_session::historical::Config<
-		FullIdentification = Exposure<<T as frame_system::Config>::AccountId, BalanceOf<T>>,
-		FullIdentificationOf = ExposureOf<T>,
-	>,
-	T::SessionHandler: pallet_session::SessionHandler<<T as frame_system::Config>::AccountId>,
-	T::SessionManager: pallet_session::SessionManager<<T as frame_system::Config>::AccountId>,
-	T::ValidatorIdOf: Convert<
-		<T as frame_system::Config>::AccountId,
-		Option<<T as frame_system::Config>::AccountId>,
-	>,
+OnOffenceHandler<T::AccountId, pallet_session::historical::IdentificationTuple<T>, Weight>
+for Module<T>
+	where
+		T: pallet_session::Config<ValidatorId = <T as frame_system::Config>::AccountId>,
+		T: pallet_session::historical::Config<
+			FullIdentification = Exposure<<T as frame_system::Config>::AccountId, BalanceOf<T>>,
+			FullIdentificationOf = ExposureOf<T>,
+		>,
+		T::SessionHandler: pallet_session::SessionHandler<<T as frame_system::Config>::AccountId>,
+		T::SessionManager: pallet_session::SessionManager<<T as frame_system::Config>::AccountId>,
+		T::ValidatorIdOf: Convert<
+			<T as frame_system::Config>::AccountId,
+			Option<<T as frame_system::Config>::AccountId>,
+		>,
 {
 	fn on_offence(
 		offenders: &[OffenceDetails<
@@ -2901,11 +2900,11 @@ pub struct FilterHistoricalOffences<T, R> {
 }
 
 impl<T, Reporter, Offender, R, O> ReportOffence<Reporter, Offender, O>
-	for FilterHistoricalOffences<Module<T>, R>
-where
-	T: Config,
-	R: ReportOffence<Reporter, Offender, O>,
-	O: Offence<Offender>,
+for FilterHistoricalOffences<Module<T>, R>
+	where
+		T: Config,
+		R: ReportOffence<Reporter, Offender, O>,
+		O: Offence<Offender>,
 {
 	fn report_offence(reporters: Vec<Reporter>, offence: O) -> Result<(), OffenceError> {
 		// disallow any slashing from before the current bonding period.

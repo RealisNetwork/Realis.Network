@@ -4774,6 +4774,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "hex",
+ "hex-literal",
  "log",
  "pallet-authorship",
  "pallet-balances",

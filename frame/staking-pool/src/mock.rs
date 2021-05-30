@@ -217,6 +217,7 @@ parameter_types! {
 	pub const BondingDuration: EraIndex = 3;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &I_NPOS;
 	pub const MaxNominatorRewardedPerValidator: u32 = 64;
+	pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
 }
 
 thread_local! {
@@ -244,6 +245,7 @@ impl onchain::Config for Test {
 impl Config for Test {
 	const MAX_NOMINATIONS: u32 = 16;
 	type Currency = Balances;
+	type PalletId = StakingPalletId;
 	type UnixTime = Timestamp;
 	type CurrencyToVote = frame_support::traits::SaturatingCurrencyToVote;
 	type RewardRemainder = RewardRemainderMock;

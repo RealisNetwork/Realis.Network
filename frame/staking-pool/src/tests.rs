@@ -32,9 +32,12 @@ use frame_support::{
 use pallet_balances::Error as BalancesError;
 use substrate_test_utils::assert_eq_uvec;
 use frame_election_provider_support::Support;
+use hex_literal::*;
 
 #[test]
 fn force_unstake_works() {
+	let pallet_id = hex!("64612f7374616b69");
+	println!("{:?}", pallet_id);
 	ExtBuilder::default().build_and_execute(|| {
 		// Account 11 is stashed and locked, and account 10 is the controller
 		assert_eq!(Staking::bonded(&11), Some(10));

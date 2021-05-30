@@ -76,6 +76,7 @@ use pallet_session::{historical as pallet_session_historical};
 use sp_inherents::{InherentData, CheckInherentsResult};
 use static_assertions::const_assert;
 use pallet_contracts::weights::WeightInfo;
+pub use pallet_staking;
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -357,7 +358,7 @@ impl pallet_babe::Config for Runtime {
 	)>>::IdentificationTuple;
 
 	type HandleEquivocation =
-		pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
+	pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
 
 	type WeightInfo = ();
 }
@@ -403,7 +404,7 @@ impl pallet_transaction_payment::Config for Runtime {
 	type TransactionByteFee = TransactionByteFee;
 	type WeightToFee = IdentityFee<Balance>;
 	type FeeMultiplierUpdate =
-		TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
+	TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
 }
 
 parameter_types! {
@@ -457,26 +458,6 @@ impl pallet_session::Config for Runtime {
 impl pallet_session::historical::Config for Runtime {
 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
-}
-
-pallet_staking_reward_curve::build! {
-	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-		min_inflation: 0_025_000,
-		max_inflation: 0_100_000,
-		ideal_stake: 0_500_000,
-		falloff: 0_050_000,
-		max_piece_count: 40,
-		test_precision: 0_005_000,
-	);
-}
-
-parameter_types! {
-	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-	pub const BondingDuration: pallet_staking::EraIndex = 24 * 28;
-	pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
-	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
-	pub const MaxNominatorRewardedPerValidator: u32 = 256;
-	pub OffchainRepeat: BlockNumber = 5;
 }
 
 // impl pallet_staking::Config for Runtime {
@@ -912,7 +893,7 @@ impl pallet_grandpa::Config for Runtime {
 	type KeyOwnerProofSystem = Historical;
 
 	type KeyOwnerProof =
-		<Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
+	<Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
 
 	type KeyOwnerIdentification = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(
 		KeyTypeId,
@@ -920,7 +901,7 @@ impl pallet_grandpa::Config for Runtime {
 	)>>::IdentificationTuple;
 
 	type HandleEquivocation =
-		pallet_grandpa::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
+	pallet_grandpa::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
 
 	type WeightInfo = ();
 }
@@ -1101,20 +1082,29 @@ impl pallet_nft::Config for Runtime {
 	type RealisTokenId = u32;
 }
 
-impl realis_game_api::Config for Runtime {
-	type Event = Event;
+// impl realis_game_api::Config for Runtime {
+// 	type Event = Event;
+// }
+
+pallet_staking_reward_curve::build! {
+	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
+		min_inflation: 0_025_000,
+		max_inflation: 0_100_000,
+		ideal_stake: 0_500_000,
+		falloff: 0_050_000,
+		max_piece_count: 40,
+		test_precision: 0_005_000,
+	);
 }
 
 parameter_types! {
 	pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
-	// pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-	// pub const BondingDuration: pallet_staking::EraIndex = 24 * 28;
-	// pub const BondingDurationInBlockNumber: BlockNumber = 2 * EPOCH_DURATION_IN_BLOCKS * EPOCH_DURATION_IN_SLOTS;
-	// pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7;
-	// pub const MaxNominatorRewardedPerValidator: u32 = 128;
-	// pub const Cap: Balance = CAP;
-	// pub const TotalPower: u32 = TOTAL_POWER;
-	// pub OffchainRepeat: BlockNumber = 5;
+	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
+	pub const BondingDuration: pallet_staking::EraIndex = 24 * 28;
+	pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
+	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
+	pub const MaxNominatorRewardedPerValidator: u32 = 256;
+	pub OffchainRepeat: BlockNumber = 5;
 }
 
 impl pallet_staking::Config for Runtime {
@@ -1185,7 +1175,7 @@ construct_runtime!(
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
-		RealisApi: realis_game_api::{Pallet, Call, Event<T>},
+		// RealisApi: realis_game_api::{Pallet, Call, Event<T>},
 	}
 );
 
@@ -1235,9 +1225,9 @@ mod mmr {
 	pub use pallet_mmr::primitives::*;
 
 	pub type Leaf = <
-		<Runtime as pallet_mmr::Config>::LeafData
-		as
-		LeafDataProvider
+	<Runtime as pallet_mmr::Config>::LeafData
+	as
+	LeafDataProvider
 	>::LeafData;
 	pub type Hash = <Runtime as pallet_mmr::Config>::Hash;
 	pub type Hashing = <Runtime as pallet_mmr::Config>::Hashing;
