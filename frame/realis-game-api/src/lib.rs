@@ -4,14 +4,16 @@
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
 
-use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::Get,
-PalletId};
-use frame_system::ensure_root;
+use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::{
+    ExistenceRequirement, ExistenceRequirement::AllowDeath, StoredMap, WithdrawReasons, OnNewAccount, Get, OnUnbalanced,
+}, Parameter, PalletId};
+use sp_runtime::{traits::{AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
+                          StoredMapError, Zero,}, RuntimeDebug};
+use frame_system::{ensure_signed, split_inner, RefCount, ensure_root};
 use sp_std::prelude::*;
-use pallet_balances;
 use pallet_nft::{Token, Params, Socket, Rarity, TokenId};
 use pallet_nft as NFT;
-use sp_runtime::traits::StaticLookup;
+use pallet_staking;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
 
@@ -61,6 +63,21 @@ decl_error! {
 	}
 }
 
+pub struct DealWithTransactions;
+impl OnUnbalanced<PositiveImbalance> for DealWithTransactions {
+    fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item=NegativeImbalance>) {
+        if let Some(value) = fees_then_tips.next() {
+            // for fees, 80% to treasury, 20% to author
+            let mut split = value.ration(80, 20);
+            if let Some(value) = fees_then_tips.next() {
+                // for tips, if any, 80% to treasury, 20% to author (though this can be anything)
+                value.ration_merge_into(80, 20, &mut split);
+            }
+            T::account_id()::on_unbalanced(split.1);
+            pallet_staking::Module::<T>::account_id().on_unbalanced(split.0);
+        }
+    }
+}
 decl_module! {
 	pub struct Module<T: Config> for enum Call where origin: T::Origin {
         const PalletId: PalletId = T::PalletId::get();
@@ -72,19 +89,34 @@ decl_module! {
 
         #[weight = 10_000]
         pub fn mint_nft(origin, target_account: <T as frame_system::Config>::AccountId, token_id: pallet_nft::TokenId) -> dispatch::DispatchResult {
-           let minted_token = pallet_nft::Module::<T>::mint_basic_nft(&target_account, token_id);
+           pallet_nft::Module::<T>::mint_basic_nft(&target_account, token_id)
            Ok(())
         }
 
         #[weight = 10_000]
         pub fn transfer_nft(origin, dest_account: T::AccountId, token_id: pallet_nft::TokenId) {
-            return NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
+            NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id)
         }
 
         #[weight = 10_000]
-        pub fn transfer(T::account_id(), dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> dispatch::DispatchResultWithPostInfo {
+        pub fn transfer_from_pallet(T::account_id(), dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> dispatch::DispatchResultWithPostInfo {
             pallet_support::Curency::transfer(T::account_id(), &dest, value, KeepAlive)
 		}
+
+        #[weight = 10_000]
+        pub fn transfer_from_ptop(from: <T::Lookup as StaticLookup>::Source, to: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> dispatch::DispatchResultWithPostInfo {
+            pallet_support::Curency::transfer(from, to, value, KeepAlive)
+		}
+
+        #[weight = 10_000]
+        pub fn burn_nft(origin, pallet_nft::TokenId) -> dispatch::DispatchResult {
+            NFT::Module::<T>::burn_basic_nft(TokenId)
+        }
+
+        #[weight = 10_000]
+        pub fn spend_in_game (T::account_id(), pallet_staking::Module::<T>::account_id()) {
+
+        }
     }
 }
 

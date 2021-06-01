@@ -293,8 +293,8 @@ impl Default for ExtBuilder {
 		Self {
 			validator_pool: false,
 			nominate: true,
-			validator_count: 2,
-			minimum_validator_count: 0,
+			validator_count: 4,
+			minimum_validator_count: 2,
 			fair: true,
 			num_validators: None,
 			invulnerables: vec![],

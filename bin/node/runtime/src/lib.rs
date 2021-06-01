@@ -118,7 +118,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 265,
+	spec_version: 266,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 2,
@@ -147,10 +147,10 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item=NegativeImbalance>) {
 		if let Some(fees) = fees_then_tips.next() {
 			// for fees, 80% to treasury, 20% to author
-			let mut split = fees.ration(100, 0);
+			let mut split = fees.ration(0, 100);
 			if let Some(tips) = fees_then_tips.next() {
 				// for tips, if any, 80% to treasury, 20% to author (though this can be anything)
-				tips.ration_merge_into(100, 0, &mut split);
+				tips.ration_merge_into(0, 100, &mut split);
 			}
 			// Treasury::on_unbalanced(split.0);
 			Author::on_unbalanced(split.1);
@@ -334,7 +334,7 @@ impl pallet_scheduler::Config for Runtime {
 parameter_types! {
 	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
 	//       Attempting to do so will brick block production.
-	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS;
+	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS as u64;
 	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK;
 	pub const ReportLongevity: u64 =
 		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
@@ -393,7 +393,7 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
-	pub const TransactionByteFee: Balance = 10 * MILLICENTS;
+	pub const TransactionByteFee: Balance = MILLICENTS;
 	pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
 	pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(1, 100_000);
 	pub MinimumMultiplier: Multiplier = Multiplier::saturating_from_rational(1, 1_000_000_000u128);
@@ -459,28 +459,6 @@ impl pallet_session::historical::Config for Runtime {
 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
 }
-
-// impl pallet_staking::Config for Runtime {
-// 	const MAX_NOMINATIONS: u32 = MAX_NOMINATIONS;
-// 	type Currency = Balances;
-// 	type UnixTime = Timestamp;
-// 	type CurrencyToVote = U128CurrencyToVote;
-// 	type RewardRemainder = ();
-// 	type Event = Event;
-// 	type Slash = (); // send the slashed funds to the treasury.
-// 	type Reward = (); // rewards are minted from the void
-// 	type SessionsPerEra = SessionsPerEra;
-// 	type BondingDuration = BondingDuration;
-// 	type SlashDeferDuration = SlashDeferDuration;
-// 	/// A super-majority of the council can cancel the slash.
-// 	type SlashCancelOrigin = EnsureRoot<AccountId>;
-// 	type SessionInterface = Self;
-// 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
-// 	type NextNewSession = Session;
-// 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
-// 	type ElectionProvider = ElectionProviderMultiPhase;
-// 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
-// }
 
 parameter_types! {
 	// phase durations. 1/4 of the last session for each.
@@ -1100,8 +1078,8 @@ pallet_staking_reward_curve::build! {
 parameter_types! {
 	pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
 	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-	pub const BondingDuration: pallet_staking::EraIndex = 24 * 28;
-	pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
+	pub const BondingDuration: pallet_staking::EraIndex = 28;
+	pub const SlashDeferDuration: pallet_staking::EraIndex = 27; // 1/4 the bonding duration.
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const MaxNominatorRewardedPerValidator: u32 = 256;
 	pub OffchainRepeat: BlockNumber = 5;

@@ -191,15 +191,15 @@ decl_storage! {
 // Pallets use events to inform users when important changes are made.
 // https://substrate.dev/docs/en/knowledgebase/runtime/events
 decl_event!(
-	pub enum Event<T> where 
-    AccountId = <T as frame_system::Config>::AccountId, 
+	pub enum Event<T> where
+    AccountId = <T as frame_system::Config>::AccountId,
     TokenBalance = <T as Config>::Balance,
     RealisTokenId = <T as Config>::RealisTokenId, {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
 		SomethingStored(TokenId, AccountId),
 		TokenMinted(AccountId, TokenId),
-		TokenBurned(sp_std::vec::Vec<Token>),
+		TokenBurned(),
         BasicTokenBurned(TokenId),
 		TokenTransferred(TokenId, AccountId),
         TokenBreeded(TokenId),
@@ -329,12 +329,11 @@ decl_module! {
             Ok(())
 
 		}
-        
+
 		///Burn token(only owner)
 		#[weight = 10_000]
 		pub fn burn(origin, token_id: TokenId) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
-
             // ensure!(
             //     who != T::AccountId::default(),
             //     Error::<T>::NonExistentToken
@@ -346,7 +345,7 @@ decl_module! {
             );
 
 			let id_of_token = Self::burn_nft(token_id)?;
-		    Self::deposit_event(RawEvent::TokenBurned(id_of_token.clone()));
+		    Self::deposit_event(RawEvent::TokenBurned());
             Ok(())
         }
 
@@ -365,7 +364,7 @@ decl_module! {
             );
 
 			let id_of_token = Self::burn_basic_nft(token_id)?;
-		    Self::deposit_event(RawEvent::TokenBurned(id_of_token.clone()));
+		    Self::deposit_event(RawEvent::TokenBurned());
             Ok(())
         }
 
@@ -422,22 +421,17 @@ impl<T: Config> Module<T> {
         Ok(token_id)
     }
 
-    pub fn burn_nft(token_id: TokenId) -> dispatch::result::Result<Vec<Token>, dispatch::DispatchError> {
+    pub fn burn_nft(token_id: TokenId) -> dispatch::DispatchResult {
         let owner = Self::owner_of(token_id);
 
 
         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
 
-        let deleted_token = TokensForAccount::<T>::take(&owner);
-        // TokensForAccount::<T>::mutate(&owner, &token_id, |tokens| {
-        //     let pos = tokens
-        //         .binary_search(&token_id)
-        //         .expect("We already checked that we have the correct owner; qed");
-        //     tokens.remove(pos);
-        // });
+        // TokensForAccount::<T>::mutate(&owner, |token_id| token_id.burn(&token_id));
+        TokensForAccount::<T>::take(&owner);
         AccountForToken::<T>::remove(&token_id);
 
-        Ok(deleted_token)
+        Ok(())
     }
 
     pub fn burn_basic_nft(token_id: TokenId) -> dispatch::result::Result<Vec<Token>, dispatch::DispatchError> {
