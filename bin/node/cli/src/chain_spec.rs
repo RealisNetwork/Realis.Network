@@ -537,12 +537,13 @@ pub fn realis_config() -> Result<ChainSpec, String> {
 }
 
 fn development_config_genesis() -> GenesisConfig {
-	testnet_genesis(
+	realis_genesis(
 		vec![
 			authority_keys_from_seed("Alice"),
 		],
 		vec![],
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
+		vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
 		None,
 	)
 }
@@ -563,13 +564,14 @@ pub fn development_config() -> ChainSpec {
 }
 
 fn local_testnet_genesis() -> GenesisConfig {
-	testnet_genesis(
+	realis_genesis(
 		vec![
 			authority_keys_from_seed("Alice"),
 			authority_keys_from_seed("Bob"),
 		],
 		vec![],
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
+		vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
 		None,
 	)
 }

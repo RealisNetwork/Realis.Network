@@ -4,7 +4,8 @@
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
 
-use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::Get};
+use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::Get,
+PalletId};
 use frame_system::ensure_root;
 use sp_std::prelude::*;
 use pallet_balances;
@@ -27,6 +28,8 @@ use codec::{Decode, Encode, EncodeLike};
 pub trait Config: frame_system::Config + pallet_nft::Config + pallet_balances::Config {
     /// Because this pallet emits events, it depends on the runtime's definition of an event.
     type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
+
+    type PalletId: Get<PalletId>;
 }
 
 
@@ -60,6 +63,7 @@ decl_error! {
 
 decl_module! {
 	pub struct Module<T: Config> for enum Call where origin: T::Origin {
+        const PalletId: PalletId = T::PalletId::get();
         		// Errors must be initialized if they are used by the pallet.
 		type Error = Error<T>;
 
@@ -72,34 +76,23 @@ decl_module! {
            Ok(())
         }
 
-        // #[weight = 10_000]
-        // pub fn breed_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
-        //     let token_id = 3;
-        //     let rarity = NFT::Rarity::Legendary;
-        //     let socket = NFT::Socket::Head;
-        //     let params = NFT::Params{strength: 2,
-        //         agility: 2,
-        //         intelligence: 9 };
-        //     NFT::Module::<T>::burn(origin.clone(), 1);
-        //     NFT::Module::<T>::burn(origin.clone(), 2);
-        //     return NFT::Module::<T>::mint(origin, target_account, token_id, rarity, socket, params);
-        // }
-
         #[weight = 10_000]
         pub fn transfer_nft(origin, dest_account: T::AccountId, token_id: pallet_nft::TokenId) {
-            let json_nft = 123;
             return NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
         }
 
-
         #[weight = 10_000]
-        pub fn transfer(origin, dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> dispatch::DispatchResultWithPostInfo {
-            return pallet_balances::Pallet::<T>::transfer(origin, dest, value);
+        pub fn transfer(T::account_id(), dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> dispatch::DispatchResultWithPostInfo {
+            pallet_support::Curency::transfer(T::account_id(), &dest, value, KeepAlive)
 		}
     }
 }
 
-
+impl<T: Config> Module<T> {
+    pub fn account_id() -> T::AccountId {
+        T::PalletId::get().into_account()
+    }
+}
 // fn get_from_json() -> Token {
 //     let client = reqwest::Client::new();
 //     let mut request = client.get(URL);
