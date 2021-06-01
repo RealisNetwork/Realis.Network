@@ -9,12 +9,12 @@ docker run -d --name=${CONTAINER} --net=host \
  -v /blockchain_soul/soul/nikita1:/realis/chain \
 ${IMAGE} \
 /realis/realis \
---chain=realis2 \
+--chain ../realis.json \
 --ws-port 9944 \
 --rpc-port 9933  \
 --validator  \
 --rpc-methods=Unsafe  \
- --listen-addr /ip4/0.0.0.0/tcp/30333 \
+--reserved-nodes /ip4/161.97.142.255/tcp/30333/p2p/12D3KooWAAd19rb8AQhpnybsYYwDk5gaL9GGWZFJ4QrcXqrLM8w3 \
 --name MyNode01 \
 --unsafe-ws-external \
 --unsafe-rpc-external \

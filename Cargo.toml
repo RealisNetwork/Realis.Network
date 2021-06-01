@@ -1,17 +1,21 @@
-[profile.release]
-panic = 'unwind'
+cargo-features = ["resolver"]
 
 [workspace]
+resolver = "2"
+
 members = [
-    "bin/node/bench",
-    "bin/node/browser-testing",
-    "bin/node/cli",
-    "bin/node/executor",
-    "bin/node/primitives",
-    "bin/node/rpc",
-    "bin/node/rpc-client",
+	"bin/node/cli",
     "bin/node/runtime",
-    "bin/node/testing",
-    "bin/utils/chain-spec-builder",
-    "bin/utils/subkey",
+    # "frame/nft",
 ]
+
+# Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.
+# `node-executor` is a dependecy of a `node-cli` at `bin/node/cli`.
+[patch.'https://github.com/paritytech/substrate']
+node-runtime = { path = "bin/node/runtime" }
+
+[profile.dev]
+split-debuginfo = "unpacked"
+
+[profile.release]
+panic = "unwind"
