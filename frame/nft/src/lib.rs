@@ -15,6 +15,7 @@ use primitive_types::U256;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
 use sp_std::prelude::*;
+use frame_support::traits::Len;
 
 #[cfg(test)]
 mod mock;
@@ -334,11 +335,6 @@ decl_module! {
 		#[weight = 10_000]
 		pub fn burn(origin, token_id: TokenId) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
-            // ensure!(
-            //     who != T::AccountId::default(),
-            //     Error::<T>::NonExistentToken
-            // );
-
             ensure!(
                 who == Self::account_for_token(&token_id),
                 Error::<T>::NotTokenOwner
@@ -423,10 +419,8 @@ impl<T: Config> Module<T> {
 
     pub fn burn_nft(token_id: TokenId) -> dispatch::DispatchResult {
         let owner = Self::owner_of(token_id);
-
-
-        TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
-
+        let tokens = TokensForAccount::<T>::get(&owner);
+        TokensForAccount::<T>::mutate(&owner, |tokens| tokens.remove(1));
         // TokensForAccount::<T>::mutate(&owner, |token_id| token_id.burn(&token_id));
         TokensForAccount::<T>::take(&owner);
         AccountForToken::<T>::remove(&token_id);

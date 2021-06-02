@@ -4,7 +4,7 @@ CONTAINER="realis-test"
 docker rm -f ${CONTAINER}
 docker rmi ${IMAGE}
 docker build -t ${IMAGE} .
-docker push ${IMAGE}
+#docker push ${IMAGE}
 docker run -d --name=${CONTAINER} --net=host \
  -v /blockchain_soul/soul/nikita1:/realis/chain \
 ${IMAGE} \
@@ -14,7 +14,6 @@ ${IMAGE} \
 --rpc-port 9933  \
 --validator  \
 --rpc-methods=Unsafe  \
---reserved-nodes /ip4/161.97.142.255/tcp/30333/p2p/12D3KooWAAd19rb8AQhpnybsYYwDk5gaL9GGWZFJ4QrcXqrLM8w3 \
 --name MyNode01 \
 --unsafe-ws-external \
 --unsafe-rpc-external \

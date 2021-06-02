@@ -402,7 +402,7 @@ pub fn realis_genesis(
 		.collect::<Vec<_>>();
 	let num_endowed_accounts = endowed_accounts.len();
 
-	const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
+	const ENDOWMENT: Balance = 30_000 * DOLLARS / 10;
 	const STASH: Balance = ENDOWMENT / 1000;
 
 	GenesisConfig {

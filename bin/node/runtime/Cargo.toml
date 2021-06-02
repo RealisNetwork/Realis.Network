@@ -89,7 +89,7 @@ pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", 
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-vesting = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-nft = { path = "../../../frame/nft", default-features = false }
-realis-game-api = { path = "../../../frame/realis-game-api", default-features = false }
+# realis-game-api = { path = "../../../frame/realis-game-api", default-features = false }
 realis-primitives = { version = "0.0.1", default-features = false, path = "../primitives" }
 
 [build-dependencies]
@@ -167,7 +167,7 @@ std = [
 	"frame-try-runtime/std",
 	"sp-npos-elections/std",
    	"pallet-nft/std",
-   	"realis-game-api/std",
+#   	"realis-game-api/std",
 	"realis-primitives/std",
 ]
 runtime-benchmarks = [
