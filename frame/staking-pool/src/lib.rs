@@ -277,6 +277,7 @@ pub mod testing_utils;
 pub mod benchmarking;
 
 pub mod slashing;
+pub mod inflation;
 pub mod weights;
 
 use sp_std::{
@@ -666,12 +667,59 @@ impl<T: Config> SessionInterface<<T as frame_system::Config>::AccountId> for T w
 	}
 }
 
+/// Handler for determining how much of a balance should be paid out on the current era.
+pub trait EraPayout<Balance> {
+	/// Determine the payout for this era.
+	///
+	/// Returns the amount to be paid to stakers in this era, as well as whatever else should be
+	/// paid out ("the rest").
+	fn era_payout(
+		total_staked: Balance,
+		total_issuance: Balance,
+		era_duration_millis: u64,
+	) -> (Balance, Balance);
+}
+
 pub trait Transfer<AccountId, Balance> {
 	fn transfer(
 		source: &AccountId,
 		dest: &AccountId,
 		value: Balance,
 	) -> Option<PositiveImbalanceOf<Self>> where Self: Config;
+}
+
+impl<Balance: Default> EraPayout<Balance> for () {
+	fn era_payout(
+		_total_staked: Balance,
+		_total_issuance: Balance,
+		_era_duration_millis: u64,
+	) -> (Balance, Balance) {
+		(Default::default(), Default::default())
+	}
+}
+
+/// Adaptor to turn a `PiecewiseLinear` curve definition into an `EraPayout` impl, used for
+/// backwards compatibility.
+pub struct ConvertCurve<T>(sp_std::marker::PhantomData<T>);
+impl<
+	Balance: AtLeast32BitUnsigned + Clone,
+	T: Get<&'static PiecewiseLinear<'static>>,
+> EraPayout<Balance> for ConvertCurve<T> {
+	fn era_payout(
+		total_staked: Balance,
+		total_issuance: Balance,
+		era_duration_millis: u64,
+	) -> (Balance, Balance) {
+		let (validator_payout, max_payout) = inflation::compute_total_payout(
+			&T::get(),
+			total_staked,
+			total_issuance,
+			// Duration of era; more than u64::MAX is rewarded as u64::MAX.
+			era_duration_millis,
+		);
+		let rest = max_payout.saturating_sub(validator_payout.clone());
+		(validator_payout, rest)
+	}
 }
 
 pub trait Config: frame_system::Config + SendTransactionTypes<Call<Self>> {
@@ -734,6 +782,10 @@ pub trait Config: frame_system::Config + SendTransactionTypes<Call<Self>> {
 	/// Interface for interacting with a session module.
 	type SessionInterface: self::SessionInterface<Self::AccountId>;
 
+	/// The payout for validators and the system for the current era.
+	/// See [Era payout](./index.html#era-payout).
+	type EraPayout: EraPayout<BalanceOf<Self>>;
+
 	/// Something that can estimate the next session change, accurately or as a best effort guess.
 	type NextNewSession: EstimateNextNewSession<Self::BlockNumber>;
 
@@ -782,7 +834,7 @@ enum Releases {
 
 impl Default for Releases {
 	fn default() -> Self {
-		Releases::V6_0_0
+		Releases::V5_0_0
 	}
 }
 
@@ -802,9 +854,6 @@ decl_storage! {
 
 		/// Minimum number of staking participants before emergency conditions are imposed.
 		pub MinimumValidatorCount get(fn minimum_validator_count) config(): u32;
-
-		        pub ErasAccumulatedBalance get(fn eras_accumulated_balance):
-            map hasher(twox_64_concat) EraIndex => BalanceOf<T>;
 
 		/// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
 		/// easy to initialize and the performance hit is minimal (we expect no more than four
@@ -2201,12 +2250,19 @@ impl<T: Config> Module<T> {
 	/// Compute payout for era.
 	fn end_era(active_era: ActiveEraInfo, _session_index: SessionIndex) {
 		// Note: active_era_start can be None if end era is called during genesis config.
-		if let Some(_active_era_start) = active_era.start {
-			let payout = Self::eras_accumulated_balance(active_era.index);
-			Self::deposit_event(RawEvent::EraPayout(active_era.index, payout, Zero::zero()));
+		if let Some(active_era_start) = active_era.start {
+			let now_as_millis_u64 = T::UnixTime::now().as_millis().saturated_into::<u64>();
+
+			let era_duration = (now_as_millis_u64 - active_era_start).saturated_into::<u64>();
+			let staked = Self::eras_total_stake(&active_era.index);
+			let issuance = T::Currency::total_issuance();
+			let (validator_payout, rest) = T::EraPayout::era_payout(staked, issuance, era_duration);
+
+			Self::deposit_event(RawEvent::EraPayout(active_era.index, validator_payout, rest));
 
 			// Set ending era reward.
-			<ErasValidatorReward<T>>::insert(&active_era.index, payout);
+			<ErasValidatorReward<T>>::insert(&active_era.index, validator_payout);
+			T::RewardRemainder::on_unbalanced(T::Currency::issue(rest));
 		}
 	}
 
@@ -2384,19 +2440,6 @@ impl<T: Config> Module<T> {
 		<ErasRewardPoints<T>>::remove(era_index);
 		<ErasTotalStake<T>>::remove(era_index);
 		ErasStartSessionIndex::remove(era_index);
-
-		// Not only clean the stored rewards but also withdraw them away
-		match T::Currency::withdraw(
-			&T::PalletId::get().into_account(),
-			ErasAccumulatedBalance::<T>::take(era_index),
-			WithdrawReasons::all(),
-			KeepAlive,
-		) {
-			Ok(imbalance) => T::RewardRemainder::on_unbalanced(imbalance),
-			Err(_) => frame_support::print(
-				"Warning: an error happened when trying to handle active era's rewards remainder",
-			),
-		};
 	}
 
 	/// Apply previously-unapplied slashes on the beginning of a new era, after a delay.
@@ -2882,18 +2925,6 @@ for FilterHistoricalOffences<Module<T>, R>
 		R::is_known_offence(offenders, time_slot)
 	}
 }
-
-impl<T: Config> OnUnbalanced<NegativeImbalanceOf<T>> for Module<T> {
-	fn on_nonzero_unbalanced(imbalance: NegativeImbalanceOf<T>) {
-		if let Some(active_era_info) = Self::active_era() {
-			ErasAccumulatedBalance::<T>::mutate(active_era_info.index, |v: &mut BalanceOf<T>| {
-				*v = v.saturating_add(imbalance.peek())
-			});
-			T::Currency::resolve_creating(&T::PalletId::get().into_account(), imbalance);
-		}
-	}
-}
-
 
 /// Check that list is sorted and has no duplicates.
 fn is_sorted_and_unique(list: &[u32]) -> bool {
