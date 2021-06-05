@@ -7,13 +7,7 @@
 use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::{
     ExistenceRequirement, ExistenceRequirement::AllowDeath, StoredMap, WithdrawReasons, OnNewAccount, Get, OnUnbalanced,
 }, Parameter, PalletId};
-use sp_runtime::{traits::{AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
-                          StoredMapError, Zero,}, RuntimeDebug};
-use frame_system::{ensure_signed, split_inner, RefCount, ensure_root};
 use sp_std::prelude::*;
-use pallet_nft::{Token, Params, Socket, Rarity, TokenId};
-use pallet_nft as NFT;
-use pallet_staking::*;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
 
@@ -37,9 +31,15 @@ use codec::{Decode, Encode, EncodeLike};
 pub use frame_system::pallet::*;
 #[frame_support::pallet]
 pub mod pallet {
+    use pallet_nft::{Token, Params, Socket, Rarity, TokenId};
+    use pallet_nft as NFT;
+    use pallet_staking::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
     use pallet_nft::Error::KeepAlive;
+    use frame_support::PalletId;
+    use sp_runtime::traits::AccountIdConversion;
+    use frame_support::traits::ExistenceRequirement;
 
 
     // 2. Declaration of the Pallet type
@@ -69,9 +69,9 @@ pub trait Config: frame_system::Config + pallet_nft::Config {
 pub enum Event<T: Config> {
     /// Event documentation should end with an array that provides descriptive names for event
     /// parameters. [something, who]
-    TokenMinted(AccountId, TokenId),
-    TokenTransferred(TokenId, AccountId),
-    TokenBreeded(TokenId),
+    TokenMinted(T::AccountId, NFT::TokenId),
+    TokenTransferred(NFT::TokenId, T::AccountId),
+    TokenBreeded(NFT::TokenId),
     // TokensTransferred(TokenId, AccountId, TokenId, AccountId),
 }
 
@@ -104,36 +104,39 @@ impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 #[pallet::call]
 impl<T:Config> Pallet<T> {
 
-    #[weight = 10_000]
-    pub fn mint_nft(origin: OriginOf<T>, target_account: <T as frame_system::Config>::AccountId, token_id: pallet_nft::TokenId) -> dispatch::DispatchResult {
+    #[pallet::weight(90_000_000)]
+    pub fn mint_nft(origin: OriginFor<T>, target_account: <T as frame_system::Config>::AccountId, token_id: pallet_nft::TokenId) -> DispatchResult {
         pallet_nft::Module::<T>::mint_basic_nft(&target_account, token_id);
         Ok(())
     }
 
-    #[weight = 10_000]
-    pub fn transfer_nft(origin: OriginOf<T>, dest_account: T::AccountId, token_id: pallet_nft::TokenId) {
-        NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id)
+    #[pallet::weight(60_000_000)]
+    pub fn transfer_nft(origin: OriginFor<T>, dest_account: T::AccountId, token_id: pallet_nft::TokenId) -> DispatchResult {
+        NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
+        Ok(())
     }
 
-    #[weight = 10_000]
-    pub fn transfer_from_pallet(origin: OriginOf<T>, pallet_id: T::account_id(), dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> dispatch::DispatchResultWithPostInfo {
-        pallet_support::Curency::transfer(T::account_id(), &dest, value, KeepAlive)
+    // #[pallet::weight(50_000_000)]
+    // pub fn transfer_from_pallet(origin: OriginFor<T>, pallet_id: T::account_id(), dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> DispatchResultWithPostInfo {
+    //     frame_support::Curency::transfer(T::account_id(), &dest, value, KeepAlive)
+    // }
+
+    #[pallet::weight(30_000_000)]
+    pub fn transfer_from_ptop(origin: OriginFor<T>, from: T::AccountId, to: T::AccountId, value: T::Balance) -> DispatchResult {
+        frame_support::traits::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
+        Ok(())
     }
 
-    #[weight = 10_000]
-    pub fn transfer_from_ptop(origin: OriginOf<T>, from: <T::Lookup as StaticLookup>::Source, to: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> dispatch::DispatchResultWithPostInfo {
-        pallet_support::Curency::transfer(from, to, value, KeepAlive)
+    #[pallet::weight(90_000_000)]
+    pub fn burn_nft(origin: OriginFor<T>, token_id: pallet_nft::TokenId) -> DispatchResult {
+        NFT::Module::<T>::burn_basic_nft(token_id);
+        Ok(())
     }
 
-    #[weight = 10_000]
-    pub fn burn_nft(origin: OriginOf<T>, token_id: pallet_nft::TokenId) -> dispatch::DispatchResult {
-        NFT::Module::<T>::burn_basic_nft(TokenId)
-    }
-
-    #[weight = 10_000]
-    pub fn spend_in_game (origin: OriginOf<T>, pallet_id: ::account_id(), pallet_id_staking: pallet_staking::Module::<T>::account_id()) {
-
-        }
+    // #[pallet::weight(90_000_000)]
+    // pub fn spend_in_game (origin: OriginFor<T>, pallet_id: ::account_id(), pallet_id_staking: pallet_staking::Module::<T>::account_id()) -> DispatchResultWithPostInfo {
+    //
+    //     }
     }
 
     impl<T: Config> Pallet<T> {
