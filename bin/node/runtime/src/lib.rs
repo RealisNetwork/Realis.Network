@@ -1078,8 +1078,8 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
 	pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
-	pub const SessionsPerEra: sp_staking::SessionIndex = 1;
-	pub const BondingDuration: pallet_staking::EraIndex = 1;
+	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
+	pub const BondingDuration: pallet_staking::EraIndex = 28;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const SlashDeferDuration: pallet_staking::EraIndex = 27; // 1/4 the bonding duration.
 	pub const MaxNominatorRewardedPerValidator: u32 = 256;
