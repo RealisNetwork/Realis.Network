@@ -5780,6 +5780,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "realis-game-api"
+version = "0.0.1"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-nft",
+ "pallet-staking",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "realis-primitives"
 version = "0.0.1"
 dependencies = [
