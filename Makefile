@@ -25,3 +25,7 @@ clean:
 .PHONY: docker 
 docker:
 	make build && cd target/release && mv realis ../../docker && cd ../../docker && bash ./run-realis.sh
+
+.PHONY: fmt
+fmt:
+	cargo fmt -p pallet-staking -p pallet-nft -p realis-game-api
