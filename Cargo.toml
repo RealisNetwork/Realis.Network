@@ -6,8 +6,10 @@ resolver = "2"
 members = [
 	"bin/node/cli",
     "bin/node/runtime",
-    # "frame/nft",
+    "bin/node/primitives",
+     "frame/nft",
     "frame/realis-game-api",
+    "frame/staking-pool",
 ]
 
 # Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.

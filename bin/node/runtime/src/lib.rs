@@ -1060,9 +1060,15 @@ impl pallet_nft::Config for Runtime {
 	type RealisTokenId = u32;
 }
 
-// impl realis_game_api::Config for Runtime {
-// 	type Event = Event;
-// }
+parameter_types! {
+	pub const GameApiPalletId: PalletId = PalletId(*b"rl/gamap");
+}
+
+impl realis_game_api::Config for Runtime {
+	type Event = Event;
+	type PalletId = GameApiPalletId;
+	type Currency = Balances;
+}
 
 
 pallet_staking_reward_curve::build! {
@@ -1154,7 +1160,7 @@ construct_runtime!(
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
-		// RealisApi: realis_game_api::{Pallet, Call, Event<T>},
+		RealisApi: realis_game_api::{Pallet, Call, Event<T>},
 	}
 );
 

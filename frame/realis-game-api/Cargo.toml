@@ -37,5 +37,5 @@ std = [
     "sp-runtime/std",
     "sp-std/std",
     "pallet-nft/std",
-    "pallet-staking/std"
+    "pallet-staking/std",
 ]

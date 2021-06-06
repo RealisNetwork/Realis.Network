@@ -4111,6 +4111,7 @@ dependencies = [
  "pallet-utility",
  "pallet-vesting",
  "parity-scale-codec",
+ "realis-game-api",
  "realis-primitives",
  "sp-api",
  "sp-authority-discovery",
