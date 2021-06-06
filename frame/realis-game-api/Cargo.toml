@@ -1,15 +1,15 @@
 [package]
-authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
-description = 'FRAME pallet template for defining custom runtime logic.'
-edition = '2018'
-homepage = 'https://substrate.dev'
-license = 'Unlicense'
-name = 'realis-game-api'
-repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
-version = '0.0.1'
+authors = ["Substrate DevHub <https://github.com/substrate-developer-hub>"]
+description = "FRAME pallet template for defining custom runtime logic."
+edition = "2018"
+homepage = "https://substrate.dev"
+license = "Unlicense"
+name = "realis-game-api"
+repository = "https://github.com/substrate-developer-hub/substrate-node-template/"
+version = "0.0.1"
 
 [package.metadata.docs.rs]
-targets = ['x86_64-unknown-linux-gnu']
+targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 serde = { version = "1.0.102", optional = true }
@@ -19,7 +19,7 @@ frame-system = { git = "https://github.com/paritytech/substrate", rev = "0bda865
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-nft = { version = "0.0.2", default-features = false, path="../nft" }
-pallet-staking = {version = "3.0.0", default-features = false, path="../staking-pool", optional = true }
+pallet-staking = {version = "3.0.0", default-features = false, path="../staking-pool" }
 
 [dev-dependencies]
 sp-core = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
@@ -28,12 +28,14 @@ sp-io = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b0
 
 
 [features]
-default = ['std']
+default = ["std"]
 std = [
-    'serde',
-    'codec/std',
-    'frame-support/std',
-    'frame-system/std',
-    'sp-runtime/std',
-    'sp-std/std'
+    "serde",
+    "codec/std",
+    "frame-support/std",
+    "frame-system/std",
+    "sp-runtime/std",
+    "sp-std/std",
+    "pallet-nft/std",
+    "pallet-staking/std"
 ]

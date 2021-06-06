@@ -521,7 +521,7 @@ parameter_types! {
 	pub const VotingPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
 	pub const FastTrackVotingPeriod: BlockNumber = 3 * 24 * 60 * MINUTES;
 	pub const InstantAllowed: bool = true;
-	pub const MinimumDeposit: Balance = 100 * DOLLARS;
+	pub const MinimumDeposit: Balance = 1;
 	pub const EnactmentPeriod: BlockNumber = 30 * 24 * 60 * MINUTES;
 	pub const CooloffPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
 	// One cent: $10,000 / MB
@@ -1064,10 +1064,23 @@ impl pallet_nft::Config for Runtime {
 // 	type Event = Event;
 // }
 
+
+pallet_staking_reward_curve::build! {
+	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
+		min_inflation: 0_025_000,
+		max_inflation: 0_100_000,
+		ideal_stake: 0_500_000,
+		falloff: 0_050_000,
+		max_piece_count: 40,
+		test_precision: 0_005_000,
+	);
+}
+
 parameter_types! {
 	pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
-	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-	pub const BondingDuration: pallet_staking::EraIndex = 28;
+	pub const SessionsPerEra: sp_staking::SessionIndex = 1;
+	pub const BondingDuration: pallet_staking::EraIndex = 1;
+	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const SlashDeferDuration: pallet_staking::EraIndex = 27; // 1/4 the bonding duration.
 	pub const MaxNominatorRewardedPerValidator: u32 = 256;
 	pub OffchainRepeat: BlockNumber = 5;
@@ -1079,6 +1092,7 @@ impl pallet_staking::Config for Runtime {
 	type UnixTime = Timestamp;
 	type PalletId = StakingPalletId;
 	type CurrencyToVote = U128CurrencyToVote;
+	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type RewardRemainder = ();
 	type Event = Event;
 	type Slash = (); // send the slashed funds to the treasury.
