@@ -38,9 +38,10 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
     use pallet_nft::Error::KeepAlive;
     use frame_support::PalletId;
-    use sp_runtime::traits::AccountIdConversion;
-    use frame_support::traits::ExistenceRequirement;
-
+    use sp_runtime::traits::{AccountIdConversion, AtLeast32BitUnsigned};
+    use frame_support::traits::{ExistenceRequirement, Currency};
+    use codec::Codec;
+    use sp_std::fmt::Debug;
 
     // 2. Declaration of the Pallet type
 // This is a placeholder to implement traits and methods.
@@ -58,6 +59,8 @@ pub trait Config: frame_system::Config + pallet_nft::Config {
     type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
     type PalletId: Get<PalletId>;
+
+    type Currency: Currency<Self::AccountId, Balance=Self::Balance>;
 }
 
 
@@ -106,7 +109,7 @@ impl<T:Config> Pallet<T> {
 
     #[pallet::weight(90_000_000)]
     pub fn mint_nft(origin: OriginFor<T>, target_account: <T as frame_system::Config>::AccountId, token_id: pallet_nft::TokenId) -> DispatchResult {
-        pallet_nft::Module::<T>::mint_basic_nft(&target_account, token_id);
+        NFT::Module::<T>::mint_basic_nft(&target_account, token_id);
         Ok(())
     }
 
@@ -123,7 +126,7 @@ impl<T:Config> Pallet<T> {
 
     #[pallet::weight(30_000_000)]
     pub fn transfer_from_ptop(origin: OriginFor<T>, from: T::AccountId, to: T::AccountId, value: T::Balance) -> DispatchResult {
-        frame_support::traits::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
+        T::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
         Ok(())
     }
 
