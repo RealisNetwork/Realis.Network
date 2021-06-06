@@ -3,10 +3,14 @@
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
-
-use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::{
-    ExistenceRequirement, ExistenceRequirement::AllowDeath, StoredMap, WithdrawReasons, OnNewAccount, Get, OnUnbalanced,
-}, Parameter, PalletId};
+use frame_support::{
+    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure,
+    traits::{
+        ExistenceRequirement, ExistenceRequirement::AllowDeath, Get, OnNewAccount, OnUnbalanced,
+        StoredMap, WithdrawReasons,
+    },
+    PalletId, Parameter,
+};
 use sp_std::prelude::*;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
@@ -31,115 +35,124 @@ use codec::{Decode, Encode, EncodeLike};
 pub use frame_system::pallet::*;
 #[frame_support::pallet]
 pub mod pallet {
-    use pallet_nft::{Token, Params, Socket, Rarity, TokenId};
-    use pallet_nft as NFT;
-    use pallet_staking::*;
-    use frame_support::pallet_prelude::*;
-    use frame_system::pallet_prelude::*;
-    use pallet_nft::Error::KeepAlive;
-    use frame_support::PalletId;
-    use sp_runtime::traits::{AccountIdConversion, AtLeast32BitUnsigned};
-    use frame_support::traits::{ExistenceRequirement, Currency};
     use codec::Codec;
+    use frame_support::pallet_prelude::*;
+    use frame_support::traits::{Currency, ExistenceRequirement};
+    use frame_support::PalletId;
+    use frame_system::pallet_prelude::*;
+    use pallet_nft as NFT;
+    use pallet_nft::Error::KeepAlive;
+    use pallet_nft::{Params, Rarity, Socket, Token, TokenId};
+    use pallet_staking::*;
+    use sp_runtime::traits::{AccountIdConversion, AtLeast32BitUnsigned};
     use sp_std::fmt::Debug;
 
     // 2. Declaration of the Pallet type
-// This is a placeholder to implement traits and methods.
-#[pallet::pallet]
-#[pallet::generate_store(pub(super) trait Store)]
-pub struct Pallet<T>(_);
+    // This is a placeholder to implement traits and methods.
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(_);
 
-// 3. Runtime Configuration Trait
-// All types and constants go here.
-// Use #[pallet::constant] and #[pallet::extra_constants]
-// to pass in values to metadata.
-#[pallet::config]
-pub trait Config: frame_system::Config + pallet_nft::Config {
-    /// Because this pallet emits events, it depends on the runtime's definition of an event.
-    type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+    // 3. Runtime Configuration Trait
+    // All types and constants go here.
+    // Use #[pallet::constant] and #[pallet::extra_constants]
+    // to pass in values to metadata.
+    #[pallet::config]
+    pub trait Config: frame_system::Config + pallet_nft::Config {
+        /// Because this pallet emits events, it depends on the runtime's definition of an event.
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-    type PalletId: Get<PalletId>;
+        type PalletId: Get<PalletId>;
 
-    type Currency: Currency<Self::AccountId, Balance=Self::Balance>;
-}
-
-
-// 5. Runtime Events
-// Can stringify event types to metadata.
-#[pallet::event]
-#[pallet::metadata(T::AccountId = "AccountId")]
-#[pallet::generate_deposit(pub(super) fn deposit_event)]
-pub enum Event<T: Config> {
-    /// Event documentation should end with an array that provides descriptive names for event
-    /// parameters. [something, who]
-    TokenMinted(T::AccountId, NFT::TokenId),
-    TokenTransferred(NFT::TokenId, T::AccountId),
-    TokenBreeded(NFT::TokenId),
-    // TokensTransferred(TokenId, AccountId, TokenId, AccountId),
-}
-
-#[pallet::error]
-pub enum Error<T> {
-/// Error names should be descriptive.
-NoneValue,
-/// Errors should have helpful documentation associated with them.
-StorageOverflow,
-///
-TokenExist,
-///
-NotTokenOwner,
-///
-NonExistentToken,
-///
-NotNftMaster
-}
-
-// 6. Hooks
-// Define some logic that should be executed
-// regularly in some context, for e.g. on_initialize.
-#[pallet::hooks]
-impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-
-}
-
-// 7. Extrinsics
-// Functions that are callable from outside the runtime.
-#[pallet::call]
-impl<T:Config> Pallet<T> {
-
-    #[pallet::weight(90_000_000)]
-    pub fn mint_nft(origin: OriginFor<T>, target_account: <T as frame_system::Config>::AccountId, token_id: pallet_nft::TokenId) -> DispatchResult {
-        NFT::Module::<T>::mint_basic_nft(&target_account, token_id);
-        Ok(())
+        type Currency: Currency<Self::AccountId, Balance = Self::Balance>;
     }
 
-    #[pallet::weight(60_000_000)]
-    pub fn transfer_nft(origin: OriginFor<T>, dest_account: T::AccountId, token_id: pallet_nft::TokenId) -> DispatchResult {
-        NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
-        Ok(())
+    // 5. Runtime Events
+    // Can stringify event types to metadata.
+    #[pallet::event]
+    #[pallet::metadata(T::AccountId = "AccountId")]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    pub enum Event<T: Config> {
+        /// Event documentation should end with an array that provides descriptive names for event
+        /// parameters. [something, who]
+        TokenMinted(T::AccountId, NFT::TokenId),
+        TokenTransferred(NFT::TokenId, T::AccountId),
+        TokenBreeded(NFT::TokenId),
+        // TokensTransferred(TokenId, AccountId, TokenId, AccountId),
     }
 
-    // #[pallet::weight(50_000_000)]
-    // pub fn transfer_from_pallet(origin: OriginFor<T>, pallet_id: T::account_id(), dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> DispatchResultWithPostInfo {
-    //     frame_support::Curency::transfer(T::account_id(), &dest, value, KeepAlive)
-    // }
-
-    #[pallet::weight(30_000_000)]
-    pub fn transfer_from_ptop(origin: OriginFor<T>, from: T::AccountId, to: T::AccountId, value: T::Balance) -> DispatchResult {
-        T::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
-        Ok(())
+    #[pallet::error]
+    pub enum Error<T> {
+        /// Error names should be descriptive.
+        NoneValue,
+        /// Errors should have helpful documentation associated with them.
+        StorageOverflow,
+        ///
+        TokenExist,
+        ///
+        NotTokenOwner,
+        ///
+        NonExistentToken,
+        ///
+        NotNftMaster,
     }
 
-    #[pallet::weight(90_000_000)]
-    pub fn burn_nft(origin: OriginFor<T>, token_id: pallet_nft::TokenId) -> DispatchResult {
-        NFT::Module::<T>::burn_basic_nft(token_id);
-        Ok(())
-    }
+    // 6. Hooks
+    // Define some logic that should be executed
+    // regularly in some context, for e.g. on_initialize.
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-    // #[pallet::weight(90_000_000)]
-    // pub fn spend_in_game (origin: OriginFor<T>, pallet_id: ::account_id(), pallet_id_staking: pallet_staking::Module::<T>::account_id()) -> DispatchResultWithPostInfo {
-    //
-    //     }
+    // 7. Extrinsics
+    // Functions that are callable from outside the runtime.
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
+        #[pallet::weight(90_000_000)]
+        pub fn mint_nft(
+            origin: OriginFor<T>,
+            target_account: <T as frame_system::Config>::AccountId,
+            token_id: pallet_nft::TokenId,
+        ) -> DispatchResult {
+            NFT::Module::<T>::mint_basic_nft(&target_account, token_id);
+            Ok(())
+        }
+
+        #[pallet::weight(60_000_000)]
+        pub fn transfer_nft(
+            origin: OriginFor<T>,
+            dest_account: T::AccountId,
+            token_id: pallet_nft::TokenId,
+        ) -> DispatchResult {
+            NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
+            Ok(())
+        }
+
+        // #[pallet::weight(50_000_000)]
+        // pub fn transfer_from_pallet(origin: OriginFor<T>, pallet_id: T::account_id(), dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> DispatchResultWithPostInfo {
+        //     frame_support::Curency::transfer(T::account_id(), &dest, value, KeepAlive)
+        // }
+
+        #[pallet::weight(30_000_000)]
+        pub fn transfer_from_ptop(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            to: T::AccountId,
+            value: T::Balance,
+        ) -> DispatchResult {
+            T::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
+            Ok(())
+        }
+
+        #[pallet::weight(90_000_000)]
+        pub fn burn_nft(origin: OriginFor<T>, token_id: pallet_nft::TokenId) -> DispatchResult {
+            NFT::Module::<T>::burn_basic_nft(token_id);
+            Ok(())
+        }
+
+        // #[pallet::weight(90_000_000)]
+        // pub fn spend_in_game (origin: OriginFor<T>, pallet_id: ::account_id(), pallet_id_staking: pallet_staking::Module::<T>::account_id()) -> DispatchResultWithPostInfo {
+        //
+        //     }
     }
 
     impl<T: Config> Pallet<T> {
