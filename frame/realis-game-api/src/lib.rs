@@ -46,6 +46,7 @@ pub mod pallet {
     use pallet_staking::*;
     use sp_runtime::traits::{AccountIdConversion, AtLeast32BitUnsigned};
     use sp_std::fmt::Debug;
+    use frame_support::dispatch::{GetDispatchInfo, Dispatchable};
 
     // 2. Declaration of the Pallet type
     // This is a placeholder to implement traits and methods.
@@ -62,6 +63,7 @@ pub mod pallet {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
+        #[pallet::constant]
         type PalletId: Get<PalletId>;
 
         type Currency: Currency<Self::AccountId, Balance = Self::Balance>;
@@ -75,10 +77,10 @@ pub mod pallet {
     pub enum Event<T: Config> {
         /// Event documentation should end with an array that provides descriptive names for event
         /// parameters. [something, who]
-        TokenMinted(T::AccountId, NFT::TokenId),
-        TokenTransferred(NFT::TokenId, T::AccountId),
-        TokenBreeded(NFT::TokenId),
-        // TokensTransferred(TokenId, AccountId, TokenId, AccountId),
+        TokenMinted,
+        TokenTransferred,
+        TokenBurned,
+        FundTransferred,
     }
 
     #[pallet::error]
@@ -110,10 +112,13 @@ pub mod pallet {
         #[pallet::weight(90_000_000)]
         pub fn mint_nft(
             origin: OriginFor<T>,
-            target_account: <T as frame_system::Config>::AccountId,
+            target_account: T::AccountId,
             token_id: pallet_nft::TokenId,
         ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+
             NFT::Module::<T>::mint_basic_nft(&target_account, token_id);
+            Self::deposit_event(Event::<T>::TokenMinted);
             Ok(())
         }
 
@@ -123,7 +128,10 @@ pub mod pallet {
             dest_account: T::AccountId,
             token_id: pallet_nft::TokenId,
         ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+
             NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
+            Self::deposit_event(Event::<T>::TokenTransferred);
             Ok(())
         }
 
@@ -140,12 +148,15 @@ pub mod pallet {
             value: T::Balance,
         ) -> DispatchResult {
             T::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
+            Self::deposit_event(Event::<T>::FundTransferred);
             Ok(())
         }
 
         #[pallet::weight(90_000_000)]
         pub fn burn_nft(origin: OriginFor<T>, token_id: pallet_nft::TokenId) -> DispatchResult {
+            let who = ensure_signed(origin)?;
             NFT::Module::<T>::burn_basic_nft(token_id);
+            Self::deposit_event(Event::<T>::TokenBurned);
             Ok(())
         }
 
