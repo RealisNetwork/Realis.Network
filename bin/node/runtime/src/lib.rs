@@ -1160,7 +1160,7 @@ construct_runtime!(
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
-		RealisGameApi: realis_game_api::{Pallet, Call, Config, Event<T>},
+		RealisGameApi: realis_game_api::{Pallet, Call, Config<T>, Event<T>},
 	}
 );
 

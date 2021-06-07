@@ -8,7 +8,7 @@ members = [
     "bin/node/runtime",
     "bin/node/primitives",
      "frame/nft",
-    "frame/realis-game-api",
+#    "frame/realis-game-api",
     "frame/staking-pool",
 ]
 
@@ -17,6 +17,7 @@ members = [
 [patch.'https://github.com/paritytech/substrate']
 node-runtime = { path = "bin/node/runtime" }
 pallet-staking = {path = "frame/staking-pool"}
+pallet-nft = {path = "frame/nft"}
 [profile.dev]
 split-debuginfo = "unpacked"
 

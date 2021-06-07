@@ -32,7 +32,7 @@ use codec::{Decode, Encode, EncodeLike};
 // }
 
 // 1. Imports and Dependencies
-pub use frame_system::pallet::*;
+pub use pallet::*;
 #[frame_support::pallet]
 pub mod pallet {
     use codec::Codec;
