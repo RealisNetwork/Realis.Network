@@ -15,29 +15,14 @@ use sp_std::prelude::*;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
 
-// pub struct DealWithTransactions;
-// impl OnUnbalanced<PositiveImbalance> for DealWithTransactions {
-//     fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item=NegativeImbalance>) {
-//         if let Some(value) = fees_then_tips.next() {
-//             // for fees, 80% to treasury, 20% to author
-//             let mut split = value.ration(80, 20);
-//             if let Some(value) = fees_then_tips.next() {
-//                 // for tips, if any, 80% to treasury, 20% to author (though this can be anything)
-//                 value.ration_merge_into(80, 20, &mut split);
-//             }
-//             T::account_id()::on_unbalanced(split.1);
-//             pallet_staking::Module::<T>::account_id().on_unbalanced(split.0);
-//         }
-//     }
-// }
-
 // 1. Imports and Dependencies
 pub use pallet::*;
 #[frame_support::pallet]
 pub mod pallet {
     use codec::Codec;
+    use frame_support::dispatch::{Dispatchable, GetDispatchInfo};
     use frame_support::pallet_prelude::*;
-    use frame_support::traits::{Currency, ExistenceRequirement};
+    use frame_support::traits::{Currency, ExistenceRequirement, OnUnbalanced};
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use pallet_nft as NFT;
@@ -46,7 +31,8 @@ pub mod pallet {
     use pallet_staking::*;
     use sp_runtime::traits::{AccountIdConversion, AtLeast32BitUnsigned};
     use sp_std::fmt::Debug;
-    use frame_support::dispatch::{GetDispatchInfo, Dispatchable};
+    use frame_support::StorageMap;
+    use core::iter::Iterator;
 
     // 2. Declaration of the Pallet type
     // This is a placeholder to implement traits and methods.
@@ -72,7 +58,6 @@ pub mod pallet {
     // 5. Runtime Events
     // Can stringify event types to metadata.
     #[pallet::event]
-    #[pallet::metadata(T::AccountId = "AccountId")]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         /// Event documentation should end with an array that provides descriptive names for event
@@ -80,15 +65,13 @@ pub mod pallet {
         TokenMinted,
         TokenTransferred,
         TokenBurned,
-        FundTransferred,
+        FundsTransferred,
     }
 
     #[pallet::error]
     pub enum Error<T> {
         /// Error names should be descriptive.
         NoneValue,
-        /// Errors should have helpful documentation associated with them.
-        StorageOverflow,
         ///
         TokenExist,
         ///
@@ -135,35 +118,84 @@ pub mod pallet {
             Ok(())
         }
 
-        // #[pallet::weight(50_000_000)]
-        // pub fn transfer_from_pallet(origin: OriginFor<T>, pallet_id: T::account_id(), dest: <T::Lookup as StaticLookup>::Source, value: <T as pallet_balances::Config>::Balance) -> DispatchResultWithPostInfo {
-        //     frame_support::Curency::transfer(T::account_id(), &dest, value, KeepAlive)
-        // }
+        #[pallet::weight(50_000_000)]
+        pub fn transfer_from_pallet(
+            origin: OriginFor<T>,
+            dest: T::AccountId,
+            #[pallet::compact] value: T::Balance,
+        ) -> DispatchResult {
+            let pallet_id = Self::account_id();
+            T::Currency::transfer(&pallet_id, &dest, value, ExistenceRequirement::KeepAlive);
+            Self::deposit_event(Event::<T>::FundsTransferred);
+            Ok(())
+        }
+
+        #[pallet::weight(50_000_000)]
+        pub fn transfer_to_pallet(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            #[pallet::compact] value: T::Balance,
+        ) -> DispatchResult {
+            let pallet_id = Self::account_id();
+            T::Currency::transfer(&from, &pallet_id, value, ExistenceRequirement::KeepAlive);
+            Self::deposit_event(Event::<T>::FundsTransferred);
+            Ok(())
+        }
 
         #[pallet::weight(30_000_000)]
         pub fn transfer_from_ptop(
             origin: OriginFor<T>,
             from: T::AccountId,
             to: T::AccountId,
-            value: T::Balance,
+            #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             T::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
-            Self::deposit_event(Event::<T>::FundTransferred);
+            Self::deposit_event(Event::<T>::FundsTransferred);
             Ok(())
         }
 
         #[pallet::weight(90_000_000)]
         pub fn burn_nft(origin: OriginFor<T>, token_id: pallet_nft::TokenId) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            // ensure!(
+            //     who == NFT::AccountForToken::get(&token_id),
+            //     Error::<T>::NotTokenOwner
+            // );
             NFT::Module::<T>::burn_basic_nft(token_id);
             Self::deposit_event(Event::<T>::TokenBurned);
             Ok(())
         }
 
-        // #[pallet::weight(90_000_000)]
-        // pub fn spend_in_game (origin: OriginFor<T>, pallet_id: ::account_id(), pallet_id_staking: pallet_staking::Module::<T>::account_id()) -> DispatchResultWithPostInfo {
-        //
-        //     }
+        #[pallet::weight(90_000_000)]
+        pub fn spend_in_game(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            #[pallet::compact] amount: T::Balance,
+        ) -> DispatchResult {
+            let pallet_id_staking = pallet_staking::Module::account_id();
+            let pallet_id_game_api = Self::account_id();
+            if let Some(value) = amount.next() {
+                // for fees, 80% to treasury, 20% to author
+                let mut split = amount.ration(80, 20);
+                if let Some(value) = amount.next() {
+                    // for tips, if any, 80% to treasury, 20% to author (though this can be anything)
+                    value.ration_merge_into(80, 20, &mut split);
+                }
+                T::Currency::transfer(
+                    &from,
+                    &pallet_id_staking,
+                    split.0,
+                    ExistenceRequirement::KeepAlive,
+                );
+                T::Currency::transfer(
+                    &from,
+                    &pallet_id_game_api,
+                    split.1,
+                    ExistenceRequirement::KeepAlive,
+                );
+            };
+            Ok(())
+        }
     }
 
     impl<T: Config> Pallet<T> {

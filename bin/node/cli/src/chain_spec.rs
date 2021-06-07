@@ -42,6 +42,7 @@ use sc_telemetry::serde_json::Map;
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::GenesisConfig;
 use node_runtime::pallet_staking;
+use node_runtime::realis_game_api;
 
 type AccountPublic = <Signature as Verify>::Signer;
 
@@ -230,6 +231,7 @@ pub fn testnet_genesis(
 			get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 			get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 			pallet_staking::Module::<Runtime>::account_id(),
+			realis_game_api::Pallet::<Runtime>::account_id(),
 		]
 	});
 	// endow all authorities and nominators.
@@ -373,6 +375,7 @@ pub fn realis_genesis(
 			get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 			get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 			pallet_staking::Module::<Runtime>::account_id(),
+			realis_game_api::Pallet::<Runtime>::account_id(),
 		]
 	});
 	// endow all authorities and nominators.

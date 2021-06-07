@@ -181,16 +181,16 @@ decl_storage! {
     // A unique name is used to ensure that the pallet's storage items are isolated.
     // This name may be updated, but each pallet in the runtime must use a unique name.
     // ---------------------------------vvvvvvvvvvvvvv
-    trait Store for Module<T: Config> as TemplateModule {
+    pub trait Store for Module<T: Config> as TemplateModule {
         // Learn more about declaring storage items:
         // https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
-        MaxTokenId get(fn max_realis_token_id): T::RealisTokenId = 17u32.into();
-        MinTokenId get(fn min_realis_token_id): T::RealisTokenId = 1u32.into();
-        TokensForAccount get(fn tokens_of_owner_by_index): map hasher(opaque_blake2_256) T::AccountId => Vec<Token>;
-        AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) TokenId => T::AccountId;
-        TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u32;
-        AllTokensInAccount get(fn all_tokens_in_account): map hasher(opaque_blake2_256) TokenId => Option<Token>;
-        NftMasters get(fn nft_masters) config(): Vec<T::AccountId>;
+        pub MaxTokenId get(fn max_realis_token_id): T::RealisTokenId = 17u32.into();
+        pub MinTokenId get(fn min_realis_token_id): T::RealisTokenId = 1u32.into();
+        pub TokensForAccount get(fn tokens_of_owner_by_index): map hasher(opaque_blake2_256) T::AccountId => Vec<Token>;
+        pub AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) TokenId => T::AccountId;
+        pub TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u32;
+        pub AllTokensInAccount get(fn all_tokens_in_account): map hasher(opaque_blake2_256) TokenId => Option<Token>;
+        pub NftMasters get(fn nft_masters) config(): Vec<T::AccountId>;
         pub SystemAccount get(fn system_account):
             map hasher(blake2_128_concat) (T::RealisTokenId, T::AccountId) => AccountInfo<T::Index, AccountData<<T as Config>::Balance>>;
     }
