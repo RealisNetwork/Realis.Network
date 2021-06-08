@@ -1307,7 +1307,6 @@ decl_module! {
             };
             Self::update_ledger(&controller, &item);
         }
-
         /// Add some extra amount that have appeared in the stash `free_balance` into the balance up
         /// for staking.
         ///
