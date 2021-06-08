@@ -119,7 +119,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 267,
+	spec_version: 269,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 2,
@@ -1061,17 +1061,6 @@ impl pallet_nft::Config for Runtime {
 	type RealisTokenId = u32;
 }
 
-parameter_types! {
-	pub const GameApiPalletId: PalletId = PalletId(*b"rl/gamap");
-}
-
-impl realis_game_api::Config for Runtime {
-	type Event = Event;
-	type PalletId = GameApiPalletId;
-	type Currency = Balances;
-}
-
-
 pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
 		min_inflation: 0_025_000,
@@ -1114,6 +1103,17 @@ impl pallet_staking::Config for Runtime {
 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
 	type ElectionProvider = ElectionProviderMultiPhase;
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+	pub const GameApiPalletId: PalletId = PalletId(*b"rl/gamap");
+}
+
+impl realis_game_api::Config for Runtime {
+	type Event = Event;
+	type PalletId = GameApiPalletId;
+	type Currency = Balances;
+	type StakingPoolId = StakingPalletId;
 }
 
 construct_runtime!(

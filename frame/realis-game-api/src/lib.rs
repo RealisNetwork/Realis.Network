@@ -30,20 +30,23 @@ pub mod pallet {
     use sp_runtime::traits::AccountIdConversion;
     use sp_std::fmt::Debug;
     use frame_support::traits::Imbalance;
+    use frame_support::{StorageValue, StorageMap};
+    use sp_std::vec::Vec;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(_);
 
     #[pallet::config]
-    pub trait Config: frame_system::Config + pallet_nft::Config {
+    pub trait Config: frame_system::Config + pallet_nft::Config + pallet_staking::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-        #[pallet::constant]
         type PalletId: Get<PalletId>;
 
         type Currency: Currency<Self::AccountId, Balance = Self::Balance>;
+
+        type StakingPoolId: From<<Self as pallet_staking::Config>::PalletId>;
     }
 
     #[pallet::event]
@@ -71,8 +74,8 @@ pub mod pallet {
         NotNftMaster,
     }
 
-    #[pallet::storage]
-    pub(crate) type NftMasters<T: Config> = StorageValue<_, T::AccountId, ValueQuery>;
+    // #[pallet::storage]
+    // pub(crate) type NftMasters<T: Config> = StorageValue<_, T::AccountId, ValueQuery>;
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
@@ -88,9 +91,15 @@ pub mod pallet {
             token_id: pallet_nft::TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
             ensure!(
-                who == NftMasters::<T>::get(),
+                nft_master.contains(&who),
                 Error::<T>::NotNftMaster
+            );
+
+            ensure!(
+            !NFT::AccountForToken::<T>::contains_key(token_id),
+            Error::<T>::TokenExist
             );
 
             NFT::Module::<T>::mint_basic_nft(&target_account, token_id);
@@ -105,8 +114,9 @@ pub mod pallet {
             token_id: pallet_nft::TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
             ensure!(
-                who == NftMasters::<T>::get(),
+                nft_master.contains(&who),
                 Error::<T>::NotNftMaster
             );
 
@@ -122,12 +132,13 @@ pub mod pallet {
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
             ensure!(
-                who == NftMasters::<T>::get(),
+                nft_master.contains(&who),
                 Error::<T>::NotNftMaster
             );
             let pallet_id = Self::account_id();
-            T::Currency::transfer(&pallet_id, &dest, value, ExistenceRequirement::KeepAlive);
+            <T as Config>::Currency::transfer(&pallet_id, &dest, value, ExistenceRequirement::KeepAlive);
             Self::deposit_event(Event::<T>::FundsTransferred);
             Ok(())
         }
@@ -139,12 +150,13 @@ pub mod pallet {
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
             ensure!(
-                who == NftMasters::<T>::get(),
+                nft_master.contains(&who),
                 Error::<T>::NotNftMaster
             );
             let pallet_id = Self::account_id();
-            T::Currency::transfer(&from, &pallet_id, value, ExistenceRequirement::KeepAlive);
+            <T as Config>::Currency::transfer(&from, &pallet_id, value, ExistenceRequirement::KeepAlive);
             Self::deposit_event(Event::<T>::FundsTransferred);
             Ok(())
         }
@@ -157,11 +169,12 @@ pub mod pallet {
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
             ensure!(
-                who == NftMasters::<T>::get(),
+                nft_master.contains(&who),
                 Error::<T>::NotNftMaster
             );
-            T::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
+            <T as Config>::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
             Self::deposit_event(Event::<T>::FundsTransferred);
             Ok(())
         }
@@ -169,8 +182,9 @@ pub mod pallet {
         #[pallet::weight(90_000_000)]
         pub fn burn_nft(origin: OriginFor<T>, token_id: pallet_nft::TokenId) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
             ensure!(
-                who == NftMasters::<T>::get(),
+                nft_master.contains(&who),
                 Error::<T>::NotNftMaster
             );
             NFT::Module::<T>::burn_basic_nft(token_id);
@@ -185,31 +199,28 @@ pub mod pallet {
             #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
             ensure!(
-                who == NftMasters::<T>::get(),
+                nft_master.contains(&who),
                 Error::<T>::NotNftMaster
             );
-            let imbalance = T::Currency::withdraw(
+            let imbalance = <T as Config>::Currency::withdraw(
                 &from,
                 amount,
-                WithdrawReasons::TRANSFER,
+                WithdrawReasons::all(),
                 ExistenceRequirement::KeepAlive,
             )?;
-            let pallet_id_staking = pallet_staking::Module::T::PalletId;
+            let pallet_id_staking = Self::account_id_staking();
             let pallet_id_game_api = Self::account_id();
                 // for fees, 80% to treasury, 20% to author
-                let (to_staking, to_game_api) = imbalance.ration(80, 20);
-            T::Currency::transfer(
-                    &from,
+                let (to_game_api, to_staking) = imbalance.ration(80, 20);
+            <T as Config>::Currency::resolve_creating(
                     &pallet_id_game_api,
-                    to_game_api.peek(),
-                    ExistenceRequirement::KeepAlive,
+                    to_game_api,
                 );
-                T::Currency::transfer(
-                    &from,
+            <T as Config>::Currency::resolve_creating(
                     &pallet_id_staking,
-                    to_staking.peek(),
-                    ExistenceRequirement::KeepAlive,
+                    to_staking,
                 );
             Ok(())
         }
@@ -217,7 +228,11 @@ pub mod pallet {
 
     impl<T: Config> Pallet<T> {
         pub fn account_id() -> T::AccountId {
-            T::PalletId::get().into_account()
+            <T as Config>::PalletId::get().into_account()
+        }
+
+        pub fn account_id_staking() -> T::AccountId {
+            <T as pallet_staking::Config>::PalletId::get().into_account()
         }
     }
 }
