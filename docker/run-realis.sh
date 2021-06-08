@@ -4,7 +4,6 @@ CONTAINER="realis-test"
 docker rm -f ${CONTAINER}
 docker rmi ${IMAGE}
 docker build -t ${IMAGE} .
-#docker push ${IMAGE}
 docker run -d --name=${CONTAINER} --net=host \
  -v /blockchain_soul/soul/nikita1:/realis/chain \
 ${IMAGE} \
