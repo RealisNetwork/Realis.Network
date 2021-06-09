@@ -7,7 +7,7 @@ use frame_support::{
     ensure,
     traits::{EnsureOrigin, Get},
     weights::{GetDispatchInfo, Pays},
-    Parameter, PalletId,
+    PalletId, Parameter,
 };
 
 use pallet_nft;

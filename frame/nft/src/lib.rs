@@ -593,12 +593,12 @@ impl<T: Config> Module<T> {
                 (maybe_endowed, result)
             })
         })
-            .map(|(maybe_endowed, result)| {
-                if let Some(endowed) = maybe_endowed {
-                    Self::deposit_event(RawEvent::Endowed(who.clone(), token_id, endowed));
-                }
-                result
-            })
+        .map(|(maybe_endowed, result)| {
+            if let Some(endowed) = maybe_endowed {
+                Self::deposit_event(RawEvent::Endowed(who.clone(), token_id, endowed));
+            }
+            result
+        })
     }
 
     fn ensure_can_withdraw(
@@ -640,15 +640,15 @@ impl<T: Config> Module<T> {
                 (existed, maybe_value.is_some(), result)
             })
         })
-            .map(|(existed, exists, v)| {
-                if !existed && exists {
-                    Self::on_created_account(k.clone());
-                } else if existed && !exists {
-                    // TODO:
-                    //Self::on_killed_account(k.clone());
-                }
-                v
-            })
+        .map(|(existed, exists, v)| {
+            if !existed && exists {
+                Self::on_created_account(k.clone());
+            } else if existed && !exists {
+                // TODO:
+                //Self::on_killed_account(k.clone());
+            }
+            v
+        })
     }
 
     fn post_mutation(

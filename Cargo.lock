@@ -803,7 +803,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "chainbridge"
+name = "chain-bridge"
 version = "0.0.1"
 dependencies = [
  "frame-support",
@@ -4084,7 +4084,7 @@ dependencies = [
 name = "node-runtime"
 version = "2.0.1"
 dependencies = [
- "chainbridge",
+ "chain-bridge",
  "frame-benchmarking",
  "frame-executive",
  "frame-support",
@@ -4738,7 +4738,7 @@ dependencies = [
 name = "pallet-realis-bridge"
 version = "0.1.0"
 dependencies = [
- "chainbridge",
+ "chain-bridge",
  "frame-support",
  "frame-system",
  "pallet-balances",

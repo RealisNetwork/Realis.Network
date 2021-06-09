@@ -1,17 +1,17 @@
 // Ensure we're `no_std` when compiling for Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use chainbridge as bridge;
+use chain_bridge as bridge;
 use frame_support::traits::{Currency, EnsureOrigin, ExistenceRequirement::AllowDeath, Get};
 use frame_support::{
     decl_error, decl_event, decl_module, dispatch::DispatchResult, ensure,
     traits::ExistenceRequirement, Parameter,
 };
-use sp_runtime::traits::AtLeast32BitUnsigned;
 use frame_system::{self as system, ensure_signed};
 use pallet_nft as erc721;
 use sp_arithmetic::traits::SaturatedConversion;
 use sp_core::U256;
+use sp_runtime::traits::AtLeast32BitUnsigned;
 use sp_std::prelude::*;
 
 mod mock;
@@ -22,9 +22,7 @@ type ResourceId = bridge::ResourceId;
 type BalanceOf<T> =
     <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
-pub trait Config:
-    system::Config + bridge::Config + erc721::Config
-{
+pub trait Config: system::Config + bridge::Config + erc721::Config {
     type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
     /// Specifies the origin check provided by the bridge for calls that can only be called by the bridge pallet
     type BridgeOrigin: EnsureOrigin<Self::Origin, Success = Self::AccountId>;
@@ -36,7 +34,6 @@ pub trait Config:
     type HashId: Get<ResourceId>;
     type NativeTokenId: Get<ResourceId>;
     type Erc721Id: Get<ResourceId>;
-
 }
 
 decl_event! {
