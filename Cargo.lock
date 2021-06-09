@@ -4095,6 +4095,7 @@ dependencies = [
  "pallet-mmr",
  "pallet-multisig",
  "pallet-nft",
+ "pallet-nicks",
  "pallet-offences",
  "pallet-offences-benchmarking",
  "pallet-randomness-collective-flip",
@@ -4645,6 +4646,19 @@ dependencies = [
  "primitive-types",
  "serde",
  "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-nicks"
+version = "3.0.0"
+source = "git+https://github.com/paritytech/substrate?rev=0bda86540d44b09da6f1ea6656f3f52d5447db81#0bda86540d44b09da6f1ea6656f3f52d5447db81"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
  "sp-io",
  "sp-runtime",
  "sp-std",
