@@ -7,7 +7,7 @@ use frame_support::{
     ensure,
     traits::{EnsureOrigin, Get},
     weights::{GetDispatchInfo, Pays},
-    Parameter,
+    Parameter, PalletId,
 };
 
 use pallet_nft;
@@ -15,7 +15,7 @@ use pallet_nft;
 use frame_system::{self as system, ensure_root, ensure_signed};
 use sp_core::U256;
 use sp_runtime::traits::{AccountIdConversion, Dispatchable};
-use sp_runtime::{ModuleId, RuntimeDebug};
+use sp_runtime::RuntimeDebug;
 use sp_std::{prelude::*, vec};
 
 use codec::{Decode, Encode, EncodeLike};
@@ -24,7 +24,7 @@ mod mock;
 mod tests;
 
 const DEFAULT_RELAYER_THRESHOLD: u32 = 1;
-const MODULE_ID: ModuleId = ModuleId(*b"cb/bridg");
+const MODULE_ID: PalletId = PalletId(*b"cb/bridg");
 
 pub type ChainId = u8;
 pub type DepositNonce = u64;

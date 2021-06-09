@@ -10,17 +10,17 @@ codec = { package = "parity-scale-codec", version = "2.0.0", default-features = 
 serde = { version = "1.0.114", optional = true }
 
 # primitives
-sp-std = { version = "3.0.0", default-features = false, path = '../../primitives/std' }
-sp-runtime = { version = "3.0.0", default-features = false, path = '../../primitives/runtime' }
-sp-io = { version = "3.0.0", default-features = false, path = '../../primitives/io' }
-sp-core = { version = "3.0.0", default-features = false, path = '../../primitives/core' }
+sp-std = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sp-io = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sp-core = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 
 # frame dependencies
-frame-support = { version = "3.0.0", default-features = false, path = '../support' }
-frame-system = { version = "3.0.0", default-features = false, path = '../system' }
-pallet-nft = {version = "0.0.1", default-features = false, path = "../nft"}
+frame-support = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+frame-system = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+pallet-nft = {version = "0.0.2", default-features = false, path = "../nft"}
 
-pallet-balances = { version = "3.0.0", default-features = false, path = '../balances' }
+pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 
 [build-dependencies]
 wasm-builder-runner = { version = "3.0.0", package = "substrate-wasm-builder-runner"}

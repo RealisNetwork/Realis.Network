@@ -147,13 +147,21 @@ decl_module! {
             ) -> DispatchResult {
             T::BridgeOrigin::ensure_origin(origin)?;
 
-            let token_info = pallet_nft::Token {
-		        rarity,
-		        socket,
-		        params
-		    };
+            let token_info: Vec<pallet_nft::Token> = sp_std::vec![pallet_nft::Token {
+               token_id,
+               rarity,
+               socket,
+               params
+            }];
 
-            <erc721::Module<T>>::mint_nft(&target_account, token_info, token_id)?;
+            let token = pallet_nft::Token {
+               token_id,
+               rarity,
+               socket,
+               params
+            };
+
+            <erc721::Module<T>>::mint_nft(&target_account, token_info, token_id, token)?;
             Ok(())
         }
     }

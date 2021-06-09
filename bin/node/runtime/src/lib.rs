@@ -1132,6 +1132,34 @@ impl realis_game_api::Config for Runtime {
 	type StakingPoolId = StakingPalletId;
 }
 
+parameter_types! {
+    pub const ChainId: u8 = 5;
+    pub const ProposalLifetime: u32 = 50;
+}
+
+impl chainbridge::Config for Runtime {
+	type Event = Event;
+	type AdminOrigin = EnsureRoot<Self::AccountId>;
+	type Proposal = Call;
+	type ChainId = ChainId;
+	type ProposalLifetime = ProposalLifetime;
+}
+
+parameter_types! {
+	pub HashId: chainbridge::ResourceId = chainbridge::derive_resource_id(ChainId::get(), b"NET_HASH");
+	pub NativeTokenId: chainbridge::ResourceId = chainbridge::derive_resource_id(ChainId::get(), b"NET");
+	pub Erc721Id: chainbridge::ResourceId = chainbridge::derive_resource_id(ChainId::get(), b"NET_NFT");
+}
+
+impl pallet_realis_bridge::Config for Runtime {
+	type Event = Event;
+	type BridgeOrigin = chainbridge::EnsureBridge<Self>;
+	type Currency = Balances;
+	type HashId = HashId;
+	type NativeTokenId = NativeTokenId;
+	type Erc721Id = Erc721Id;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1177,6 +1205,8 @@ construct_runtime!(
 		Mmr: pallet_mmr::{Pallet, Storage},
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
+		ChainBridge: chainbridge::{Pallet, Call, Storage, Event<T>},
+		RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
 	}
