@@ -1,32 +1,22 @@
 [package]
-name = "node-primitives"
-version = "2.0.0"
-authors = ["Parity Technologies <admin@parity.io>"]
+authors = ["Realis Network <hello@realis.network>"]
+description = "node runtime primitives"
 edition = "2018"
-license = "Apache-2.0"
-homepage = "https://substrate.dev"
-repository = "https://github.com/paritytech/substrate/"
-
-[package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-gnu"]
+homepage = "https://realis.network/"
+license = "GPL-3.0"
+name = "realis-primitives"
+readme = "README.md"
+repository = "https://github.com/RealisNetwork/Realis.Network"
+version = "0.0.1"
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
-frame-system = { version = "3.0.0", default-features = false, path = "../../../frame/system" }
-sp-application-crypto = { version = "3.0.0", default-features = false, path = "../../../primitives/application-crypto" }
-sp-core = { version = "3.0.0", default-features = false, path = "../../../primitives/core" }
-sp-runtime = { version = "3.0.0", default-features = false, path = "../../../primitives/runtime" }
-
-[dev-dependencies]
-sp-serializer = { version = "3.0.0", path = "../../../primitives/serializer" }
-pretty_assertions = "0.6.1"
+# substrate
+sp-core = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 
 [features]
 default = ["std"]
 std = [
-	"codec/std",
-	"frame-system/std",
-	"sp-application-crypto/std",
 	"sp-core/std",
 	"sp-runtime/std",
 ]

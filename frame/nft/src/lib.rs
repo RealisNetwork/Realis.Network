@@ -3,17 +3,28 @@
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
-
-use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::{
-    ExistenceRequirement, ExistenceRequirement::AllowDeath, Vec, StoredMap, WithdrawReasons, OnNewAccount, Get,
-}, Parameter};
-use sp_runtime::{traits::{AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
-    StoredMapError, Zero,}, RuntimeDebug};
-use frame_system::{ensure_signed, split_inner, RefCount, ensure_root};
+use frame_support::{
+    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure,
+    traits::{
+        ExistenceRequirement, ExistenceRequirement::AllowDeath, Get, OnNewAccount, StoredMap,
+        WithdrawReasons,
+    },
+    Parameter,
+};
+use frame_system::{ensure_root, ensure_signed, split_inner, RefCount};
 use pallet_balances;
-use sp_core::U256;
+use primitive_types::U256;
+use sp_runtime::{
+    traits::{
+        AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
+        StoredMapError, Zero,
+    },
+    RuntimeDebug,
+};
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
+use frame_support::traits::Len;
+use sp_std::prelude::*;
 
 #[cfg(test)]
 mod mock;
@@ -23,7 +34,7 @@ mod tests;
 
 pub type TokenId = U256;
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub enum Rarity {
     Common,
     Uncommon,
@@ -36,7 +47,7 @@ pub enum Rarity {
 //     fn default() -> Self { Rarity::Common }
 // }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub enum Socket {
     Head,
     Body,
@@ -47,20 +58,16 @@ pub enum Socket {
     Weapon,
 }
 
-// impl Default for Socket {
-//     fn default() -> Self { Socket::Head }
-// }
-
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub struct Params {
     pub strength: u8,
     pub agility: u8,
     pub intelligence: u8,
 }
 
-
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub struct Token {
+    pub token_id: TokenId,
     pub rarity: Rarity,
     pub socket: Socket,
     pub params: Params,
@@ -78,15 +85,15 @@ pub enum Reasons {
 }
 
 impl From<WithdrawReasons> for Reasons {
-	fn from(r: WithdrawReasons) -> Reasons {
-		if r == WithdrawReasons::from(WithdrawReasons::TRANSACTION_PAYMENT) {
-			Reasons::Fee
-		} else if r.contains(WithdrawReasons::TRANSACTION_PAYMENT) {
-			Reasons::All
-		} else {
-			Reasons::Misc
-		}
-	}
+    fn from(r: WithdrawReasons) -> Reasons {
+        if r == WithdrawReasons::from(WithdrawReasons::TRANSACTION_PAYMENT) {
+            Reasons::Fee
+        } else if r.contains(WithdrawReasons::TRANSACTION_PAYMENT) {
+            Reasons::All
+        } else {
+            Reasons::Misc
+        }
+    }
 }
 
 #[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]
@@ -157,7 +164,6 @@ pub trait Config: frame_system::Config {
     type ExistentialDeposit: Get<Self::Balance>;
 
     type RealisTokenId: Parameter + AtLeast32BitUnsigned + Default + Copy;
-
 }
 
 // impl <T: Config> Module<T> {
@@ -172,80 +178,77 @@ pub trait Config: frame_system::Config {
 // The pallet's runtime storage items.
 // https://substrate.dev/docs/en/knowledgebase/runtime/storage
 decl_storage! {
-	// A unique name is used to ensure that the pallet's storage items are isolated.
-	// This name may be updated, but each pallet in the runtime must use a unique name.
-	// ---------------------------------vvvvvvvvvvvvvv
-	trait Store for Module<T: Config> as TemplateModule {
-		// Learn more about declaring storage items:
-		// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
-        MaxTokenId get(fn max_realis_token_id): T::RealisTokenId = 17u32.into();
-        MinTokenId get(fn min_realis_token_id): T::RealisTokenId = 1u32.into();
-		TokensForAccount get(fn tokens_of_owner_by_index): double_map hasher(opaque_blake2_256) T::AccountId, hasher(opaque_blake2_256) TokenId => Option<Token>;
-        AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) TokenId => T::AccountId;
-        TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u32;
-        AllTokensInAccount get(fn all_tokens_in_account): map hasher(opaque_blake2_256) TokenId => Option<Token>;
-        NftMasters get(fn nft_masters) config(): Vec<T::AccountId>;
+    // A unique name is used to ensure that the pallet's storage items are isolated.
+    // This name may be updated, but each pallet in the runtime must use a unique name.
+    // ---------------------------------vvvvvvvvvvvvvv
+    pub trait Store for Module<T: Config> as TemplateModule {
+        // Learn more about declaring storage items:
+        // https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
+        pub MaxTokenId get(fn max_realis_token_id): T::RealisTokenId = 17u32.into();
+        pub MinTokenId get(fn min_realis_token_id): T::RealisTokenId = 1u32.into();
+        pub TokensForAccount get(fn tokens_of_owner_by_index): map hasher(opaque_blake2_256) T::AccountId => Vec<Token>;
+        pub AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) TokenId => T::AccountId;
+        pub TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u32;
+        pub AllTokensInAccount get(fn all_tokens_in_account): map hasher(opaque_blake2_256) TokenId => Option<Token>;
+        pub NftMasters get(fn nft_masters) config(): Vec<T::AccountId>;
         pub SystemAccount get(fn system_account):
             map hasher(blake2_128_concat) (T::RealisTokenId, T::AccountId) => AccountInfo<T::Index, AccountData<<T as Config>::Balance>>;
-	}
+    }
 }
 
 // Pallets use events to inform users when important changes are made.
 // https://substrate.dev/docs/en/knowledgebase/runtime/events
 decl_event!(
-	pub enum Event<T> where 
-    AccountId = <T as frame_system::Config>::AccountId, 
-    TokenBalance = <T as Config>::Balance,
-    RealisTokenId = <T as Config>::RealisTokenId, {
-		/// Event documentation should end with an array that provides descriptive names for event
-		/// parameters. [something, who]
-		SomethingStored(TokenId, AccountId),
-		TokenMinted(AccountId, TokenId),
-		TokenBurned(Token),
+    pub enum Event<T>
+    where
+        AccountId = <T as frame_system::Config>::AccountId,
+        TokenBalance = <T as Config>::Balance,
+        RealisTokenId = <T as Config>::RealisTokenId,
+    {
+        /// Event documentation should end with an array that provides descriptive names for event
+        /// parameters. [something, who]
+        SomethingStored(TokenId, AccountId),
+        TokenMinted(AccountId, TokenId),
+        TokenBurned(),
         BasicTokenBurned(TokenId),
-		TokenTransferred(TokenId, AccountId),
+        TokenTransferred(TokenId, AccountId),
         TokenBreeded(TokenId),
-                /// An account was created with some free balance. \[account, free_balance\]
-                Endowed(AccountId, RealisTokenId, TokenBalance),
-                /// Some assets were transferred. \[token_id, from, to, amount\]
-                Transfer(AccountId, AccountId, RealisTokenId, TokenBalance),
-                /// A balance was set by root. \[who, free, reserved\]
-                RealisTokenBalanceSet(
-                    AccountId,
-                    TokenId,
-                    TokenBalance,
-                    TokenBalance,
-                ),
-                /// Some amount was deposited (e.g. for transaction fees). \[who, deposit\]
-                Deposit(AccountId, TokenId, TokenBalance),
-                /// Some balance was reserved (moved from free to reserved). \[who, value\]
-                Reserved(AccountId, TokenId, TokenBalance),
-                /// Some balance was unreserved (moved from reserved to free). \[who, value\]
-                Unreserved(AccountId, TokenId, TokenBalance),
-                /// A new \[account\] was created.
-                NewAccount(AccountId, RealisTokenId),
-                TokenCreated(TokenId),
-                /// Some assets were issued. [token_id, owner, total_supply]
-                Issued(TokenId, AccountId, TokenBalance),
+        /// An account was created with some free balance. \[account, free_balance\]
+        Endowed(AccountId, RealisTokenId, TokenBalance),
+        /// Some assets were transferred. \[token_id, from, to, amount\]
+        Transfer(AccountId, AccountId, RealisTokenId, TokenBalance),
+        /// A balance was set by root. \[who, free, reserved\]
+        RealisTokenBalanceSet(AccountId, TokenId, TokenBalance, TokenBalance),
+        /// Some amount was deposited (e.g. for transaction fees). \[who, deposit\]
+        Deposit(AccountId, TokenId, TokenBalance),
+        /// Some balance was reserved (moved from free to reserved). \[who, value\]
+        Reserved(AccountId, TokenId, TokenBalance),
+        /// Some balance was unreserved (moved from reserved to free). \[who, value\]
+        Unreserved(AccountId, TokenId, TokenBalance),
+        /// A new \[account\] was created.
+        NewAccount(AccountId, RealisTokenId),
+        TokenCreated(TokenId),
+        /// Some assets were issued. [token_id, owner, total_supply]
+        Issued(TokenId, AccountId, TokenBalance),
         // TokensTransferred(TokenId, AccountId, TokenId, AccountId),
-	}
+    }
 );
 
 // Errors inform users that something went wrong.
 decl_error! {
-	pub enum Error for Module<T: Config> {
-		/// Error names should be descriptive.
-		NoneValue,
-		/// Errors should have helpful documentation associated with them.
-		StorageOverflow,
-		/// Token use now another wallet
-		TokenExist,
-		/// Not token owner
-		NotTokenOwner,
-		///
-		NonExistentToken,
-		///
-		NotNftMaster,
+    pub enum Error for Module<T: Config> {
+        /// Error names should be descriptive.
+        NoneValue,
+        /// Errors should have helpful documentation associated with them.
+        StorageOverflow,
+        /// Token use now another wallet
+        TokenExist,
+        /// Not token owner
+        NotTokenOwner,
+        ///
+        NonExistentToken,
+        ///
+        NotNftMaster,
         ///
         InvalidTokenId,
         /// Transfer amount should be non-zero
@@ -271,63 +274,83 @@ decl_error! {
         InvalidTransfer,
         /// Have no permission to transfer someone's balance
         NotAllowed,
-	}
+    }
 }
 
 // Dispatchable functions allows users to interact with the pallet and invoke state changes.
 // These functions materialize as "extrinsics", which are often compared to transactions.
 // Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 decl_module! {
-	pub struct Module<T: Config> for enum Call where origin: T::Origin {
-		// Errors must be initialized if they are used by the pallet.
-		type Error = Error<T>;
+    pub struct Module<T: Config> for enum Call where origin: T::Origin {
+        // Errors must be initialized if they are used by the pallet.
+        type Error = Error<T>;
 
-		// Events must be initialized if they are used by the pallet.
-		fn deposit_event() = default;
+        // Events must be initialized if they are used by the pallet.
+        fn deposit_event() = default;
 
-		/// Mint token
-		#[weight = 10_000]
-		pub fn mint(origin, target_account: T::AccountId,
-		token_id: TokenId,
+        /// Mint token
+        #[weight = 10_000]
+        pub fn mint(origin, target_account: T::AccountId,
+        token_id: TokenId,
         rarity: Rarity,
         socket: Socket,
         params: Params,
         ) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
-		    ensure!(
+            ensure!(
                 Self::nft_masters().contains(&who),
                 Error::<T>::NotNftMaster
             );
 
-		    let token_info = Token {
-		        rarity,
-		        socket,
-		        params
-		    };
+            let token_info: Vec<Token> = sp_std::vec![Token {
+               token_id,
+               rarity,
+               socket,
+               params
+            }];
 
-            Self::mint_nft(&target_account, token_info, token_id)?;
-		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
+            let token = Token {
+               token_id,
+               rarity,
+               socket,
+               params
+            };
+            Self::mint_nft(&target_account, token_info, token_id, token)?;
+            Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
             Ok(())
 
-		}
+        }
 
         #[weight = 10_000]
-		pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
+        pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
-		    ensure!(
+            ensure!(
                 Self::nft_masters().contains(&who),
                 Error::<T>::NotNftMaster
             );
 
             Self::mint_basic_nft(&target_account, token_id)?;
-		    Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
+            Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
             Ok(())
 
-		}
-        
-		///Burn token(only owner)
-		#[weight = 10_000]
-		pub fn burn(origin, token_id: TokenId) -> dispatch::DispatchResult {
+        }
+
+        ///Burn token(only owner)
+        #[weight = 10_000]
+        pub fn burn(origin, token_id: TokenId) -> dispatch::DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(
+                who == Self::account_for_token(&token_id),
+                Error::<T>::NotTokenOwner
+            );
+
+            let id_of_token = Self::burn_nft(token_id)?;
+            Self::deposit_event(RawEvent::TokenBurned());
+            Ok(())
+        }
+
+        #[weight = 10_000]
+        pub fn burn_basic(origin, token_id: TokenId) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
 
             // ensure!(
@@ -340,8 +363,8 @@ decl_module! {
                 Error::<T>::NotTokenOwner
             );
 
-			let id_of_token = Self::burn_nft(token_id)?;
-		    Self::deposit_event(RawEvent::TokenBurned(id_of_token.clone()));
+            let id_of_token = Self::burn_basic_nft(token_id)?;
+            Self::deposit_event(RawEvent::TokenBurned());
             Ok(())
         }
 
@@ -370,42 +393,61 @@ decl_module! {
 }
 
 impl<T: Config> Module<T> {
-    pub fn mint_nft(target_account: &T::AccountId, token_info: Token, token_id: TokenId) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
+    pub fn mint_nft(
+        target_account: &T::AccountId,
+        token_info: Vec<Token>,
+        token_id: TokenId,
+        token: Token,
+    ) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
         // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
-            ensure!(
-                !AccountForToken::<T>::contains_key(token_id),
-                 Error::<T>::TokenExist
-                 );
-
-            TokensForAccount::<T>::insert(target_account, token_id, token_info);
-            // hash_set_of_tokens.insert(token_id)
-            TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
-            AccountForToken::<T>::insert(token_id, &target_account);
-            // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
-            Ok(token_id)
+        ensure!(
+            !AccountForToken::<T>::contains_key(token_id),
+            Error::<T>::TokenExist
+        );
+        TokensForAccount::<T>::mutate(target_account, |token_info| token_info.push(token));
+        // hash_set_of_tokens.insert(token_id)
+        TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+        AccountForToken::<T>::insert(token_id, &target_account);
+        // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
+        Ok(token_id)
     }
 
-     pub fn mint_basic_nft(target_account: &T::AccountId, token_id: TokenId) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
+    pub fn mint_basic_nft(
+        target_account: &T::AccountId,
+        token_id: TokenId,
+    ) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
         // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
-            ensure!(
-                !AccountForToken::<T>::contains_key(token_id),
-                 Error::<T>::TokenExist
-                 );
-            
-            // hash_set_of_tokens.insert(token_id);
-            TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
-            AccountForToken::<T>::insert(token_id, &target_account);
-            // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
-            Ok(token_id)
+        ensure!(
+            !AccountForToken::<T>::contains_key(token_id),
+            Error::<T>::TokenExist
+        );
+
+        // hash_set_of_tokens.insert(token_id);
+        TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+        AccountForToken::<T>::insert(token_id, &target_account);
+        // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
+        Ok(token_id)
     }
-    
-    pub fn burn_nft(token_id: TokenId) -> dispatch::result::Result<Token, dispatch::DispatchError> {
+
+    pub fn burn_nft(token_id: TokenId) -> dispatch::DispatchResult {
         let owner = Self::owner_of(token_id);
+        let tokens = TokensForAccount::<T>::get(&owner);
+        TokensForAccount::<T>::mutate(&owner, |tokens| tokens.remove(1));
+        // TokensForAccount::<T>::mutate(&owner, |token_id| token_id.burn(&token_id));
+        TokensForAccount::<T>::take(&owner);
+        AccountForToken::<T>::remove(&token_id);
 
+        Ok(())
+    }
+
+    pub fn burn_basic_nft(
+        token_id: TokenId,
+    ) -> dispatch::result::Result<Vec<Token>, dispatch::DispatchError> {
+        let owner = Self::owner_of(token_id);
 
         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
 
-        let deleted_token = TokensForAccount::<T>::take(&owner, token_id);
+        let deleted_token = TokensForAccount::<T>::take(&owner);
         // TokensForAccount::<T>::mutate(&owner, &token_id, |tokens| {
         //     let pos = tokens
         //         .binary_search(&token_id)
@@ -414,37 +456,37 @@ impl<T: Config> Module<T> {
         // });
         AccountForToken::<T>::remove(&token_id);
 
-        Ok(deleted_token.unwrap())
+        Ok(deleted_token)
     }
 
-
-    fn transfer_nft(dest_account: &T::AccountId, token_id: TokenId) -> dispatch::DispatchResult
-    {
+    fn transfer_nft(dest_account: &T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
         let owner = Self::owner_of(token_id);
         ensure!(
-                owner != T::AccountId::default(),
-                Error::<T>::NonExistentToken
-            );
+            owner != T::AccountId::default(),
+            Error::<T>::NonExistentToken
+        );
 
         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
         TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
         AccountForToken::<T>::remove(token_id);
 
-        let transferred_token = TokensForAccount::<T>::take(owner, token_id).unwrap();
+        let transferred_token = TokensForAccount::<T>::take(&owner);
 
-        TokensForAccount::<T>::insert(dest_account, token_id, transferred_token);
+        TokensForAccount::<T>::insert(dest_account, transferred_token);
         AccountForToken::<T>::insert(token_id, &dest_account);
 
         Ok(())
     }
 
-    pub fn transfer_basic_nft(dest_account: &T::AccountId, token_id: TokenId) -> dispatch::DispatchResult
-    {
+    pub fn transfer_basic_nft(
+        dest_account: &T::AccountId,
+        token_id: TokenId,
+    ) -> dispatch::DispatchResult {
         let owner = Self::owner_of(token_id);
         ensure!(
-                owner != T::AccountId::default(),
-                Error::<T>::NonExistentToken
-            );
+            owner != T::AccountId::default(),
+            Error::<T>::NonExistentToken
+        );
 
         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
         TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
@@ -481,41 +523,50 @@ impl<T: Config> Module<T> {
             return Ok(());
         }
 
-        Self::try_mutate_account(dest, token_id, |to_account, _| -> dispatch::DispatchResult {
-            Self::try_mutate_account(transactor, token_id, |from_account, _| -> dispatch::DispatchResult {
-                from_account.free = from_account
-                    .free
-                    .checked_sub(&value)
-                    .ok_or(Error::<T>::InsufficientBalance)?;
-
-                // NOTE: total stake being stored in the same type means that this could never overflow
-                // but better to be safe than sorry.
-                to_account.free = to_account
-                    .free
-                    .checked_add(&value)
-                    .ok_or(Error::<T>::Overflow)?;
-
-                let ed = T::ExistentialDeposit::get();
-                ensure!(to_account.total() >= ed, Error::<T>::ExistentialDeposit);
-
-                Self::ensure_can_withdraw(
+        Self::try_mutate_account(
+            dest,
+            token_id,
+            |to_account, _| -> dispatch::DispatchResult {
+                Self::try_mutate_account(
                     transactor,
                     token_id,
-                    value,
-                    WithdrawReasons::TRANSFER,
-                    from_account.free,
-                )?;
+                    |from_account, _| -> dispatch::DispatchResult {
+                        from_account.free = from_account
+                            .free
+                            .checked_sub(&value)
+                            .ok_or(Error::<T>::InsufficientBalance)?;
 
-                let allow_death = existence_requirement == ExistenceRequirement::AllowDeath;
-                let allow_death = allow_death && frame_system::Module::<T>::allow_death(transactor);
-                ensure!(
-                    allow_death || from_account.free >= ed,
-                    Error::<T>::KeepAlive
-                );
+                        // NOTE: total stake being stored in the same type means that this could never overflow
+                        // but better to be safe than sorry.
+                        to_account.free = to_account
+                            .free
+                            .checked_add(&value)
+                            .ok_or(Error::<T>::Overflow)?;
 
-                Ok(())
-            })
-        })?;
+                        let ed = T::ExistentialDeposit::get();
+                        ensure!(to_account.total() >= ed, Error::<T>::ExistentialDeposit);
+
+                        Self::ensure_can_withdraw(
+                            transactor,
+                            token_id,
+                            value,
+                            WithdrawReasons::TRANSFER,
+                            from_account.free,
+                        )?;
+
+                        let allow_death = existence_requirement == ExistenceRequirement::AllowDeath;
+                        let allow_death =
+                            allow_death && frame_system::Module::<T>::allow_death(transactor);
+                        ensure!(
+                            allow_death || from_account.free >= ed,
+                            Error::<T>::KeepAlive
+                        );
+
+                        Ok(())
+                    },
+                )
+            },
+        )?;
 
         // Emit transfer event.
         Self::deposit_event(RawEvent::Transfer(
@@ -542,12 +593,12 @@ impl<T: Config> Module<T> {
                 (maybe_endowed, result)
             })
         })
-        .map(|(maybe_endowed, result)| {
-            if let Some(endowed) = maybe_endowed {
-                Self::deposit_event(RawEvent::Endowed(who.clone(), token_id, endowed));
-            }
-            result
-        })
+            .map(|(maybe_endowed, result)| {
+                if let Some(endowed) = maybe_endowed {
+                    Self::deposit_event(RawEvent::Endowed(who.clone(), token_id, endowed));
+                }
+                result
+            })
     }
 
     fn ensure_can_withdraw(
@@ -589,15 +640,15 @@ impl<T: Config> Module<T> {
                 (existed, maybe_value.is_some(), result)
             })
         })
-        .map(|(existed, exists, v)| {
-            if !existed && exists {
-                Self::on_created_account(k.clone());
-            } else if existed && !exists {
-                // TODO:
-                //Self::on_killed_account(k.clone());
-            }
-            v
-        })
+            .map(|(existed, exists, v)| {
+                if !existed && exists {
+                    Self::on_created_account(k.clone());
+                } else if existed && !exists {
+                    // TODO:
+                    //Self::on_killed_account(k.clone());
+                }
+                v
+            })
     }
 
     fn post_mutation(
@@ -635,5 +686,13 @@ impl<T: Config> Module<T> {
     pub fn get(k: &(T::RealisTokenId, T::AccountId)) -> AccountData<T::Balance> {
         SystemAccount::<T>::get(k).data
     }
+}
 
+#[cfg(test)]
+mod test {
+
+    #[test]
+    fn mint_nft_if_possible() {
+        assert_eq!(super::mint_nft(&1, &1, 222, Common, Head, {strength: 2, agility: 3, intelligence: 4}));
+    }
 }

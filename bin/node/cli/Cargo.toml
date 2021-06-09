@@ -44,81 +44,84 @@ structopt = { version = "0.3.8", optional = true }
 parking_lot = "0.11.1"
 
 # primitives
-sp-authority-discovery = { version = "3.0.0",  path = "../../../primitives/authority-discovery" }
-sp-consensus-babe = { version = "0.9.0", path = "../../../primitives/consensus/babe" }
-grandpa-primitives = { version = "3.0.0", package = "sp-finality-grandpa", path = "../../../primitives/finality-grandpa" }
-sp-core = { version = "3.0.0", path = "../../../primitives/core" }
-sp-runtime = { version = "3.0.0", path = "../../../primitives/runtime" }
-sp-timestamp = { version = "3.0.0", default-features = false, path = "../../../primitives/timestamp" }
-sp-inherents = { version = "3.0.0", path = "../../../primitives/inherents" }
-sp-keyring = { version = "3.0.0", path = "../../../primitives/keyring" }
-sp-keystore = { version = "0.9.0", path = "../../../primitives/keystore" }
-sp-io = { version = "3.0.0", path = "../../../primitives/io" }
-sp-consensus = { version = "0.9.0", path = "../../../primitives/consensus/common" }
-sp-transaction-pool = { version = "3.0.0", path = "../../../primitives/transaction-pool" }
+sp-authority-discovery = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-consensus-babe = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+grandpa-primitives = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", package = "sp-finality-grandpa" }
+sp-core = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-timestamp = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-authorship = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-inherents = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-keyring = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-keystore = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-io = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-consensus = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-transaction-pool = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 
 # client dependencies
-sc-client-api = { version = "3.0.0", path = "../../../client/api" }
-sc-chain-spec = { version = "3.0.0", path = "../../../client/chain-spec" }
-sc-consensus = { version = "0.9.0", path = "../../../client/consensus/common" }
-sc-transaction-pool = { version = "3.0.0", path = "../../../client/transaction-pool" }
-sc-network = { version = "0.9.0", path = "../../../client/network" }
-sc-consensus-slots = { version = "0.9.0", path = "../../../client/consensus/slots" }
-sc-consensus-babe = { version = "0.9.0", path = "../../../client/consensus/babe" }
-grandpa = { version = "0.9.0", package = "sc-finality-grandpa", path = "../../../client/finality-grandpa" }
-sc-client-db = { version = "0.9.0", default-features = false, path = "../../../client/db" }
-sc-offchain = { version = "3.0.0", path = "../../../client/offchain" }
-sc-rpc = { version = "3.0.0", path = "../../../client/rpc" }
-sc-basic-authorship = { version = "0.9.0", path = "../../../client/basic-authorship" }
-sc-service = { version = "0.9.0", default-features = false, path = "../../../client/service" }
-sc-tracing = { version = "3.0.0", path = "../../../client/tracing" }
-sc-telemetry = { version = "3.0.0", path = "../../../client/telemetry" }
-sc-authority-discovery = { version = "0.9.0",  path = "../../../client/authority-discovery" }
-sc-finality-grandpa-warp-sync = { version = "0.9.0", path = "../../../client/finality-grandpa-warp-sync", optional = true }
+sc-client-api = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-chain-spec = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-consensus = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-transaction-pool = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-network = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-consensus-slots = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-consensus-babe = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-consensus-uncles = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+grandpa = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", package = "sc-finality-grandpa" }
+sc-client-db = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sc-offchain = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-rpc = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-basic-authorship = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-service = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sc-tracing = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-telemetry = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-authority-discovery = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-finality-grandpa-warp-sync = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 
 # frame dependencies
-pallet-indices = { version = "3.0.0", path = "../../../frame/indices" }
-pallet-timestamp = { version = "3.0.0", default-features = false, path = "../../../frame/timestamp" }
-pallet-contracts = { version = "3.0.0", path = "../../../frame/contracts" }
-frame-system = { version = "3.0.0", path = "../../../frame/system" }
-pallet-balances = { version = "3.0.0", path = "../../../frame/balances" }
-pallet-transaction-payment = { version = "3.0.0", path = "../../../frame/transaction-payment" }
-frame-support = { version = "3.0.0", default-features = false, path = "../../../frame/support" }
-pallet-im-online = { version = "3.0.0", default-features = false, path = "../../../frame/im-online" }
-pallet-authority-discovery = { version = "3.0.0", path = "../../../frame/authority-discovery" }
-pallet-staking = { version = "3.0.0", path = "../../../frame/staking" }
-pallet-grandpa = { version = "3.0.0", path = "../../../frame/grandpa" }
+pallet-indices = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+pallet-timestamp = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+pallet-contracts = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+frame-system = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+frame-support = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+pallet-im-online = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+pallet-authority-discovery = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+pallet-staking = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+pallet-grandpa = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 
 # node-specific dependencies
-node-runtime = { version = "2.0.0", path = "../runtime" }
-node-rpc = { version = "2.0.0", path = "../rpc" }
-node-primitives = { version = "2.0.0", path = "../primitives" }
-node-executor = { version = "2.0.0", path = "../executor" }
+node-runtime = { path = "../runtime" }
+node-rpc = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+node-primitives = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+node-executor = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 
 # CLI-specific dependencies
-sc-cli = { version = "0.9.0", optional = true, path = "../../../client/cli" }
-frame-benchmarking-cli = { version = "3.0.0", optional = true, path = "../../../utils/frame/benchmarking-cli" }
-node-inspect = { version = "0.8.0", optional = true, path = "../inspect" }
-try-runtime-cli = { version = "0.9.0", optional = true, path = "../../../utils/frame/try-runtime/cli" }
+sc-cli = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+node-inspect = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+try-runtime-cli = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 
 # WASM-specific dependencies
-wasm-bindgen = { version = "0.2.57", optional = true }
+wasm-bindgen = { version = "0.2.73", optional = true }
 wasm-bindgen-futures = { version = "0.4.18", optional = true }
-browser-utils = { package = "substrate-browser-utils", path = "../../../utils/browser", optional = true, version = "0.9.0"}
-libp2p-wasm-ext = { version = "0.27", features = ["websocket"], optional = true }
+browser-utils = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81",package = "substrate-browser-utils",  optional = true}
+libp2p-wasm-ext = { version = "0.28", features = ["websocket"], optional = true }
 
 [target.'cfg(target_arch="x86_64")'.dependencies]
-node-executor = { version = "2.0.0", path = "../executor", features = [ "wasmtime" ] }
-sc-cli = { version = "0.9.0", optional = true, path = "../../../client/cli", features = [ "wasmtime" ] }
-sc-service = { version = "0.9.0", default-features = false, path = "../../../client/service", features = [ "wasmtime" ] }
-sp-trie = { version = "3.0.0", default-features = false, path = "../../../primitives/trie", features = ["memory-tracker"] }
+node-executor = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", features = [ "wasmtime" ] }
+sc-cli = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true, features = [ "wasmtime" ] }
+sc-service = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false, features = [ "wasmtime" ] }
+sp-trie = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false, features = ["memory-tracker"] }
 
 [dev-dependencies]
-sc-keystore = { version = "3.0.0", path = "../../../client/keystore" }
-sc-consensus = { version = "0.9.0", path = "../../../client/consensus/common" }
-sc-consensus-babe = { version = "0.9.0", features = ["test-helpers"], path = "../../../client/consensus/babe" }
-sc-consensus-epochs = { version = "0.9.0", path = "../../../client/consensus/epochs" }
-sc-service-test = { version = "2.0.0", path = "../../../client/service/test" }
+sc-keystore = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-consensus = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-consensus-babe = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-consensus-epochs = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sc-service-test = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
+sp-io = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 futures = "0.3.9"
 tempfile = "3.1.0"
 assert_cmd = "1.0"
@@ -131,16 +134,16 @@ soketto = "0.4.2"
 
 [build-dependencies]
 structopt = { version = "0.3.8", optional = true }
-node-inspect = { version = "0.8.0", optional = true, path = "../inspect" }
-frame-benchmarking-cli = { version = "3.0.0", optional = true, path = "../../../utils/frame/benchmarking-cli" }
-substrate-build-script-utils = { version = "3.0.0", optional = true, path = "../../../utils/build-script-utils" }
-substrate-frame-cli = { version = "3.0.0", optional = true, path = "../../../utils/frame/frame-utilities-cli" }
-try-runtime-cli = { version = "0.9.0", optional = true, path = "../../../utils/frame/try-runtime/cli" }
+node-inspect = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+substrate-build-script-utils = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+substrate-frame-cli = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
+try-runtime-cli = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", optional = true }
 
 [build-dependencies.sc-cli]
-version = "0.9.0"
+git = "https://github.com/paritytech/substrate"
+rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81"
 package = "sc-cli"
-path = "../../../client/cli"
 optional = true
 
 [features]

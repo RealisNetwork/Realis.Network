@@ -20,8 +20,12 @@ build:
 
 .PHONY: clean
 clean:
-	cd ../soul/nikita/chains/realis_network/ && rm -rf db && cd ../../../vlad/chains/realis_network/ && rm -rf db && cd ../../../../Realis.Network
+	cd ../soul/nikita/chains/realis/ && rm -rf db && rm -rf network && cd ../../../vlad/chains/realis/ && rm -rf db && rm -rf network && cd ../../../../Realis.Network
 
 .PHONY: docker 
 docker:
 	make build && cd target/release && mv realis ../../docker && cd ../../docker && bash ./run-realis.sh
+
+.PHONY: fmt
+fmt:
+	cargo fmt -p pallet-staking -p pallet-nft -p realis-game-api

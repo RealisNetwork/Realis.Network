@@ -3,109 +3,236 @@
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
-
-use frame_support::{decl_module, decl_storage, decl_event, decl_error, ensure, dispatch, traits::Get};
-use frame_system::ensure_root;
-use frame_support::traits::Vec;
-use pallet_balances;
-use pallet_nft::{Token, Params, Socket, Rarity, TokenId};
-use pallet_nft as NFT;
-use sp_runtime::traits::StaticLookup;
+use frame_support::{
+    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure,
+    traits::{
+        ExistenceRequirement, ExistenceRequirement::AllowDeath, Get, OnNewAccount, OnUnbalanced,
+        StoredMap, WithdrawReasons,
+    },
+    PalletId, Parameter,
+};
+use sp_std::prelude::*;
 // use std::collections::HashSet;
 use codec::{Decode, Encode, EncodeLike};
 
-// extern crate clap;
-// #[macro_use]
-// extern crate prettytable;
-// extern crate reqwest;
-// extern crate serde;
-// #[macro_use]
-// extern crate serde_derive;
-// extern crate serde_json;
+// 1. Imports and Dependencies
+pub use pallet::*;
+#[frame_support::pallet]
+pub mod pallet {
+    use codec::Codec;
+    use frame_support::dispatch::{Dispatchable, GetDispatchInfo};
+    use frame_support::pallet_prelude::*;
+    use frame_support::traits::{Currency, ExistenceRequirement, OnUnbalanced, WithdrawReasons};
+    use frame_support::PalletId;
+    use frame_system::pallet_prelude::*;
+    use pallet_nft as NFT;
+    use pallet_nft::Error::KeepAlive;
+    use sp_runtime::traits::AccountIdConversion;
+    use sp_std::fmt::Debug;
+    use frame_support::traits::Imbalance;
+    use frame_support::{StorageValue, StorageMap};
+    use sp_std::vec::Vec;
 
-/// Configure the pallet by specifying the parameters and types on which it depends.
-pub trait Config: frame_system::Config + pallet_nft::Config + pallet_balances::Config {
-    /// Because this pallet emits events, it depends on the runtime's definition of an event.
-    type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
-}
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(_);
 
+    #[pallet::config]
+    pub trait Config: frame_system::Config + pallet_nft::Config + pallet_staking::Config {
+        /// Because this pallet emits events, it depends on the runtime's definition of an event.
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-decl_event!(
-	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId {
-		/// Event documentation should end with an array that provides descriptive names for event
-		/// parameters. [something, who]
-		TokenMinted(AccountId, TokenId),
-		TokenTransferred(TokenId, AccountId),
-        TokenBreeded(TokenId),
-        // TokensTransferred(TokenId, AccountId, TokenId, AccountId),
-	}
-);
+        type PalletId: Get<PalletId>;
 
-decl_error! {
-	pub enum Error for Module<T: Config> {
-		/// Error names should be descriptive.
-		NoneValue,
-		/// Errors should have helpful documentation associated with them.
-		StorageOverflow,
-		///
-		TokenExist,
-		///
-		NotTokenOwner,
-		///
-		NonExistentToken,
-		///
-		NotNftMaster
-	}
-}
+        type Currency: Currency<Self::AccountId, Balance = Self::Balance>;
 
-decl_module! {
-	pub struct Module<T: Config> for enum Call where origin: T::Origin {
-        		// Errors must be initialized if they are used by the pallet.
-		type Error = Error<T>;
+        type StakingPoolId: From<<Self as pallet_staking::Config>::PalletId>;
+    }
 
-		// Events must be initialized if they are used by the pallet.
-		fn deposit_event() = default;
+    #[pallet::event]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    pub enum Event<T: Config> {
+        /// Event documentation should end with an array that provides descriptive names for event
+        /// parameters. [something, who]
+        TokenMinted,
+        TokenTransferred,
+        TokenBurned,
+        FundsTransferred,
+    }
 
-        #[weight = 10_000]
-        pub fn mint_nft(origin, target_account: <T as frame_system::Config>::AccountId, token_id: pallet_nft::TokenId) -> dispatch::DispatchResult {
-           let minted_token = pallet_nft::Module::<T>::mint_basic_nft(&target_account, token_id);
-           Ok(())
+    #[pallet::error]
+    pub enum Error<T> {
+        /// Error names should be descriptive.
+        NoneValue,
+        ///
+        TokenExist,
+        ///
+        NotTokenOwner,
+        ///
+        NonExistentToken,
+        ///
+        NotNftMaster,
+    }
+
+    // #[pallet::storage]
+    // pub(crate) type NftMasters<T: Config> = StorageValue<_, T::AccountId, ValueQuery>;
+
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+
+    // 7. Extrinsics
+    // Functions that are callable from outside the runtime.
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
+        #[pallet::weight(90_000_000)]
+        pub fn mint_nft(
+            origin: OriginFor<T>,
+            target_account: T::AccountId,
+            token_id: pallet_nft::TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(
+                nft_master.contains(&who),
+                Error::<T>::NotNftMaster
+            );
+
+            ensure!(
+            !NFT::AccountForToken::<T>::contains_key(token_id),
+            Error::<T>::TokenExist
+            );
+
+            NFT::Module::<T>::mint_basic_nft(&target_account, token_id);
+            Self::deposit_event(Event::<T>::TokenMinted);
+            Ok(())
         }
 
-        // #[weight = 10_000]
-        // pub fn breed_nft(origin, target_account: <T as frame_system::Config>::AccountId) -> dispatch::DispatchResult {
-        //     let token_id = 3;
-        //     let rarity = NFT::Rarity::Legendary;
-        //     let socket = NFT::Socket::Head;
-        //     let params = NFT::Params{strength: 2,
-        //         agility: 2,
-        //         intelligence: 9 };
-        //     NFT::Module::<T>::burn(origin.clone(), 1);
-        //     NFT::Module::<T>::burn(origin.clone(), 2);
-        //     return NFT::Module::<T>::mint(origin, target_account, token_id, rarity, socket, params);
-        // }
+        #[pallet::weight(60_000_000)]
+        pub fn transfer_nft(
+            origin: OriginFor<T>,
+            dest_account: T::AccountId,
+            token_id: pallet_nft::TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(
+                nft_master.contains(&who),
+                Error::<T>::NotNftMaster
+            );
 
-        #[weight = 10_000]
-        pub fn transfer_nft(origin, dest_account: T::AccountId, token_id: pallet_nft::TokenId) {
-            let json_nft = 123;
-            return NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
+            NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
+            Self::deposit_event(Event::<T>::TokenTransferred);
+            Ok(())
         }
 
+        #[pallet::weight(50_000_000)]
+        pub fn transfer_from_pallet(
+            origin: OriginFor<T>,
+            dest: T::AccountId,
+            #[pallet::compact] value: T::Balance,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(
+                nft_master.contains(&who),
+                Error::<T>::NotNftMaster
+            );
+            let pallet_id = Self::account_id();
+            <T as Config>::Currency::transfer(&pallet_id, &dest, value, ExistenceRequirement::KeepAlive);
+            Self::deposit_event(Event::<T>::FundsTransferred);
+            Ok(())
+        }
 
-        // #[weight = 10_000]
-        // pub fn transfer(origin, dest: <T::Lookup as StaticLookup>::Source, value: pallet_balances::Balance) -> dispatch::DispatchResultWithPostInfo {
-        //     return pallet_balances::Pallet::<T>::transfer(origin, dest, value);
-		// }
+        #[pallet::weight(50_000_000)]
+        pub fn transfer_to_pallet(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            #[pallet::compact] value: T::Balance,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(
+                nft_master.contains(&who),
+                Error::<T>::NotNftMaster
+            );
+            let pallet_id = Self::account_id();
+            <T as Config>::Currency::transfer(&from, &pallet_id, value, ExistenceRequirement::KeepAlive);
+            Self::deposit_event(Event::<T>::FundsTransferred);
+            Ok(())
+        }
+
+        #[pallet::weight(30_000_000)]
+        pub fn transfer_from_ptop(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            to: T::AccountId,
+            #[pallet::compact] value: T::Balance,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(
+                nft_master.contains(&who),
+                Error::<T>::NotNftMaster
+            );
+            <T as Config>::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
+            Self::deposit_event(Event::<T>::FundsTransferred);
+            Ok(())
+        }
+
+        #[pallet::weight(90_000_000)]
+        pub fn burn_nft(origin: OriginFor<T>, token_id: pallet_nft::TokenId) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(
+                nft_master.contains(&who),
+                Error::<T>::NotNftMaster
+            );
+            NFT::Module::<T>::burn_basic_nft(token_id);
+            Self::deposit_event(Event::<T>::TokenBurned);
+            Ok(())
+        }
+
+        #[pallet::weight(90_000_000)]
+        pub fn spend_in_game(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            #[pallet::compact] amount: T::Balance,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(
+                nft_master.contains(&who),
+                Error::<T>::NotNftMaster
+            );
+            let imbalance = <T as Config>::Currency::withdraw(
+                &from,
+                amount,
+                WithdrawReasons::all(),
+                ExistenceRequirement::KeepAlive,
+            )?;
+            let pallet_id_staking = Self::account_id_staking();
+            let pallet_id_game_api = Self::account_id();
+                // for fees, 80% to treasury, 20% to author
+                let (to_game_api, to_staking) = imbalance.ration(80, 20);
+            <T as Config>::Currency::resolve_creating(
+                    &pallet_id_game_api,
+                    to_game_api,
+                );
+            <T as Config>::Currency::resolve_creating(
+                    &pallet_id_staking,
+                    to_staking,
+                );
+            Ok(())
+        }
+    }
+
+    impl<T: Config> Pallet<T> {
+        pub fn account_id() -> T::AccountId {
+            <T as Config>::PalletId::get().into_account()
+        }
+
+        pub fn account_id_staking() -> T::AccountId {
+            <T as pallet_staking::Config>::PalletId::get().into_account()
+        }
     }
 }
-
-
-// fn get_from_json() -> Token {
-//     let client = reqwest::Client::new();
-//     let mut request = client.get(URL);
-
-//     let mut resp = request.send().unwrap();
-
-//     assert!(resp.status().is_success());
-//     return resp;
-// }
