@@ -33,10 +33,6 @@ pub enum Rarity {
     Legendary,
 }
 
-// impl Default for Rarity {
-//     fn default() -> Self { Rarity::Common }
-// }
-
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub enum Socket {
     Head,
@@ -181,7 +177,7 @@ decl_storage! {
         // https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
         pub MaxTokenId get(fn max_realis_token_id): T::RealisTokenId = 17_u32.into();
         pub MinTokenId get(fn min_realis_token_id): T::RealisTokenId = 1_u32.into();
-        pub TokensForAccount get(fn tokens_of_owner_by_index): map hasher(opaque_blake2_256) T::AccountId => Vec<Token>;
+        pub TokensForAccount get(fn tokens_of_owner_by_index): map hasher(opaque_blake2_256) T::AccountId => Vec<(TokenId, Token)>;
         pub AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) TokenId => T::AccountId;
         pub TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u32;
         pub TokensWithTypes get(fn tokens_with_types): map hasher(opaque_blake2_256) T::AccountId => (TokenId, Types);
@@ -392,7 +388,7 @@ impl<T: Config> Module<T> {
             !AccountForToken::<T>::contains_key(token_id),
             Error::<T>::TokenExist
         );
-        TokensForAccount::<T>::mutate(target_account, |token_info| token_info.push(token));
+        TokensForAccount::<T>::mutate(target_account, |token_info| token_info.push((token_id, token)));
         // hash_set_of_tokens.insert(token_id)
         TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
         AccountForToken::<T>::insert(token_id, &target_account);
@@ -431,7 +427,7 @@ impl<T: Config> Module<T> {
 
     pub fn burn_basic_nft(
         token_id: TokenId,
-    ) -> dispatch::result::Result<Vec<Token>, dispatch::DispatchError> {
+    ) -> dispatch::result::Result<Vec<(TokenId, Token)>, dispatch::DispatchError> {
         let owner = Self::owner_of(token_id);
 
         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
