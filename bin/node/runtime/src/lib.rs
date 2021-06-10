@@ -38,21 +38,20 @@ use frame_support::{
 	},
 };
 use frame_system::{
-	EnsureRoot, EnsureOneOf,
+	EnsureRoot,
 	limits::{BlockWeights, BlockLength}
 };
-use frame_support::{traits::InstanceFilter, PalletId};
+use frame_support::PalletId;
 use codec::{Encode, Decode};
 use sp_core::{
 	crypto::KeyTypeId,
-	u32_trait::{_1, _2, _3, _4, _5},
 	OpaqueMetadata,
 };
 pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 use sp_api::impl_runtime_apis;
 use sp_runtime::{
-	Permill, Perbill, Perquintill, Percent, ApplyExtrinsicResult, impl_opaque_keys, generic,
+	Perbill, Perquintill, ApplyExtrinsicResult, impl_opaque_keys, generic,
 	create_runtime_str, FixedPointNumber,
 };
 use sp_runtime::curve::PiecewiseLinear;
@@ -61,7 +60,6 @@ use sp_runtime::traits::{
 	self, BlakeTwo256, Block as BlockT, StaticLookup, SaturatedConversion, ConvertInto, OpaqueKeys,
 	NumberFor,
 };
-use pallet_staking::*;
 // use pallet_staking::weights::SubstrateWeight;
 use sp_version::RuntimeVersion;
 #[cfg(any(feature = "std", test))]
@@ -119,8 +117,8 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 269,
-	impl_version: 1,
+	spec_version: 286,
+	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 2,
 };
@@ -394,7 +392,7 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
-	pub const TransactionByteFee: Balance = MILLICENTS / 2;
+	pub const TransactionByteFee: Balance = MILLICENTS / 200;
 	pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
 	pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(1, 100_000);
 	pub MinimumMultiplier: Multiplier = Multiplier::saturating_from_rational(1, 1_000_000_000u128);
@@ -1021,6 +1019,22 @@ impl pallet_assets::Config for Runtime {
 }
 
 parameter_types! {
+		pub const NickReservationFee: u64 = 2;
+		pub const MinNickLength: u32 = 3;
+		pub const MaxNickLength: u32 = 16;
+	}
+
+impl pallet_nicks::Config for Runtime {
+	type Currency = Balances;
+	type ReservationFee = NickReservationFee;
+	type Slashed = ();
+	type MinLength = MinNickLength;
+	type MaxLength = MaxNickLength;
+	type Event = Event;
+	type ForceOrigin = EnsureRoot<AccountId>;
+}
+
+parameter_types! {
 	// pub IgnoredIssuance: Balance = Treasury::pot();
 	pub const QueueCount: u32 = 300;
 	pub const MaxQueueLen: u32 = 1000;
@@ -1116,6 +1130,34 @@ impl realis_game_api::Config for Runtime {
 	type StakingPoolId = StakingPalletId;
 }
 
+parameter_types! {
+    pub const ChainId: u8 = 5;
+    pub const ProposalLifetime: u32 = 50;
+}
+
+impl chain_bridge::Config for Runtime {
+	type Event = Event;
+	type AdminOrigin = EnsureRoot<Self::AccountId>;
+	type Proposal = Call;
+	type ChainId = ChainId;
+	type ProposalLifetime = ProposalLifetime;
+}
+
+parameter_types! {
+	pub HashId: chain_bridge::ResourceId = chain_bridge::derive_resource_id(ChainId::get(), b"NET_HASH");
+	pub NativeTokenId: chain_bridge::ResourceId = chain_bridge::derive_resource_id(ChainId::get(), b"NET");
+	pub Erc721Id: chain_bridge::ResourceId = chain_bridge::derive_resource_id(ChainId::get(), b"NET_NFT");
+}
+
+impl pallet_realis_bridge::Config for Runtime {
+	type Event = Event;
+	type BridgeOrigin = chain_bridge::EnsureBridge<Self>;
+	type Currency = Balances;
+	type HashId = HashId;
+	type NativeTokenId = NativeTokenId;
+	type Erc721Id = Erc721Id;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1144,6 +1186,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
 		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
 		AuthorityDiscovery: pallet_authority_discovery::{Pallet, Call, Config},
+		Nicks: pallet_nicks::{Pallet, Call, Storage, Event<T>},
 		Offences: pallet_offences::{Pallet, Call, Storage, Event},
 		Historical: pallet_session_historical::{Pallet},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Call, Storage},
@@ -1160,6 +1203,8 @@ construct_runtime!(
 		Mmr: pallet_mmr::{Pallet, Storage},
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
+		ChainBridge: chain_bridge::{Pallet, Call, Storage, Event<T>},
+		RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
 	}

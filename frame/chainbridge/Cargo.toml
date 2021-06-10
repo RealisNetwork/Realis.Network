@@ -1,0 +1,39 @@
+[package]
+name = 'chain-bridge'
+version = '0.0.1'
+authors = ['exlead@gmail.com']
+edition = '2018'
+
+[dependencies]
+# third-party dependencies
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
+serde = { version = "1.0.114", optional = true }
+
+# primitives
+sp-std = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sp-io = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+sp-core = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+
+# frame dependencies
+frame-support = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+frame-system = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+pallet-nft = {version = "0.0.2", default-features = false, path = "../nft"}
+
+pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+
+[build-dependencies]
+wasm-builder-runner = { version = "3.0.0", package = "substrate-wasm-builder-runner"}
+[features]
+default = ["std"]
+std = [
+	"codec/std",
+	"serde",
+	"sp-std/std",
+	"sp-runtime/std",
+	"sp-io/std",
+	"sp-core/std",
+	"frame-support/std",
+	"frame-system/std",
+	"pallet-balances/std",
+]
