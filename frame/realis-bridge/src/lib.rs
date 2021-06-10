@@ -5,13 +5,12 @@ use chain_bridge as bridge;
 use frame_support::traits::{Currency, EnsureOrigin, ExistenceRequirement::AllowDeath, Get};
 use frame_support::{
     decl_error, decl_event, decl_module, dispatch::DispatchResult, ensure,
-    traits::ExistenceRequirement, Parameter,
+    traits::ExistenceRequirement,
 };
 use frame_system::{self as system, ensure_signed};
 use pallet_nft as erc721;
 use sp_arithmetic::traits::SaturatedConversion;
 use sp_core::U256;
-use sp_runtime::traits::AtLeast32BitUnsigned;
 use sp_std::prelude::*;
 
 mod mock;
@@ -100,10 +99,10 @@ decl_module! {
         /// Transfer a non-fungible token (erc721) to a (whitelisted) destination chain.
         #[weight = 195_000_000]
         pub fn transfer_erc721(origin, recipient: Vec<u8>, token_id: U256, dest_id: bridge::ChainId) -> DispatchResult {
-            let source = ensure_signed(origin)?;
+            let _source = ensure_signed(origin)?;
             ensure!(<bridge::Module<T>>::chain_whitelisted(dest_id), Error::<T>::InvalidTransfer);
             match <erc721::Module<T>>::all_tokens_in_account(&token_id) {
-                Some(token) => {
+                Some(_token) => {
                     <erc721::Module<T>>::burn_nft(token_id)?;
                     let resource_id = T::Erc721Id::get();
                     let tid: &mut [u8] = &mut[0; 32];
@@ -144,13 +143,6 @@ decl_module! {
             ) -> DispatchResult {
             T::BridgeOrigin::ensure_origin(origin)?;
 
-            let token_info: Vec<pallet_nft::Token> = sp_std::vec![pallet_nft::Token {
-               token_id,
-               rarity,
-               socket,
-               params
-            }];
-
             let token = pallet_nft::Token {
                token_id,
                rarity,
@@ -158,7 +150,7 @@ decl_module! {
                params
             };
 
-            <erc721::Module<T>>::mint_nft(&target_account, token_info, token_id, token)?;
+            <erc721::Module<T>>::mint_nft(&target_account, token_id, token)?;
             Ok(())
         }
     }

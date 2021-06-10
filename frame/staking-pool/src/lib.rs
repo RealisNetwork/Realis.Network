@@ -282,15 +282,14 @@ pub mod weights;
 
 use codec::{Decode, Encode, HasCompact};
 use frame_election_provider_support::{data_provider, ElectionProvider, Supports, VoteWeight};
-use frame_support::traits::ExistenceRequirement::{AllowDeath, KeepAlive};
 use frame_support::{
     decl_error, decl_event, decl_module, decl_storage,
     dispatch::{DispatchResult, DispatchResultWithPostInfo},
     ensure,
     storage::IterableStorageMap,
     traits::{
-        Currency, CurrencyToVote, EnsureOrigin, EstimateNextNewSession, Get, Imbalance,
-        LockIdentifier, LockableCurrency, OnUnbalanced, UnixTime, WithdrawReasons,
+        Currency, CurrencyToVote, EnsureOrigin, EstimateNextNewSession, ExistenceRequirement, Get,
+        Imbalance, LockIdentifier, LockableCurrency, OnUnbalanced, UnixTime, WithdrawReasons,
     },
     weights::{
         constants::{WEIGHT_PER_MICROS, WEIGHT_PER_NANOS},
@@ -318,7 +317,7 @@ use sp_std::{collections::btree_map::BTreeMap, convert::From, prelude::*, result
 pub use weights::WeightInfo;
 
 const STAKING_ID: LockIdentifier = *b"staking ";
-pub(crate) const LOG_TARGET: &'static str = "runtime::staking";
+pub(crate) const LOG_TARGET: &str = "runtime::staking";
 
 // syntactic sugar for logging.
 #[macro_export]
@@ -2075,13 +2074,12 @@ impl<T: Config> Module<T> {
 
         // Track the number of payout ops to nominators. Note: `WeightInfo::payout_stakers_alive_staked`
         // always assumes at least a validator is paid out, so we do not need to count their payout op.
-        let mut nominator_payout_count: u32 = 0;
+        let nominator_payout_count: u32 = 0;
 
         // Lets now calculate how this is split to the nominators.
         // Reward only the clipped exposures. Note this is not necessarily sorted.
         for nominator in exposure.others.iter() {
-            let nominator_exposure_part =
-                Perbill::from_rational_approximation(nominator.value, exposure.total);
+            let nominator_exposure_part = Perbill::from_rational(nominator.value, exposure.total);
 
             let nominator_reward: BalanceOf<T> =
                 nominator_exposure_part * validator_leftover_payout;
@@ -2127,7 +2125,7 @@ impl<T: Config> Module<T> {
             &Self::account_id(),
             amount,
             WithdrawReasons::all(),
-            KeepAlive,
+            ExistenceRequirement::KeepAlive,
         )
         .map_err(|_| ())?;
         match Self::payee(stash) {

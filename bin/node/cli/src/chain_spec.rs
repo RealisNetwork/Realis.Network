@@ -260,7 +260,7 @@ pub fn testnet_genesis(
 		}))
 		.collect::<Vec<_>>();
 
-	let num_endowed_accounts = endowed_accounts.len();
+	let _num_endowed_accounts = endowed_accounts.len();
 
 	const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
 	const STASH: Balance = ENDOWMENT / 1000;
@@ -346,6 +346,7 @@ pub fn testnet_genesis(
 	}
 }
 
+///Realis chain-spec
 pub fn realis_genesis(
 	initial_authorities: Vec<(
 		AccountId,
@@ -403,7 +404,7 @@ pub fn realis_genesis(
 			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
 		}))
 		.collect::<Vec<_>>();
-	let num_endowed_accounts = endowed_accounts.len();
+	let _num_endowed_accounts = endowed_accounts.len();
 
 	const ENDOWMENT: Balance = 30_000 * DOLLARS / 10;
 	const STASH: Balance = ENDOWMENT / 1000;
@@ -490,6 +491,7 @@ pub fn realis_genesis(
 	}
 }
 
+///Realis test chain-spec
 pub fn realis_testnet_config() -> ChainSpec {
 	let mut properties = Map::new();
 	properties.insert("tokenDecimals".into(), 10.into());
@@ -509,6 +511,7 @@ pub fn realis_testnet_config() -> ChainSpec {
 	)
 }
 
+///Realis ctestnet genesis
 pub fn realis_testnet_genesis() -> GenesisConfig {
 			realis_genesis(
 				vec![
@@ -536,6 +539,7 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
 		None,
 	)}
 
+///Realis chain-spec from realis.json
 pub fn realis_config() -> Result<ChainSpec, String> {
 	ChainSpec::from_json_bytes(&include_bytes!("../../../../realis.json")[..])
 }

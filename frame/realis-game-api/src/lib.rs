@@ -1,37 +1,17 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// Edit this file to define custom logic or remove it if it is not needed.
-/// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// https://substrate.dev/docs/en/knowledgebase/runtime/frame
-use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure,
-    traits::{
-        ExistenceRequirement, ExistenceRequirement::AllowDeath, Get, OnNewAccount, OnUnbalanced,
-        StoredMap, WithdrawReasons,
-    },
-    PalletId, Parameter,
-};
-use sp_std::prelude::*;
-// use std::collections::HashSet;
-use codec::{Decode, Encode, EncodeLike};
-
 // 1. Imports and Dependencies
 pub use pallet::*;
 #[frame_support::pallet]
 pub mod pallet {
-    use codec::Codec;
-    use frame_support::dispatch::{Dispatchable, GetDispatchInfo};
     use frame_support::pallet_prelude::*;
     use frame_support::traits::Imbalance;
-    use frame_support::traits::{Currency, ExistenceRequirement, OnUnbalanced, WithdrawReasons};
+    use frame_support::traits::{Currency, ExistenceRequirement, WithdrawReasons};
     use frame_support::PalletId;
     use frame_support::{StorageMap, StorageValue};
     use frame_system::pallet_prelude::*;
     use pallet_nft as NFT;
-    use pallet_nft::Error::KeepAlive;
     use sp_runtime::traits::AccountIdConversion;
-    use sp_std::fmt::Debug;
-    use sp_std::vec::Vec;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
@@ -89,6 +69,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             target_account: T::AccountId,
             token_id: pallet_nft::TokenId,
+            type_token: pallet_nft::Types,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
@@ -99,7 +80,7 @@ pub mod pallet {
                 Error::<T>::TokenExist
             );
 
-            NFT::Module::<T>::mint_basic_nft(&target_account, token_id);
+            NFT::Module::<T>::mint_basic_nft(&target_account, token_id, type_token)?;
             Self::deposit_event(Event::<T>::TokenMinted);
             Ok(())
         }
@@ -114,7 +95,7 @@ pub mod pallet {
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
 
-            NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id);
+            NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id)?;
             Self::deposit_event(Event::<T>::TokenTransferred);
             Ok(())
         }
@@ -134,7 +115,7 @@ pub mod pallet {
                 &dest,
                 value,
                 ExistenceRequirement::KeepAlive,
-            );
+            )?;
             Self::deposit_event(Event::<T>::FundsTransferred);
             Ok(())
         }
@@ -154,7 +135,7 @@ pub mod pallet {
                 &pallet_id,
                 value,
                 ExistenceRequirement::KeepAlive,
-            );
+            )?;
             Self::deposit_event(Event::<T>::FundsTransferred);
             Ok(())
         }
@@ -169,7 +150,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            <T as Config>::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive);
+            <T as Config>::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive)?;
             Self::deposit_event(Event::<T>::FundsTransferred);
             Ok(())
         }
@@ -179,7 +160,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            NFT::Module::<T>::burn_basic_nft(token_id);
+            NFT::Module::<T>::burn_basic_nft(token_id)?;
             Self::deposit_event(Event::<T>::TokenBurned);
             Ok(())
         }

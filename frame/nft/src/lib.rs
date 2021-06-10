@@ -1,29 +1,19 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// Edit this file to define custom logic or remove it if it is not needed.
-/// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// https://substrate.dev/docs/en/knowledgebase/runtime/frame
+use codec::{Decode, Encode};
 use frame_support::{
     decl_error, decl_event, decl_module, decl_storage, dispatch, ensure,
-    traits::{
-        ExistenceRequirement, ExistenceRequirement::AllowDeath, Get, OnNewAccount, StoredMap,
-        WithdrawReasons,
-    },
+    traits::{ExistenceRequirement, Get, OnNewAccount, WithdrawReasons},
     Parameter,
 };
-use frame_system::{ensure_root, ensure_signed, split_inner, RefCount};
-use pallet_balances;
+use frame_system::{ensure_signed, split_inner, RefCount};
 use primitive_types::U256;
 use sp_runtime::{
     traits::{
-        AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, Member, Saturating, StaticLookup,
-        StoredMapError, Zero,
+        AtLeast32BitUnsigned, CheckedAdd, CheckedSub, Member, Saturating, StoredMapError, Zero,
     },
     RuntimeDebug,
 };
-// use std::collections::HashSet;
-use codec::{Decode, Encode, EncodeLike};
-use frame_support::traits::Len;
 use sp_std::prelude::*;
 
 #[cfg(test)]
@@ -58,6 +48,11 @@ pub enum Socket {
     Weapon,
 }
 
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy, Default)]
+pub struct Types {
+    pub tape: u8,
+}
+
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub struct Params {
     pub strength: u8,
@@ -86,7 +81,7 @@ pub enum Reasons {
 
 impl From<WithdrawReasons> for Reasons {
     fn from(r: WithdrawReasons) -> Reasons {
-        if r == WithdrawReasons::from(WithdrawReasons::TRANSACTION_PAYMENT) {
+        if r == WithdrawReasons::TRANSACTION_PAYMENT {
             Reasons::Fee
         } else if r.contains(WithdrawReasons::TRANSACTION_PAYMENT) {
             Reasons::All
@@ -184,11 +179,12 @@ decl_storage! {
     pub trait Store for Module<T: Config> as TemplateModule {
         // Learn more about declaring storage items:
         // https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
-        pub MaxTokenId get(fn max_realis_token_id): T::RealisTokenId = 17u32.into();
-        pub MinTokenId get(fn min_realis_token_id): T::RealisTokenId = 1u32.into();
+        pub MaxTokenId get(fn max_realis_token_id): T::RealisTokenId = 17_u32.into();
+        pub MinTokenId get(fn min_realis_token_id): T::RealisTokenId = 1_u32.into();
         pub TokensForAccount get(fn tokens_of_owner_by_index): map hasher(opaque_blake2_256) T::AccountId => Vec<Token>;
         pub AccountForToken get(fn account_for_token): map hasher(opaque_blake2_256) TokenId => T::AccountId;
         pub TotalForAccount get(fn total_for_account): map hasher(blake2_128_concat) T::AccountId => u32;
+        pub TokensWithTypes get(fn tokens_with_types): map hasher(opaque_blake2_256) T::AccountId => (TokenId, Types);
         pub AllTokensInAccount get(fn all_tokens_in_account): map hasher(opaque_blake2_256) TokenId => Option<Token>;
         pub NftMasters get(fn nft_masters) config(): Vec<T::AccountId>;
         pub SystemAccount get(fn system_account):
@@ -302,35 +298,28 @@ decl_module! {
                 Error::<T>::NotNftMaster
             );
 
-            let token_info: Vec<Token> = sp_std::vec![Token {
-               token_id,
-               rarity,
-               socket,
-               params
-            }];
-
             let token = Token {
                token_id,
                rarity,
                socket,
                params
             };
-            Self::mint_nft(&target_account, token_info, token_id, token)?;
-            Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
+            Self::mint_nft(&target_account, token_id, token)?;
+            Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
             Ok(())
 
         }
 
         #[weight = 10_000]
-        pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
+        pub fn mint_basic(origin, target_account: T::AccountId, token_id: TokenId, type_token: Types) -> dispatch::DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(
                 Self::nft_masters().contains(&who),
                 Error::<T>::NotNftMaster
             );
 
-            Self::mint_basic_nft(&target_account, token_id)?;
-            Self::deposit_event(RawEvent::TokenMinted(target_account.clone(), token_id));
+            Self::mint_basic_nft(&target_account, token_id, type_token)?;
+            Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
             Ok(())
 
         }
@@ -344,7 +333,7 @@ decl_module! {
                 Error::<T>::NotTokenOwner
             );
 
-            let id_of_token = Self::burn_nft(token_id)?;
+            Self::burn_nft(token_id)?;
             Self::deposit_event(RawEvent::TokenBurned());
             Ok(())
         }
@@ -363,7 +352,7 @@ decl_module! {
                 Error::<T>::NotTokenOwner
             );
 
-            let id_of_token = Self::burn_basic_nft(token_id)?;
+            Self::burn_basic_nft(token_id)?;
             Self::deposit_event(RawEvent::TokenBurned());
             Ok(())
         }
@@ -375,7 +364,7 @@ decl_module! {
             ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
 
             Self::transfer_nft(&dest_account, token_id)?;
-            Self::deposit_event(RawEvent::TokenTransferred(token_id.clone(), dest_account.clone()));
+            Self::deposit_event(RawEvent::TokenTransferred(token_id, dest_account));
             Ok(())
         }
 
@@ -385,7 +374,7 @@ decl_module! {
             ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
 
             Self::transfer_basic_nft(&dest_account, token_id)?;
-            Self::deposit_event(RawEvent::TokenTransferred(token_id.clone(), dest_account.clone()));
+            Self::deposit_event(RawEvent::TokenTransferred(token_id, dest_account));
             Ok(())
         }
 
@@ -395,7 +384,6 @@ decl_module! {
 impl<T: Config> Module<T> {
     pub fn mint_nft(
         target_account: &T::AccountId,
-        token_info: Vec<Token>,
         token_id: TokenId,
         token: Token,
     ) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
@@ -415,6 +403,7 @@ impl<T: Config> Module<T> {
     pub fn mint_basic_nft(
         target_account: &T::AccountId,
         token_id: TokenId,
+        type_tokens: Types,
     ) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
         // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
         ensure!(
@@ -423,6 +412,7 @@ impl<T: Config> Module<T> {
         );
 
         // hash_set_of_tokens.insert(token_id);
+        TokensWithTypes::<T>::insert(&target_account, (token_id, type_tokens));
         TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
         AccountForToken::<T>::insert(token_id, &target_account);
         // Self::deposit_event(RawEvent::TokenMinted(target_account, token_id));
@@ -431,7 +421,6 @@ impl<T: Config> Module<T> {
 
     pub fn burn_nft(token_id: TokenId) -> dispatch::DispatchResult {
         let owner = Self::owner_of(token_id);
-        let tokens = TokensForAccount::<T>::get(&owner);
         TokensForAccount::<T>::mutate(&owner, |tokens| tokens.remove(1));
         // TokensForAccount::<T>::mutate(&owner, |token_id| token_id.burn(&token_id));
         TokensForAccount::<T>::take(&owner);
@@ -491,8 +480,7 @@ impl<T: Config> Module<T> {
         TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
         TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
         AccountForToken::<T>::remove(token_id);
-
-        let transferred_token = AccountForToken::<T>::take(token_id);
+        AccountForToken::<T>::take(token_id);
 
         AccountForToken::<T>::insert(token_id, &dest_account);
 
@@ -555,8 +543,8 @@ impl<T: Config> Module<T> {
                         )?;
 
                         let allow_death = existence_requirement == ExistenceRequirement::AllowDeath;
-                        let allow_death =
-                            allow_death && frame_system::Module::<T>::allow_death(transactor);
+                        let allow_death = allow_death
+                            && !frame_system::Pallet::<T>::is_provider_required(transactor);
                         ensure!(
                             allow_death || from_account.free >= ed,
                             Error::<T>::KeepAlive
