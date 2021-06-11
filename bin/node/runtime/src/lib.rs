@@ -38,21 +38,20 @@ use frame_support::{
 	},
 };
 use frame_system::{
-	EnsureRoot, EnsureOneOf,
+	EnsureRoot,
 	limits::{BlockWeights, BlockLength}
 };
-use frame_support::{traits::InstanceFilter, PalletId};
+use frame_support::PalletId;
 use codec::{Encode, Decode};
 use sp_core::{
 	crypto::KeyTypeId,
-	u32_trait::{_1, _2, _3, _4, _5},
 	OpaqueMetadata,
 };
 pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 use sp_api::impl_runtime_apis;
 use sp_runtime::{
-	Permill, Perbill, Perquintill, Percent, ApplyExtrinsicResult, impl_opaque_keys, generic,
+	Perbill, Perquintill, ApplyExtrinsicResult, impl_opaque_keys, generic,
 	create_runtime_str, FixedPointNumber,
 };
 use sp_runtime::curve::PiecewiseLinear;
@@ -61,7 +60,6 @@ use sp_runtime::traits::{
 	self, BlakeTwo256, Block as BlockT, StaticLookup, SaturatedConversion, ConvertInto, OpaqueKeys,
 	NumberFor,
 };
-use pallet_staking::*;
 // use pallet_staking::weights::SubstrateWeight;
 use sp_version::RuntimeVersion;
 #[cfg(any(feature = "std", test))]
@@ -119,7 +117,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 269,
+	spec_version: 267,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 2,
