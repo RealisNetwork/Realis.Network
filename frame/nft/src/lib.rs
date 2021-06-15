@@ -271,7 +271,7 @@ pub mod pallet {
     pub(crate) type NftMasters<T: Config> = StorageValue<_, Vec<T::AccountId>>;
 
     #[pallet::storage]
-    pub(crate) type SystemAccount<T: Config> = StorageMap<_, Blake2_128Concat,T::RealisTokenId, T::AccountId, AccountInfo<Self::Index, AccountData<<T as Config>::Balance>>>;
+    pub(crate) type SystemAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::RealisTokenId, T::AccountId, AccountInfo<T::Index, AccountData<<T as Config>::Balance>>>;
 
 
     #[pallet::hooks]
@@ -291,7 +291,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(
-                Self::nft_masters().contains(&who),
+                NftMasters.contains(&who),
                 Error::<T>::NotNftMaster
             );
 
@@ -326,7 +326,7 @@ pub mod pallet {
         pub fn burn(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(
-                who == Self::account_for_token(&token_id),
+                who == AccountForToken::<T>::take(token_id).unwrap(),
                 Error::<T>::NotTokenOwner
             );
 
@@ -345,7 +345,7 @@ pub mod pallet {
             // );
 
             ensure!(
-                who == Self::account_for_token(&token_id),
+                who == AccountForToken::<T>::take(token_id).unwrap(),
                 Error::<T>::NotTokenOwner
             );
 
@@ -358,7 +358,7 @@ pub mod pallet {
         #[pallet::weight(50_000_000)]
         pub fn transfer(origin: OriginFor<T>, dest_account: T::AccountId, token_id: TokenId) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
+            ensure!(who == AccountForToken::<T>::take(token_id).unwrap(), Error::<T>::NotTokenOwner);
 
             Self::transfer_nft(&dest_account, token_id)?;
             Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
@@ -368,7 +368,7 @@ pub mod pallet {
         #[pallet::weight(25_000_000)]
         pub fn transfer_basic(origin: OriginFor<T>, dest_account: T::AccountId, token_id: TokenId) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            ensure!(who == Self::account_for_token(&token_id), Error::<T>::NotTokenOwner);
+            ensure!(who == AccountForToken::<T>::take(token_id).unwrap(), Error::<T>::NotTokenOwner);
 
             Self::transfer_basic_nft(&dest_account, token_id)?;
             Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
@@ -664,7 +664,8 @@ pub mod pallet {
         }
 
         fn owner_of(token_id: TokenId) -> T::AccountId {
-            Self::account_for_token(token_id)
+            let owner = AccountForToken::<T>::take(token_id).unwrap();
+            return owner;
         }
 
         pub fn get(k: &(T::RealisTokenId, T::AccountId)) -> AccountData<T::Balance> {
