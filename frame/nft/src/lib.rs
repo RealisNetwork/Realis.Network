@@ -1,4 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![feature(option_result_contains)]
 use codec::{Decode, Encode};
 use frame_support::{
     dispatch, ensure,
@@ -270,8 +271,8 @@ pub mod pallet {
     #[pallet::getter(fn nft_masters)]
     pub(crate) type NftMasters<T: Config> = StorageValue<_, Vec<T::AccountId>>;
 
-    #[pallet::storage]
-    pub(crate) type SystemAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::RealisTokenId, T::AccountId, AccountInfo<T::Index, AccountData<<T as Config>::Balance>>>;
+    // #[pallet::storage]
+    // pub(crate) type SystemAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::RealisTokenId, T::AccountId, AccountInfo<T::Index, AccountData<<T as Config>::Balance>>>;
 
 
     #[pallet::hooks]
@@ -290,8 +291,9 @@ pub mod pallet {
                     params: Params,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            // let who = whos.unwrap();
             ensure!(
-                NftMasters.contains(&who),
+                NftMasters::<T>::get(&who).uwnrap(),
                 Error::<T>::NotNftMaster
             );
 
@@ -388,9 +390,9 @@ pub mod pallet {
             !AccountForToken::<T>::contains_key(token_id),
             Error::<T>::TokenExist
         );
-            TokensForAccount::<T>::mutate(target_account, |token_info| token_info.push((token_id, token)));
+            TokensForAccount::<T>::mutate(target_account, |token_info| token_info.unwrap().push((token_id, token)));
             // hash_set_of_tokens.insert(token_id)
-            TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+            TotalForAccount::<T>::mutate(&target_account, |total| *total.insert(1));
             AccountForToken::<T>::insert(token_id, &target_account);
             // Self::deposit_event(Event::TokenMinted(target_account, token_id));
             Ok(token_id)
@@ -409,7 +411,7 @@ pub mod pallet {
 
             // hash_set_of_tokens.insert(token_id);
             TokensWithTypes::<T>::insert(&target_account, (token_id, type_tokens));
-            TotalForAccount::<T>::mutate(&target_account, |total| *total += 1);
+            TotalForAccount::<T>::mutate(&target_account, |total| *total.insert(1));
             AccountForToken::<T>::insert(token_id, &target_account);
             // Self::deposit_event(Event::TokenMinted(target_account, token_id));
             Ok(token_id)
@@ -417,7 +419,7 @@ pub mod pallet {
 
         pub fn burn_nft(token_id: TokenId) -> dispatch::DispatchResult {
             let owner = Self::owner_of(token_id);
-            TokensForAccount::<T>::mutate(&owner, |tokens| tokens.remove(1));
+            TokensForAccount::<T>::mutate(&owner, |tokens| tokens.unwrap().remove(1));
             // TokensForAccount::<T>::mutate(&owner, |token_id| token_id.burn(&token_id));
             TokensForAccount::<T>::take(&owner);
             AccountForToken::<T>::remove(&token_id);
@@ -430,9 +432,9 @@ pub mod pallet {
         ) -> dispatch::result::Result<Vec<(TokenId, Token)>, dispatch::DispatchError> {
             let owner = Self::owner_of(token_id);
 
-            TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+            TotalForAccount::<T>::mutate(&owner, |total| *total.insert(1));
 
-            let deleted_token = TokensForAccount::<T>::take(&owner);
+            let deleted_token = TokensForAccount::<T>::take(&owner).unwrap();
             // TokensForAccount::<T>::mutate(&owner, &token_id, |tokens| {
             //     let pos = tokens
             //         .binary_search(&token_id)
@@ -451,11 +453,11 @@ pub mod pallet {
             Error::<T>::NonExistentToken
         );
 
-            TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
-            TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
+            TotalForAccount::<T>::mutate(&owner, |total| *total.unwrap());
+            TotalForAccount::<T>::mutate(dest_account, |total| *total.insert(1));
             AccountForToken::<T>::remove(token_id);
 
-            let transferred_token = TokensForAccount::<T>::take(&owner);
+            let transferred_token = TokensForAccount::<T>::take(&owner).unwrap();
 
             TokensForAccount::<T>::insert(dest_account, transferred_token);
             AccountForToken::<T>::insert(token_id, &dest_account);
@@ -474,7 +476,7 @@ pub mod pallet {
         );
 
             TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
-            TotalForAccount::<T>::mutate(dest_account, |total| *total += 1);
+            TotalForAccount::<T>::mutate(dest_account, |total| *total.insert(1));
             AccountForToken::<T>::remove(token_id);
             AccountForToken::<T>::take(token_id);
 
@@ -496,144 +498,144 @@ pub mod pallet {
             Ok(())
         }
 
-        pub fn do_transfer(
-            transactor: &T::AccountId,
-            dest: &T::AccountId,
-            token_id: T::RealisTokenId,
-            value: <T as Config>::Balance,
-            existence_requirement: ExistenceRequirement,
-        ) -> dispatch::DispatchResult {
-            if value.is_zero() || transactor == dest {
-                return Ok(());
-            }
+        // pub fn do_transfer(
+        //     transactor: &T::AccountId,
+        //     dest: &T::AccountId,
+        //     token_id: T::RealisTokenId,
+        //     value: <T as Config>::Balance,
+        //     existence_requirement: ExistenceRequirement,
+        // ) -> dispatch::DispatchResult {
+        //     if value.is_zero() || transactor == dest {
+        //         return Ok(());
+        //     }
+        //
+        //     Self::try_mutate_account(
+        //         dest,
+        //         token_id,
+        //         |to_account, _| -> dispatch::DispatchResult {
+        //             Self::try_mutate_account(
+        //                 transactor,
+        //                 token_id,
+        //                 |from_account, _| -> dispatch::DispatchResult {
+        //                     from_account.free = from_account
+        //                         .free
+        //                         .checked_sub(&value)
+        //                         .ok_or(Error::<T>::InsufficientBalance)?;
+        //
+        //                     // NOTE: total stake being stored in the same type means that this could never overflow
+        //                     // but better to be safe than sorry.
+        //                     to_account.free = to_account
+        //                         .free
+        //                         .checked_add(&value)
+        //                         .ok_or(Error::<T>::Overflow)?;
+        //
+        //                     let ed = T::ExistentialDeposit::get();
+        //                     ensure!(to_account.total() >= ed, Error::<T>::ExistentialDeposit);
+        //
+        //                     Self::ensure_can_withdraw(
+        //                         transactor,
+        //                         token_id,
+        //                         value,
+        //                         WithdrawReasons::TRANSFER,
+        //                         from_account.free,
+        //                     )?;
+        //
+        //                     let allow_death = existence_requirement == ExistenceRequirement::AllowDeath;
+        //                     let allow_death = allow_death
+        //                         && !frame_system::Pallet::<T>::is_provider_required(transactor);
+        //                     ensure!(
+        //                     allow_death || from_account.free >= ed,
+        //                     Error::<T>::KeepAlive
+        //                 );
+        //
+        //                     Ok(())
+        //                 },
+        //             )
+        //         },
+        //     )?;
+        //
+        //     // Emit transfer event.
+        //     Self::deposit_event(Event::Transfer(
+        //         transactor.clone(),
+        //         dest.clone(),
+        //         token_id,
+        //         value,
+        //     ));
+        //
+        //     Ok(())
+        // }
 
-            Self::try_mutate_account(
-                dest,
-                token_id,
-                |to_account, _| -> dispatch::DispatchResult {
-                    Self::try_mutate_account(
-                        transactor,
-                        token_id,
-                        |from_account, _| -> dispatch::DispatchResult {
-                            from_account.free = from_account
-                                .free
-                                .checked_sub(&value)
-                                .ok_or(Error::<T>::InsufficientBalance)?;
+        // fn try_mutate_account<R, E: From<StoredMapError>>(
+        //     who: &T::AccountId,
+        //     token_id: T::RealisTokenId,
+        //     f: impl FnOnce(&mut AccountData<<T as Config>::Balance>, bool) -> Result<R, E>,
+        // ) -> Result<R, E> {
+        //     Self::try_mutate_exists(&(token_id, who.clone()), |maybe_account| {
+        //         let is_new = maybe_account.is_none();
+        //         let mut account = maybe_account.take().unwrap_or_default();
+        //         f(&mut account, is_new).map(move |result| {
+        //             let maybe_endowed = if is_new { Some(account.free) } else { None };
+        //             *maybe_account = Self::post_mutation(who, account);
+        //             (maybe_endowed, result)
+        //         })
+        //     })
+        //         .map(|(maybe_endowed, result)| {
+        //             if let Some(endowed) = maybe_endowed {
+        //                 Self::deposit_event(Event::Endowed(who.clone(), token_id, endowed));
+        //             }
+        //             result
+        //         })
+        // }
 
-                            // NOTE: total stake being stored in the same type means that this could never overflow
-                            // but better to be safe than sorry.
-                            to_account.free = to_account
-                                .free
-                                .checked_add(&value)
-                                .ok_or(Error::<T>::Overflow)?;
+        // fn ensure_can_withdraw(
+        //     who: &T::AccountId,
+        //     token_id: T::RealisTokenId,
+        //     amount: T::Balance,
+        //     reasons: WithdrawReasons,
+        //     new_balance: T::Balance,
+        // ) -> dispatch::DispatchResult {
+        //     if amount.is_zero() {
+        //         return Ok(());
+        //     }
+        //     let min_balance = Self::account(token_id, who).frozen(reasons.into());
+        //     ensure!(
+        //     new_balance >= min_balance,
+        //     Error::<T>::LiquidityRestrictions
+        // );
+        //     Ok(())
+        // }
 
-                            let ed = T::ExistentialDeposit::get();
-                            ensure!(to_account.total() >= ed, Error::<T>::ExistentialDeposit);
-
-                            Self::ensure_can_withdraw(
-                                transactor,
-                                token_id,
-                                value,
-                                WithdrawReasons::TRANSFER,
-                                from_account.free,
-                            )?;
-
-                            let allow_death = existence_requirement == ExistenceRequirement::AllowDeath;
-                            let allow_death = allow_death
-                                && !frame_system::Pallet::<T>::is_provider_required(transactor);
-                            ensure!(
-                            allow_death || from_account.free >= ed,
-                            Error::<T>::KeepAlive
-                        );
-
-                            Ok(())
-                        },
-                    )
-                },
-            )?;
-
-            // Emit transfer event.
-            Self::deposit_event(Event::Transfer(
-                transactor.clone(),
-                dest.clone(),
-                token_id,
-                value,
-            ));
-
-            Ok(())
-        }
-
-        fn try_mutate_account<R, E: From<StoredMapError>>(
-            who: &T::AccountId,
-            token_id: T::RealisTokenId,
-            f: impl FnOnce(&mut AccountData<<T as Config>::Balance>, bool) -> Result<R, E>,
-        ) -> Result<R, E> {
-            Self::try_mutate_exists(&(token_id, who.clone()), |maybe_account| {
-                let is_new = maybe_account.is_none();
-                let mut account = maybe_account.take().unwrap_or_default();
-                f(&mut account, is_new).map(move |result| {
-                    let maybe_endowed = if is_new { Some(account.free) } else { None };
-                    *maybe_account = Self::post_mutation(who, account);
-                    (maybe_endowed, result)
-                })
-            })
-                .map(|(maybe_endowed, result)| {
-                    if let Some(endowed) = maybe_endowed {
-                        Self::deposit_event(Event::Endowed(who.clone(), token_id, endowed));
-                    }
-                    result
-                })
-        }
-
-        fn ensure_can_withdraw(
-            who: &T::AccountId,
-            token_id: T::RealisTokenId,
-            amount: T::Balance,
-            reasons: WithdrawReasons,
-            new_balance: T::Balance,
-        ) -> dispatch::DispatchResult {
-            if amount.is_zero() {
-                return Ok(());
-            }
-            let min_balance = Self::account(token_id, who).frozen(reasons.into());
-            ensure!(
-            new_balance >= min_balance,
-            Error::<T>::LiquidityRestrictions
-        );
-            Ok(())
-        }
-
-        fn try_mutate_exists<R, E: From<StoredMapError>>(
-            k: &(T::RealisTokenId, T::AccountId),
-            f: impl FnOnce(&mut Option<AccountData<T::Balance>>) -> Result<R, E>,
-        ) -> Result<R, E> {
-            SystemAccount::<T>::try_mutate_exists(k, |maybe_value| {
-                let existed = maybe_value.is_some();
-                let (maybe_prefix, mut maybe_data) = split_inner(maybe_value.take(), |account| {
-                    ((account.nonce, account.refcount), account.data)
-                });
-                f(&mut maybe_data).map(|result| {
-                    *maybe_value = maybe_data.map(|data| {
-                        let (nonce, refcount) = maybe_prefix.unwrap_or_default();
-                        AccountInfo {
-                            nonce,
-                            refcount,
-                            data,
-                        }
-                    });
-                    (existed, maybe_value.is_some(), result)
-                })
-            })
-                .map(|(existed, exists, v)| {
-                    if !existed && exists {
-                        Self::on_created_account(k.clone());
-                    } else if existed && !exists {
-                        // TODO:
-                        //Self::on_killed_account(k.clone());
-                    }
-                    v
-                })
-        }
+        // fn try_mutate_exists<R, E: From<StoredMapError>>(
+        //     k: &(T::RealisTokenId, T::AccountId),
+        //     f: impl FnOnce(&mut Option<AccountData<T::Balance>>) -> Result<R, E>,
+        // ) -> Result<R, E> {
+        //     SystemAccount::<T>::try_mutate_exists(k, |maybe_value| {
+        //         let existed = maybe_value.is_some();
+        //         let (maybe_prefix, mut maybe_data) = split_inner(maybe_value.take(), |account| {
+        //             ((account.nonce, account.refcount), account.data)
+        //         });
+        //         f(&mut maybe_data).map(|result| {
+        //             *maybe_value = maybe_data.map(|data| {
+        //                 let (nonce, refcount) = maybe_prefix.unwrap_or_default();
+        //                 AccountInfo {
+        //                     nonce,
+        //                     refcount,
+        //                     data,
+        //                 }
+        //             });
+        //             (existed, maybe_value.is_some(), result)
+        //         })
+        //     })
+        //         .map(|(existed, exists, v)| {
+        //             if !existed && exists {
+        //                 Self::on_created_account(k.clone());
+        //             } else if existed && !exists {
+        //                 // TODO:
+        //                 //Self::on_killed_account(k.clone());
+        //             }
+        //             v
+        //         })
+        // }
 
         fn post_mutation(
             _who: &T::AccountId,
@@ -654,9 +656,9 @@ pub mod pallet {
             }
         }
 
-        fn account(token_id: T::RealisTokenId, who: &T::AccountId) -> AccountData<T::Balance> {
-            Self::get(&(token_id, who.clone()))
-        }
+        // fn account(token_id: T::RealisTokenId, who: &T::AccountId) -> AccountData<T::Balance> {
+        //     Self::get(&(token_id, who.clone()))
+        // }
 
         pub fn on_created_account(who: (T::RealisTokenId, T::AccountId)) {
             <T as Config>::OnNewAccount::on_new_account(&who);
@@ -668,9 +670,9 @@ pub mod pallet {
             return owner;
         }
 
-        pub fn get(k: &(T::RealisTokenId, T::AccountId)) -> AccountData<T::Balance> {
-            SystemAccount::<T>::get(k).data
-        }
+        // pub fn get(k: &(T::RealisTokenId, T::AccountId)) -> AccountData<T::Balance> {
+        //     SystemAccount::<T>::get().data
+        // }
     }
 }
 
