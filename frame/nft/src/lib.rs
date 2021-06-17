@@ -269,7 +269,7 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn nft_masters)]
-    pub(crate) type NftMasters<T: Config> = StorageValue<_, Vec<T::AccountId>>;
+    pub(crate) type NftMasters<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 
     // #[pallet::storage]
     // pub(crate) type SystemAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::RealisTokenId, T::AccountId, AccountInfo<T::Index, AccountData<<T as Config>::Balance>>>;
@@ -291,9 +291,9 @@ pub mod pallet {
                     params: Params,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            // let who = whos.unwrap();
+
             ensure!(
-                NftMasters::<T>::get(&who).uwnrap(),
+                Self::nft_masters().contains(&who),
                 Error::<T>::NotNftMaster
             );
 
@@ -303,6 +303,7 @@ pub mod pallet {
                 socket,
                 params
             };
+
             Self::mint_nft(&target_account, token_id, token)?;
             Self::deposit_event(Event::TokenMinted(target_account, token_id));
             Ok(())
@@ -390,8 +391,7 @@ pub mod pallet {
             !AccountForToken::<T>::contains_key(token_id),
             Error::<T>::TokenExist
         );
-            TokensForAccount::<T>::mutate(target_account, |token_info| token_info.unwrap().push((token_id, token)));
-            // hash_set_of_tokens.insert(token_id)
+            TokensForAccount::<T>::mutate(target_account, |token_info| token_info.as_mut().map(|val| val.push((token_id, token))));            // hash_set_of_tokens.insert(token_id)
             TotalForAccount::<T>::mutate(&target_account, |total| *total.insert(1));
             AccountForToken::<T>::insert(token_id, &target_account);
             // Self::deposit_event(Event::TokenMinted(target_account, token_id));
@@ -419,7 +419,11 @@ pub mod pallet {
 
         pub fn burn_nft(token_id: TokenId) -> dispatch::DispatchResult {
             let owner = Self::owner_of(token_id);
-            TokensForAccount::<T>::mutate(&owner, |tokens| tokens.unwrap().remove(1));
+            TokensForAccount::<T>::mutate(&owner, |tokens| tokens.as_mut().map(|val| {
+                if let Some(index) = val.iter().position(|(v, _)| *v == token_id) {
+                    val.remove(index);
+                }
+            }));
             // TokensForAccount::<T>::mutate(&owner, |token_id| token_id.burn(&token_id));
             TokensForAccount::<T>::take(&owner);
             AccountForToken::<T>::remove(&token_id);
@@ -453,7 +457,7 @@ pub mod pallet {
             Error::<T>::NonExistentToken
         );
 
-            TotalForAccount::<T>::mutate(&owner, |total| *total.unwrap());
+            TotalForAccount::<T>::mutate(&owner, |total| total.as_mut().map(|val| *val -= 1));
             TotalForAccount::<T>::mutate(dest_account, |total| *total.insert(1));
             AccountForToken::<T>::remove(token_id);
 
@@ -475,7 +479,7 @@ pub mod pallet {
             Error::<T>::NonExistentToken
         );
 
-            TotalForAccount::<T>::mutate(&owner, |total| *total -= 1);
+            TotalForAccount::<T>::mutate(&owner, |total| total.as_mut().map(|val| *val -= 1));
             TotalForAccount::<T>::mutate(dest_account, |total| *total.insert(1));
             AccountForToken::<T>::remove(token_id);
             AccountForToken::<T>::take(token_id);

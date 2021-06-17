@@ -72,7 +72,7 @@ pub mod pallet {
             type_token: pallet_nft::Types,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = NFT::NftMasters::<T>::get();
+            let nft_master = NFT::Pallet::<T>::NftMasters::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
 
             ensure!(
