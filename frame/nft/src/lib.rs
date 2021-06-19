@@ -253,7 +253,7 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn account_for_token)]
-    pub(crate) type AccountForToken<T: Config> = StorageMap<_, Blake2_256, TokenId, T::AccountId>;
+    pub type AccountForToken<T: Config> = StorageMap<_, Blake2_256, TokenId, T::AccountId>;
 
     #[pallet::storage]
     #[pallet::getter(fn total_for_account)]
@@ -269,13 +269,44 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn nft_masters)]
-    pub(crate) type NftMasters<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+    pub type NftMasters<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 
     // #[pallet::storage]
     // pub(crate) type SystemAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::RealisTokenId, T::AccountId, AccountInfo<T::Index, AccountData<<T as Config>::Balance>>>;
 
 
-    #[pallet::hooks]
+    #[pallet::genesis_config]
+    pub struct GenesisConfig<T: Config> {
+        pub nft_masters: Self::nft_masters(),
+    }
+
+    #[cfg(feature = "std")]
+    impl<T: Config> Default for GenesisConfig<T> {
+        fn default() -> Self {
+            Self {
+                nft_masters: Default::default(),
+            }
+        }
+    }
+
+    #[pallet::genesis_build]
+    impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+        fn build(&self) {
+        NftMasters::<T>::take()
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl<T: Config> GenesisConfig<T> {
+        /// Direct implementation of `GenesisBuild::build_storage`.
+        ///
+        /// Kept in order not to break dependency.
+        pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
+            <Self as GenesisBuild<T>>::build_storage(self)
+        }
+    }
+
+        #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
     // Dispatchable functions allows users to interact with the pallet and invoke state changes.
 // These functions materialize as "extrinsics", which are often compared to transactions.

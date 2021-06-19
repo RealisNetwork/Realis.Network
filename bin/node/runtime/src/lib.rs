@@ -1205,7 +1205,7 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		// ChainBridge: chain_bridge::{Pallet, Call, Storage, Event<T>},
 		// RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
-		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
+		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>},
 		RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
 	}
 );
