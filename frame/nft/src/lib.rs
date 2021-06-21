@@ -3,14 +3,14 @@
 use codec::{Decode, Encode};
 use frame_support::{
     dispatch, ensure,
-    traits::{ExistenceRequirement, Get, OnNewAccount, WithdrawReasons},
+    traits::{ Get, OnNewAccount, WithdrawReasons},
     Parameter,
 };
-use frame_system::{ensure_signed, split_inner, RefCount};
+use frame_system::{ensure_signed, RefCount};
 use primitive_types::U256;
 use sp_runtime::{
     traits::{
-        AtLeast32BitUnsigned, CheckedAdd, CheckedSub, Member, Saturating, StoredMapError, Zero,
+        AtLeast32BitUnsigned, Member, Saturating,
     },
     RuntimeDebug,
 };
@@ -143,10 +143,10 @@ pub mod pallet {
                 Reasons::Fee => self.fee_frozen,
             }
         }
-        /// The total balance in this account including any that is reserved and ignoring any frozen.
-        fn total(&self) -> Balance {
-            self.free.saturating_add(self.reserved)
-        }
+        // /// The total balance in this account including any that is reserved and ignoring any frozen.
+        // fn total(&self) -> Balance {
+        //     self.free.saturating_add(self.reserved)
+        // }
     }
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
@@ -277,7 +277,7 @@ pub mod pallet {
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
-        pub nft_masters: Self::nft_masters(),
+        pub nft_masters: Vec<T::AccountId>,
     }
 
     #[cfg(feature = "std")]
@@ -292,7 +292,7 @@ pub mod pallet {
     #[pallet::genesis_build]
     impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
         fn build(&self) {
-        NftMasters::<T>::take()
+            NftMasters::<T>::get();
         }
     }
 
@@ -306,7 +306,7 @@ pub mod pallet {
         }
     }
 
-        #[pallet::hooks]
+    #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
     // Dispatchable functions allows users to interact with the pallet and invoke state changes.
 // These functions materialize as "extrinsics", which are often compared to transactions.
@@ -672,24 +672,24 @@ pub mod pallet {
         //         })
         // }
 
-        fn post_mutation(
-            _who: &T::AccountId,
-            new: AccountData<<T as Config>::Balance>,
-        ) -> Option<AccountData<<T as Config>::Balance>> {
-            let total = new.total();
-            if total < T::ExistentialDeposit::get() {
-                // TODO:
-                /*
-            if !total.is_zero() {
-                T::DustRemoval::on_unbalanced(NegativeImbalance::new(total));
-                Self::deposit_event(Event::DustLost(who.clone(), total));
-            }
-            */
-                None
-            } else {
-                Some(new)
-            }
-        }
+        // fn post_mutation(
+        //     _who: &T::AccountId,
+        //     new: AccountData<<T as Config>::Balance>,
+        // ) -> Option<AccountData<<T as Config>::Balance>> {
+        //     let total = new.total();
+        //     if total < T::ExistentialDeposit::get() {
+        //         // TODO:
+        //         /*
+        //     if !total.is_zero() {
+        //         T::DustRemoval::on_unbalanced(NegativeImbalance::new(total));
+        //         Self::deposit_event(Event::DustLost(who.clone(), total));
+        //     }
+        //     */
+        //         None
+        //     } else {
+        //         Some(new)
+        //     }
+        // }
 
         // fn account(token_id: T::RealisTokenId, who: &T::AccountId) -> AccountData<T::Balance> {
         //     Self::get(&(token_id, who.clone()))
