@@ -47,6 +47,7 @@ use sp_core::{
 	crypto::KeyTypeId,
 	OpaqueMetadata,
 };
+use sp_io::hashing::blake2_128;
 pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 use sp_api::impl_runtime_apis;
@@ -117,7 +118,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 286,
+	spec_version: 270,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 2,
@@ -1144,18 +1145,12 @@ impl realis_game_api::Config for Runtime {
 // }
 //
 // parameter_types! {
-// 	pub HashId: chain_bridge::ResourceId = chain_bridge::derive_resource_id(ChainId::get(), b"NET_HASH");
-// 	pub NativeTokenId: chain_bridge::ResourceId = chain_bridge::derive_resource_id(ChainId::get(), b"NET");
-// 	pub Erc721Id: chain_bridge::ResourceId = chain_bridge::derive_resource_id(ChainId::get(), b"NET_NFT");
+// 	pub Erc721Id: chain_bridge::ResourceId = chain_bridge::derive_resource_id(1, &blake2_128(b"NFT"));
 // }
 //
 // impl pallet_realis_bridge::Config for Runtime {
 // 	type Event = Event;
-// 	type BridgeOrigin = chain_bridge::EnsureBridge<Self>;
-// 	type Currency = Balances;
-// 	type HashId = HashId;
-// 	type NativeTokenId = NativeTokenId;
-// 	type Erc721Id = Erc721Id;
+// 	type Identifier = Erc721Id;
 // }
 
 construct_runtime!(
@@ -1205,7 +1200,7 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		// ChainBridge: chain_bridge::{Pallet, Call, Storage, Event<T>},
 		// RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
-		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>},
+		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
 	}
 );

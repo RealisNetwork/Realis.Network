@@ -8,6 +8,7 @@ pub mod pallet {
     use frame_support::traits::Imbalance;
     use frame_support::traits::{Currency, ExistenceRequirement, WithdrawReasons};
     use frame_support::PalletId;
+    use frame_support::{StorageMap, StorageValue};
     use frame_system::pallet_prelude::*;
     use pallet_nft as NFT;
     use sp_runtime::traits::AccountIdConversion;
@@ -79,7 +80,7 @@ pub mod pallet {
                 Error::<T>::TokenExist
             );
 
-            NFT::Pallet::<T>::mint_basic_nft(&target_account, token_id, type_token)?;
+            NFT::Module::<T>::mint_basic_nft(&target_account, token_id, type_token)?;
             Self::deposit_event(Event::<T>::TokenMinted);
             Ok(())
         }
@@ -94,7 +95,7 @@ pub mod pallet {
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
 
-            NFT::Pallet::<T>::transfer_basic_nft(&dest_account, token_id)?;
+            NFT::Module::<T>::transfer_basic_nft(&dest_account, token_id)?;
             Self::deposit_event(Event::<T>::TokenTransferred);
             Ok(())
         }
@@ -159,7 +160,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            NFT::Pallet::<T>::burn_basic_nft(token_id)?;
+            NFT::Module::<T>::burn_basic_nft(token_id)?;
             Self::deposit_event(Event::<T>::TokenBurned);
             Ok(())
         }
