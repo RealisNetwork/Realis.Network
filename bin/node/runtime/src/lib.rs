@@ -117,8 +117,8 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 286,
-	impl_version: 0,
+	spec_version: 267,
+	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 2,
 };
@@ -392,7 +392,7 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
-	pub const TransactionByteFee: Balance = MILLICENTS / 200;
+	pub const TransactionByteFee: Balance = MILLICENTS / 2;
 	pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
 	pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(1, 100_000);
 	pub MinimumMultiplier: Multiplier = Multiplier::saturating_from_rational(1, 1_000_000_000u128);
@@ -1019,22 +1019,6 @@ impl pallet_assets::Config for Runtime {
 }
 
 parameter_types! {
-		pub const NickReservationFee: u64 = 2;
-		pub const MinNickLength: u32 = 3;
-		pub const MaxNickLength: u32 = 16;
-	}
-
-impl pallet_nicks::Config for Runtime {
-	type Currency = Balances;
-	type ReservationFee = NickReservationFee;
-	type Slashed = ();
-	type MinLength = MinNickLength;
-	type MaxLength = MaxNickLength;
-	type Event = Event;
-	type ForceOrigin = EnsureRoot<AccountId>;
-}
-
-parameter_types! {
 	// pub IgnoredIssuance: Balance = Treasury::pot();
 	pub const QueueCount: u32 = 300;
 	pub const MaxQueueLen: u32 = 1000;
@@ -1088,8 +1072,8 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
 	pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
-	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-	pub const BondingDuration: pallet_staking::EraIndex = 28;
+	pub const SessionsPerEra: sp_staking::SessionIndex = 1;
+	pub const BondingDuration: pallet_staking::EraIndex = 1;
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
 	pub const SlashDeferDuration: pallet_staking::EraIndex = 27; // 1/4 the bonding duration.
 	pub const MaxNominatorRewardedPerValidator: u32 = 256;
@@ -1130,34 +1114,6 @@ impl realis_game_api::Config for Runtime {
 	type StakingPoolId = StakingPalletId;
 }
 
-parameter_types! {
-    pub const ChainId: u8 = 5;
-    pub const ProposalLifetime: u32 = 50;
-}
-
-impl chain_bridge::Config for Runtime {
-	type Event = Event;
-	type AdminOrigin = EnsureRoot<Self::AccountId>;
-	type Proposal = Call;
-	type ChainId = ChainId;
-	type ProposalLifetime = ProposalLifetime;
-}
-
-parameter_types! {
-	pub HashId: chain_bridge::ResourceId = chain_bridge::derive_resource_id(ChainId::get(), b"NET_HASH");
-	pub NativeTokenId: chain_bridge::ResourceId = chain_bridge::derive_resource_id(ChainId::get(), b"NET");
-	pub Erc721Id: chain_bridge::ResourceId = chain_bridge::derive_resource_id(ChainId::get(), b"NET_NFT");
-}
-
-impl pallet_realis_bridge::Config for Runtime {
-	type Event = Event;
-	type BridgeOrigin = chain_bridge::EnsureBridge<Self>;
-	type Currency = Balances;
-	type HashId = HashId;
-	type NativeTokenId = NativeTokenId;
-	type Erc721Id = Erc721Id;
-}
-
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1186,7 +1142,6 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
 		ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
 		AuthorityDiscovery: pallet_authority_discovery::{Pallet, Call, Config},
-		Nicks: pallet_nicks::{Pallet, Call, Storage, Event<T>},
 		Offences: pallet_offences::{Pallet, Call, Storage, Event},
 		Historical: pallet_session_historical::{Pallet},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Call, Storage},
@@ -1203,8 +1158,6 @@ construct_runtime!(
 		Mmr: pallet_mmr::{Pallet, Storage},
 		Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
-		ChainBridge: chain_bridge::{Pallet, Call, Storage, Event<T>},
-		RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
 	}
