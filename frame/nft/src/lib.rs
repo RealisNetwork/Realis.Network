@@ -3,14 +3,14 @@
 use codec::{Decode, Encode};
 use frame_support::{
     dispatch, ensure,
-    traits::{ExistenceRequirement, Get, OnNewAccount, WithdrawReasons},
+    traits::{ Get, OnNewAccount, WithdrawReasons},
     Parameter,
 };
-use frame_system::{ensure_signed, split_inner, RefCount};
+use frame_system::{ensure_signed, RefCount};
 use primitive_types::U256;
 use sp_runtime::{
     traits::{
-        AtLeast32BitUnsigned, CheckedAdd, CheckedSub, Member, Saturating, StoredMapError, Zero,
+        AtLeast32BitUnsigned, Member, Saturating,
     },
     RuntimeDebug,
 };
@@ -143,10 +143,10 @@ pub mod pallet {
                 Reasons::Fee => self.fee_frozen,
             }
         }
-        /// The total balance in this account including any that is reserved and ignoring any frozen.
-        fn total(&self) -> Balance {
-            self.free.saturating_add(self.reserved)
-        }
+        // /// The total balance in this account including any that is reserved and ignoring any frozen.
+        // fn total(&self) -> Balance {
+        //     self.free.saturating_add(self.reserved)
+        // }
     }
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
@@ -672,24 +672,24 @@ pub mod pallet {
         //         })
         // }
 
-        fn post_mutation(
-            _who: &T::AccountId,
-            new: AccountData<<T as Config>::Balance>,
-        ) -> Option<AccountData<<T as Config>::Balance>> {
-            let total = new.total();
-            if total < T::ExistentialDeposit::get() {
-                // TODO:
-                /*
-            if !total.is_zero() {
-                T::DustRemoval::on_unbalanced(NegativeImbalance::new(total));
-                Self::deposit_event(Event::DustLost(who.clone(), total));
-            }
-            */
-                None
-            } else {
-                Some(new)
-            }
-        }
+        // fn post_mutation(
+        //     _who: &T::AccountId,
+        //     new: AccountData<<T as Config>::Balance>,
+        // ) -> Option<AccountData<<T as Config>::Balance>> {
+        //     let total = new.total();
+        //     if total < T::ExistentialDeposit::get() {
+        //         // TODO:
+        //         /*
+        //     if !total.is_zero() {
+        //         T::DustRemoval::on_unbalanced(NegativeImbalance::new(total));
+        //         Self::deposit_event(Event::DustLost(who.clone(), total));
+        //     }
+        //     */
+        //         None
+        //     } else {
+        //         Some(new)
+        //     }
+        // }
 
         // fn account(token_id: T::RealisTokenId, who: &T::AccountId) -> AccountData<T::Balance> {
         //     Self::get(&(token_id, who.clone()))
