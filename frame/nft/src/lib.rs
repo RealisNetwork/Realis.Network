@@ -3,26 +3,23 @@
 use codec::{Decode, Encode};
 use frame_support::{
     dispatch, ensure,
-    traits::{ Get, OnNewAccount, WithdrawReasons},
+    traits::{Get, OnNewAccount, WithdrawReasons},
     Parameter,
 };
 use frame_system::{ensure_signed, RefCount};
+pub use pallet::*;
 use primitive_types::U256;
 use sp_runtime::{
-    traits::{
-        AtLeast32BitUnsigned, Member, Saturating,
-    },
+    traits::{AtLeast32BitUnsigned, Member, Saturating},
     RuntimeDebug,
 };
 use sp_std::prelude::*;
-pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
@@ -98,33 +95,33 @@ pub mod pallet {
         /// The number of transactions this account has sent.
         pub nonce: Index,
         /// The number of other modules that currently depend on this account's existence. The account
-    /// cannot be reaped until this is zero.
+        /// cannot be reaped until this is zero.
         pub refcount: RefCount,
         /// The additional data that belongs to this account. Used to store the balance(s) in a lot of
-    /// chains.
+        /// chains.
         pub data: AccountData,
     }
 
     #[derive(Encode, Decode, Clone, PartialEq, Eq, Default, RuntimeDebug)]
     pub struct AccountData<Balance> {
         /// Non-reserved part of the balance. There may still be restrictions on this, but it is the
-    /// total pool what may in principle be transferred, reserved and used for tipping.
-    ///
-    /// This is the only balance that matters in terms of most operations on tokens. It
-    /// alone is used to determine the balance when in the contract execution environment.
+        /// total pool what may in principle be transferred, reserved and used for tipping.
+        ///
+        /// This is the only balance that matters in terms of most operations on tokens. It
+        /// alone is used to determine the balance when in the contract execution environment.
         pub free: Balance,
         /// Balance which is reserved and may not be used at all.
-    ///
-    /// This can still get slashed, but gets slashed last of all.
-    ///
-    /// This balance is a 'reserve' balance that other subsystems use in order to set aside tokens
-    /// that are still 'owned' by the account holder, but which are suspendable.
+        ///
+        /// This can still get slashed, but gets slashed last of all.
+        ///
+        /// This balance is a 'reserve' balance that other subsystems use in order to set aside tokens
+        /// that are still 'owned' by the account holder, but which are suspendable.
         pub reserved: Balance,
         /// The amount that `free` may not drop below when withdrawing for *anything except transaction
-    /// fee payment*.
+        /// fee payment*.
         pub misc_frozen: Balance,
         /// The amount that `free` may not drop below when withdrawing specifically for transaction
-    /// fee payment.
+        /// fee payment.
         pub fee_frozen: Balance,
     }
 
@@ -135,7 +132,7 @@ pub mod pallet {
             self.free.saturating_sub(self.frozen(reasons))
         }
         /// The amount that this account's free balance may not be reduced beyond for the given
-    /// `reasons`.
+        /// `reasons`.
         fn frozen(&self, reasons: Reasons) -> Balance {
             match reasons {
                 Reasons::All => self.misc_frozen.max(self.fee_frozen),
@@ -165,10 +162,14 @@ pub mod pallet {
     }
 
     // Pallets use events to inform users when important changes are made.
-// https://substrate.dev/docs/en/knowledgebase/runtime/events
+    // https://substrate.dev/docs/en/knowledgebase/runtime/events
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", TokenBalance = "Balance", RealisTokenId = "T::RealisTokenId")]
+    #[pallet::metadata(
+        T::AccountId = "AccountId",
+        TokenBalance = "Balance",
+        RealisTokenId = "T::RealisTokenId"
+    )]
     pub enum Event<T: Config> {
         /// Event documentation should end with an array that provides descriptive names for event
         /// parameters. [something, who]
@@ -249,7 +250,8 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn tokens_of_owner_by_index)]
-    pub(crate) type TokensForAccount<T: Config>  = StorageMap<_, Blake2_256, T::AccountId, Vec<(TokenId, Token)>>;
+    pub(crate) type TokensForAccount<T: Config> =
+        StorageMap<_, Blake2_256, T::AccountId, Vec<(TokenId, Token)>>;
 
     #[pallet::storage]
     #[pallet::getter(fn account_for_token)]
@@ -261,11 +263,13 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn tokens_with_types)]
-    pub(crate) type TokensWithTypes<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, (TokenId, Types)>;
+    pub(crate) type TokensWithTypes<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::AccountId, (TokenId, Types)>;
 
     #[pallet::storage]
     #[pallet::getter(fn all_tokens_in_account)]
-    pub(crate) type AllTokensInAccount<T: Config> = StorageMap<_, Blake2_256, TokenId, Option<Token>>;
+    pub(crate) type AllTokensInAccount<T: Config> =
+        StorageMap<_, Blake2_256, TokenId, Option<Token>>;
 
     #[pallet::storage]
     #[pallet::getter(fn nft_masters)]
@@ -273,7 +277,6 @@ pub mod pallet {
 
     // #[pallet::storage]
     // pub(crate) type SystemAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::RealisTokenId, T::AccountId, AccountInfo<T::Index, AccountData<<T as Config>::Balance>>>;
-
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
@@ -309,50 +312,49 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
     // Dispatchable functions allows users to interact with the pallet and invoke state changes.
-// These functions materialize as "extrinsics", which are often compared to transactions.
-// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
+    // These functions materialize as "extrinsics", which are often compared to transactions.
+    // Dispatchable functions must be annotated with a weight and must return a DispatchResult.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Mint token
         #[pallet::weight(60_000_000)]
-        pub fn mint(origin: OriginFor<T>, target_account: T::AccountId,
-                    token_id: TokenId,
-                    rarity: Rarity,
-                    socket: Socket,
-                    params: Params,
+        pub fn mint(
+            origin: OriginFor<T>,
+            target_account: T::AccountId,
+            token_id: TokenId,
+            rarity: Rarity,
+            socket: Socket,
+            params: Params,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
-            ensure!(
-                Self::nft_masters().contains(&who),
-                Error::<T>::NotNftMaster
-            );
+            ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
 
             let token = Token {
                 token_id,
                 rarity,
                 socket,
-                params
+                params,
             };
 
             Self::mint_nft(&target_account, token_id, token)?;
             Self::deposit_event(Event::TokenMinted(target_account, token_id));
             Ok(())
-
         }
 
         #[pallet::weight(30_000_000)]
-        pub fn mint_basic(origin: OriginFor<T>, target_account: T::AccountId, token_id: TokenId, type_token: Types) -> DispatchResult {
+        pub fn mint_basic(
+            origin: OriginFor<T>,
+            target_account: T::AccountId,
+            token_id: TokenId,
+            type_token: Types,
+        ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            ensure!(
-                Self::nft_masters().contains(&who),
-                Error::<T>::NotNftMaster
-            );
+            ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
 
             Self::mint_basic_nft(&target_account, token_id, type_token)?;
             Self::deposit_event(Event::TokenMinted(target_account, token_id));
             Ok(())
-
         }
 
         ///Burn token(only owner)
@@ -390,9 +392,16 @@ pub mod pallet {
 
         ///Transfer token(only owner)
         #[pallet::weight(50_000_000)]
-        pub fn transfer(origin: OriginFor<T>, dest_account: T::AccountId, token_id: TokenId) -> DispatchResult {
+        pub fn transfer(
+            origin: OriginFor<T>,
+            dest_account: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            ensure!(who == AccountForToken::<T>::take(token_id).unwrap(), Error::<T>::NotTokenOwner);
+            ensure!(
+                who == AccountForToken::<T>::take(token_id).unwrap(),
+                Error::<T>::NotTokenOwner
+            );
 
             Self::transfer_nft(&dest_account, token_id)?;
             Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
@@ -400,15 +409,21 @@ pub mod pallet {
         }
 
         #[pallet::weight(25_000_000)]
-        pub fn transfer_basic(origin: OriginFor<T>, dest_account: T::AccountId, token_id: TokenId) -> DispatchResult {
+        pub fn transfer_basic(
+            origin: OriginFor<T>,
+            dest_account: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            ensure!(who == AccountForToken::<T>::take(token_id).unwrap(), Error::<T>::NotTokenOwner);
+            ensure!(
+                who == AccountForToken::<T>::take(token_id).unwrap(),
+                Error::<T>::NotTokenOwner
+            );
 
             Self::transfer_basic_nft(&dest_account, token_id)?;
             Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
             Ok(())
         }
-
     }
 
     impl<T: Config> Pallet<T> {
@@ -419,10 +434,12 @@ pub mod pallet {
         ) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
             // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
             ensure!(
-            !AccountForToken::<T>::contains_key(token_id),
-            Error::<T>::TokenExist
-        );
-            TokensForAccount::<T>::mutate(target_account, |token_info| token_info.as_mut().map(|val| val.push((token_id, token))));            // hash_set_of_tokens.insert(token_id)
+                !AccountForToken::<T>::contains_key(token_id),
+                Error::<T>::TokenExist
+            );
+            TokensForAccount::<T>::mutate(target_account, |token_info| {
+                token_info.as_mut().map(|val| val.push((token_id, token)))
+            }); // hash_set_of_tokens.insert(token_id)
             TotalForAccount::<T>::mutate(&target_account, |total| *total.insert(1));
             AccountForToken::<T>::insert(token_id, &target_account);
             // Self::deposit_event(Event::TokenMinted(target_account, token_id));
@@ -436,9 +453,9 @@ pub mod pallet {
         ) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
             // fn mint(target_account: &T::AccountId, token_id: Self::TokenId) -> dispatch::result::Result<Self::TokenId, _> {
             ensure!(
-            !AccountForToken::<T>::contains_key(token_id),
-            Error::<T>::TokenExist
-        );
+                !AccountForToken::<T>::contains_key(token_id),
+                Error::<T>::TokenExist
+            );
 
             // hash_set_of_tokens.insert(token_id);
             TokensWithTypes::<T>::insert(&target_account, (token_id, type_tokens));
@@ -450,11 +467,13 @@ pub mod pallet {
 
         pub fn burn_nft(token_id: TokenId) -> dispatch::DispatchResult {
             let owner = Self::owner_of(token_id);
-            TokensForAccount::<T>::mutate(&owner, |tokens| tokens.as_mut().map(|val| {
-                if let Some(index) = val.iter().position(|(v, _)| *v == token_id) {
-                    val.remove(index);
-                }
-            }));
+            TokensForAccount::<T>::mutate(&owner, |tokens| {
+                tokens.as_mut().map(|val| {
+                    if let Some(index) = val.iter().position(|(v, _)| *v == token_id) {
+                        val.remove(index);
+                    }
+                })
+            });
             // TokensForAccount::<T>::mutate(&owner, |token_id| token_id.burn(&token_id));
             TokensForAccount::<T>::take(&owner);
             AccountForToken::<T>::remove(&token_id);
@@ -481,12 +500,15 @@ pub mod pallet {
             Ok(deleted_token)
         }
 
-        fn transfer_nft(dest_account: &T::AccountId, token_id: TokenId) -> dispatch::DispatchResult {
+        fn transfer_nft(
+            dest_account: &T::AccountId,
+            token_id: TokenId,
+        ) -> dispatch::DispatchResult {
             let owner = Self::owner_of(token_id);
             ensure!(
-            owner != T::AccountId::default(),
-            Error::<T>::NonExistentToken
-        );
+                owner != T::AccountId::default(),
+                Error::<T>::NonExistentToken
+            );
 
             TotalForAccount::<T>::mutate(&owner, |total| total.as_mut().map(|val| *val -= 1));
             TotalForAccount::<T>::mutate(dest_account, |total| *total.insert(1));
@@ -506,9 +528,9 @@ pub mod pallet {
         ) -> dispatch::DispatchResult {
             let owner = Self::owner_of(token_id);
             ensure!(
-            owner != T::AccountId::default(),
-            Error::<T>::NonExistentToken
-        );
+                owner != T::AccountId::default(),
+                Error::<T>::NonExistentToken
+            );
 
             TotalForAccount::<T>::mutate(&owner, |total| total.as_mut().map(|val| *val -= 1));
             TotalForAccount::<T>::mutate(dest_account, |total| *total.insert(1));
@@ -526,9 +548,9 @@ pub mod pallet {
 
         pub fn validate_realis_token_id(token_id: T::RealisTokenId) -> dispatch::DispatchResult {
             ensure!(
-            token_id >= <MinTokenId<T>>::get() && token_id <= <MaxTokenId<T>>::get(),
-            Error::<T>::InvalidTokenId
-        );
+                token_id >= <MinTokenId<T>>::get() && token_id <= <MaxTokenId<T>>::get(),
+                Error::<T>::InvalidTokenId
+            );
 
             Ok(())
         }
@@ -710,4 +732,3 @@ pub mod pallet {
         // }
     }
 }
-
