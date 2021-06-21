@@ -277,7 +277,7 @@ pub mod pallet {
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
-        pub nft_masters: Self::nft_masters(),
+        pub nft_masters: Vec<T::AccountId>,
     }
 
     #[cfg(feature = "std")]
@@ -292,7 +292,7 @@ pub mod pallet {
     #[pallet::genesis_build]
     impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
         fn build(&self) {
-        NftMasters::<T>::take()
+            NftMasters::<T>::get();
         }
     }
 
@@ -306,7 +306,7 @@ pub mod pallet {
         }
     }
 
-        #[pallet::hooks]
+    #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
     // Dispatchable functions allows users to interact with the pallet and invoke state changes.
 // These functions materialize as "extrinsics", which are often compared to transactions.
