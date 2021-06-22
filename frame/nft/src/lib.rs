@@ -167,9 +167,9 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     #[pallet::metadata(
-        T::AccountId = "AccountId",
-        TokenBalance = "Balance",
-        RealisTokenId = "T::RealisTokenId"
+    T::AccountId = "AccountId",
+    TokenBalance = "Balance",
+    RealisTokenId = "T::RealisTokenId"
     )]
     pub enum Event<T: Config> {
         /// Event documentation should end with an array that provides descriptive names for event
@@ -252,7 +252,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn tokens_of_owner_by_index)]
     pub(crate) type TokensForAccount<T: Config> =
-        StorageMap<_, Blake2_256, T::AccountId, Vec<(TokenId, Token)>>;
+    StorageMap<_, Blake2_128Concat, T::AccountId, (TokenId, Token)>;
 
     #[pallet::storage]
     #[pallet::getter(fn account_for_token)]
@@ -265,12 +265,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn tokens_with_types)]
     pub(crate) type TokensWithTypes<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, (TokenId, Types)>;
-
-    #[pallet::storage]
-    #[pallet::getter(fn all_tokens_in_account)]
-    pub(crate) type AllTokensInAccount<T: Config> =
-        StorageMap<_, Blake2_256, TokenId, Option<Token>>;
+    StorageMap<_, Blake2_128Concat, T::AccountId, (TokenId, Types)>;
 
     #[pallet::storage]
     #[pallet::getter(fn nft_masters)]
@@ -437,10 +432,9 @@ pub mod pallet {
             let tokens_count = TotalForAccount::<T>::get(&target_account);
             let new_tokens_count = tokens_count.checked_add(1).ok_or(ArithmeticError::Overflow)?;
 
-            TokensForAccount::<T>::mutate(target_account, |token_info| {
-                token_info.as_mut().map(|val| val.push((token_id, token)))
-            });
             TotalForAccount::<T>::insert(&target_account, new_tokens_count);
+
+            TokensForAccount::<T>::insert(&target_account, (token_id, token));
             AccountForToken::<T>::insert(token_id, &target_account);
             Ok(token_id)
         }
@@ -459,7 +453,6 @@ pub mod pallet {
             let tokens_count = TotalForAccount::<T>::get(&target_account);
             let new_tokens_count = tokens_count.checked_add(1).ok_or(ArithmeticError::Overflow)?;
 
-            // hash_set_of_tokens.insert(token_id);
             TokensWithTypes::<T>::insert(&target_account, (token_id, type_tokens));
             TotalForAccount::<T>::insert(&target_account, new_tokens_count);
             AccountForToken::<T>::insert(token_id, &target_account);
@@ -469,27 +462,21 @@ pub mod pallet {
 
         pub fn burn_nft(token_id: TokenId) -> dispatch::DispatchResult {
             let owner = Self::owner_of(token_id);
-            TokensForAccount::<T>::mutate(&owner, |tokens| {
-                tokens.as_mut().map(|val| {
-                    if let Some(index) = val.iter().position(|(v, _)| *v == token_id) {
-                        val.remove(index);
-                    }
-                })
-            });
 
             let tokens_count = TotalForAccount::<T>::get(&owner);
             let new_tokens_count = tokens_count.checked_sub(1).ok_or(ArithmeticError::Overflow)?;
 
             TotalForAccount::<T>::insert(&owner, new_tokens_count);
 
-            TokensForAccount::<T>::take(&owner);
+            let _tuple_tokens = TokensForAccount::<T>::take(&owner).unwrap();
+
             AccountForToken::<T>::remove(&token_id);
             Ok(())
         }
 
         pub fn burn_basic_nft(
             token_id: TokenId,
-        ) -> dispatch::result::Result<Vec<(TokenId, Token)>, dispatch::DispatchError> {
+        ) -> dispatch::DispatchResult {
             let owner = Self::owner_of(token_id);
 
             let tokens_count = TotalForAccount::<T>::get(&owner);
@@ -498,7 +485,7 @@ pub mod pallet {
             TotalForAccount::<T>::insert(&owner, new_tokens_count);
             AccountForToken::<T>::insert(token_id, &owner);
 
-            let deleted_token = TokensForAccount::<T>::take(&owner).unwrap_or_default();
+            let _deleted_token = TokensForAccount::<T>::take(&owner).unwrap();
             // TokensForAccount::<T>::mutate(&owner, &token_id, |tokens| {
             //     let pos = tokens
             //         .binary_search(&token_id)
@@ -507,7 +494,7 @@ pub mod pallet {
             // });
             AccountForToken::<T>::remove(&token_id);
 
-            Ok(deleted_token)
+            Ok(())
         }
 
         fn transfer_nft(
