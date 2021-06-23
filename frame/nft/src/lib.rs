@@ -500,7 +500,7 @@ pub mod pallet {
             TotalForAccount::<T>::insert(&owner, new_tokens_count);
             AccountForToken::<T>::insert(token_id, &owner);
 
-            let _deleted_token = TokensForAccount::<T>::take(&owner).unwrap();
+            let _deleted_token = VecOfTokensOnAccount::<T>::take(&owner).unwrap();
             // TokensForAccount::<T>::mutate(&owner, &token_id, |tokens| {
             //     let pos = tokens
             //         .binary_search(&token_id)
@@ -534,6 +534,32 @@ pub mod pallet {
 
             AccountForToken::<T>::insert(token_id, &dest_account);
             TotalForAccount::<T>::insert(&dest_account, new_tokens_count_plus);
+
+            // TODO check is owner in TokensForAccount
+            // TODO check is owner own this token
+
+            // Find index of token_id in vector
+            let mut index: usize = 0;
+            for (i, tuple) in VecOfTokensOnAccount::<T>::get(&owner).unwrap().iter().enumerate() {
+                // If find same token_id
+                if tuple.0 == token_id {
+                    // Remember index
+                    index = i;
+                    // Stop searching
+                    break;
+                }
+            }
+            // Remove (token_id, token) by index and remember it
+            let mut vector = VecOfTokensOnAccount::<T>::get(&owner).unwrap();
+            let tuple = vector.remove(index);
+            //
+            VecOfTokensOnAccount::<T>::insert(&owner, vector);
+            // Get vector by key
+            let mut vector = VecOfTokensOnAccount::<T>::get(&dest_account).unwrap_or_default();
+            // Add new value to vector
+            vector.insert(0, tuple);
+            // Set new modified vector by this key
+            VecOfTokensOnAccount::<T>::insert(&dest_account, vector);
 
             Ok(())
         }
