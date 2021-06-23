@@ -251,8 +251,8 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn tokens_of_owner_by_index)]
-    pub(crate) type TokensForAccount<T: Config> =
-    StorageMap<_, Blake2_128Concat, T::AccountId, (TokenId, Token)>;
+    pub(crate) type VecOfTokensOnAccount<T: Config> =
+    StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(TokenId, Token)>>;
 
     #[pallet::storage]
     #[pallet::getter(fn account_for_token)]
@@ -434,7 +434,17 @@ pub mod pallet {
 
             TotalForAccount::<T>::insert(&target_account, new_tokens_count);
 
-            TokensForAccount::<T>::insert(&target_account, (token_id, token));
+            // If TokensForAcccount don't contains this account as key
+            if !VecOfTokensOnAccount::<T>::contains_key(&target_account) {
+                VecOfTokensOnAccount::<T>::insert(&target_account, vec![(token_id, token)]);
+             } else {
+                // Get vector by key
+                let mut vector = VecOfTokensOnAccount::<T>::get(&target_account).unwrap();
+                // Add new value to vector
+                vector.insert(0, (token_id, token));
+                // Set new modified vector by this key
+                VecOfTokensOnAccount::<T>::insert(&target_account, vector);
+            }
             AccountForToken::<T>::insert(token_id, &target_account);
             Ok(token_id)
         }
@@ -453,10 +463,10 @@ pub mod pallet {
             let tokens_count = TotalForAccount::<T>::get(&target_account);
             let new_tokens_count = tokens_count.checked_add(1).ok_or(ArithmeticError::Overflow)?;
 
-            TokensWithTypes::<T>::insert(&target_account, (token_id, type_tokens));
             TotalForAccount::<T>::insert(&target_account, new_tokens_count);
+
+            TokensWithTypes::<T>::insert(&target_account, (token_id, type_tokens));
             AccountForToken::<T>::insert(token_id, &target_account);
-            // Self::deposit_event(Event::TokenMinted(target_account, token_id));
             Ok(token_id)
         }
 
@@ -468,7 +478,12 @@ pub mod pallet {
 
             TotalForAccount::<T>::insert(&owner, new_tokens_count);
 
-            let _tuple_tokens = TokensForAccount::<T>::take(&owner).unwrap();
+            let mut tuple_tokens = VecOfTokensOnAccount::<T>::get(&owner).unwrap();
+
+            // Leave elements that match pattern
+            tuple_tokens.retain(|val| val.0 != token_id);
+
+            VecOfTokensOnAccount::<T>::insert(&owner, tuple_tokens);
 
             AccountForToken::<T>::remove(&token_id);
             Ok(())
@@ -517,9 +532,6 @@ pub mod pallet {
             let tokens_count_plus = TotalForAccount::<T>::get(&dest_account);
             let new_tokens_count_plus = tokens_count_plus.checked_add(1).ok_or(ArithmeticError::Overflow)?;
 
-            let transferred_token = TokensForAccount::<T>::take(&owner).unwrap();
-
-            TokensForAccount::<T>::insert(dest_account, transferred_token);
             AccountForToken::<T>::insert(token_id, &dest_account);
             TotalForAccount::<T>::insert(&dest_account, new_tokens_count_plus);
 
@@ -542,12 +554,10 @@ pub mod pallet {
             TotalForAccount::<T>::insert(&owner, new_tokens_count_minus);
 
             AccountForToken::<T>::remove(token_id);
-            AccountForToken::<T>::take(token_id);
 
             let tokens_count = TotalForAccount::<T>::get(&dest_account);
             let new_tokens_count = tokens_count.checked_add(1).ok_or(ArithmeticError::Overflow)?;
 
-            AccountForToken::<T>::insert(token_id, &dest_account);
             AccountForToken::<T>::insert(token_id, &dest_account);
             TotalForAccount::<T>::insert(&dest_account, new_tokens_count);
 
@@ -735,7 +745,7 @@ pub mod pallet {
         }
 
         fn owner_of(token_id: TokenId) -> T::AccountId {
-            AccountForToken::<T>::get(token_id).unwrap_or_default()
+            AccountForToken::<T>::get(token_id).unwrap()
         }
 
         // pub fn get(k: &(T::RealisTokenId, T::AccountId)) -> AccountData<T::Balance> {
