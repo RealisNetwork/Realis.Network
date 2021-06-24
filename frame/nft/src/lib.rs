@@ -1,5 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(option_result_contains)]
+
 use codec::{Decode, Encode};
 use frame_support::{
     dispatch, ensure,

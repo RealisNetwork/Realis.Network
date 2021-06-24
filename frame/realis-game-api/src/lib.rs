@@ -145,7 +145,7 @@ pub mod pallet {
         }
 
         #[pallet::weight(30_000_000)]
-        pub fn transfer_from_ptop(
+        pub fn transfer_from_ptp(
             origin: OriginFor<T>,
             from: T::AccountId,
             to: T::AccountId,
