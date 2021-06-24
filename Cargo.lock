@@ -5800,6 +5800,7 @@ version = "0.0.1"
 dependencies = [
  "frame-support",
  "frame-system",
+ "pallet-balances",
  "pallet-nft",
  "pallet-staking",
  "parity-scale-codec",

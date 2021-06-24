@@ -18,6 +18,7 @@ frame-support = { git = "https://github.com/paritytech/substrate", rev = "0bda86
 frame-system = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-nft = { version = "0.0.2", default-features = false, path="../nft" }
 pallet-staking = {version = "3.0.0", default-features = false, path="../staking-pool" }
 
