@@ -2,6 +2,11 @@
 
 // 1. Imports and Dependencies
 pub use pallet::*;
+#[cfg(test)]
+mod mock;
+#[cfg(test)]
+mod tests;
+
 #[frame_support::pallet]
 pub mod pallet {
     use frame_support::pallet_prelude::*;
@@ -64,7 +69,7 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::weight(90_000_000)]
-        pub fn mint_nft(
+        pub fn mint_basic_nft(
             origin: OriginFor<T>,
             target_account: T::AccountId,
             token_id: pallet_nft::TokenId,
@@ -85,7 +90,7 @@ pub mod pallet {
         }
 
         #[pallet::weight(60_000_000)]
-        pub fn transfer_nft(
+        pub fn transfer_basic_nft(
             origin: OriginFor<T>,
             dest_account: T::AccountId,
             token_id: pallet_nft::TokenId,
@@ -155,7 +160,10 @@ pub mod pallet {
         }
 
         #[pallet::weight(90_000_000)]
-        pub fn burn_nft(origin: OriginFor<T>, token_id: pallet_nft::TokenId) -> DispatchResult {
+        pub fn burn_basic_nft(
+            origin: OriginFor<T>,
+            token_id: pallet_nft::TokenId,
+        ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
