@@ -2,12 +2,18 @@ name: CI
 on:
   push:
     branches:
-      - feature/new-architecture
+      - ngubin
       - main
+      - develop
+      - bridges
+      - dkireev
   pull_request:
     branches:
-      - feature/new-architecture
+      - ngubin
       - main
+      - develop
+      - bridges
+      - dkireev
 
 env:
   CARGO_TERM_COLOR: always
