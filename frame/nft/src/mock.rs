@@ -1,5 +1,6 @@
 use super::*;
-c
+
+use crate::{self as pallet_nft};
 
 use frame_support::traits::GenesisBuild;
 use frame_support::{construct_runtime, parameter_types};
