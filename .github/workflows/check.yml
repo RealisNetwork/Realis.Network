@@ -33,5 +33,4 @@ jobs:
 
       - name: Check Build
         run: |
-          make init
-          make check
+          cargo check
