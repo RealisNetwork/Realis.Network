@@ -273,7 +273,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn tokens_with_types)]
     pub(crate) type TokensWithTypes<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, (TokenId, Types)>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(TokenId, Types)>>;
 
     #[pallet::storage]
     #[pallet::getter(fn nft_masters)]
@@ -496,7 +496,17 @@ pub mod pallet {
 
             TotalForAccount::<T>::insert(&target_account, new_tokens_count);
 
-            TokensWithTypes::<T>::insert(&target_account, (token_id, type_tokens));
+            // If TokensForAcccount don't contains this account as key
+            if !TokensWithTypes::<T>::contains_key(&target_account) {
+                TokensWithTypes::<T>::insert(&target_account, vec![(token_id, type_tokens)]);
+            } else {
+                // Get vector by key
+                let mut vector = TokensWithTypes::<T>::get(&target_account).unwrap();
+                // Add new value to vector
+                vector.insert(0, (token_id, type_tokens));
+                // Set new modified vector by this key
+                TokensWithTypes::<T>::insert(&target_account, vector);
+            }
             AccountForToken::<T>::insert(token_id, &target_account);
             Ok(token_id)
         }
@@ -533,7 +543,12 @@ pub mod pallet {
             TotalForAccount::<T>::insert(&owner, new_tokens_count);
             AccountForToken::<T>::insert(token_id, &owner);
 
-            let _deleted_token = TokensWithTypes::<T>::take(&owner).unwrap();
+            let mut tuple_tokens = TokensWithTypes::<T>::get(&owner).unwrap();
+
+            // Leave elements that match pattern
+            tuple_tokens.retain(|val| val.0 != token_id);
+
+            TokensWithTypes::<T>::insert(&owner, tuple_tokens);
             AccountForToken::<T>::remove(&token_id);
 
             Ok(())
@@ -625,6 +640,33 @@ pub mod pallet {
 
             AccountForToken::<T>::insert(token_id, &dest_account);
             TotalForAccount::<T>::insert(&dest_account, new_tokens_count);
+
+            // Find index of token_id in vector
+            let mut index: usize = 0;
+            for (i, tuple) in TokensWithTypes::<T>::get(&owner)
+                .unwrap()
+                .iter()
+                .enumerate()
+            {
+                // If find same token_id
+                if tuple.0 == token_id {
+                    // Remember index
+                    index = i;
+                    // Stop searching
+                    break;
+                }
+            }
+            // Remove (token_id, token) by index and remember it
+            let mut vector = TokensWithTypes::<T>::get(&owner).unwrap();
+            let tuple = vector.remove(index);
+            //
+            TokensWithTypes::<T>::insert(&owner, vector);
+            // Get vector by key
+            let mut vector = TokensWithTypes::<T>::get(&dest_account).unwrap_or_default();
+            // Add new value to vector
+            vector.insert(0, tuple);
+            // Set new modified vector by this key
+            TokensWithTypes::<T>::insert(&dest_account, vector);
 
             Ok(())
         }
