@@ -1,12 +1,20 @@
 name: Test
 
 on:
-  pull_request:
-    branches:
-    - master
   push:
     branches:
-    - master
+      - ngubin
+      - main
+      - develop
+      - bridges
+      - dkireev
+  pull_request:
+    branches:
+      - ngubin
+      - main
+      - develop
+      - bridges
+      - dkireev
 
 jobs:
   build:
