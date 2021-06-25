@@ -29,23 +29,17 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         profile: minimal
-        toolchain: nightly-2021-03-04
+        toolchain: nightly-2021-05-11
         components: rustfmt
         target: wasm32-unknown-unknown
         default: true
     - name: Check format
       run: cargo fmt --all -- --check
     - name: Build
-      run: make build-all
+      run: cargo build --release
     - name: Install clippy
       run: rustup component add clippy
     - name: Run clippy
       run: cargo clippy -- -D warnings
     - name: Run runtime tests
-      run: make test-runtimes
-    - name: Run eth tests
-      run: make test-eth
-    - name: Run benchmarking tests
-      run: make test-benchmarking
-    - name: Check benchmarks
-      run: make check-benchmarks
+      run: cargo test -p node-runtime
