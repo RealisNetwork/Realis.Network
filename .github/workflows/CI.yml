@@ -57,6 +57,3 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 10
-
-      - name: Run dvm tests
-        run: cd script_tests/ && npm install && npm test
