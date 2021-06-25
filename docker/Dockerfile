@@ -5,4 +5,4 @@ ADD ./realis /realis/realis
 RUN chmod +x /realis/realis
 ADD ./realis.json /realis/realis.json
 WORKDIR /realis/chain
-EXPOSE 9044 9033
+EXPOSE 9944 9044 9033
