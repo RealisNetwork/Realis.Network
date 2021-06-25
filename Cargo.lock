@@ -4113,7 +4113,6 @@ dependencies = [
  "pallet-vesting",
  "parity-scale-codec",
  "realis-game-api",
- "realis-primitives",
  "sp-api",
  "sp-authority-discovery",
  "sp-block-builder",
@@ -5798,25 +5797,24 @@ dependencies = [
 name = "realis-game-api"
 version = "0.0.1"
 dependencies = [
+ "frame-election-provider-support",
  "frame-support",
  "frame-system",
+ "pallet-authorship",
  "pallet-balances",
  "pallet-nft",
+ "pallet-session",
  "pallet-staking",
+ "pallet-staking-reward-curve",
+ "pallet-timestamp",
  "parity-scale-codec",
+ "primitive-types",
  "serde",
  "sp-core",
  "sp-io",
  "sp-runtime",
+ "sp-staking",
  "sp-std",
-]
-
-[[package]]
-name = "realis-primitives"
-version = "0.0.1"
-dependencies = [
- "sp-core",
- "sp-runtime",
 ]
 
 [[package]]

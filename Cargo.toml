@@ -6,7 +6,6 @@ resolver = "2"
 members = [
 	"bin/node/cli",
     "bin/node/runtime",
-    "bin/node/primitives",
      "frame/nft",
 #    "frame/realis-game-api",
     "frame/staking-pool",
