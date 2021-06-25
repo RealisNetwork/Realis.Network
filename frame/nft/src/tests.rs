@@ -154,7 +154,8 @@ fn mint_token_and_transfer_it_two_times() {
         assert_ok!(Nft::transfer(Origin::signed(1), 2, U256([1, 0, 0, 0])));
         assert_err!(
             Nft::transfer(Origin::signed(1), 1, U256([1, 0, 0, 0])),
-            Error::<Test>::NotTokenOwner);
+            Error::<Test>::NotTokenOwner
+        );
     })
 }
 
@@ -206,7 +207,8 @@ fn mint_token_and_transfer_it_then_burn_not_by_owner() {
         assert_ok!(Nft::transfer(Origin::signed(1), 2, U256([1, 0, 0, 0])));
         assert_err!(
             Nft::burn(Origin::signed(1), U256([1, 0, 0, 0])),
-            Error::<Test>::NotTokenOwner);
+            Error::<Test>::NotTokenOwner
+        );
     })
 }
 
