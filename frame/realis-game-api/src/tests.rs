@@ -11,7 +11,7 @@ fn it_works_for_default_value() {
             1,
             U256([1, 0, 0, 0]),
             NFT::Types {
-				tapes: 2
+				tape: 2
             }
         ));
 	})
