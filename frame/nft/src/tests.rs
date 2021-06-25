@@ -348,7 +348,7 @@ fn try_transfer_basic_not_exists_token() {
 /// Mint - ok
 /// Burn - ok
 #[test]
-fn basci_mint_and_burn_same_token() {
+fn basic_mint_and_burn_same_token() {
     new_test_ext(vec![1]).execute_with(|| {
         assert_ok!(Nft::mint_basic(
             Origin::signed(1),
