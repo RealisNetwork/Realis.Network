@@ -53,74 +53,74 @@ fn add_slashing_spans<T: Config>(who: &T::AccountId, spans: u32) {
 // This function clears all existing validators and nominators from the set, and generates one new
 // validator being nominated by n nominators, and returns the validator stash account and the
 // nominators' stash and controller. It also starts an era and creates pending payouts.
-pub fn create_validator_with_nominators<T: Config>(
-    n: u32,
-    upper_bound: u32,
-    dead: bool,
-    destination: RewardDestination<T::AccountId>,
-) -> Result<(T::AccountId, Vec<(T::AccountId, T::AccountId)>), &'static str> {
-    // Clean up any existing state.
-    clear_validators_and_nominators::<T>();
-    let mut points_total = 0;
-    let mut points_individual = Vec::new();
-
-    let (v_stash, v_controller) = create_stash_controller::<T>(0, 100, destination.clone())?;
-    let validator_prefs = ValidatorPrefs {
-        commission: Perbill::from_percent(50),
-        ..Default::default()
-    };
-    Staking::<T>::validate(RawOrigin::Signed(v_controller).into(), validator_prefs)?;
-    let stash_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(v_stash.clone());
-
-    points_total += 10;
-    points_individual.push((v_stash.clone(), 10));
-
-    let mut nominators = Vec::new();
-
-    // Give the validator n nominators, but keep total users in the system the same.
-    for i in 0..upper_bound {
-        let (n_stash, n_controller) = if !dead {
-            create_stash_controller::<T>(u32::max_value() - i, 100, destination.clone())?
-        } else {
-            create_stash_and_dead_controller::<T>(u32::max_value() - i, 100, destination.clone())?
-        };
-        if i < n {
-            Staking::<T>::nominate(
-                RawOrigin::Signed(n_controller.clone()).into(),
-                vec![stash_lookup.clone()],
-            )?;
-            nominators.push((n_stash, n_controller));
-        }
-    }
-
-    ValidatorCount::put(1);
-
-    // Start a new Era
-    let new_validators = Staking::<T>::new_era(SessionIndex::one()).unwrap();
-
-    assert_eq!(new_validators.len(), 1);
-    assert_eq!(
-        new_validators[0], v_stash,
-        "Our validator was not selected!"
-    );
-
-    // Give Era Points
-    let reward = EraRewardPoints::<T::AccountId> {
-        total: points_total,
-        individual: points_individual.into_iter().collect(),
-    };
-
-    let current_era = CurrentEra::get().unwrap();
-    ErasRewardPoints::<T>::insert(current_era, reward);
-
-    // Create reward pool
-    let total_payout = T::Currency::minimum_balance()
-        .saturating_mul(upper_bound.into())
-        .saturating_mul(1000u32.into());
-    <ErasValidatorReward<T>>::insert(current_era, total_payout);
-
-    Ok((v_stash, nominators))
-}
+// pub fn create_validator_with_nominators<T: Config>(
+//     n: u32,
+//     upper_bound: u32,
+//     dead: bool,
+//     destination: RewardDestination<T::AccountId>,
+// ) -> Result<(T::AccountId, Vec<(T::AccountId, T::AccountId)>), &'static str> {
+//     // Clean up any existing state.
+//     clear_validators_and_nominators::<T>();
+//     let mut points_total = 0;
+//     let mut points_individual = Vec::new();
+//
+//     let (v_stash, v_controller) = create_stash_controller::<T>(0, 100, destination.clone())?;
+//     let validator_prefs = ValidatorPrefs {
+//         commission: Perbill::from_percent(50),
+//         ..Default::default()
+//     };
+//     Staking::<T>::validate(RawOrigin::Signed(v_controller).into(), validator_prefs)?;
+//     let stash_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(v_stash.clone());
+//
+//     points_total += 10;
+//     points_individual.push((v_stash.clone(), 10));
+//
+//     let mut nominators = Vec::new();
+//
+//     // Give the validator n nominators, but keep total users in the system the same.
+//     for i in 0..upper_bound {
+//         let (n_stash, n_controller) = if !dead {
+//             create_stash_controller::<T>(u32::max_value() - i, 100, destination.clone())?
+//         } else {
+//             create_stash_and_dead_controller::<T>(u32::max_value() - i, 100, destination.clone())?
+//         };
+//         if i < n {
+//             Staking::<T>::nominate(
+//                 RawOrigin::Signed(n_controller.clone()).into(),
+//                 vec![stash_lookup.clone()],
+//             )?;
+//             nominators.push((n_stash, n_controller));
+//         }
+//     }
+//
+//     ValidatorCount::put(1);
+//
+//     // Start a new Era
+//     let new_validators = Staking::<T>::new_era(SessionIndex::one()).unwrap_or_default();
+//
+//     assert_eq!(new_validators.len(), 0);
+//     assert_eq!(
+//         new_validators[0], v_stash,
+//         "Our validator was not selected!"
+//     );
+//
+//     // Give Era Points
+//     let reward = EraRewardPoints::<T::AccountId> {
+//         total: points_total,
+//         individual: points_individual.into_iter().collect(),
+//     };
+//
+//     let current_era = CurrentEra::get().unwrap();
+//     ErasRewardPoints::<T>::insert(current_era, reward);
+//
+//     // Create reward pool
+//     let total_payout = T::Currency::minimum_balance()
+//         .saturating_mul(upper_bound.into())
+//         .saturating_mul(1000u32.into());
+//     <ErasValidatorReward<T>>::insert(current_era, total_payout);
+//
+//     Ok((v_stash, nominators))
+// }
 
 const USER_SEED: u32 = 999666;
 
@@ -360,74 +360,74 @@ benchmarks! {
         assert_eq!(UnappliedSlashes::<T>::get(&era).len(), (MAX_SLASHES - s) as usize);
     }
 
-    payout_stakers_dead_controller {
-        let n in 1 .. T::MaxNominatorRewardedPerValidator::get() as u32;
-        let (validator, nominators) = create_validator_with_nominators::<T>(
-            n,
-            T::MaxNominatorRewardedPerValidator::get() as u32,
-            true,
-            RewardDestination::Controller,
-        )?;
+    // payout_stakers_dead_controller {
+    //     let n in 1 .. T::MaxNominatorRewardedPerValidator::get() as u32;
+    //     let (validator, nominators) = create_validator_with_nominators::<T>(
+    //         n,
+    //         T::MaxNominatorRewardedPerValidator::get() as u32,
+    //         true,
+    //         RewardDestination::Controller,
+    //     )?;
+    //
+    //     let current_era = CurrentEra::get().unwrap();
+    //     // set the commission for this particular era as well.
+    //     <ErasValidatorPrefs<T>>::insert(current_era, validator.clone(), <Staking<T>>::validators(&validator));
+    //
+    //     let caller = whitelisted_caller();
+    //     let validator_controller = <Bonded<T>>::get(&validator).unwrap();
+    //     let balance_before = T::Currency::free_balance(&validator_controller);
+    //     for (_, controller) in &nominators {
+    //         let balance = T::Currency::free_balance(&controller);
+    //         ensure!(balance.is_zero(), "Controller has balance, but should be dead.");
+    //     }
+    // }: payout_stakers(RawOrigin::Signed(caller), validator.clone(), current_era)
+    // verify {
+    //     let balance_after = T::Currency::free_balance(&validator_controller);
+    //     ensure!(
+    //         balance_before < balance_after,
+    //         "Balance of validator controller should have increased after payout.",
+    //     );
+    //     for (_, controller) in &nominators {
+    //         let balance = T::Currency::free_balance(&controller);
+    //         ensure!(!balance.is_zero(), "Payout not given to controller.");
+    //     }
+    // }
 
-        let current_era = CurrentEra::get().unwrap();
-        // set the commission for this particular era as well.
-        <ErasValidatorPrefs<T>>::insert(current_era, validator.clone(), <Staking<T>>::validators(&validator));
-
-        let caller = whitelisted_caller();
-        let validator_controller = <Bonded<T>>::get(&validator).unwrap();
-        let balance_before = T::Currency::free_balance(&validator_controller);
-        for (_, controller) in &nominators {
-            let balance = T::Currency::free_balance(&controller);
-            ensure!(balance.is_zero(), "Controller has balance, but should be dead.");
-        }
-    }: payout_stakers(RawOrigin::Signed(caller), validator.clone(), current_era)
-    verify {
-        let balance_after = T::Currency::free_balance(&validator_controller);
-        ensure!(
-            balance_before < balance_after,
-            "Balance of validator controller should have increased after payout.",
-        );
-        for (_, controller) in &nominators {
-            let balance = T::Currency::free_balance(&controller);
-            ensure!(!balance.is_zero(), "Payout not given to controller.");
-        }
-    }
-
-    payout_stakers_alive_staked {
-        let n in 1 .. T::MaxNominatorRewardedPerValidator::get() as u32;
-        let (validator, nominators) = create_validator_with_nominators::<T>(
-            n,
-            T::MaxNominatorRewardedPerValidator::get() as u32,
-            false,
-            RewardDestination::Staked,
-        )?;
-
-        let current_era = CurrentEra::get().unwrap();
-        // set the commission for this particular era as well.
-        <ErasValidatorPrefs<T>>::insert(current_era, validator.clone(), <Staking<T>>::validators(&validator));
-
-        let caller = whitelisted_caller();
-        let balance_before = T::Currency::free_balance(&validator);
-        let mut nominator_balances_before = Vec::new();
-        for (stash, _) in &nominators {
-            let balance = T::Currency::free_balance(&stash);
-            nominator_balances_before.push(balance);
-        }
-    }: payout_stakers(RawOrigin::Signed(caller), validator.clone(), current_era)
-    verify {
-        let balance_after = T::Currency::free_balance(&validator);
-        ensure!(
-            balance_before < balance_after,
-            "Balance of validator stash should have increased after payout.",
-        );
-        for ((stash, _), balance_before) in nominators.iter().zip(nominator_balances_before.iter()) {
-            let balance_after = T::Currency::free_balance(&stash);
-            ensure!(
-                balance_before < &balance_after,
-                "Balance of nominator stash should have increased after payout.",
-            );
-        }
-    }
+    // payout_stakers_alive_staked {
+    //     let n in 1 .. T::MaxNominatorRewardedPerValidator::get() as u32;
+    //     let (validator, nominators) = create_validator_with_nominators::<T>(
+    //         n,
+    //         T::MaxNominatorRewardedPerValidator::get() as u32,
+    //         false,
+    //         RewardDestination::Staked,
+    //     )?;
+    //
+    //     let current_era = CurrentEra::get().unwrap();
+    //     // set the commission for this particular era as well.
+    //     <ErasValidatorPrefs<T>>::insert(current_era, validator.clone(), <Staking<T>>::validators(&validator));
+    //
+    //     let caller = whitelisted_caller();
+    //     let balance_before = T::Currency::free_balance(&validator);
+    //     let mut nominator_balances_before = Vec::new();
+    //     for (stash, _) in &nominators {
+    //         let balance = T::Currency::free_balance(&stash);
+    //         nominator_balances_before.push(balance);
+    //     }
+    // }: payout_stakers(RawOrigin::Signed(caller), validator.clone(), current_era)
+    // verify {
+    //     let balance_after = T::Currency::free_balance(&validator);
+    //     ensure!(
+    //         balance_before < balance_after,
+    //         "Balance of validator stash should have increased after payout.",
+    //     );
+    //     for ((stash, _), balance_before) in nominators.iter().zip(nominator_balances_before.iter()) {
+    //         let balance_after = T::Currency::free_balance(&stash);
+    //         ensure!(
+    //             balance_before < &balance_after,
+    //             "Balance of nominator stash should have increased after payout.",
+    //         );
+    //     }
+    // }
 
     rebond {
         let l in 1 .. MAX_UNLOCKING_CHUNKS as u32;
@@ -634,75 +634,75 @@ mod tests {
             });
     }
 
-    #[test]
-    fn create_validator_with_nominators_works() {
-        ExtBuilder::default()
-            .has_stakers(true)
-            .build()
-            .execute_with(|| {
-                let n = 10;
-
-                let (validator_stash, nominators) = create_validator_with_nominators::<Test>(
-                    n,
-                    <Test as Config>::MaxNominatorRewardedPerValidator::get() as u32,
-                    false,
-                    RewardDestination::Staked,
-                )
-                .unwrap();
-
-                assert_eq!(nominators.len() as u32, n);
-
-                let current_era = CurrentEra::get().unwrap();
-
-                let original_free_balance = Balances::free_balance(&validator_stash);
-                assert_ok!(Staking::payout_stakers(
-                    Origin::signed(1337),
-                    validator_stash,
-                    current_era
-                ));
-                let new_free_balance = Balances::free_balance(&validator_stash);
-
-                assert!(original_free_balance < new_free_balance);
-            });
-    }
-
-    #[test]
-    fn add_slashing_spans_works() {
-        ExtBuilder::default()
-            .has_stakers(true)
-            .build()
-            .execute_with(|| {
-                let n = 10;
-
-                let (validator_stash, _nominators) = create_validator_with_nominators::<Test>(
-                    n,
-                    <Test as Config>::MaxNominatorRewardedPerValidator::get() as u32,
-                    false,
-                    RewardDestination::Staked,
-                )
-                .unwrap();
-
-                // Add 20 slashing spans
-                let num_of_slashing_spans = 20;
-                add_slashing_spans::<Test>(&validator_stash, num_of_slashing_spans);
-
-                let slashing_spans = SlashingSpans::<Test>::get(&validator_stash).unwrap();
-                assert_eq!(
-                    slashing_spans.iter().count(),
-                    num_of_slashing_spans as usize
-                );
-                for i in 0..num_of_slashing_spans {
-                    assert!(SpanSlash::<Test>::contains_key((&validator_stash, i)));
-                }
-
-                // Test everything is cleaned up
-                assert_ok!(Staking::kill_stash(&validator_stash, num_of_slashing_spans));
-                assert!(SlashingSpans::<Test>::get(&validator_stash).is_none());
-                for i in 0..num_of_slashing_spans {
-                    assert!(!SpanSlash::<Test>::contains_key((&validator_stash, i)));
-                }
-            });
-    }
+    // #[test]
+    // fn create_validator_with_nominators_works() {
+    //     ExtBuilder::default()
+    //         .has_stakers(true)
+    //         .build()
+    //         .execute_with(|| {
+    //             let n = 10;
+    //
+    //             let (validator_stash, nominators) = create_validator_with_nominators::<Test>(
+    //                 n,
+    //                 <Test as Config>::MaxNominatorRewardedPerValidator::get() as u32,
+    //                 false,
+    //                 RewardDestination::Staked,
+    //             )
+    //             .unwrap();
+    //
+    //             assert_eq!(nominators.len() as u32, n);
+    //
+    //             let current_era = CurrentEra::get().unwrap();
+    //
+    //             let original_free_balance = Balances::free_balance(&validator_stash);
+    //             assert_ok!(Staking::payout_stakers(
+    //                 Origin::signed(1337),
+    //                 validator_stash,
+    //                 current_era
+    //             ));
+    //             let new_free_balance = Balances::free_balance(&validator_stash);
+    //
+    //             assert!(original_free_balance < new_free_balance);
+    //         });
+    // }
+    //
+    // #[test]
+    // fn add_slashing_spans_works() {
+    //     ExtBuilder::default()
+    //         .has_stakers(true)
+    //         .build()
+    //         .execute_with(|| {
+    //             let n = 10;
+    //
+    //             let (validator_stash, _nominators) = create_validator_with_nominators::<Test>(
+    //                 n,
+    //                 <Test as Config>::MaxNominatorRewardedPerValidator::get() as u32,
+    //                 false,
+    //                 RewardDestination::Staked,
+    //             )
+    //             .unwrap();
+    //
+    //             // Add 20 slashing spans
+    //             let num_of_slashing_spans = 20;
+    //             add_slashing_spans::<Test>(&validator_stash, num_of_slashing_spans);
+    //
+    //             let slashing_spans = SlashingSpans::<Test>::get(&validator_stash).unwrap();
+    //             assert_eq!(
+    //                 slashing_spans.iter().count(),
+    //                 num_of_slashing_spans as usize
+    //             );
+    //             for i in 0..num_of_slashing_spans {
+    //                 assert!(SpanSlash::<Test>::contains_key((&validator_stash, i)));
+    //             }
+    //
+    //             // Test everything is cleaned up
+    //             assert_ok!(Staking::kill_stash(&validator_stash, num_of_slashing_spans));
+    //             assert!(SlashingSpans::<Test>::get(&validator_stash).is_none());
+    //             for i in 0..num_of_slashing_spans {
+    //                 assert!(!SpanSlash::<Test>::contains_key((&validator_stash, i)));
+    //             }
+    //         });
+    // }
 
     #[test]
     fn test_payout_all() {
@@ -731,8 +731,8 @@ mod tests {
     }
 }
 
-impl_benchmark_test_suite!(
-    Staking,
-    crate::mock::ExtBuilder::default().has_stakers(true).build(),
-    crate::mock::Test,
-);
+// impl_benchmark_test_suite!(
+//     Staking,
+//     crate::mock::ExtBuilder::default().has_stakers(true).build(),
+//     crate::mock::Test,
+// );

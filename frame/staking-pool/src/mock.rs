@@ -21,7 +21,7 @@ use crate as staking;
 use crate::*;
 use frame_election_provider_support::onchain;
 use frame_support::{
-    assert_ok, parameter_types,
+    assert_ok, parameter_types, PalletId,
     traits::{Currency, FindAuthor, Get, OnFinalize, OnInitialize, OneSessionHandler},
     weights::constants::RocksDbWeight,
     IterableStorageMap, StorageDoubleMap, StorageMap, StorageValue,
