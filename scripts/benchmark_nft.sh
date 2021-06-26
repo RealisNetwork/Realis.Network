@@ -3,6 +3,8 @@
 --execution wasm \
 --wasm-execution compiled \
 --pallet pallet_nft \
---extrinsic '\*' \
+--extrinsic '*' \
+--steps 20 \
+--repeat 10 \
 --raw \
 --output ./
