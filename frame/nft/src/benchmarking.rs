@@ -6,12 +6,12 @@ mod benchmarking {
 	use frame_system::RawOrigin;
 
 	benchmarks!{
-	mint {
+	mint_benchmarking {
 		// The upper bound can be increased for greater accuracy
-		let token_id = 1 .. 1000;
+		let token_id: Range<AccountId> = 1 .. 1000;
 	}: mint(
 			RawOrigin::Root,
-			token_id.next().unwrap(),
+			token_id.into(),
 			U256([1, 0, 0, 0]),
 			Rarity::Common,
 			Socket::Head,
