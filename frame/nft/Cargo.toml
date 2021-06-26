@@ -17,6 +17,7 @@ serde = { version = "1.0.102", optional = true }
 primitive-types = { version = "0.9.0", default-features = false }
 frame-support = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", version = "3.1.0", default-features = false, optional = true }
 pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
@@ -32,6 +33,7 @@ default = ["std"]
 std = [
     "serde",
     "codec/std",
+    "frame-benchmarking/std",
     "frame-support/std",
     "frame-system/std",
     "pallet-balances/std",
@@ -39,3 +41,6 @@ std = [
     "sp-std/std",
     "primitive-types/std",
 ]
+
+runtime-benchmarks = ["frame-benchmarking"]
+try-runtime = ["frame-support/try-runtime"]

@@ -1,4 +1,3 @@
-//use super::*;
 use crate::{mock::*, Error, Params, Rarity, Socket, Types};
 use frame_support::{assert_err, assert_ok};
 use primitive_types::U256;

@@ -19,8 +19,9 @@ use sp_std::prelude::*;
 mod mock;
 #[cfg(test)]
 mod tests;
-// mod benchmarking;
-// pub mod weights;
+
+/// Add benchmarking module
+mod benchmarking;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -255,26 +256,32 @@ pub mod pallet {
 
 	#[pallet::storage]
 	pub(crate) type MinTokenId<T: Config> = StorageValue<_, T::RealisTokenId, ValueQuery>;
-
+	/// Map where
+	///	key - AccountId
+	/// value - vector vector of TokenId and Token that belong specific account for each account
 	#[pallet::storage]
 	#[pallet::getter(fn tokens_of_owner_by_index)]
 	pub(crate) type VecOfTokensOnAccount<T: Config> =
 	StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(TokenId, Token)>>;
-
+	/// Map where
+	/// key - TokenId
+	/// value - AccountId to which belong this token
 	#[pallet::storage]
 	#[pallet::getter(fn account_for_token)]
 	pub type AccountForToken<T: Config> = StorageMap<_, Blake2_256, TokenId, T::AccountId>;
-
+	/// Map where
+	/// key - AccountId
+	/// value - number of tokens that belong to this account
 	#[pallet::storage]
 	#[pallet::getter(fn total_for_account)]
 	pub(crate) type TotalForAccount<T: Config> =
 	StorageMap<_, Twox64Concat, T::AccountId, u32, ValueQuery>;
-
+	/// Map where (same as VecOfTokensOnAccount by not for Token, insted for Types)
 	#[pallet::storage]
 	#[pallet::getter(fn tokens_with_types)]
 	pub(crate) type TokensWithTypes<T: Config> =
 	StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(TokenId, Types)>>;
-
+	/// Contains vector of all accounts ???
 	#[pallet::storage]
 	#[pallet::getter(fn nft_masters)]
 	pub type NftMasters<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
@@ -318,9 +325,11 @@ pub mod pallet {
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
 	// These functions materialize as "extrinsics", which are often compared to transactions.
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
+	/// Call functions - available from outside
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Mint token
+		/// Create token and push it to specific account
+		/// Token parametrs are determined by functions arguments: rarity, socket, params
 		#[pallet::weight(60_000_000)]
 		pub fn mint(
 			origin: OriginFor<T>,
@@ -330,22 +339,26 @@ pub mod pallet {
 			socket: Socket,
 			params: Params,
 		) -> DispatchResult {
+			// Check is signed correct
 			let who = ensure_signed(origin)?;
-
+			// Check if account that signed operation have permission for this operation
 			ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
-
+			// Create token by grouping up arguments
 			let token = Token {
 				token_id,
 				rarity,
 				socket,
 				params,
 			};
-
+			// Push token on account
 			Self::mint_nft(&target_account, token_id, token)?;
+			// Call mint event
 			Self::deposit_event(Event::TokenMinted(target_account, token_id));
 			Ok(())
 		}
 
+		/// Create token(type token) and push it to specific account
+		/// Token parametrs are determined by functions arguments: type
 		#[pallet::weight(30_000_000)]
 		pub fn mint_basic(
 			origin: OriginFor<T>,
@@ -353,10 +366,13 @@ pub mod pallet {
 			token_id: TokenId,
 			type_token: Types,
 		) -> DispatchResult {
+			// Check is signed correct
 			let who = ensure_signed(origin)?;
+			// Check if account that signed operation have permission for this operation
 			ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
-
+			// Push token on account
 			Self::mint_basic_nft(&target_account, token_id, type_token)?;
+			// Call mint event
 			Self::deposit_event(Event::TokenMinted(target_account, token_id));
 			Ok(())
 		}
