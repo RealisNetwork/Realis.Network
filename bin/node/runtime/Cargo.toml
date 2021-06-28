@@ -208,8 +208,7 @@ runtime-benchmarks = [
 	"pallet-utility/runtime-benchmarks",
 	"pallet-vesting/runtime-benchmarks",
 	"pallet-offences-benchmarking",
-	"pallet-session-benchmarking",
-
+#	"pallet-session-benchmarking",
 	"pallet-nft/runtime-benchmarks",
 
 	"frame-system-benchmarking",

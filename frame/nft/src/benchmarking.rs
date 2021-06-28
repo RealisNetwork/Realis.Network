@@ -1,4 +1,4 @@
-#[cfg(feature = "runtime-benchmarks")]
+ #[cfg(feature = "runtime-benchmarks")]
 
 mod benchmarking {
 	use crate::{*};
@@ -8,8 +8,8 @@ mod benchmarking {
 
 	// Get Alice AccountId
 	fn alice<T: Config>() -> T::AccountId {
-		let bytes = hex!("10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d");
-		T::AccountId::decode(&mut &bytes[..]).unwrap_or_default()
+		let alice = crate::NftMasters::<T>::get();
+		alice.get(0).unwrap().clone()
 	}
 
 	benchmarks!{
