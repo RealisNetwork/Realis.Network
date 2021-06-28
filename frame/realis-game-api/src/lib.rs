@@ -18,7 +18,9 @@ pub mod pallet {
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use pallet_nft as NFT;
-    use sp_runtime::traits::AccountIdConversion;
+    use sp_runtime::traits::{AccountIdConversion, Saturating};
+
+    type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
@@ -220,14 +222,6 @@ pub mod pallet {
 
         pub fn account_id_staking() -> T::AccountId {
             <T as pallet_staking::Config>::PalletId::get().into_account()
-        }
-
-        pub fn pot() -> dispatch::result::Result<(T::AccountId, crate::BalanceOf<T>), dispatch::DispatchError> {
-            let account_id = Self::account_id();
-            let balance = <T as Config>::Currency::free_balance(&account_id)
-                .saturating_sub(<T as Config>::Currency::minimum_balance());
-
-            Ok((account_id, balance))
         }
     }
 }
