@@ -7,4 +7,4 @@
 --steps 20 \
 --repeat 10 \
 --raw \
---output ./
+--output=./frame/nft/src/weights.rs
