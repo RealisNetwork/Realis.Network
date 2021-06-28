@@ -154,6 +154,7 @@
 //! use frame_system::ensure_signed;
 //! use pallet_staking::{self as staking};
 //!
+//!
 //! pub trait Config: staking::Config {}
 //!
 //! decl_module! {
@@ -339,7 +340,7 @@ pub type EraIndex = u32;
 pub type RewardPoint = u32;
 
 /// The balance type of this module.
-pub type BalanceOf<T> =
+type BalanceOf<T> =
     <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 type PositiveImbalanceOf<T> = <<T as Config>::Currency as Currency<
@@ -1122,6 +1123,7 @@ decl_event!(
         Withdrawn(AccountId, Balance),
         /// A nominator has been kicked from a validator. \[nominator, stash\]
         Kicked(AccountId, AccountId),
+        Balance(AccountId, Balance),
     }
 );
 
@@ -1305,6 +1307,16 @@ decl_module! {
                 claimed_rewards: (last_reward_era..current_era).collect(),
             };
             Self::update_ledger(&controller, &item);
+        }
+
+        #[weight = T::WeightInfo::bond()]
+        pub fn balance_pallet(origin) -> DispatchResult {
+            let who = ensure_root(origin)?;
+            let account_id = Self::account_id();
+            let balance = <T as Config>::Currency::free_balance(&account_id)
+                .saturating_sub(<T as Config>::Currency::minimum_balance());
+            Self::deposit_event(RawEvent::Balance(account_id, balance));
+            Ok(())
         }
         /// Add some extra amount that have appeared in the stash `free_balance` into the balance up
         /// for staking.

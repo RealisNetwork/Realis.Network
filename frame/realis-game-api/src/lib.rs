@@ -1,11 +1,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 // 1. Imports and Dependencies
+pub use frame_support::traits::Currency;
 pub use pallet::*;
 #[cfg(test)]
 mod mock;
 #[cfg(test)]
 mod tests;
+
+
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -28,7 +31,7 @@ pub mod pallet {
 
         type PalletId: Get<PalletId>;
 
-        type Currency: Currency<Self::AccountId, Balance = Self::Balance>;
+        type Currency:Currency<Self::AccountId, Balance = Self::Balance>;
 
         type StakingPoolId: From<<Self as pallet_staking::Config>::PalletId>;
     }
@@ -42,6 +45,7 @@ pub mod pallet {
         TokenTransferred,
         TokenBurned,
         FundsTransferred,
+        Balance(T::AccountId, BalanceOf<T>),
     }
 
     #[pallet::error]
@@ -195,6 +199,18 @@ pub mod pallet {
             <T as Config>::Currency::resolve_creating(&pallet_id_staking, to_staking);
             Ok(())
         }
+
+        #[pallet::weight(90_000_000)]
+        pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            let account_id = Self::account_id();
+            let balance = <T as Config>::Currency::free_balance(&account_id)
+                .saturating_sub(<T as Config>::Currency::minimum_balance());
+            Self::deposit_event(Event::Balance(account_id, balance));
+            Ok(())
+        }
     }
 
     impl<T: Config> Pallet<T> {
@@ -204,6 +220,14 @@ pub mod pallet {
 
         pub fn account_id_staking() -> T::AccountId {
             <T as pallet_staking::Config>::PalletId::get().into_account()
+        }
+
+        pub fn pot() -> dispatch::result::Result<(T::AccountId, crate::BalanceOf<T>), dispatch::DispatchError> {
+            let account_id = Self::account_id();
+            let balance = <T as Config>::Currency::free_balance(&account_id)
+                .saturating_sub(<T as Config>::Currency::minimum_balance());
+
+            Ok((account_id, balance))
         }
     }
 }
