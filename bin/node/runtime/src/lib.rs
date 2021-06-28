@@ -1073,6 +1073,7 @@ impl pallet_nft::Config for Runtime {
 	type ExistentialDeposit = ExistentialDepositOfRealisTokens;
 	type OnNewAccount = ();
 	type RealisTokenId = u32;
+	type WeightInfo = pallet_nft::weights::WeightInfoOf<Runtime>;
 }
 
 

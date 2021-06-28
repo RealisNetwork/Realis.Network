@@ -22,6 +22,9 @@ mod tests;
 
 /// Add benchmarking module
 mod benchmarking;
+pub mod weights;
+
+pub use weights::WeightInfoOf;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -99,6 +102,15 @@ pub mod pallet {
 		}
 	}
 
+	pub trait WeightInfo {
+		fn mint() -> Weight;
+		fn mint_basic() -> Weight;
+		fn burn() -> Weight;
+		fn burn_basic() -> Weight;
+		fn transfer() -> Weight;
+		fn transfer_basic() -> Weight;
+	}
+
 	#[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]
 	pub struct AccountInfo<Index, AccountData> {
 		/// The number of transactions this account has sent.
@@ -168,6 +180,9 @@ pub mod pallet {
 		type ExistentialDeposit: Get<Self::Balance>;
 
 		type RealisTokenId: Parameter + AtLeast32BitUnsigned + Default + Copy;
+
+		/// Weight information for extrinsics in this pallet.
+		type WeightInfo: WeightInfo;
 	}
 
 	// Pallets use events to inform users when important changes are made.
@@ -330,7 +345,7 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		/// Create token and push it to specific account
 		/// Token parametrs are determined by functions arguments: rarity, socket, params
-		#[pallet::weight(60_000_000)]
+		#[pallet::weight(T::WeightInfo::mint())]
 		pub fn mint(
 			origin: OriginFor<T>,
 			target_account: T::AccountId,
@@ -359,7 +374,7 @@ pub mod pallet {
 
 		/// Create token(type token) and push it to specific account
 		/// Token parametrs are determined by functions arguments: type
-		#[pallet::weight(30_000_000)]
+		#[pallet::weight(T::WeightInfo::mint_basic())]
 		pub fn mint_basic(
 			origin: OriginFor<T>,
 			target_account: T::AccountId,
@@ -378,7 +393,7 @@ pub mod pallet {
 		}
 
 		///Burn token(only owner)
-		#[pallet::weight(70_000_000)]
+		#[pallet::weight(T::WeightInfo::burn())]
 		pub fn burn(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
 			ensure!(
                 Self::account_for_token(&token_id) != None,
@@ -395,7 +410,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		#[pallet::weight(35_000_000)]
+		#[pallet::weight(T::WeightInfo::burn_basic())]
 		pub fn burn_basic(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
 			ensure!(
                 Self::account_for_token(&token_id) != None,
@@ -415,7 +430,7 @@ pub mod pallet {
 		}
 
 		///Transfer token(only owner)
-		#[pallet::weight(50_000_000)]
+		#[pallet::weight(T::WeightInfo::transfer())]
 		pub fn transfer(
 			origin: OriginFor<T>,
 			dest_account: T::AccountId,
@@ -437,7 +452,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		#[pallet::weight(25_000_000)]
+		#[pallet::weight(T::WeightInfo::transfer_basic())]
 		pub fn transfer_basic(
 			origin: OriginFor<T>,
 			dest_account: T::AccountId,
