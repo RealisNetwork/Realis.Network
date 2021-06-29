@@ -1582,6 +1582,7 @@ impl_runtime_apis! {
 
 			// Custom pallets
 			add_benchmark!(params, batches, pallet_nft, Nft);
+			add_benchmark!(params, batches, realis_game_api, RealisGameApi);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
