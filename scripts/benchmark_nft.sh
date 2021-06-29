@@ -1,5 +1,7 @@
+cargo build --release --features runtime-benchmarks
+
 ./target/release/realis benchmark \
---chain dev \
+--chain staging \
 --execution wasm \
 --wasm-execution compiled \
 --pallet pallet_nft \
