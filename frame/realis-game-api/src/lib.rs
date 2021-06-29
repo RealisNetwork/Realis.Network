@@ -107,7 +107,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            NFT::Pallet::<T>::burn_basic_nft(token_id, None)?;
+            NFT::Pallet::<T>::burn_basic_nft(token_id)?;
             Self::deposit_event(Event::<T>::TokenBurned);
             Ok(())
         }

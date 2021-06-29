@@ -8,7 +8,7 @@ use frame_support::{
 };
 use frame_system::{ensure_signed, RefCount};
 pub use pallet::*;
-use primitive_types::U256;
+pub use primitive_types::U256;
 use sp_runtime::{
 	traits::{AtLeast32BitUnsigned, Member, Saturating},
 	RuntimeDebug,
@@ -611,9 +611,6 @@ pub mod pallet {
 
 			AccountForToken::<T>::insert(token_id, &dest_account);
 			TotalForAccount::<T>::insert(&dest_account, new_tokens_count_plus);
-
-			// TODO check is owner in TokensForAccount
-			// TODO check is owner own this token
 
 			// Find index of token_id in vector
 			let mut index: usize = 0;

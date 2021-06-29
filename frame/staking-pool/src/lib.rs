@@ -289,7 +289,7 @@ use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch:
 }, weights::{
     constants::{WEIGHT_PER_MICROS, WEIGHT_PER_NANOS},
     Weight, WithPostDispatchInfo,
-}, PalletId, Parameter};
+}, PalletId};
 use frame_system::{self as system, ensure_root, ensure_signed, offchain::SendTransactionTypes};
 use pallet_session::historical;
 use sp_runtime::traits::AccountIdConversion;
@@ -308,7 +308,7 @@ use sp_staking::{
 };
 use sp_std::{collections::btree_map::BTreeMap, convert::From, prelude::*, result};
 pub use weights::WeightInfo;
-use frame_support::pallet_prelude::Member;
+
 
 const STAKING_ID: LockIdentifier = *b"staking ";
 pub(crate) const LOG_TARGET: &str = "runtime::staking";
@@ -1305,9 +1305,9 @@ decl_module! {
             Self::update_ledger(&controller, &item);
         }
 
+        // TODO unused argument _origin
         #[weight = T::WeightInfo::bond()]
-        pub fn balance_pallet(origin) -> DispatchResult {
-            let who = ensure_root(origin)?;
+        pub fn balance_pallet(_origin) -> DispatchResult {
             let account_id = Self::account_id();
             let balance = <T as Config>::Currency::free_balance(&account_id)
                 .saturating_sub(<T as Config>::Currency::minimum_balance());
