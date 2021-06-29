@@ -27,6 +27,7 @@ frame-election-provider-support = { git = "https://github.com/paritytech/substra
 primitive-types = { version = "0.9.0", default-features = false }
 pallet-nft = { version = "0.0.2", default-features = false, path="../nft" }
 pallet-staking = {version = "3.0.0", default-features = false, path="../staking-pool" }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", version = "3.1.0", default-features = false, optional = true }
 
 [dev-dependencies]
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
@@ -40,6 +41,7 @@ default = ["std"]
 std = [
     "serde",
     "codec/std",
+    "frame-benchmarking/std",
     "frame-support/std",
     "frame-system/std",
     "sp-runtime/std",
@@ -47,3 +49,6 @@ std = [
     "pallet-nft/std",
     "pallet-staking/std",
 ]
+
+runtime-benchmarks = ["frame-benchmarking"]
+try-runtime = ["frame-support/try-runtime"]

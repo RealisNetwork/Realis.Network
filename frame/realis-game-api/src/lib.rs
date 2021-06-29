@@ -10,6 +10,7 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+mod benchmarking;
 
 
 #[frame_support::pallet]

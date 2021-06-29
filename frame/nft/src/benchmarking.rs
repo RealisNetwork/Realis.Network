@@ -2,8 +2,8 @@
 
 mod benchmarking {
 	 use crate::Pallet as Nft;
-	use crate::{*};
-	use frame_benchmarking::{benchmarks, impl_benchmark_test_suite, account};
+	 use crate::{*};
+	 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite, account};
 	 use frame_system::RawOrigin as SystemOrigin;
 
 	 const SEED: u32 = 1;
