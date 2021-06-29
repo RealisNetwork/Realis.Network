@@ -283,21 +283,13 @@ pub mod weights;
 
 use codec::{Decode, Encode, HasCompact};
 use frame_election_provider_support::{data_provider, ElectionProvider, Supports, VoteWeight};
-use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage,
-    dispatch::{DispatchResult, DispatchResultWithPostInfo},
-    ensure,
-    storage::IterableStorageMap,
-    traits::{
-        Currency, CurrencyToVote, EnsureOrigin, EstimateNextNewSession, ExistenceRequirement, Get,
-        Imbalance, LockIdentifier, LockableCurrency, OnUnbalanced, UnixTime, WithdrawReasons,
-    },
-    weights::{
-        constants::{WEIGHT_PER_MICROS, WEIGHT_PER_NANOS},
-        Weight, WithPostDispatchInfo,
-    },
-    PalletId,
-};
+use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch::{DispatchResult, DispatchResultWithPostInfo}, ensure, storage::IterableStorageMap, traits::{
+    Currency, CurrencyToVote, EnsureOrigin, EstimateNextNewSession, ExistenceRequirement, Get,
+    Imbalance, LockIdentifier, LockableCurrency, OnUnbalanced, UnixTime, WithdrawReasons,
+}, weights::{
+    constants::{WEIGHT_PER_MICROS, WEIGHT_PER_NANOS},
+    Weight, WithPostDispatchInfo,
+}, PalletId, Parameter};
 use frame_system::{self as system, ensure_root, ensure_signed, offchain::SendTransactionTypes};
 use pallet_session::historical;
 use sp_runtime::traits::AccountIdConversion;
@@ -316,6 +308,7 @@ use sp_staking::{
 };
 use sp_std::{collections::btree_map::BTreeMap, convert::From, prelude::*, result};
 pub use weights::WeightInfo;
+use frame_support::pallet_prelude::Member;
 
 const STAKING_ID: LockIdentifier = *b"staking ";
 pub(crate) const LOG_TARGET: &str = "runtime::staking";
@@ -755,6 +748,8 @@ pub trait Config: frame_system::Config + SendTransactionTypes<Call<Self>> {
     /// The overarching event type.
     type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
 
+    // type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy;
+
     /// Handler for the unbalanced reduction when slashing a staker.
     type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
 
@@ -1124,6 +1119,7 @@ decl_event!(
         /// A nominator has been kicked from a validator. \[nominator, stash\]
         Kicked(AccountId, AccountId),
         Balance(AccountId, Balance),
+        FundsTransferred,
     }
 );
 
@@ -1318,6 +1314,25 @@ decl_module! {
             Self::deposit_event(RawEvent::Balance(account_id, balance));
             Ok(())
         }
+
+        // #[pallet::weight(50_000_000)]
+        // pub fn transfer_to_pallet(
+        //     origin,
+        //     from: T::AccountId,
+        //     value: T::Balance,
+        // ) -> DispatchResult {
+        //     let who = ensure_root(origin)?;
+        //     let pallet_id = Self::account_id();
+        //     <T as Config>::Currency::transfer(
+        //         &from,
+        //         &pallet_id,
+        //         value,
+        //         ExistenceRequirement::KeepAlive,
+        //     )?;
+        //     Self::deposit_event(RawEvent::FundsTransferred);
+        //     Ok(())
+        // }
+
         /// Add some extra amount that have appeared in the stash `free_balance` into the balance up
         /// for staking.
         ///

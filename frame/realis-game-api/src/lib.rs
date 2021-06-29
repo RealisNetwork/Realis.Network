@@ -2,7 +2,9 @@
 
 // 1. Imports and Dependencies
 pub use frame_support::traits::Currency;
+
 pub use pallet::*;
+
 #[cfg(test)]
 mod mock;
 #[cfg(test)]
@@ -13,12 +15,13 @@ mod tests;
 #[frame_support::pallet]
 pub mod pallet {
     use frame_support::pallet_prelude::*;
-    use frame_support::traits::Imbalance;
-    use frame_support::traits::{Currency, ExistenceRequirement, WithdrawReasons};
     use frame_support::PalletId;
+    use frame_support::traits::{Currency, ExistenceRequirement, WithdrawReasons};
+    use frame_support::traits::Imbalance;
     use frame_system::pallet_prelude::*;
-    use pallet_nft as NFT;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
+
+    use pallet_nft as NFT;
 
     type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
@@ -95,6 +98,19 @@ pub mod pallet {
             Ok(())
         }
 
+        #[pallet::weight(90_000_000)]
+        pub fn burn_basic_nft(
+            origin: OriginFor<T>,
+            token_id: pallet_nft::TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            NFT::Pallet::<T>::burn_basic_nft(token_id, None)?;
+            Self::deposit_event(Event::<T>::TokenBurned);
+            Ok(())
+        }
+
         #[pallet::weight(60_000_000)]
         pub fn transfer_basic_nft(
             origin: OriginFor<T>,
@@ -162,19 +178,6 @@ pub mod pallet {
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             <T as Config>::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive)?;
             Self::deposit_event(Event::<T>::FundsTransferred);
-            Ok(())
-        }
-
-        #[pallet::weight(90_000_000)]
-        pub fn burn_basic_nft(
-            origin: OriginFor<T>,
-            token_id: pallet_nft::TokenId,
-        ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
-            let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            NFT::Pallet::<T>::burn_basic_nft(token_id)?;
-            Self::deposit_event(Event::<T>::TokenBurned);
             Ok(())
         }
 
