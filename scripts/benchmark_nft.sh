@@ -1,10 +1,12 @@
+cargo build --release --features runtime-benchmarks
+
 ./target/release/realis benchmark \
 --chain dev \
 --execution wasm \
 --wasm-execution compiled \
---pallet pallet_nft \
+--pallet realis-game-api \
 --extrinsic '*' \
 --steps 20 \
 --repeat 10 \
 --raw \
---output=./frame/nft/src/weights.rs
+--output=./frame/realis-game-api/src/weights.rs

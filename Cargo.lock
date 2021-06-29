@@ -5819,6 +5819,7 @@ dependencies = [
 name = "realis-game-api"
 version = "0.0.1"
 dependencies = [
+ "frame-benchmarking",
  "frame-election-provider-support",
  "frame-support",
  "frame-system",

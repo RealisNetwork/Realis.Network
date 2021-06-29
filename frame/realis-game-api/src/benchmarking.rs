@@ -75,7 +75,6 @@ mod benchmarking {
 			let existential_deposit = T::ExistentialDeposit::get();
 			let transfer_amount = existential_deposit.saturating_mul((ED_MULTIPLIER - 1).into()) + 1u32.into();
 
-			ReaslisGameApi::<T>::transfer_to_pallet()
 		}: _(
 			owner_origin,
 			recipient,
@@ -123,11 +122,5 @@ mod benchmarking {
 			// 10000 as Nft::Config::Balance
 		)
 
-		balance_pallet {
-			let caller = alice::<T>();
-			let owner_origin = SystemOrigin::Signed(caller.clone());
-		}: _(
-			owner_origin
-		)
 	}
 }

@@ -122,7 +122,7 @@ pub mod pallet {
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
 
-            NFT::Pallet::<T>::transfer_basic_nft(&dest_account, token_id)?;
+            NFT::Pallet::<T>::transfer_basic_nft(token_id, None, &dest_account)?;
             Self::deposit_event(Event::<T>::TokenTransferred);
             Ok(())
         }
