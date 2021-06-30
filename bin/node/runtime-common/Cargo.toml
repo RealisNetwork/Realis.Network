@@ -34,7 +34,6 @@ libsecp256k1 = "0.3.5"
 
 [features]
 default = ["std"]
-no_std = []
 std = [
     "parity-scale-codec/std",
     "serde_derive",
@@ -47,13 +46,4 @@ std = [
     "sp-runtime/std",
     "frame-system/std",
     "libsecp256k1/std",
-]
-runtime-benchmarks = [
-    "libsecp256k1/hmac",
-    "frame-benchmarking",
-    "frame-support/runtime-benchmarks",
-    "frame-system/runtime-benchmarks",
-]
-try-runtime = [
-    "pallet-timestamp/try-runtime",
 ]

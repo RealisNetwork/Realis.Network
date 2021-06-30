@@ -173,6 +173,7 @@ std = [
    	"pallet-nft/std",
    	"realis-game-api/std",
 	"node-primitives/std",
+	"runtime-common/std"
 #	"chain-bridge/std",
 #	"pallet-realis-bridge/std",
 ]
