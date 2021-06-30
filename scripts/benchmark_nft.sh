@@ -4,9 +4,10 @@ cargo build --release --features runtime-benchmarks
 --chain dev \
 --execution wasm \
 --wasm-execution compiled \
---pallet realis-game-api \
+--pallet pallet-nft \
 --extrinsic '*' \
 --steps 20 \
 --repeat 10 \
 --raw \
---output=./frame/realis-game-api/src/weights.rs
+--output=./frame/nft/src/weights.rs \
+--template=./.maintain/frame-weight-template.hbs

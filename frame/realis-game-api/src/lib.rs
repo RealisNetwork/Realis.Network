@@ -11,7 +11,9 @@ mod mock;
 mod tests;
 
 mod benchmarking;
+pub mod weights;
 
+pub use weights::WeightInfoOf;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -21,10 +23,11 @@ pub mod pallet {
     use frame_support::traits::Imbalance;
     use frame_system::pallet_prelude::*;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
+    use super::*;
 
     use pallet_nft as NFT;
 
-    type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+    type BalanceOf<T> = <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
@@ -37,9 +40,11 @@ pub mod pallet {
 
         type PalletId: Get<PalletId>;
 
-        type Currency:Currency<Self::AccountId, Balance = Self::Balance>;
+        type ApiCurrency: Currency<Self::AccountId, Balance = Self::Balance>;
 
         type StakingPoolId: From<<Self as pallet_staking::Config>::PalletId>;
+
+        type WeightInfoOf: WeightInfoOf;
     }
 
     #[pallet::event]
@@ -78,7 +83,7 @@ pub mod pallet {
     // Functions that are callable from outside the runtime.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoOf::mint_basic_nft())]
         pub fn mint_basic_nft(
             origin: OriginFor<T>,
             target_account: T::AccountId,
@@ -99,7 +104,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoOf::burn_basic_nft())]
         pub fn burn_basic_nft(
             origin: OriginFor<T>,
             token_id: pallet_nft::TokenId,
@@ -112,7 +117,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(60_000_000)]
+        #[pallet::weight(T::WeightInfoOf::transfer_basic_nft())]
         pub fn transfer_basic_nft(
             origin: OriginFor<T>,
             dest_account: T::AccountId,
@@ -127,7 +132,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(50_000_000)]
+        #[pallet::weight(T::WeightInfoOf::transfer_from_pallet())]
         pub fn transfer_from_pallet(
             origin: OriginFor<T>,
             dest: T::AccountId,
@@ -137,7 +142,7 @@ pub mod pallet {
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let pallet_id = Self::account_id();
-            <T as Config>::Currency::transfer(
+            <T as Config>::ApiCurrency::transfer(
                 &pallet_id,
                 &dest,
                 value,
@@ -147,7 +152,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(50_000_000)]
+        #[pallet::weight(T::WeightInfoOf::transfer_to_pallet())]
         pub fn transfer_to_pallet(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -157,7 +162,7 @@ pub mod pallet {
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let pallet_id = Self::account_id();
-            <T as Config>::Currency::transfer(
+            <T as Config>::ApiCurrency::transfer(
                 &from,
                 &pallet_id,
                 value,
@@ -167,7 +172,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(30_000_000)]
+        #[pallet::weight(T::WeightInfoOf::transfer_from_ptp())]
         pub fn transfer_from_ptp(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -177,12 +182,12 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            <T as Config>::Currency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive)?;
+            <T as Config>::ApiCurrency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive)?;
             Self::deposit_event(Event::<T>::FundsTransferred);
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoOf::spend_in_game())]
         pub fn spend_in_game(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -191,7 +196,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            let imbalance = <T as Config>::Currency::withdraw(
+            let imbalance = <T as Config>::ApiCurrency::withdraw(
                 &from,
                 amount,
                 WithdrawReasons::all(),
@@ -201,8 +206,8 @@ pub mod pallet {
             let pallet_id_game_api = Self::account_id();
             // for fees, 80% to treasury, 20% to author
             let (to_game_api, to_staking) = imbalance.ration(80, 20);
-            <T as Config>::Currency::resolve_creating(&pallet_id_game_api, to_game_api);
-            <T as Config>::Currency::resolve_creating(&pallet_id_staking, to_staking);
+            <T as Config>::ApiCurrency::resolve_creating(&pallet_id_game_api, to_game_api);
+            <T as Config>::ApiCurrency::resolve_creating(&pallet_id_staking, to_staking);
             Ok(())
         }
 
@@ -212,8 +217,8 @@ pub mod pallet {
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let account_id = Self::account_id();
-            let balance = <T as Config>::Currency::free_balance(&account_id)
-                .saturating_sub(<T as Config>::Currency::minimum_balance());
+            let balance = <T as Config>::ApiCurrency::free_balance(&account_id)
+                .saturating_sub(<T as Config>::ApiCurrency::minimum_balance());
             Self::deposit_event(Event::Balance(account_id, balance));
             Ok(())
         }

@@ -20,7 +20,7 @@ mod tests;
 mod benchmarking;
 pub mod weights;
 
-pub use weights::WeightInfoOf;
+pub use weights::WeightInfo;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -97,15 +97,6 @@ pub mod pallet {
 				Reasons::Misc
 			}
 		}
-	}
-
-	pub trait WeightInfo {
-		fn mint() -> Weight;
-		fn mint_basic() -> Weight;
-		fn burn() -> Weight;
-		fn burn_basic() -> Weight;
-		fn transfer() -> Weight;
-		fn transfer_basic() -> Weight;
 	}
 
 	#[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]

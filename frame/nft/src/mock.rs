@@ -78,7 +78,7 @@ impl Config for Test {
     type ExistentialDeposit = ExistentialDepositOfRealisTokens;
     type OnNewAccount = ();
     type RealisTokenId = u32;
-    type WeightInfo = pallet_nft::weights::WeightInfoOf<Test>;
+    type WeightInfo = pallet_nft::weights::SubstrateWeight<Test>;
 }
 
 pub fn new_test_ext(nft_master: Vec<u64>) -> sp_io::TestExternalities {

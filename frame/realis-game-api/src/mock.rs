@@ -269,8 +269,9 @@ parameter_types! {
 impl Config for Test {
     type Event = Event;
     type PalletId = GameApiPalletId;
-    type Currency = Balances;
+    type ApiCurrency = Balances;
     type StakingPoolId = StakingPalletId;
+    type WeightInfoOf = realis_game_api::weights::SubstrateWeight<Test>;
 }
 
 // Build genesis storage according to the mock runtime.

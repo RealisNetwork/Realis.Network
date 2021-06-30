@@ -1073,7 +1073,7 @@ impl pallet_nft::Config for Runtime {
 	type ExistentialDeposit = ExistentialDepositOfRealisTokens;
 	type OnNewAccount = ();
 	type RealisTokenId = u32;
-	type WeightInfo = pallet_nft::weights::WeightInfoOf<Runtime>;
+	type WeightInfo = pallet_nft::weights::SubstrateWeight<Runtime>;
 }
 
 
@@ -1128,8 +1128,9 @@ parameter_types! {
 impl realis_game_api::Config for Runtime {
 	type Event = Event;
 	type PalletId = GameApiPalletId;
-	type Currency = Balances;
+	type ApiCurrency = Balances;
 	type StakingPoolId = StakingPalletId;
+	type WeightInfoOf = realis_game_api::weights::SubstrateWeight<Runtime>;
 }
 
 // parameter_types! {
