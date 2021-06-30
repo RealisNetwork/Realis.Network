@@ -1314,23 +1314,23 @@ decl_module! {
             Ok(())
         }
 
-        // #[pallet::weight(50_000_000)]
-        // pub fn transfer_to_pallet(
-        //     origin,
-        //     from: T::AccountId,
-        //     value: T::Balance,
-        // ) -> DispatchResult {
-        //     let who = ensure_root(origin)?;
-        //     let pallet_id = Self::account_id();
-        //     <T as Config>::Currency::transfer(
-        //         &from,
-        //         &pallet_id,
-        //         value,
-        //         ExistenceRequirement::KeepAlive,
-        //     )?;
-        //     Self::deposit_event(RawEvent::FundsTransferred);
-        //     Ok(())
-        // }
+        #[weight = T::WeightInfo::bond()]
+        pub fn transfer_to_pallet(
+            origin,
+            from: T::AccountId,
+            #[compact] value: BalanceOf<T>,
+        ) -> DispatchResult {
+            let _who = ensure_root(origin)?;
+            let pallet_id = Self::account_id();
+            T::Currency::transfer(
+                &from,
+                &pallet_id,
+                value,
+                ExistenceRequirement::KeepAlive,
+            )?;
+            Self::deposit_event(RawEvent::FundsTransferred);
+            Ok(())
+        }
 
         /// Add some extra amount that have appeared in the stash `free_balance` into the balance up
         /// for staking.
