@@ -1,4 +1,4 @@
-cargo build --release --features runtime-benchmarks -p realis-game-api
+cargo build --release --features runtime-benchmarks
 
 ./target/release/realis benchmark \
 --chain dev \
@@ -9,4 +9,5 @@ cargo build --release --features runtime-benchmarks -p realis-game-api
 --steps 20 \
 --repeat 10 \
 --raw \
---output=./frame/realis-game-api/src/weights.rs
+--output=./frame/realis-game-api/src/weights.rs \
+--template=./.maintain/frame-weight-template.hbs

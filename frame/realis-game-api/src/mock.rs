@@ -259,7 +259,7 @@ impl pallet_nft::Config for Test {
     type ExistentialDeposit = ExistentialDepositOfRealisTokens;
     type OnNewAccount = ();
     type RealisTokenId = u32;
-    type WeightInfo = pallet_nft::weights::WeightInfoOf<Test>;
+    type WeightInfo = pallet_nft::weights::SubstrateWeight<Test>;
 }
 
 parameter_types! {
@@ -269,8 +269,9 @@ parameter_types! {
 impl Config for Test {
     type Event = Event;
     type PalletId = GameApiPalletId;
-    type Currency = Balances;
+    type ApiCurrency = Balances;
     type StakingPoolId = StakingPalletId;
+    type WeightInfoOf = realis_game_api::weights::SubstrateWeight<Test>;
 }
 
 // Build genesis storage according to the mock runtime.

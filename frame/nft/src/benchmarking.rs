@@ -1,12 +1,12 @@
- #[cfg(feature = "runtime-benchmarks")]
+#[cfg(feature = "runtime-benchmarks")]
 
 mod benchmarking {
-	 use crate::Pallet as Nft;
-	 use crate::{*};
-	 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite, account};
-	 use frame_system::RawOrigin as SystemOrigin;
+	use crate::Pallet as Nft;
+	use crate::{*};
+	use frame_benchmarking::{benchmarks, impl_benchmark_test_suite, account};
+	use frame_system::RawOrigin as SystemOrigin;
 
-	 const SEED: u32 = 1;
+	const SEED: u32 = 1;
 
 	// Get Alice AccountId
 	fn alice<T: Config>() -> T::AccountId {
