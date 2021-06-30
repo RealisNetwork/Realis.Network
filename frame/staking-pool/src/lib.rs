@@ -309,7 +309,6 @@ use sp_staking::{
 use sp_std::{collections::btree_map::BTreeMap, convert::From, prelude::*, result};
 pub use weights::WeightInfo;
 
-
 const STAKING_ID: LockIdentifier = *b"staking ";
 pub(crate) const LOG_TARGET: &str = "runtime::staking";
 
@@ -1305,9 +1304,9 @@ decl_module! {
             Self::update_ledger(&controller, &item);
         }
 
-        // TODO unused argument _origin
         #[weight = T::WeightInfo::bond()]
-        pub fn balance_pallet(_origin) -> DispatchResult {
+        pub fn balance_pallet(origin) -> DispatchResult {
+            let _who = ensure_root(origin)?;
             let account_id = Self::account_id();
             let balance = <T as Config>::Currency::free_balance(&account_id)
                 .saturating_sub(<T as Config>::Currency::minimum_balance());
