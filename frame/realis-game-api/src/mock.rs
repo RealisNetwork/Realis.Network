@@ -75,10 +75,10 @@ impl sp_runtime::BoundToRuntimeAppPublic for OtherSessionHandler {
     type Public = UintAuthorityId;
 }
 
-pub fn is_disabled(controller: u64) -> bool {
-    let stash = Staking::ledger(&controller).unwrap().stash;
-    SESSION.with(|d| d.borrow().1.contains(&stash))
-}
+// pub fn is_disabled(controller: u64) -> bool {
+//     let stash = Staking::ledger(&controller).unwrap().stash;
+//     SESSION.with(|d| d.borrow().1.contains(&stash))
+// }
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;

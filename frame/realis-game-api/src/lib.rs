@@ -109,10 +109,10 @@ pub mod pallet {
             origin: OriginFor<T>,
             token_id: pallet_nft::TokenId,
         ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
+            let who = ensure_signed(origin.clone())?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            NFT::Pallet::<T>::burn_basic_nft(token_id, None)?;
+            NFT::Pallet::<T>::burn_basic(origin, token_id)?;
             Self::deposit_event(Event::<T>::TokenBurned);
             Ok(())
         }
