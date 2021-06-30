@@ -96,7 +96,7 @@ frame_support::construct_runtime!(
         Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
         Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
         NFT: pallet_nft::{Pallet, Call, Storage, Event<T>},
-        RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
+        RealisGameApi: realis_game_api::{Pallet, Call, Event<T>, Config<T>},
     }
 );
 

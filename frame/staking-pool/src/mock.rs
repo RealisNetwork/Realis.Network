@@ -24,7 +24,7 @@ use frame_support::{
     assert_ok, parameter_types, PalletId,
     traits::{Currency, FindAuthor, Get, OnFinalize, OnInitialize, OneSessionHandler},
     weights::constants::RocksDbWeight,
-    IterableStorageMap, StorageDoubleMap, StorageMap, StorageValue,
+    IterableStorageMap, StorageDoubleMap, StorageValue,
 };
 use sp_core::H256;
 use sp_io;
@@ -277,8 +277,6 @@ where
 }
 
 pub type Extrinsic = TestXt<Call, ()>;
-pub(crate) type StakingCall = crate::Call<Test>;
-pub(crate) type TestRuntimeCall = <Test as frame_system::Config>::Call;
 
 pub struct ExtBuilder {
     validator_pool: bool,
@@ -693,14 +691,14 @@ pub(crate) fn current_total_payout_for_duration(duration: u64) -> Balance {
     payout
 }
 
-pub(crate) fn maximum_payout_for_duration(duration: u64) -> Balance {
-    let (payout, rest) = <Test as Config>::EraPayout::era_payout(
-        Staking::eras_total_stake(active_era()),
-        Balances::total_issuance(),
-        duration,
-    );
-    payout + rest
-}
+// pub(crate) fn maximum_payout_for_duration(duration: u64) -> Balance {
+//     let (payout, rest) = <Test as Config>::EraPayout::era_payout(
+//         Staking::eras_total_stake(active_era()),
+//         Balances::total_issuance(),
+//         duration,
+//     );
+//     payout + rest
+// }
 
 /// Time it takes to finish a session.
 ///
@@ -723,13 +721,13 @@ pub(crate) fn reward_time_per_era() -> u64 {
     time_per_era() - BLOCK_TIME
 }
 
-pub(crate) fn reward_all_elected() {
-    let rewards = <Test as Config>::SessionInterface::validators()
-        .into_iter()
-        .map(|v| (v, 1));
-
-    <Module<Test>>::reward_by_ids(rewards)
-}
+// pub(crate) fn reward_all_elected() {
+//     let rewards = <Test as Config>::SessionInterface::validators()
+//         .into_iter()
+//         .map(|v| (v, 1));
+//
+//     <Module<Test>>::reward_by_ids(rewards)
+// }
 
 pub(crate) fn validator_controllers() -> Vec<AccountId> {
     Session::validators()
@@ -791,24 +789,24 @@ pub(crate) fn add_slash(who: &AccountId) {
     );
 }
 
-/// Make all validator and nominator request their payment
-pub(crate) fn make_all_reward_payment(era: EraIndex) {
-    let validators_with_reward = ErasRewardPoints::<Test>::get(era)
-        .individual
-        .keys()
-        .cloned()
-        .collect::<Vec<_>>();
 
-    // reward validators
-    for validator_controller in validators_with_reward.iter().filter_map(Staking::bonded) {
-        let ledger = <Ledger<Test>>::get(&validator_controller).unwrap();
-        assert_ok!(Staking::payout_stakers(
-            Origin::signed(1337),
-            ledger.stash,
-            era
-        ));
-    }
-}
+// pub(crate) fn make_all_reward_payment(era: EraIndex) {
+//     let validators_with_reward = ErasRewardPoints::<Test>::get(era)
+//         .individual
+//         .keys()
+//         .cloned()
+//         .collect::<Vec<_>>();
+//
+//     // reward validators
+//     for validator_controller in validators_with_reward.iter().filter_map(Staking::bonded) {
+//         let ledger = <Ledger<Test>>::get(&validator_controller).unwrap();
+//         assert_ok!(Staking::payout_stakers(
+//             Origin::signed(1337),
+//             ledger.stash,
+//             era
+//         ));
+//     }
+// }
 
 #[macro_export]
 macro_rules! assert_session_era {
