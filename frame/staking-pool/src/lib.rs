@@ -283,13 +283,21 @@ pub mod weights;
 
 use codec::{Decode, Encode, HasCompact};
 use frame_election_provider_support::{data_provider, ElectionProvider, Supports, VoteWeight};
-use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch::{DispatchResult, DispatchResultWithPostInfo}, ensure, storage::IterableStorageMap, traits::{
-    Currency, CurrencyToVote, EnsureOrigin, EstimateNextNewSession, ExistenceRequirement, Get,
-    Imbalance, LockIdentifier, LockableCurrency, OnUnbalanced, UnixTime, WithdrawReasons,
-}, weights::{
-    constants::{WEIGHT_PER_MICROS, WEIGHT_PER_NANOS},
-    Weight, WithPostDispatchInfo,
-}, PalletId};
+use frame_support::{
+    decl_error, decl_event, decl_module, decl_storage,
+    dispatch::{DispatchResult, DispatchResultWithPostInfo},
+    ensure,
+    storage::IterableStorageMap,
+    traits::{
+        Currency, CurrencyToVote, EnsureOrigin, EstimateNextNewSession, ExistenceRequirement, Get,
+        Imbalance, LockIdentifier, LockableCurrency, OnUnbalanced, UnixTime, WithdrawReasons,
+    },
+    weights::{
+        constants::{WEIGHT_PER_MICROS, WEIGHT_PER_NANOS},
+        Weight, WithPostDispatchInfo,
+    },
+    PalletId,
+};
 use frame_system::{self as system, ensure_root, ensure_signed, offchain::SendTransactionTypes};
 use pallet_session::historical;
 use sp_runtime::traits::AccountIdConversion;

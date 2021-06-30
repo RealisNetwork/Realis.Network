@@ -21,10 +21,10 @@ use crate as staking;
 use crate::*;
 use frame_election_provider_support::onchain;
 use frame_support::{
-    assert_ok, parameter_types, PalletId,
+    assert_ok, parameter_types,
     traits::{Currency, FindAuthor, Get, OnFinalize, OnInitialize, OneSessionHandler},
     weights::constants::RocksDbWeight,
-    IterableStorageMap, StorageDoubleMap, StorageValue,
+    IterableStorageMap, PalletId, StorageDoubleMap, StorageValue,
 };
 use sp_core::H256;
 use sp_io;
@@ -788,7 +788,6 @@ pub(crate) fn add_slash(who: &AccountId) {
         &[Perbill::from_percent(10)],
     );
 }
-
 
 // pub(crate) fn make_all_reward_payment(era: EraIndex) {
 //     let validators_with_reward = ErasRewardPoints::<Test>::get(era)

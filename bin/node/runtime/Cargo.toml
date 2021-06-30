@@ -91,6 +91,7 @@ pallet-vesting = { git = "https://github.com/paritytech/substrate", rev = "0bda8
 pallet-nicks = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81", default-features = false }
 pallet-nft = { version = "0.0.2", path = "../../../frame/nft", default-features = false }
 realis-game-api = { version = "0.0.1", path = "../../../frame/realis-game-api", default-features = false }
+runtime-common = { version = "0.0.1", path = "../runtime-common", default-features = false }
 #pallet-realis-bridge = { version = "0.1.0", default-features = false, path = "../../../frame/realis-bridge" }
 #chain-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/chainbridge"}
 

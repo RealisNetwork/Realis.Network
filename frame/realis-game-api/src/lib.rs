@@ -17,17 +17,18 @@ pub use weights::WeightInfoOf;
 
 #[frame_support::pallet]
 pub mod pallet {
+    use super::*;
     use frame_support::pallet_prelude::*;
-    use frame_support::PalletId;
-    use frame_support::traits::{Currency, ExistenceRequirement, WithdrawReasons};
     use frame_support::traits::Imbalance;
+    use frame_support::traits::{Currency, ExistenceRequirement, WithdrawReasons};
+    use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
-    use super::*;
 
     use pallet_nft as NFT;
 
-    type BalanceOf<T> = <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+    type BalanceOf<T> =
+        <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
@@ -213,7 +214,12 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            <T as Config>::ApiCurrency::transfer(&from, &to, value, ExistenceRequirement::KeepAlive)?;
+            <T as Config>::ApiCurrency::transfer(
+                &from,
+                &to,
+                value,
+                ExistenceRequirement::KeepAlive,
+            )?;
             Self::deposit_event(Event::<T>::FundsTransferred);
             Ok(())
         }

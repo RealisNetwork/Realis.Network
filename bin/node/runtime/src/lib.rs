@@ -76,6 +76,8 @@ use static_assertions::const_assert;
 use pallet_contracts::weights::WeightInfo;
 pub use pallet_staking;
 pub use realis_game_api;
+use runtime_common;
+use sp_core::u32_trait::{_3, _4};
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -1133,6 +1135,20 @@ impl realis_game_api::Config for Runtime {
 	type WeightInfoOf = realis_game_api::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_types! {
+	pub Prefix: &'static [u8] = b"Pay DOTs to the Polkadot account:";
+}
+
+impl runtime_common::Config for Runtime {
+	type Event = Event;
+	type VestingSchedule = Vesting;
+	type Prefix = Prefix;
+	/// At least 3/4 of the council must agree to a claim move before it can happen.
+	type MoveClaimOrigin = pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>;
+	type WeightInfo = weights::runtime_common_claims::WeightInfo<Runtime>;
+}
+
+
 // parameter_types! {
 //     pub const ChainId: u8 = 5;
 //     pub const ProposalLifetime: u32 = 50;
@@ -1204,6 +1220,7 @@ construct_runtime!(
 		// RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
 		RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
+		Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
 	}
 );
 

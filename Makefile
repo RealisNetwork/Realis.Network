@@ -29,3 +29,7 @@ docker:
 .PHONY: fmt
 fmt:
 	cargo fmt -p pallet-staking -p pallet-nft -p realis-game-api
+
+.PHONY: clippy
+clippy:
+	cargo clippy

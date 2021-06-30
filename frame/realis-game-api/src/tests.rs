@@ -1,5 +1,5 @@
-use crate::{mock::*, Error, Config, Currency};
-use frame_support::{assert_ok, assert_err};
+use crate::{mock::*, Config, Currency, Error};
+use frame_support::{assert_err, assert_ok};
 use pallet_nft as NFT;
 use primitive_types::U256;
 
@@ -34,7 +34,8 @@ fn mint_existent_token() {
                 Origin::signed(1),
                 1,
                 U256([1, 0, 0, 0]),
-                NFT::Types { tape: 1 }),
+                NFT::Types { tape: 1 }
+            ),
             Error::<Test>::TokenExist
         );
     })
@@ -44,10 +45,8 @@ fn mint_existent_token() {
 fn burn_none_existent_token() {
     new_test_ext(vec![1]).execute_with(|| {
         assert_err!(
-            RealisGameApi::burn_basic_nft(
-                Origin::signed(1),
-                U256([1, 0, 0, 0])),
-             NFT::Error::<Test>::NonExistentToken
+            RealisGameApi::burn_basic_nft(Origin::signed(1), U256([1, 0, 0, 0])),
+            NFT::Error::<Test>::NonExistentToken
         )
     })
 }
@@ -156,9 +155,7 @@ fn mint_transfer_burn_not_by_owner() {
             U256([1, 0, 0, 0])
         ));
         assert_err!(
-            RealisGameApi::burn_basic_nft(
-                Origin::signed(1),
-                U256([1, 0, 0, 0])),
+            RealisGameApi::burn_basic_nft(Origin::signed(1), U256([1, 0, 0, 0])),
             NFT::Error::<Test>::NotTokenOwner
         );
     })
@@ -249,9 +246,7 @@ fn mint_and_transfer_2_times_burn_not_by_owner() {
             U256([1, 0, 0, 0])
         ));
         assert_err!(
-            RealisGameApi::burn_basic_nft(
-                Origin::signed(2),
-                U256([1, 0, 0, 0])),
+            RealisGameApi::burn_basic_nft(Origin::signed(2), U256([1, 0, 0, 0])),
             NFT::Error::<Test>::NotTokenOwner
         );
     })
