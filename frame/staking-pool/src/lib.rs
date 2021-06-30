@@ -1118,7 +1118,7 @@ decl_event!(
         /// A nominator has been kicked from a validator. \[nominator, stash\]
         Kicked(AccountId, AccountId),
         Balance(AccountId, Balance),
-        FundsTransferred,
+        FundsTransferred(AccountId, Balance),
     }
 );
 
@@ -1328,7 +1328,7 @@ decl_module! {
                 value,
                 ExistenceRequirement::KeepAlive,
             )?;
-            Self::deposit_event(RawEvent::FundsTransferred);
+            Self::deposit_event(RawEvent::FundsTransferred(from, value));
             Ok(())
         }
 
