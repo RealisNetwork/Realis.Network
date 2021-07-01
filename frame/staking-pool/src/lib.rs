@@ -751,7 +751,7 @@ enum Releases {
 
 impl Default for Releases {
     fn default() -> Self {
-        Releases::V7_0_0
+        Releases::V5_0_0
     }
 }
 
