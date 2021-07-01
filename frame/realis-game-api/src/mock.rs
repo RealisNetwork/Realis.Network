@@ -142,6 +142,8 @@ impl frame_system::Config for Test {
 
 impl pallet_balances::Config for Test {
     type MaxLocks = ();
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type Balance = u128;
     type Event = Event;
     type DustRemoval = ();
@@ -175,6 +177,7 @@ impl pallet_session::historical::Config for Test {
     type FullIdentification = pallet_staking::Exposure<u64, u128>;
     type FullIdentificationOf = pallet_staking::ExposureOf<Test>;
 }
+
 impl pallet_authorship::Config for Test {
     type FindAuthor = ();
     type UncleGenerations = UncleGenerations;
@@ -238,6 +241,7 @@ impl pallet_staking::Config for Test {
     type NextNewSession = Session;
     type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
     type ElectionProvider = onchain::OnChainSequentialPhragmen<Self>;
+    type GenesisElectionProvider = Self::ElectionProvider;
     type WeightInfo = ();
 }
 
@@ -250,7 +254,7 @@ where
 }
 
 parameter_types! {
-    pub const ExistentialDepositOfRealisTokens: u128 = 1;
+    pub const ExistentialDepositOfRealisTokens: u64 = 1;
 }
 
 impl pallet_nft::Config for Test {
@@ -269,7 +273,7 @@ parameter_types! {
 impl Config for Test {
     type Event = Event;
     type PalletId = GameApiPalletId;
-    type ApiCurrency = Balances;
+    type ApiCurrency = pallet_balances::Pallet<Test>;
     type StakingPoolId = StakingPalletId;
     type WeightInfoOf = realis_game_api::weights::SubstrateWeight<Test>;
 }

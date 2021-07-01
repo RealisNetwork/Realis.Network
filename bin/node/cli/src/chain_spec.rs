@@ -22,12 +22,11 @@ use sc_chain_spec::ChainSpecExtension;
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 use serde::{Serialize, Deserialize};
 use node_runtime::{
-	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, /*CouncilConfig*/
-	/*DemocracyConfig,*/ GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
-	StakingConfig, /*ElectionsConfig,*/ IndicesConfig, /*SocietyConfig,*/ SudoConfig, SystemConfig, NftConfig,
-	/*TechnicalCommitteeConfig,*/ wasm_binary_unwrap, MAX_NOMINATIONS,
+	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, CouncilConfig,
+	DemocracyConfig, GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
+	StakingConfig, ElectionsConfig, IndicesConfig, SocietyConfig, SudoConfig, SystemConfig, NftConfig,
+	TechnicalCommitteeConfig, wasm_binary_unwrap, MAX_NOMINATIONS,
 };
-use node_runtime::Runtime;
 use node_runtime::Block;
 use node_runtime::constants::currency::*;
 use sc_service::ChainType;
@@ -38,11 +37,13 @@ use sp_consensus_babe::{AuthorityId as BabeId};
 use pallet_im_online::sr25519::{AuthorityId as ImOnlineId};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_runtime::{Perbill, traits::{Verify, IdentifyAccount}};
-use sc_telemetry::serde_json::Map;
+
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::GenesisConfig;
 use node_runtime::pallet_staking;
 use node_runtime::realis_game_api;
+use sc_telemetry::serde_json::Map;
+use node_runtime::Runtime;
 
 type AccountPublic = <Signature as Verify>::Signer;
 
@@ -147,9 +148,14 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
 		"9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
 	].into();
 
+	let nft_master: Vec<AccountId> = vec![hex![
+		// 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
+		"9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
+	].into()];
+
 	let endowed_accounts: Vec<AccountId> = vec![root_key.clone()];
 
-	testnet_genesis(initial_authorities, vec![], root_key, Some(endowed_accounts))
+	testnet_genesis(initial_authorities, vec![], root_key, nft_master, Some(endowed_accounts))
 }
 
 /// Staging testnet config.
@@ -214,6 +220,7 @@ pub fn testnet_genesis(
 	)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
+	nft_master: Vec<AccountId>,
 	endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
 	let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
@@ -230,8 +237,6 @@ pub fn testnet_genesis(
 			get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 			get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 			get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-			pallet_staking::Module::<Runtime>::account_id(),
-			realis_game_api::Pallet::<Runtime>::account_id(),
 		]
 	});
 	// endow all authorities and nominators.
@@ -260,25 +265,38 @@ pub fn testnet_genesis(
 		}))
 		.collect::<Vec<_>>();
 
-	let _num_endowed_accounts = endowed_accounts.len();
+	let num_endowed_accounts = endowed_accounts.len();
 
-	const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
+	const ENDOWMENT: Balance = 30_000 * DOLLARS / 10;
+	const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
+	const STAKING_POOL: Balance = 30_000 * DOLLARS / 10;
 	const STASH: Balance = ENDOWMENT / 1000;
 
+	let pallet_id_staking = pallet_staking::Pallet::<Runtime>::account_id();
+	let game_wallet = realis_game_api::Pallet::<Runtime>::account_id();
+
 	GenesisConfig {
-		frame_system: SystemConfig {
+		system: SystemConfig {
 			code: wasm_binary_unwrap().to_vec(),
 			changes_trie_config: Default::default(),
 		},
-		pallet_balances: BalancesConfig {
+		balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned()
-				.map(|x| (x, ENDOWMENT))
-				.collect()
+				.map(|x| {
+					if x == pallet_id_staking {
+						(x, STAKING_POOL)
+					} else if x == game_wallet {
+						(x, GAME_WALLET)
+					} else {
+						(x, ENDOWMENT)
+					}
+				})
+				.collect(),
 		},
-		pallet_indices: IndicesConfig {
+		indices: IndicesConfig {
 			indices: vec![],
 		},
-		pallet_session: SessionConfig {
+		session: SessionConfig {
 			keys: initial_authorities.iter().map(|x| {
 				(x.0.clone(), x.0.clone(), session_keys(
 					x.2.clone(),
@@ -288,7 +306,7 @@ pub fn testnet_genesis(
 				))
 			}).collect::<Vec<_>>(),
 		},
-		pallet_staking: StakingConfig {
+		staking: StakingConfig {
 			validator_count: initial_authorities.len() as u32,
 			minimum_validator_count: initial_authorities.len() as u32,
 			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
@@ -296,53 +314,55 @@ pub fn testnet_genesis(
 			stakers,
 			.. Default::default()
 		},
-		// pallet_democracy: DemocracyConfig::default(),
-		// pallet_elections_phragmen: ElectionsConfig {
-		// 	members: endowed_accounts.iter()
-		// 				.take((num_endowed_accounts + 1) / 2)
-		// 				.cloned()
-		// 				.map(|member| (member, STASH))
-		// 				.collect(),
-		// },
-		// pallet_collective_Instance1: CouncilConfig::default(),
-		// pallet_collective_Instance2: TechnicalCommitteeConfig {
-		// 	members: endowed_accounts.iter()
-		// 				.take((num_endowed_accounts + 1) / 2)
-		// 				.cloned()
-		// 				.collect(),
-		// 	phantom: Default::default(),
-		// },
-		pallet_sudo: SudoConfig {
+		democracy: DemocracyConfig::default(),
+		elections: ElectionsConfig {
+			members: endowed_accounts.iter()
+				.take((num_endowed_accounts + 1) / 2)
+				.cloned()
+				.map(|member| (member, STASH))
+				.collect(),
+		},
+		council: CouncilConfig::default(),
+		technical_committee: TechnicalCommitteeConfig {
+			members: endowed_accounts.iter()
+				.take((num_endowed_accounts + 1) / 2)
+				.cloned()
+				.collect(),
+			phantom: Default::default(),
+		},
+		sudo: SudoConfig {
 			key: root_key,
 		},
-		pallet_babe: BabeConfig {
+		babe: BabeConfig {
 			authorities: vec![],
 			epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
 		},
-		pallet_im_online: ImOnlineConfig {
+		im_online: ImOnlineConfig {
 			keys: vec![],
 		},
-		pallet_authority_discovery: AuthorityDiscoveryConfig {
+		authority_discovery: AuthorityDiscoveryConfig {
 			keys: vec![],
 		},
-		pallet_grandpa: GrandpaConfig {
+		grandpa: GrandpaConfig {
 			authorities: vec![],
 		},
-		// pallet_membership_Instance1: Default::default(),
-		// pallet_treasury: Default::default(),
-		// pallet_society: SocietyConfig {
-		// 	members: endowed_accounts.iter()
-		// 				.take((num_endowed_accounts + 1) / 2)
-		// 				.cloned()
-		// 				.collect(),
-		// 	pot: 0,
-		// 	max_members: 999,
-		// },
-		pallet_vesting: Default::default(),
-		pallet_gilt: Default::default(),
-		pallet_nft: NftConfig {
-			nft_masters: vec![],
+		technical_membership: Default::default(),
+		treasury: Default::default(),
+		society: SocietyConfig {
+			members: endowed_accounts.iter()
+				.take((num_endowed_accounts + 1) / 2)
+				.cloned()
+				.collect(),
+			pot: 0,
+			max_members: 999,
 		},
+		vesting: Default::default(),
+		gilt: Default::default(),
+		transaction_storage: Default::default(),
+		nft: NftConfig {
+			nft_masters: nft_master,
+		},
+		claims: Default::default(),
 	}
 }
 
@@ -375,7 +395,7 @@ pub fn realis_genesis(
 			get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 			get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 			get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-			pallet_staking::Module::<Runtime>::account_id(),
+			pallet_staking::Pallet::<Runtime>::account_id(),
 			realis_game_api::Pallet::<Runtime>::account_id(),
 		]
 	});
@@ -404,25 +424,38 @@ pub fn realis_genesis(
 			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
 		}))
 		.collect::<Vec<_>>();
-	let _num_endowed_accounts = endowed_accounts.len();
+	let num_endowed_accounts = endowed_accounts.len();
 
-	const ENDOWMENT: Balance = 30_000 * DOLLARS / 10;
+	const ENDOWMENT: Balance = 197_335 * DOLLARS / 10;
+	const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
+	const STAKING_POOL: Balance = 30_000 * DOLLARS / 10;
 	const STASH: Balance = ENDOWMENT / 1000;
 
+	let pallet_id_staking = pallet_staking::Pallet::<Runtime>::account_id();
+	let game_wallet = realis_game_api::Pallet::<Runtime>::account_id();
+
 	GenesisConfig {
-		frame_system: SystemConfig {
+		system: SystemConfig {
 			code: wasm_binary_unwrap().to_vec(),
 			changes_trie_config: Default::default(),
 		},
-		pallet_balances: BalancesConfig {
+		balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned()
-				.map(|x| (x, ENDOWMENT))
+				.map(|x| {
+					if x == pallet_id_staking {
+						(x, STAKING_POOL)
+					} else if x == game_wallet {
+						(x, GAME_WALLET)
+					} else {
+						(x, ENDOWMENT)
+					}
+				})
 				.collect(),
 		},
-		pallet_indices: IndicesConfig {
+		indices: IndicesConfig {
 			indices: vec![],
 		},
-		pallet_session: SessionConfig {
+		session: SessionConfig {
 			keys: initial_authorities.iter().map(|x| {
 				(x.0.clone(), x.0.clone(), session_keys(
 					x.2.clone(),
@@ -432,62 +465,63 @@ pub fn realis_genesis(
 				))
 			}).collect::<Vec<_>>(),
 		},
-		pallet_staking: StakingConfig {
+		staking: StakingConfig {
 			validator_count: initial_authorities.len() as u32,
 			minimum_validator_count: initial_authorities.len() as u32,
 			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
 			slash_reward_fraction: Perbill::from_percent(10),
 			stakers,
 			.. Default::default()
-
 		},
-		// pallet_democracy: DemocracyConfig::default(),
-		// pallet_elections_phragmen: ElectionsConfig {
-		// 	members: endowed_accounts.iter()
-		// 				.take((num_endowed_accounts + 1) / 2)
-		// 				.cloned()
-		// 				.map(|member| (member, STASH))
-		// 				.collect(),
-		// },
-		// pallet_collective_Instance1: CouncilConfig::default(),
-		// pallet_collective_Instance2: TechnicalCommitteeConfig {
-		// 	members: endowed_accounts.iter()
-		// 				.take((num_endowed_accounts + 1) / 2)
-		// 				.cloned()
-		// 				.collect(),
-		// 	phantom: Default::default(),
-		// },
-		pallet_sudo: SudoConfig {
+		democracy: DemocracyConfig::default(),
+		elections: ElectionsConfig {
+			members: endowed_accounts.iter()
+				.take((num_endowed_accounts + 1) / 2)
+				.cloned()
+				.map(|member| (member, STASH))
+				.collect(),
+		},
+		council: CouncilConfig::default(),
+		technical_committee: TechnicalCommitteeConfig {
+			members: endowed_accounts.iter()
+				.take((num_endowed_accounts + 1) / 2)
+				.cloned()
+				.collect(),
+			phantom: Default::default(),
+		},
+		sudo: SudoConfig {
 			key: root_key,
 		},
-		pallet_babe: BabeConfig {
+		babe: BabeConfig {
 			authorities: vec![],
 			epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
 		},
-		pallet_im_online: ImOnlineConfig {
+		im_online: ImOnlineConfig {
 			keys: vec![],
 		},
-		pallet_authority_discovery: AuthorityDiscoveryConfig {
+		authority_discovery: AuthorityDiscoveryConfig {
 			keys: vec![],
 		},
-		pallet_grandpa: GrandpaConfig {
+		grandpa: GrandpaConfig {
 			authorities: vec![],
 		},
-		// pallet_membership_Instance1: Default::default(),
-		// pallet_treasury: Default::default(),
-		// pallet_society: SocietyConfig {
-		// 	members: endowed_accounts.iter()
-		// 				.take((num_endowed_accounts + 1) / 2)
-		// 				.cloned()
-		// 				.collect(),
-		// 	pot: 0,
-		// 	max_members: 999,
-		// },
-		pallet_vesting: Default::default(),
-		pallet_gilt: Default::default(),
-		pallet_nft: NftConfig {
+		technical_membership: Default::default(),
+		treasury: Default::default(),
+		society: SocietyConfig {
+			members: endowed_accounts.iter()
+				.take((num_endowed_accounts + 1) / 2)
+				.cloned()
+				.collect(),
+			pot: 0,
+			max_members: 999,
+		},
+		vesting: Default::default(),
+		gilt: Default::default(),
+		transaction_storage: Default::default(),
+		nft: NftConfig {
 			nft_masters: nft_master,
 		},
+		claims: Default::default(),
 	}
 }
 
@@ -613,6 +647,7 @@ pub(crate) mod tests {
 			],
 			vec![],
 			get_account_id_from_seed::<sr25519::Public>("Alice"),
+			vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
 			None,
 		)
 	}

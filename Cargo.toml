@@ -6,7 +6,7 @@ resolver = "2"
 members = [
 	"bin/node/cli",
     "bin/node/runtime",
-    "bin/node/runtime-common",
+#    "bin/node/runtime-common",
      "frame/nft",
     "frame/realis-game-api",
     "frame/staking-pool",
@@ -17,7 +17,7 @@ members = [
 [patch.'https://github.com/paritytech/substrate']
 node-cli = { path = "bin/node/cli" }
 node-runtime = { path = "bin/node/runtime" }
-runtime-common = { path = "bin/node/runtime-common" }
+#runtime-common = { path = "bin/node/runtime-common" }
 pallet-staking = {path = "frame/staking-pool"}
 pallet-nft = {path = "frame/nft"}
 [profile.dev]

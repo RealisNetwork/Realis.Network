@@ -336,7 +336,7 @@ parameter_types! {
 	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
 	//       Attempting to do so will brick block production.
 	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS as u64;
-	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK;
+	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK as u64;
 	pub const ReportLongevity: u64 =
 		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
 }
@@ -1074,6 +1074,7 @@ impl pallet_transaction_storage::Config for Runtime {
 	type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
 }
 
+
 parameter_types! {
 	pub const ExistentialDepositOfRealisTokens: u128 = 1;
 }
@@ -1161,7 +1162,7 @@ impl runtime_common::Config for Runtime {
 	type Prefix = Prefix;
 	/// At least 3/4 of the council must agree to a claim move before it can happen.
 	type MoveClaimOrigin = pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>;
-	type WeightInfo = weights::runtime_common_claims::WeightInfo<Runtime>;
+	type WeightInfo = runtime_common::weights::WeightInfo<Runtime>;
 }
 
 

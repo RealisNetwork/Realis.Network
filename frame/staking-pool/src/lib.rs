@@ -265,7 +265,6 @@
 //!   validators is stored in the Session pallet's `Validators` at the end of each era.
 #![cfg_attr(not(feature = "std"), no_std)]
 #![recursion_limit = "128"]
-#![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(test)]
 pub mod mock;
@@ -2438,9 +2437,8 @@ impl<T: Config> Pallet<T> {
         era: EraIndex,
     ) -> DispatchResultWithPostInfo {
         // Validate input data
-        let current_era = CurrentEra::get().ok_or(
-            Error::<T>::InvalidEraToReward
-                .with_weight(T::WeightInfo::payout_stakers_alive_staked(0)),
+        let current_era = CurrentEra::<T>::get().ok_or(
+            Error::<T>::InvalidEraToReward.with_weight(T::WeightInfo::payout_stakers_alive_staked(0))
         )?;
         let history_depth = Self::history_depth();
         ensure!(
@@ -2519,9 +2517,9 @@ impl<T: Config> Pallet<T> {
             &ledger.stash,
             validator_staking_payout + validator_commission_payout,
         )
-        .is_ok()
+            .is_ok()
         {
-            Self::deposit_event(RawEvent::Reward(ledger.stash, validator_leftover_payout));
+            Self::deposit_event(Event::Reward(ledger.stash, validator_leftover_payout));
         }
 
         // Track the number of payout ops to nominators. Note: `WeightInfo::payout_stakers_alive_staked`
@@ -2537,7 +2535,7 @@ impl<T: Config> Pallet<T> {
                 nominator_exposure_part * validator_leftover_payout;
             // We can now make nominator payout:
             if Self::make_payout(&nominator.who, nominator_reward).is_ok() {
-                Self::deposit_event(RawEvent::Reward(nominator.who.clone(), nominator_reward));
+                Self::deposit_event(Event::Reward(nominator.who.clone(), nominator_reward));
             }
         }
 
@@ -2545,7 +2543,7 @@ impl<T: Config> Pallet<T> {
         Ok(Some(T::WeightInfo::payout_stakers_alive_staked(
             nominator_payout_count,
         ))
-        .into())
+            .into())
     }
 
     /// Update the ledger for a controller.
@@ -2578,9 +2576,9 @@ impl<T: Config> Pallet<T> {
             amount,
             WithdrawReasons::all(),
             ExistenceRequirement::KeepAlive,
-        )
-        .map_err(|_| ())?;
-        match Self::payee(stash) {
+        ).map_err(|_| ())?;
+        let dest = Self::payee(stash);
+        match dest {
             RewardDestination::Controller => match Self::bonded(stash) {
                 Some(controller) => Ok(T::Currency::resolve_creating(&controller, imbalance)),
                 None => Err(()),

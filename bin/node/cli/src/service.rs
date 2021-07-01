@@ -39,7 +39,7 @@ type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 type FullGrandpaBlockImport =
-	grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>;
+grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>;
 type LightClient = sc_service::TLightClient<Block, RuntimeApi, Executor>;
 
 pub fn new_partial(
@@ -232,7 +232,7 @@ pub fn new_full_base(
 	config.network.extra_sets.push(grandpa::grandpa_peers_set_config());
 
 	#[cfg(feature = "cli")]
-	config.network.request_response_protocols.push(
+		config.network.request_response_protocols.push(
 		sc_finality_grandpa_warp_sync::request_response_config_for_chain(
 			&config,
 			task_manager.spawn_handle(),
@@ -441,11 +441,11 @@ pub fn new_light_base(
 		.filter(|x| !x.is_empty())
 		.map(|endpoints| -> Result<_, sc_telemetry::Error> {
 			#[cfg(feature = "browser")]
-			let transport = Some(
+				let transport = Some(
 				sc_telemetry::ExtTransport::new(libp2p_wasm_ext::ffi::websocket_transport())
 			);
 			#[cfg(not(feature = "browser"))]
-			let transport = None;
+				let transport = None;
 
 			let worker = TelemetryWorker::with_transport(16, transport)?;
 			let telemetry = worker.handle().new_telemetry(endpoints);
@@ -663,12 +663,12 @@ mod tests {
 				let NewFullBase {
 					task_manager, client, network, transaction_pool, ..
 				} = new_full_base(config,
-					|
-						block_import: &sc_consensus_babe::BabeBlockImport<Block, _, _>,
-						babe_link: &sc_consensus_babe::BabeLink<Block>,
-					| {
-						setup_handles = Some((block_import.clone(), babe_link.clone()));
-					}
+								  |
+									  block_import: &sc_consensus_babe::BabeBlockImport<Block, _, _>,
+									  babe_link: &sc_consensus_babe::BabeLink<Block>,
+								  | {
+									  setup_handles = Some((block_import.clone(), babe_link.clone()));
+								  }
 				)?;
 
 				let node = sc_service_test::TestNetComponents::new(
@@ -848,4 +848,5 @@ mod tests {
 			],
 		)
 	}
+
 }
