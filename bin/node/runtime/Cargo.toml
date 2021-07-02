@@ -1,6 +1,6 @@
 [package]
-name = "node-runtime"
-version = "2.0.1"
+name = "realis-runtime"
+version = "3.0.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 build = "build.rs"
