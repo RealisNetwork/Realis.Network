@@ -1,5 +1,6 @@
 use super::*;
-c
+
+use crate::{self as pallet_nft};
 
 use frame_support::traits::GenesisBuild;
 use frame_support::{construct_runtime, parameter_types};
@@ -59,6 +60,8 @@ parameter_types! {
 
 impl pallet_balances::Config for Test {
     type MaxLocks = ();
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type Balance = u64;
     type Event = Event;
     type DustRemoval = ();
@@ -77,6 +80,7 @@ impl Config for Test {
     type ExistentialDeposit = ExistentialDepositOfRealisTokens;
     type OnNewAccount = ();
     type RealisTokenId = u32;
+    type WeightInfo = pallet_nft::weights::SubstrateWeight<Test>;
 }
 
 pub fn new_test_ext(nft_master: Vec<u64>) -> sp_io::TestExternalities {

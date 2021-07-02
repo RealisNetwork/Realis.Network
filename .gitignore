@@ -16,8 +16,8 @@
 # The cache for chain data in container
 .local
 
-CustomSpec.json
-customSpec.json
+realis.json
+realis.json
 CustomSpecRaw.json
 customSpecRaw.json
 CustomSpecRealis.json
