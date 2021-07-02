@@ -24,6 +24,7 @@ pub mod pallet {
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
+    use frame_support::weights::Pays;
 
     use pallet_nft as NFT;
 
@@ -115,7 +116,7 @@ pub mod pallet {
     // Functions that are callable from outside the runtime.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(T::WeightInfoOf::mint_basic_nft())]
+        #[pallet::weight((T::WeightInfoOf::mint_basic_nft(), Pays::No))]
         pub fn mint_basic_nft(
             origin: OriginFor<T>,
             target_account: T::AccountId,
@@ -136,7 +137,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoOf::burn_basic_nft())]
+        #[pallet::weight((T::WeightInfoOf::burn_basic_nft(), Pays::No))]
         pub fn burn_basic_nft(
             origin: OriginFor<T>,
             token_id: pallet_nft::TokenId,
@@ -149,7 +150,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoOf::transfer_basic_nft())]
+        #[pallet::weight((T::WeightInfoOf::transfer_basic_nft(), Pays::No))]
         pub fn transfer_basic_nft(
             origin: OriginFor<T>,
             dest_account: T::AccountId,
@@ -164,7 +165,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoOf::transfer_from_pallet())]
+        #[pallet::weight((T::WeightInfoOf::transfer_from_pallet(), Pays::No))]
         pub fn transfer_from_pallet(
             origin: OriginFor<T>,
             dest: T::AccountId,
@@ -184,7 +185,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoOf::transfer_to_pallet())]
+        #[pallet::weight((T::WeightInfoOf::transfer_to_pallet(), Pays::No))]
         pub fn transfer_to_pallet(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -204,7 +205,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoOf::transfer_from_ptp())]
+        #[pallet::weight((T::WeightInfoOf::transfer_from_ptp(), Pays::No))]
         pub fn transfer_from_ptp(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -224,7 +225,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoOf::spend_in_game())]
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
         pub fn spend_in_game(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -248,7 +249,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight((90_000_000, Pays::No))]
         pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
