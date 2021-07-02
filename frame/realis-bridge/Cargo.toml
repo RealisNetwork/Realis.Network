@@ -1,6 +1,6 @@
 [package]
-name = 'pallet-realis-bridge'
-version = '0.1.0'
+name = 'realis-bridge'
+version = '0.0.1'
 authors = ['exlead@gmail.com']
 edition = '2018'
 

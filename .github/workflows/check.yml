@@ -30,7 +30,17 @@ jobs:
           curl https://sh.rustup.rs -sSf | sh -s -- -y
           source ~/.cargo/env
           rustup default stable
+          rustup update
+          rustup update nightly
+          rustup target add wasm32-unknown-unknown --toolchain nightly
+          rustup toolchain install nightly-2021-05-10
+          rustup override set nightly-2021-05-10
+          rustup target add wasm32-unknown-unknown --toolchain nightly-2021-05-10
 
       - name: Check Build
         run: |
           cargo check
+
+      - name: Build
+        run: |
+          cargo build

@@ -6,16 +6,18 @@ resolver = "2"
 members = [
 	"bin/node/cli",
     "bin/node/runtime",
-    "bin/node/primitives",
+    "bin/node/runtime-common",
      "frame/nft",
-#    "frame/realis-game-api",
+    "frame/realis-game-api",
     "frame/staking-pool",
 ]
 
 # Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.
 # `node-executor` is a dependecy of a `node-cli` at `bin/node/cli`.
 [patch.'https://github.com/paritytech/substrate']
-node-runtime = { path = "bin/node/runtime" }
+realis-cli = { path = "bin/node/cli" }
+realis-runtime = { path = "bin/node/runtime" }
+runtime-common = { path = "bin/node/runtime-common" }
 pallet-staking = {path = "frame/staking-pool"}
 pallet-nft = {path = "frame/nft"}
 [profile.dev]
