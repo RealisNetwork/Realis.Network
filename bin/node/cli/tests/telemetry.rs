@@ -70,9 +70,9 @@ async fn telemetry_works() {
 		}
 	});
 
-	let mut substrate = process::Command::new(cargo_bin("realis"));
+	let mut realis = process::Command::new(cargo_bin("realis"));
 
-	let mut substrate = substrate
+	let mut realis = realis
 		.args(&["--dev", "--tmp", "--telemetry-url"])
 		.arg(format!("ws://{} 10", addr))
 		.stdout(process::Stdio::piped())
@@ -84,17 +84,17 @@ async fn telemetry_works() {
 	server_task.await;
 
 	assert!(
-		substrate.try_wait().unwrap().is_none(),
+		realis.try_wait().unwrap().is_none(),
 		"the process should still be running"
 	);
 
 	// Stop the process
-	kill(Pid::from_raw(substrate.id().try_into().unwrap()), SIGINT).unwrap();
-	assert!(common::wait_for(&mut substrate, 40)
+	kill(Pid::from_raw(realis.id().try_into().unwrap()), SIGINT).unwrap();
+	assert!(common::wait_for(&mut realis, 40)
 		.map(|x| x.success())
 		.unwrap_or_default());
 
-	let output = substrate.wait_with_output().unwrap();
+	let output = realis.wait_with_output().unwrap();
 
 	println!("{}", String::from_utf8(output.stdout).unwrap());
 	eprintln!("{}", String::from_utf8(output.stderr).unwrap());
