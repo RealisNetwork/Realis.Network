@@ -12,6 +12,7 @@ ${IMAGE} \
 --chain ../realis.json \
 --ws-port 9944 \
 --rpc-port 9933  \
+--reserved-nodes /ip4/135.181.18.215/tcp/30333/p2p/12D3KooWGDaPu1zsyW8rJAZKeVbjKRbyBNqbU4Sxu6d2AgwuAFtt \
 --validator  \
 --rpc-methods=Unsafe  \
 --name MyNode01 \
