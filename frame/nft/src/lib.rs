@@ -1,5 +1,4 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![feature(option_result_contains)]
 
 use frame_support::{
     dispatch,
