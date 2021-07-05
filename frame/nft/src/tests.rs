@@ -14,6 +14,27 @@ fn mint_some_nft() {
     });
 }
 
+#[test]
+fn mint_existent_token() {
+    new_test_ext(vec![1]).execute_with(|| {
+        assert_ok!(Nft::mint_basic(
+            Origin::signed(1),
+            1,
+            U256([1, 0, 0, 0]),
+            self::Types { tape: 1 }
+        ));
+        assert_err!(
+            Nft::mint_basic(
+                Origin::signed(1),
+                1,
+                U256([1, 0, 0, 0]),
+                self::Types { tape: 1 }
+            ),
+            Error::<Test>::TokenExist
+        );
+    });
+}
+
 /// Mint a new token to account than burn same token from same account
 /// Mint - ok
 /// Burn - ok
