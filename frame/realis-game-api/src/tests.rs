@@ -2,6 +2,7 @@ use crate::{mock::*, Config, Currency, Error};
 use frame_support::{assert_err, assert_ok};
 use pallet_nft as NFT;
 use primitive_types::U256;
+use realis_primitives::*;
 
 fn alice<T: Config>() -> T::AccountId {
     let alice = NFT::NftMasters::<T>::get();
@@ -15,7 +16,7 @@ fn mint_some_type() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
     })
 }
@@ -27,14 +28,14 @@ fn mint_existent_token() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_err!(
             RealisGameApi::mint_basic_nft(
                 Origin::signed(1),
                 1,
                 U256([1, 0, 0, 0]),
-                NFT::Types { tape: 1 }
+                1
             ),
             Error::<Test>::TokenExist
         );
@@ -58,7 +59,7 @@ fn mint_and_burn() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::burn_basic_nft(
             Origin::signed(1),
@@ -74,13 +75,13 @@ fn mint_1_2_burn_1_2() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::mint_basic_nft(
             Origin::signed(1),
             1,
             U256([2, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::burn_basic_nft(
             Origin::signed(1),
@@ -100,13 +101,13 @@ fn mint_1_2_burn_2_1() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::mint_basic_nft(
             Origin::signed(1),
             1,
             U256([2, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::burn_basic_nft(
             Origin::signed(1),
@@ -126,7 +127,7 @@ fn mint_transfer_burn_by_owner() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::transfer_basic_nft(
             Origin::signed(1),
@@ -147,7 +148,7 @@ fn mint_transfer_burn_not_by_owner() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::transfer_basic_nft(
             Origin::signed(1),
@@ -168,7 +169,7 @@ fn mint_and_transfer() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::transfer_basic_nft(
             Origin::signed(1),
@@ -185,7 +186,7 @@ fn mint_and_transfer_2_times() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::transfer_basic_nft(
             Origin::signed(1),
@@ -207,7 +208,7 @@ fn mint_and_transfer_2_times_burn_by_owner() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::transfer_basic_nft(
             Origin::signed(1),
@@ -233,7 +234,7 @@ fn mint_and_transfer_2_times_burn_not_by_owner() {
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
-            NFT::Types { tape: 1 }
+            1
         ));
         assert_ok!(RealisGameApi::transfer_basic_nft(
             Origin::signed(1),
