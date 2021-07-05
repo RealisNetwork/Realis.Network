@@ -21,14 +21,14 @@
 use sc_chain_spec::ChainSpecExtension;
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 use serde::{Serialize, Deserialize};
-use realis_runtime::{
+use node_runtime::{
 	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, CouncilConfig,
 	DemocracyConfig, GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
 	StakingConfig, ElectionsConfig, IndicesConfig, SocietyConfig, SudoConfig, SystemConfig, NftConfig,
 	TechnicalCommitteeConfig, wasm_binary_unwrap, MAX_NOMINATIONS,
 };
-use realis_runtime::Block;
-use realis_runtime::constants::currency::*;
+use node_runtime::Block;
+use node_runtime::constants::currency::*;
 use sc_service::ChainType;
 use hex_literal::hex;
 use sc_telemetry::TelemetryEndpoints;
@@ -39,11 +39,11 @@ use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_runtime::{Perbill, traits::{Verify, IdentifyAccount}};
 
 pub use node_primitives::{AccountId, Balance, Signature};
-pub use realis_runtime::GenesisConfig;
-use realis_runtime::pallet_staking;
-use realis_runtime::realis_game_api;
+pub use node_runtime::GenesisConfig;
+use node_runtime::pallet_staking;
+use node_runtime::realis_game_api;
 use sc_telemetry::serde_json::Map;
-use realis_runtime::Runtime;
+use node_runtime::Runtime;
 
 type AccountPublic = <Signature as Verify>::Signer;
 
@@ -335,7 +335,7 @@ pub fn testnet_genesis(
 		},
 		babe: BabeConfig {
 			authorities: vec![],
-			epoch_config: Some(realis_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
 		},
 		im_online: ImOnlineConfig {
 			keys: vec![],
@@ -494,7 +494,7 @@ pub fn realis_genesis(
 		},
 		babe: BabeConfig {
 			authorities: vec![],
-			epoch_config: Some(realis_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
 		},
 		im_online: ImOnlineConfig {
 			keys: vec![],
