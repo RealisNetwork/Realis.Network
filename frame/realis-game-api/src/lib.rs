@@ -27,6 +27,7 @@ pub mod pallet {
     use frame_support::weights::Pays;
 
     use pallet_nft as NFT;
+    use realis_network_primitives::{Basic, TokenId};
 
     type BalanceOf<T> =
         <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -120,10 +121,10 @@ pub mod pallet {
         pub fn mint_basic_nft(
             origin: OriginFor<T>,
             target_account: T::AccountId,
-            token_id: pallet_nft::TokenId,
-            type_token: pallet_nft::Types,
+            token_id: TokenId,
+            basic: Basic,
         ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
+            let who = ensure_signed(origin.clone())?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
 
@@ -132,7 +133,7 @@ pub mod pallet {
                 Error::<T>::TokenExist
             );
 
-            NFT::Pallet::<T>::mint_basic_nft(&target_account, token_id, type_token)?;
+            NFT::Pallet::<T>::mint_basic(origin.clone(), target_account, token_id, basic)?;
             Self::deposit_event(Event::<T>::TokenMinted);
             Ok(())
         }
@@ -140,7 +141,7 @@ pub mod pallet {
         #[pallet::weight((T::WeightInfoOf::burn_basic_nft(), Pays::No))]
         pub fn burn_basic_nft(
             origin: OriginFor<T>,
-            token_id: pallet_nft::TokenId,
+            token_id: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             let nft_master = NFT::NftMasters::<T>::get();
@@ -154,7 +155,7 @@ pub mod pallet {
         pub fn transfer_basic_nft(
             origin: OriginFor<T>,
             dest_account: T::AccountId,
-            token_id: pallet_nft::TokenId,
+            token_id: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();

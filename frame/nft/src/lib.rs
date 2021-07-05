@@ -28,53 +28,13 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
     use sp_runtime::ArithmeticError;
 
+    use realis_network_primitives::*;
+
     use super::*;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
     pub struct Pallet<T>(PhantomData<T>);
-
-    pub type TokenId = U256;
-
-    #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-    pub enum Rarity {
-        Common,
-        Uncommon,
-        Rare,
-        Mythical,
-        Legendary,
-    }
-
-    #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-    pub enum Socket {
-        Head,
-        Body,
-        LegLeft,
-        LegRight,
-        ArmLeft,
-        ArmRight,
-        Weapon,
-    }
-
-    #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy, Default)]
-    pub struct Types {
-        pub tape: u8,
-    }
-
-    #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-    pub struct Params {
-        pub strength: u8,
-        pub agility: u8,
-        pub intelligence: u8,
-    }
-
-    #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-    pub struct Token {
-        pub token_id: TokenId,
-        pub rarity: Rarity,
-        pub socket: Socket,
-        pub params: Params,
-    }
 
     /// Simplified reasons for withdrawing balance.
     #[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug)]
@@ -287,7 +247,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn tokens_with_types)]
     pub(crate) type TokensWithTypes<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(TokenId, Types)>>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(TokenId, Token)>>;
 
     /// Contains vector of all accounts ???
     #[pallet::storage]
@@ -352,12 +312,15 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             // Check if account that signed operation have permission for this operation
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
-            // Create token by grouping up arguments
-            let token = Token {
-                token_id,
+            let mergeable = Mergeable {
                 rarity,
                 socket,
                 params,
+            };
+            // Create token by grouping up arguments
+            let token = Token {
+                id: token_id,
+                token_type: Type::Mergeable(mergeable)
             };
 
             // Push token on account
@@ -375,14 +338,18 @@ pub mod pallet {
             origin: OriginFor<T>,
             target_account: T::AccountId,
             token_id: TokenId,
-            type_token: Types,
+            basic: Basic,
         ) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
             // Check if account that signed operation have permission for this operation
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
+            let token = Token {
+                id: token_id,
+                token_type: Type::Basic(basic)
+            };
             // Push token on account
-            Self::mint_basic_nft(&target_account, token_id, type_token)?;
+            Self::mint_basic_nft(&target_account, token_id, token)?;
             // Call mint event
             Self::deposit_event(Event::TokenMinted(target_account, token_id));
             Ok(())
@@ -468,7 +435,7 @@ pub mod pallet {
         pub fn mint_basic_nft(
             target_account: &T::AccountId,
             token_id: TokenId,
-            type_tokens: Types,
+            basic_tokens: Token,
         ) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
             ensure!(
                 !AccountForToken::<T>::contains_key(token_id),
@@ -480,7 +447,7 @@ pub mod pallet {
             TokensWithTypes::<T>::mutate(&target_account, |tokens| {
                 tokens
                     .get_or_insert(Vec::default())
-                    .push((token_id, type_tokens));
+                    .push((token_id, basic_tokens));
             });
 
             AccountForToken::<T>::insert(token_id, &target_account);
