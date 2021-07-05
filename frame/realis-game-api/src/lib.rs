@@ -21,13 +21,13 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_support::traits::Imbalance;
     use frame_support::traits::{Currency, ExistenceRequirement, WithdrawReasons};
+    use frame_support::weights::Pays;
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
-    use frame_support::weights::Pays;
 
     use pallet_nft as NFT;
-    use realis_network_primitives::{Basic, TokenId};
+    use realis_primitives::{Basic, TokenId};
 
     type BalanceOf<T> =
         <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -139,10 +139,7 @@ pub mod pallet {
         }
 
         #[pallet::weight((T::WeightInfoOf::burn_basic_nft(), Pays::No))]
-        pub fn burn_basic_nft(
-            origin: OriginFor<T>,
-            token_id: TokenId,
-        ) -> DispatchResult {
+        pub fn burn_basic_nft(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);

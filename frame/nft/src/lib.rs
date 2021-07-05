@@ -28,7 +28,7 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
     use sp_runtime::ArithmeticError;
 
-    use realis_network_primitives::*;
+    use realis_primitives::*;
 
     use super::*;
 
@@ -320,7 +320,7 @@ pub mod pallet {
             // Create token by grouping up arguments
             let token = Token {
                 id: token_id,
-                token_type: Type::Mergeable(mergeable)
+                token_type: Type::Mergeable(mergeable),
             };
 
             // Push token on account
@@ -346,7 +346,7 @@ pub mod pallet {
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
             let token = Token {
                 id: token_id,
-                token_type: Type::Basic(basic)
+                token_type: Type::Basic(basic),
             };
             // Push token on account
             Self::mint_basic_nft(&target_account, token_id, token)?;

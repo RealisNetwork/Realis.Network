@@ -90,7 +90,7 @@ pub fn new_test_ext(nft_master: Vec<u64>) -> sp_io::TestExternalities {
     pallet_nft::GenesisConfig::<Test> {
         nft_masters: nft_master,
     }
-        .assimilate_storage(&mut t)
-        .unwrap();
+    .assimilate_storage(&mut t)
+    .unwrap();
     t.into()
 }

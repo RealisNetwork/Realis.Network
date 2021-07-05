@@ -1,13 +1,15 @@
-use frame_support::pallet_prelude::{Encode, Decode};
+#![cfg_attr(not(feature = "std"), no_std)]
+
+use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
 
-pub type TokenId 	= U256;
-pub type Basic 		= u8;
+pub type TokenId = U256;
+pub type Basic = u8;
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub struct Token {
-    pub id: 			TokenId,
-    pub token_type: 	Type,
+    pub id: TokenId,
+    pub token_type: Type,
     // market_type: 	MarketType
 }
 
@@ -26,9 +28,9 @@ pub struct Token {
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub enum Type {
     // Skin 		,
-    Mergeable 	(Mergeable),
-    Stackable 	(Stackable),
-    Basic 		(Basic),
+    Mergeable(Mergeable),
+    Stackable(Stackable),
+    Basic(Basic),
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
@@ -51,7 +53,7 @@ pub enum Rarity {
     Uncommon,
     Rare,
     Mythical,
-    Legendary
+    Legendary,
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
@@ -67,7 +69,7 @@ pub enum Socket {
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub struct Params {
-    strength: 		u8,
-    agility: 		u8,
-    intelligence: 	u8
+    strength: u8,
+    agility: u8,
+    intelligence: u8,
 }
