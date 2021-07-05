@@ -1,4 +1,4 @@
-use crate::{mock::*, Error, Params, Rarity, Socket, Types, VecOfTokensOnAccount};
+use crate::{mock::*, Error, Params, Rarity, Socket, Types};
 use frame_support::{assert_err, assert_ok};
 use primitive_types::U256;
 
@@ -15,14 +15,23 @@ fn mint_some_nft() {
 }
 
 #[test]
-fn mint_nft_not_by_nft_master() {
+fn mint_existent_token() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_err!(Nft::mint_basic(
-            Origin::signed(2),
+        assert_ok!(Nft::mint_basic(
+            Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             self::Types { tape: 1 }
-        ), Error::<Test>::NotNftMaster);
+        ));
+        assert_err!(
+            Nft::mint_basic(
+                Origin::signed(1),
+                1,
+                U256([1, 0, 0, 0]),
+                self::Types { tape: 1 }
+            ),
+            Error::<Test>::TokenExist
+        );
     });
 }
 
