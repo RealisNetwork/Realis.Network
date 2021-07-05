@@ -7,8 +7,10 @@
 .idea/
 .vscode/
 .devcontainer/
+./tests/
 /*.iml
 .DS_Store
+common.rs
 
 # The cache for docker container dependency
 .cargo
