@@ -5,6 +5,7 @@ mod benchmarking {
     use crate::*;
     use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
     use frame_system::RawOrigin as SystemOrigin;
+    use realis_primitives::*;
 
     const SEED: u32 = 1;
 
@@ -36,7 +37,7 @@ mod benchmarking {
             SystemOrigin::Signed(caller.clone()),
             caller.clone(),
             U256([1, 0, 0, 0]),
-            Types { tape: 1 }
+            1
         )
 
         burn {
@@ -65,7 +66,7 @@ mod benchmarking {
                 owner_origin,
                 caller.clone(),
                 U256([1, 0, 0, 0]),
-                Types { tape: 1 }
+                1
             );
         }: _(
             SystemOrigin::Signed(caller.clone()),
@@ -102,7 +103,7 @@ mod benchmarking {
                 owner_origin,
                 caller.clone(),
                 U256([1, 0, 0, 0]),
-                Types { tape: 1 }
+                1
             );
         }: _(
             SystemOrigin::Signed(caller.clone()),

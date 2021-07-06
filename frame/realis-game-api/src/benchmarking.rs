@@ -9,6 +9,7 @@ mod benchmarking {
     use frame_support::traits::{Currency, Get};
     use frame_system::RawOrigin as SystemOrigin;
     use sp_runtime::traits::{Saturating, StaticLookup};
+    use realis_primitives::*;
 
     const SEED: u32 = 1;
     const ED_MULTIPLIER: u32 = 10;
@@ -28,7 +29,7 @@ mod benchmarking {
               owner_origin,
               caller.clone(),
               Nft::U256([1, 0, 0, 0]),
-              Nft::Types { tape: 1 }
+              1
           )
 
           burn_basic_nft {
@@ -38,7 +39,7 @@ mod benchmarking {
                   owner_origin,
                   caller.clone(),
                   Nft::U256([1, 0, 0, 0]),
-                  Nft::Types { tape: 1 }
+                  1
               )?;
           }: _(
               SystemOrigin::Signed(caller.clone()),
@@ -53,7 +54,7 @@ mod benchmarking {
                   owner_origin,
                   caller.clone(),
                   Nft::U256([1, 0, 0, 0]),
-                  Nft::Types { tape: 1 }
+                  1
               )?;
           }: _(
               SystemOrigin::Signed(caller.clone()),
