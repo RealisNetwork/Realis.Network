@@ -1,5 +1,4 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![feature(option_result_contains)]
 
 use frame_support::{
     dispatch,
@@ -226,7 +225,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn tokens_of_owner_by_index)]
     pub(crate) type VecOfTokensOnAccount<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(TokenId, Token)>>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
 
     /// Map where
     /// key - TokenId
@@ -243,11 +242,11 @@ pub mod pallet {
     pub(crate) type TotalForAccount<T: Config> =
         StorageMap<_, Twox64Concat, T::AccountId, u32, ValueQuery>;
 
-    /// Map where (same as VecOfTokensOnAccount by not for Token, insted for Types)
+    /// Map where (same as VecOfTokensOnAccount by not for Token, instead for Types)
     #[pallet::storage]
     #[pallet::getter(fn tokens_with_types)]
     pub(crate) type TokensWithTypes<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(TokenId, Token)>>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
 
     /// Contains vector of all accounts ???
     #[pallet::storage]
@@ -424,7 +423,7 @@ pub mod pallet {
             Self::inc_total_for_account(target_account)?;
 
             VecOfTokensOnAccount::<T>::mutate(&target_account, |tokens| {
-                tokens.get_or_insert(Vec::default()).push((token_id, token));
+                tokens.get_or_insert(Vec::default()).push(token);
             });
 
             AccountForToken::<T>::insert(token_id, &target_account);
@@ -445,9 +444,7 @@ pub mod pallet {
             Self::inc_total_for_account(target_account)?;
 
             TokensWithTypes::<T>::mutate(&target_account, |tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push((token_id, basic_tokens));
+                tokens.get_or_insert(Vec::default()).push(basic_tokens);
             });
 
             AccountForToken::<T>::insert(token_id, &target_account);
@@ -459,7 +456,10 @@ pub mod pallet {
             Self::dec_total_for_account(owner)?;
 
             VecOfTokensOnAccount::<T>::mutate(owner, |tokens| {
-                tokens.as_mut().unwrap().retain(|val| val.0 != token_id);
+                tokens
+                    .as_mut()
+                    .unwrap()
+                    .retain(|token| token.id != token_id);
             });
 
             AccountForToken::<T>::remove(&token_id);
@@ -482,7 +482,7 @@ pub mod pallet {
                 tuple_tokens
                     .as_mut()
                     .unwrap()
-                    .retain(|val| val.0 != token_id);
+                    .retain(|token| token.id != token_id);
             });
 
             AccountForToken::<T>::remove(&token_id);
@@ -505,19 +505,16 @@ pub mod pallet {
 
             AccountForToken::<T>::insert(token_id, dest_account);
 
-            // TODO check is owner in TokensForAccount
-            // TODO check is owner own this token
-
-            // Remove (token_id, token) pair from current owner
-            let (token_id, token) = VecOfTokensOnAccount::<T>::mutate(owner, |tokens| {
+            // Remove token from current owner
+            let token = VecOfTokensOnAccount::<T>::mutate(owner, |tokens| {
                 let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|(id, _)| *id == token_id);
+                let index = tokens_mut.iter().position(|token| token.id == token_id);
                 tokens_mut.remove(index.unwrap())
             });
 
-            // Transfer (token_id, token) to dest_account
+            // Transfer token to dest_account
             VecOfTokensOnAccount::<T>::mutate(dest_account, |tokens| {
-                tokens.get_or_insert(Vec::default()).push((token_id, token));
+                tokens.get_or_insert(Vec::default()).push(token);
             });
 
             Ok(())
@@ -543,16 +540,16 @@ pub mod pallet {
 
             AccountForToken::<T>::insert(token_id, dest_account);
 
-            // Remove (token_id, token) pair from current owner
-            let (token_id, token) = TokensWithTypes::<T>::mutate(&owner, |tokens| {
+            // Remove token from current owner
+            let token = TokensWithTypes::<T>::mutate(&owner, |tokens| {
                 let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|(id, _)| *id == token_id);
+                let index = tokens_mut.iter().position(|token| token.id == token_id);
                 tokens_mut.remove(index.unwrap())
             });
 
-            // Transfer (token_id, token) to dest_account
+            // Transfer token to dest_account
             TokensWithTypes::<T>::mutate(dest_account, |tokens| {
-                tokens.get_or_insert(Vec::default()).push((token_id, token));
+                tokens.get_or_insert(Vec::default()).push(token);
             });
 
             Ok(())
@@ -571,7 +568,6 @@ pub mod pallet {
             Ok(())
         }
 
-        // TODO: cleanup unused stuff?
         // pub fn do_transfer(
         //     transactor: &T::AccountId,
         //     dest: &T::AccountId,

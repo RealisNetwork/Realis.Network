@@ -119,7 +119,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 267,
+    spec_version: 270,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 2,
@@ -140,7 +140,6 @@ pub fn native_version() -> NativeVersion {
         can_author_with: Default::default(),
     }
 }
-
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 
 pub struct DealWithFees;
@@ -1085,14 +1084,6 @@ impl pallet_gilt::Config for Runtime {
     type WeightInfo = pallet_gilt::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_transaction_storage::Config for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type Call = Call;
-    type FeeDestination = ();
-    type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
-}
-
 parameter_types! {
     pub const ExistentialDepositOfRealisTokens: u128 = 1;
 }
@@ -1120,8 +1111,8 @@ pallet_staking_reward_curve::build! {
 parameter_types! {
     pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
     pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-    pub const BondingDuration: pallet_staking::EraIndex = 24 * 28;
-    pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
+    pub const BondingDuration: pallet_staking::EraIndex = 28;
+    pub const SlashDeferDuration: pallet_staking::EraIndex = 27; // 1/4 the bonding duration.
     pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
     pub const MaxNominatorRewardedPerValidator: u32 = 256;
     pub OffchainRepeat: BlockNumber = 5;
@@ -1250,7 +1241,6 @@ construct_runtime!(
         Mmr: pallet_mmr::{Pallet, Storage},
         Lottery: pallet_lottery::{Pallet, Call, Storage, Event<T>},
         Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
-        TransactionStorage: pallet_transaction_storage::{Pallet, Call, Storage, Inherent, Config<T>, Event<T>},
         // ChainBridge: chain_bridge::{Pallet, Call, Storage, Event<T>},
         // RealisBridge: pallet_realis_bridge::{Pallet, Call, Event<T>},
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
@@ -1625,7 +1615,6 @@ impl_runtime_apis! {
             add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
             add_benchmark!(params, batches, pallet_tips, Tips);
-            add_benchmark!(params, batches, pallet_transaction_storage, TransactionStorage);
             add_benchmark!(params, batches, pallet_treasury, Treasury);
             add_benchmark!(params, batches, pallet_utility, Utility);
             add_benchmark!(params, batches, pallet_vesting, Vesting);

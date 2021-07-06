@@ -6,31 +6,16 @@ use realis_primitives::*;
 #[test]
 fn mint_some_nft() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
     });
 }
 
 #[test]
 fn mint_existent_token() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
         assert_err!(
-            Nft::mint_basic(
-                Origin::signed(1),
-                1,
-                U256([1, 0, 0, 0]),
-                1
-            ),
+            Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1),
             Error::<Test>::TokenExist
         );
     });
@@ -371,12 +356,7 @@ fn try_transfer_basic_not_exists_token() {
 #[test]
 fn basic_mint_and_burn_same_token() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
         assert_ok!(Nft::burn_basic(Origin::signed(1), U256([1, 0, 0, 0])));
     })
 }
@@ -387,12 +367,7 @@ fn basic_mint_and_burn_same_token() {
 #[test]
 fn basic_mint_and_burn_different_token() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
         assert_err!(
             Nft::burn_basic(Origin::signed(1), U256([2; 4])),
             Error::<Test>::NonExistentToken
@@ -406,12 +381,7 @@ fn basic_mint_and_burn_different_token() {
 #[test]
 fn basic_mint_token_and_burn_it_not_by_owner() {
     new_test_ext(vec![1, 2]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
         assert_err!(
             Nft::burn_basic(Origin::signed(2), U256([1, 0, 0, 0])),
             Error::<Test>::NotTokenOwner
@@ -425,12 +395,7 @@ fn basic_mint_token_and_burn_it_not_by_owner() {
 #[test]
 fn basic_mint_token_and_transfer_it() {
     new_test_ext(vec![1, 2]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
         assert_ok!(Nft::transfer_basic(
             Origin::signed(1),
             2,
@@ -445,12 +410,7 @@ fn basic_mint_token_and_transfer_it() {
 #[test]
 fn basic_mint_token_and_transfer_it_to_non_exist_account() {
     new_test_ext(vec![1, 2]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
         assert_ok!(Nft::transfer_basic(
             Origin::signed(1),
             99,
@@ -467,12 +427,7 @@ fn basic_mint_token_and_transfer_it_to_non_exist_account() {
 #[test]
 fn basic_mint_token_and_transfer_it_two_times() {
     new_test_ext(vec![1, 2]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
         assert_ok!(Nft::transfer_basic(
             Origin::signed(1),
             2,
@@ -493,12 +448,7 @@ fn basic_mint_token_and_transfer_it_two_times() {
 #[test]
 fn basic_mint_token_and_transfer_it_then_burn() {
     new_test_ext(vec![1, 2]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
         assert_ok!(Nft::transfer_basic(
             Origin::signed(1),
             2,
@@ -516,12 +466,7 @@ fn basic_mint_token_and_transfer_it_then_burn() {
 #[test]
 fn basic_mint_token_and_transfer_it_then_burn_not_by_owner() {
     new_test_ext(vec![1, 2]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
         assert_ok!(Nft::transfer_basic(
             Origin::signed(1),
             2,
@@ -542,18 +487,8 @@ fn basic_mint_token_and_transfer_it_then_burn_not_by_owner() {
 #[test]
 fn basic_mint_2_tokens_than_burn_two_tokens() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([1, 0, 0, 0]),
-            1
-        ));
-        assert_ok!(Nft::mint_basic(
-            Origin::signed(1),
-            1,
-            U256([2, 0, 0, 0]),
-            1
-        ));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1));
+        assert_ok!(Nft::mint_basic(Origin::signed(1), 1, U256([2, 0, 0, 0]), 1));
         assert_ok!(Nft::burn_basic(Origin::signed(1), U256([1, 0, 0, 0])));
         assert_ok!(Nft::burn_basic(Origin::signed(1), U256([2, 0, 0, 0])));
     })
