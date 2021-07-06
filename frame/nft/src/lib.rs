@@ -444,9 +444,7 @@ pub mod pallet {
             Self::inc_total_for_account(target_account)?;
 
             TokensWithTypes::<T>::mutate(&target_account, |tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push(basic_tokens);
+                tokens.get_or_insert(Vec::default()).push(basic_tokens);
             });
 
             AccountForToken::<T>::insert(token_id, &target_account);
@@ -458,7 +456,10 @@ pub mod pallet {
             Self::dec_total_for_account(owner)?;
 
             VecOfTokensOnAccount::<T>::mutate(owner, |tokens| {
-                tokens.as_mut().unwrap().retain(|token| token.id != token_id);
+                tokens
+                    .as_mut()
+                    .unwrap()
+                    .retain(|token| token.id != token_id);
             });
 
             AccountForToken::<T>::remove(&token_id);

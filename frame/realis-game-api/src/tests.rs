@@ -31,12 +31,7 @@ fn mint_existent_token() {
             1
         ));
         assert_err!(
-            RealisGameApi::mint_basic_nft(
-                Origin::signed(1),
-                1,
-                U256([1, 0, 0, 0]),
-                1
-            ),
+            RealisGameApi::mint_basic_nft(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1),
             Error::<Test>::TokenExist
         );
     })

@@ -412,7 +412,6 @@ pub fn testnet_genesis(
         },
         vesting: Default::default(),
         gilt: Default::default(),
-        transaction_storage: Default::default(),
         nft: NftConfig {
             nft_masters: nft_master,
         },
@@ -579,7 +578,6 @@ pub fn realis_genesis(
         },
         vesting: Default::default(),
         gilt: Default::default(),
-        transaction_storage: Default::default(),
         nft: NftConfig {
             nft_masters: nft_master,
         },

@@ -282,6 +282,7 @@ pub mod weights;
 use codec::{Decode, Encode, HasCompact};
 use frame_election_provider_support::{data_provider, ElectionProvider, Supports, VoteWeight};
 use frame_support::traits::ExistenceRequirement;
+use frame_support::weights::Pays;
 use frame_support::{
     pallet_prelude::*,
     traits::{
@@ -1483,7 +1484,7 @@ pub mod pallet {
         /// - Write: Bonded, Payee, [Origin Account], Locks, Ledger
         /// # </weight>
 
-        #[pallet::weight(T::WeightInfo::bond())]
+        #[pallet::weight((T::WeightInfo::bond(), Pays::No))]
         pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
             let _who = ensure_root(origin)?;
             let account_id = Self::account_id();
@@ -1493,7 +1494,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfo::bond())]
+        #[pallet::weight((T::WeightInfo::bond(), Pays::No))]
         pub fn transfer_to_pallet(
             origin: OriginFor<T>,
             from: T::AccountId,
