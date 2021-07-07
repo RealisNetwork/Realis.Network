@@ -311,15 +311,16 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             // Check if account that signed operation have permission for this operation
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
-            let mergeable = Mergeable {
-                rarity,
-                socket,
-                params,
-            };
             // Create token by grouping up arguments
             let token = Token {
                 id: token_id,
-                token_type: TokenType::Mergeable(mergeable),
+                token_type: TokenType::Mergeable(
+                    Mergeable {
+                        rarity,
+                        socket,
+                        params,
+                    }
+                ),
             };
 
             // Push token on account
@@ -343,6 +344,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             // Check if account that signed operation have permission for this operation
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
+            // Create token by grouping up arguments
             let token = Token {
                 id: token_id,
                 token_type: TokenType::Basic(basic),
@@ -354,56 +356,74 @@ pub mod pallet {
             Ok(())
         }
 
-        /// Burn token(only owner)
+        /// Burn mergeable token(only owner)
         #[pallet::weight(T::WeightInfo::burn())]
         pub fn burn(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
+            // Check is signed correct
             let origin = ensure_signed(origin)?;
+            // Get owner by token_id
             let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
+            // Only owner can burn token
             ensure!(origin == owner, Error::<T>::NotTokenOwner);
-
+            // Burn token
             Self::burn_nft(token_id, &owner)?;
+            // Call burn event
             Self::deposit_event(Event::TokenBurned());
             Ok(())
         }
 
+        /// Burn basic token(only owner)
         #[pallet::weight(T::WeightInfo::burn_basic())]
         pub fn burn_basic(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
+            // Check is signed correct
             let origin = ensure_signed(origin)?;
+            // Get owner by token_id
             let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
+            // Only owner can burn token
             ensure!(origin == owner, Error::<T>::NotTokenOwner);
-
+            // Burn token
             Self::burn_basic_nft(token_id, Some(owner))?;
+            // Call burn event
             Self::deposit_event(Event::TokenBurned());
             Ok(())
         }
 
-        /// Transfer token(only owner)
+        /// Transfer mergeable token(only owner)
         #[pallet::weight(T::WeightInfo::transfer())]
         pub fn transfer(
             origin: OriginFor<T>,
             dest_account: T::AccountId,
             token_id: TokenId,
         ) -> DispatchResult {
+            // Check is signed correct
             let origin = ensure_signed(origin)?;
+            // Get owner by token_id
             let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
+            // Only owner can transfer token
             ensure!(origin == owner, Error::<T>::NotTokenOwner);
-
+            // Transfer token
             Self::transfer_nft(&dest_account, &owner, token_id)?;
+            // Call transfer event
             Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
             Ok(())
         }
 
+        /// Transfer basic token(only owner)
         #[pallet::weight(T::WeightInfo::transfer_basic())]
         pub fn transfer_basic(
             origin: OriginFor<T>,
             dest_account: T::AccountId,
             token_id: TokenId,
         ) -> DispatchResult {
+            // Check is signed correct
             let origin = ensure_signed(origin)?;
+            // Get owner by token_id
             let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
+            // Only owner can transfer token
             ensure!(origin == owner, Error::<T>::NotTokenOwner);
-
+            // Transfer token
             Self::transfer_basic_nft(token_id, Some(owner), &dest_account)?;
+            // Call transfer event
             Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
             Ok(())
         }
