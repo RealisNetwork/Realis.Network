@@ -9,7 +9,7 @@ pub type Basic = u8;
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub struct Token {
     pub id: TokenId,
-    pub token_type: Type,
+    pub token_type: Types,
     // pub market_type: 	MarketType
 }
 
