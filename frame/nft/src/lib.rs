@@ -319,7 +319,7 @@ pub mod pallet {
             // Create token by grouping up arguments
             let token = Token {
                 id: token_id,
-                token_type: Type::mergeable(mergeable),
+                token_type: Types::mergeable(mergeable),
             };
 
             // Push token on account
@@ -345,7 +345,7 @@ pub mod pallet {
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
             let token = Token {
                 id: token_id,
-                token_type: Type::basic(basic),
+                token_type: Types::basic(basic),
             };
             // Push token on account
             Self::mint_basic_nft(&target_account, token_id, token)?;

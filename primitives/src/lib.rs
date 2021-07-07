@@ -26,7 +26,7 @@ pub struct Token {
 // }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-pub enum Type {
+pub enum Types {
     // Skin 		,
     mergeable(Mergeable),
     stackable(Stackable),
