@@ -10,7 +10,7 @@ pub type Basic = u8;
 pub struct Token {
     pub id: TokenId,
     pub token_type: Type,
-    // market_type: 	MarketType
+    // pub market_type: 	MarketType
 }
 
 // #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
@@ -48,7 +48,6 @@ pub enum Stackable {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Rarity {
     Common,
     Uncommon,
@@ -58,7 +57,6 @@ pub enum Rarity {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Socket {
     Head,
     Body,
@@ -70,7 +68,6 @@ pub enum Socket {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Params {
     pub strength: u8,
     pub agility: u8,
