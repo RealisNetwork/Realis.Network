@@ -1,3 +1,4 @@
+
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::pallet_prelude::{Decode, Encode};
@@ -9,8 +10,8 @@ pub type Basic = u8;
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub struct Token {
     pub id: TokenId,
-    pub token_type: Types,
-    // pub market_type: 	MarketType
+    pub token_type: TokenType,
+    // market_type: 	MarketType
 }
 
 // #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
@@ -26,11 +27,11 @@ pub struct Token {
 // }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-pub enum Types {
+pub enum TokenType {
     // Skin 		,
-    mergeable(Mergeable),
-    stackable(Stackable),
-    basic(Basic)
+    Mergeable(Mergeable),
+    Stackable(Stackable),
+    Basic(Basic),
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
