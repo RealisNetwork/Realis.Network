@@ -296,8 +296,8 @@ pub mod pallet {
     /// Call functions - available from outside
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        /// Create token and push it to specific account
-        /// Token parametrs are determined by functions arguments: rarity, socket, params
+        /// Create mergeable token and push it to specific account
+        /// Token arguments are determined by functions arguments: rarity, socket, params
         #[pallet::weight(T::WeightInfo::mint())]
         pub fn mint(
             origin: OriginFor<T>,
@@ -331,8 +331,8 @@ pub mod pallet {
             Ok(())
         }
 
-        /// Create token(type token) and push it to specific account
-        /// Token parametrs are determined by functions arguments: type
+        /// Create token(basic token) and push it to specific account
+        /// Token arguments are determined by functions arguments: type
         #[pallet::weight(T::WeightInfo::mint_basic())]
         pub fn mint_basic(
             origin: OriginFor<T>,
