@@ -2,8 +2,6 @@
 
 use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
 
 pub type TokenId = U256;
 pub type Basic = u8;
@@ -27,36 +25,15 @@ pub struct Token {
 // 	OnHands,
 // }
 
-impl From<Mergeable> for Type {
-    fn from(m: Mergeable) -> Self {
-        Self::Mergeable(m)
-    }
-}
-
-impl From<Stackable> for Type {
-    fn from(s: Stackable) -> Self {
-        Self::Stackable(s)
-    }
-}
-
-impl From<Basic> for Type {
-    fn from(b: Basic) -> Self {
-        Self::Basic(b)
-    }
-}
-
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-#[non_exhaustive]
 pub enum Type {
     // Skin 		,
-    Mergeable(Mergeable),
-    Stackable(Stackable),
-    Basic(Basic),
+    mergeable(Mergeable),
+    stackable(Stackable),
+    basic(Basic)
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Mergeable {
     pub rarity: Rarity,
     pub socket: Socket,
@@ -64,7 +41,6 @@ pub struct Mergeable {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Stackable {
     Silver,
     Gold,
