@@ -6,7 +6,6 @@ use frame_support::{
 };
 use frame_system::RefCount;
 pub use pallet::*;
-pub use primitive_types::U256;
 use sp_runtime::traits::{AtLeast32BitUnsigned, Saturating};
 use sp_std::prelude::*;
 
