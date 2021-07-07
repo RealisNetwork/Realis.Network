@@ -137,9 +137,9 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
     #[pallet::metadata(
-        T::AccountId = "AccountId",
-        TokenBalance = "Balance",
-        RealisTokenId = "T::RealisTokenId"
+    T::AccountId = "AccountId",
+    TokenBalance = "Balance",
+    RealisTokenId = "T::RealisTokenId"
     )]
     pub enum Event<T: Config> {
         /// Event documentation should end with an array that provides descriptive names for event
@@ -225,7 +225,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn tokens_of_owner_by_index)]
     pub(crate) type VecOfTokensOnAccount<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
+    StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
 
     /// Map where
     /// key - TokenId
@@ -240,13 +240,13 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn total_for_account)]
     pub(crate) type TotalForAccount<T: Config> =
-        StorageMap<_, Twox64Concat, T::AccountId, u32, ValueQuery>;
+    StorageMap<_, Twox64Concat, T::AccountId, u32, ValueQuery>;
 
     /// Map where (same as VecOfTokensOnAccount by not for Token, instead for Types)
     #[pallet::storage]
     #[pallet::getter(fn tokens_with_types)]
     pub(crate) type TokensWithTypes<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
+    StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
 
     /// Contains vector of all accounts ???
     #[pallet::storage]
@@ -319,7 +319,7 @@ pub mod pallet {
             // Create token by grouping up arguments
             let token = Token {
                 id: token_id,
-                token_type: Type::Mergeable(mergeable),
+                token_type: TokenType::Mergeable(mergeable),
             };
 
             // Push token on account
@@ -345,7 +345,7 @@ pub mod pallet {
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
             let token = Token {
                 id: token_id,
-                token_type: Type::Basic(basic),
+                token_type: TokenType::Basic(basic),
             };
             // Push token on account
             Self::mint_basic_nft(&target_account, token_id, token)?;
