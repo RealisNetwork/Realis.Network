@@ -3,6 +3,8 @@
 mod benchmarking {
     use crate::Pallet as Nft;
     use crate::*;
+    use primitive_types::U256;
+    use realis_primitives::*;
     use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
     use frame_system::RawOrigin as SystemOrigin;
     use realis_primitives::*;

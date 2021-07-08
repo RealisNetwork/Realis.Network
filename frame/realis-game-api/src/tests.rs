@@ -2,7 +2,6 @@ use crate::{mock::*, Config, Currency, Error};
 use frame_support::{assert_err, assert_ok};
 use pallet_nft as NFT;
 use primitive_types::U256;
-use realis_primitives::*;
 
 fn alice<T: Config>() -> T::AccountId {
     let alice = NFT::NftMasters::<T>::get();
