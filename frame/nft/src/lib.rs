@@ -9,15 +9,15 @@ pub use pallet::*;
 use sp_runtime::traits::{AtLeast32BitUnsigned, Saturating};
 use sp_std::prelude::*;
 
+// Add test modules
 #[cfg(test)]
 mod mock;
 #[cfg(test)]
 mod tests;
 
-/// Add benchmarking module
+// Add benchmarking modules
 mod benchmarking;
 pub mod weights;
-
 pub use weights::WeightInfo;
 
 #[frame_support::pallet]
