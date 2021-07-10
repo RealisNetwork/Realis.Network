@@ -6069,6 +6069,7 @@ dependencies = [
  "frame-system",
  "parity-scale-codec",
  "primitive-types",
+ "serde",
  "sp-runtime 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

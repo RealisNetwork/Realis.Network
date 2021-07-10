@@ -3,6 +3,8 @@
 mod benchmarking {
     use crate::Pallet as RealisGameApi;
     use crate::*;
+    use primitive_types::U256;
+    use realis_primitives::*;
     use pallet_nft as Nft;
 
     use frame_benchmarking::{account, benchmarks};
@@ -27,8 +29,8 @@ mod benchmarking {
           }: _(
               owner_origin,
               caller.clone(),
-              Nft::U256([1, 0, 0, 0]),
-              Nft::Types { tape: 1 }
+              U256([1, 0, 0, 0]),
+              1
           )
 
           burn_basic_nft {
@@ -37,12 +39,12 @@ mod benchmarking {
               RealisGameApi::<T>::mint_basic_nft(
                   owner_origin,
                   caller.clone(),
-                  Nft::U256([1, 0, 0, 0]),
-                  Nft::Types { tape: 1 }
+                  U256([1, 0, 0, 0]),
+                  1
               )?;
           }: _(
               SystemOrigin::Signed(caller.clone()),
-              Nft::U256([1, 0, 0, 0])
+              U256([1, 0, 0, 0])
           )
 
           transfer_basic_nft {
@@ -52,13 +54,13 @@ mod benchmarking {
               RealisGameApi::<T>::mint_basic_nft(
                   owner_origin,
                   caller.clone(),
-                  Nft::U256([1, 0, 0, 0]),
-                  Nft::Types { tape: 1 }
+                  U256([1, 0, 0, 0]),
+                  1
               )?;
           }: _(
               SystemOrigin::Signed(caller.clone()),
               recipient,
-              Nft::U256([1, 0, 0, 0])
+              U256([1, 0, 0, 0])
           )
 
           transfer_from_pallet {

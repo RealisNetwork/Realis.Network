@@ -22,14 +22,10 @@ use frame_election_provider_support::Support;
 use frame_support::{
     assert_noop, assert_ok,
     traits::{Currency, OnInitialize, ReservableCurrency},
-    weights::{extract_actual_weight, GetDispatchInfo},
 };
 use mock::*;
 use pallet_balances::Error as BalancesError;
-use sp_runtime::{
-    assert_eq_error_rate,
-    traits::{BadOrigin, Dispatchable},
-};
+use sp_runtime::traits::{BadOrigin};
 use sp_staking::offence::OffenceDetails;
 use substrate_test_utils::assert_eq_uvec;
 
