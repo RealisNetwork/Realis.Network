@@ -91,6 +91,9 @@ pallet-staking = { version = "0.0.2", default-features = false, path = "../../..
 pallet-nft = { version = "0.0.2", default-features = false, path = "../../../frame/nft" }
 realis-game-api = { version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api" }
 runtime-common = {version = "0.0.1", default-features = false, path = "../runtime-common"}
+pallet-evm = {git = "https://github.com/paritytech/frontier", branch = "master", default-features = false }
+pallet-ethereum = {git = "https://github.com/paritytech/frontier", branch = "master", default-features = false}
+pallet-dynamic-fee = {git = "https://github.com/paritytech/frontier", branch = "master", default-features = false}
 #chain-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/chainbridge" }
 #realis-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/realis-bridge" }
 
@@ -172,6 +175,9 @@ std = [
 	"max-encoded-len/std",
 	"pallet-nft/std",
 	"realis-game-api/std",
+	"pallet-evm/std",
+	"pallet-ethereum/std",
+	"pallet-dynamic-fee/std"
 #	"chain-bridge/std",
 #	"realis-bridge/std",
 ]
