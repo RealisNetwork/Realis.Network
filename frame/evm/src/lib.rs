@@ -340,7 +340,7 @@ pub mod pallet {
 	}
 
 	#[cfg(feature = "std")]
-	impl Default for GenesisConfig<T> {
+	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
 			Self {
 				account_codes: Default::default(),
