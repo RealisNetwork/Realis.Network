@@ -7,6 +7,7 @@ mod benchmarking {
     use realis_primitives::*;
     use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
     use frame_system::RawOrigin as SystemOrigin;
+    use realis_primitives::*;
 
     const SEED: u32 = 1;
 

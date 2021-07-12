@@ -27,12 +27,12 @@ use frame_support::{
     construct_runtime, parameter_types,
     traits::{
         Currency, Imbalance, KeyOwnerProofSystem, LockIdentifier, MaxEncodedLen, OnUnbalanced,
-        U128CurrencyToVote,
+        U128CurrencyToVote, FindAuthor
     },
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
         DispatchClass, IdentityFee, Weight,
-    },
+    }, ConsensusEngineId,
     RuntimeDebug,
 };
 use frame_support::{traits::InstanceFilter, PalletId};
@@ -40,6 +40,7 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureOneOf, EnsureRoot,
 };
+use sp_std::{prelude::*, marker::PhantomData};
 pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 use pallet_contracts::weights::WeightInfo;
@@ -57,7 +58,7 @@ use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{
     crypto::KeyTypeId,
     u32_trait::{_1, _2, _3, _4, _5},
-    OpaqueMetadata,
+    OpaqueMetadata, H160, H256
 };
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::curve::PiecewiseLinear;
@@ -72,6 +73,10 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys, ApplyExtrinsicResult, FixedPointNumber, Perbill,
     Percent, Permill, Perquintill,
 };
+use pallet_evm::{
+    EnsureAddressTruncated, HashedAddressMapping,
+};
+use primitive_types::U256;
 use sp_std::prelude::*;
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
@@ -119,7 +124,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 270,
+    spec_version: 277,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 2,
@@ -1136,16 +1141,15 @@ impl pallet_staking::Config for Runtime {
     type SlashCancelOrigin = EnsureOneOf<
         AccountId,
         EnsureRoot<AccountId>,
-        pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>,
+        pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>
     >;
     type SessionInterface = Self;
     type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
     type NextNewSession = Session;
     type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
     type ElectionProvider = ElectionProviderMultiPhase;
-    type GenesisElectionProvider = onchain::OnChainSequentialPhragmen<
-        pallet_election_provider_multi_phase::OnChainConfig<Self>,
-    >;
+    type GenesisElectionProvider =
+    onchain::OnChainSequentialPhragmen<pallet_election_provider_multi_phase::OnChainConfig<Self>>;
     type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
 
@@ -1173,6 +1177,65 @@ impl runtime_common::Config for Runtime {
     type MoveClaimOrigin =
         pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>;
     type WeightInfo = runtime_common::weights::WeightInfo<Runtime>;
+}
+
+
+pub struct FindAuthorTruncated<F>(PhantomData<F>);
+// impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F>
+// {
+//     fn find_author<'a, I>(digests: I) -> Option<H160> where
+//         I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
+//     {
+//         if let Some(author_index) = F::find_author(digests) {
+//             let authority_id = pallet_babe::Pallet::authorities()[author_index as usize].clone();
+//             return Some(H160::from_slice(&authority_id));
+//         }
+//         None
+//     }
+// }
+
+parameter_types! {
+	pub const ChainId: u64 = 42;
+	pub BlockGasLimit: U256 = U256::from(u32::max_value());
+}
+
+impl pallet_evm::Config for Runtime {
+    type FeeCalculator = pallet_dynamic_fee::Module<Self>;
+    type GasWeightMapping = ();
+    type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping;
+    type CallOrigin = EnsureAddressTruncated;
+    type WithdrawOrigin = EnsureAddressTruncated;
+    type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+    type Currency = Balances;
+    type Event = Event;
+    type Runner = pallet_evm::runner::stack::Runner<Self>;
+    type Precompiles = (
+        pallet_evm_precompile_simple::ECRecover,
+        pallet_evm_precompile_simple::Sha256,
+        pallet_evm_precompile_simple::Ripemd160,
+        pallet_evm_precompile_simple::Identity,
+        pallet_evm_precompile_modexp::Modexp,
+        pallet_evm_precompile_simple::ECRecoverPublicKey,
+        pallet_evm_precompile_sha3fips::Sha3FIPS256,
+        pallet_evm_precompile_sha3fips::Sha3FIPS512,
+    );
+    type ChainId = ChainId;
+    type BlockGasLimit = BlockGasLimit;
+    type OnChargeTransaction = ();
+    type FindAuthor = FindAuthorTruncated<Aura>;
+}
+
+// impl pallet_ethereum::Config for Runtime {
+//    type Event = Event;
+//    type StateRoot = pallet_ethereum::IntermediateStateRoot;
+// }
+//
+frame_support::parameter_types! {
+	pub BoundDivision: U256 = U256::from(1024);
+}
+
+impl pallet_dynamic_fee::Config for Runtime {
+   type MinGasPriceBoundDivisor = BoundDivision;
 }
 
 // parameter_types! {
@@ -1246,8 +1309,28 @@ construct_runtime!(
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
         Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
+        // Ethereum: pallet_ethereum::{Module, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
+		EVM: pallet_evm::{Pallet, Call, Storage, Event<T>, Config<T>},
+		// DynamicFee: pallet_dynamic_fee::{Module, Call, Storage, Config, Inherent},
     }
 );
+
+// pub struct TransactionConverter;
+//
+// impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
+//     fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
+//         UncheckedExtrinsic::new_unsigned(pallet_ethereum::Call::<Runtime>::transact(transaction).into())
+//     }
+// }
+//
+// impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConverter {
+//     fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> opaque::UncheckedExtrinsic {
+//         let extrinsic = UncheckedExtrinsic::new_unsigned(pallet_ethereum::Call::<Runtime>::transact(transaction).into());
+//         let encoded = extrinsic.encode();
+//         opaque::UncheckedExtrinsic::decode(&mut &encoded[..]).expect("Encoded extrinsic is always valid")
+//     }
+// }
+
 
 /// The address format for describing accounts.
 pub type Address = sp_runtime::MultiAddress<AccountId, AccountIndex>;

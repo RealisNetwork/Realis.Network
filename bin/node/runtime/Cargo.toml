@@ -18,6 +18,7 @@ codec = { package = "parity-scale-codec", version = "2.0.0", default-features = 
 static_assertions = "1.1.0"
 hex-literal = { version = "0.3.1", optional = true }
 log = { version = "0.4.14", default-features = false }
+primitive-types = { version = "0.9.0", default-features = false }
 
 # primitives
 sp-authority-discovery = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f" }
@@ -91,9 +92,14 @@ pallet-staking = { version = "0.0.2", default-features = false, path = "../../..
 pallet-nft = { version = "0.0.2", default-features = false, path = "../../../frame/nft" }
 realis-game-api = { version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api" }
 runtime-common = {version = "0.0.1", default-features = false, path = "../runtime-common"}
+pallet-evm = { version = "0.0.1", path = "../../../frame/evm", default-features = false}
+pallet-evm-precompile-simple = { default-features = false, path = "../../../frame/evm/precompile/simple" }
+pallet-evm-precompile-sha3fips = { default-features = false, path = "../../../frame/evm/precompile/sha3fips" }
+pallet-evm-precompile-modexp = { default-features = false, path = "../../../frame/evm/precompile/modexp" }
+pallet-ethereum = { version = "3.0.0-dev", path = "../../../frame/ethereum", default-features = false}
+pallet-dynamic-fee = { version = "3.0.0-dev", path = "../../../frame/dynamic-fee", default-features = false}
 #chain-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/chainbridge" }
 #realis-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/realis-bridge" }
-
 
 max-encoded-len = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f", features = [ "derive" ] }
 
@@ -172,6 +178,9 @@ std = [
 	"max-encoded-len/std",
 	"pallet-nft/std",
 	"realis-game-api/std",
+	"pallet-evm/std",
+	"pallet-ethereum/std",
+	"pallet-dynamic-fee/std"
 #	"chain-bridge/std",
 #	"realis-bridge/std",
 ]
