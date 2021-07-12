@@ -28,4 +28,8 @@ std = [
     'frame-system/std',
     'sp-runtime/std',
     "primitive-types/std",
+    "ethereum/std",
+    "ethereum-types/std",
+    "evm/std",
+    "evm/with-serde",
 ]

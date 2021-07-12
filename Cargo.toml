@@ -7,7 +7,7 @@ members = [
 	"bin/node/cli",
     "bin/node/runtime",
     "bin/node/runtime-common",
-     "frame/nft",
+    "frame/nft",
     "frame/realis-game-api",
     "frame/staking-pool",
     "primitives",
