@@ -58,8 +58,8 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
     use super::*;
-    use pallet_evm::GenesisAccount;
     use fp_storage::PALLET_ETHEREUM_SCHEMA;
+    use sp_runtime::traits::{Saturating, Zero};
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -113,6 +113,7 @@ pub mod pallet {
 
     /// Current building block's transactions and receipts.
     #[pallet::storage]
+    #[pallet::getter(fn pending)]
     pub(crate) type Pending<T: Config> = StorageValue<_, Vec<(ethereum::Transaction, TransactionStatus, ethereum::Receipt)>, ValueQuery>;
 
     /// The current Ethereum block.
@@ -130,20 +131,25 @@ pub mod pallet {
 
     // Mapping for block number and hashes.
     #[pallet::storage]
-    pub(crate) type BlockHash<T: Config> = StorageMap<_, Twox64Concat, U256, H256>;
+    pub(crate) type BlockHash<T> = StorageMap<_, Blake2_128Concat, U256, H256>;
 
+    /// Returns the Ethereum block hash by number.
+    pub struct EthereumBlockHashMapping<T>(sp_std::marker::PhantomData<T>);
+
+    impl<T: Config> BlockHashMapping for EthereumBlockHashMapping<T> {
+        fn block_hash(number: u32) -> H256 {
+            BlockHash::<T>::get(U256::from(number)).unwrap()
+        }
+    }
 
     #[pallet::genesis_config]
     pub struct GenesisConfig {
-        pub accounts: std::collections::BTreeMap<H160, GenesisAccount>,
     }
 
     #[cfg(feature = "std")]
     impl Default for GenesisConfig {
         fn default() -> Self {
-            Self {
-                accounts: Default::default()
-            }
+            Self{}
         }
     }
 
@@ -188,15 +194,6 @@ pub mod pallet {
             // ensure_none(origin)?;
 
             Self::do_transact(transaction)
-        }
-    }
-
-    /// Returns the Ethereum block hash by number.
-    pub struct EthereumBlockHashMapping;
-
-    impl BlockHashMapping for EthereumBlockHashMapping {
-        fn block_hash(number: u32) -> H256 {
-            BlockHash::<T>::get(U256::from(number)).unwrap()
         }
     }
 
@@ -284,14 +281,14 @@ pub mod pallet {
             let to_remove = n.saturating_sub(block_hash_count).saturating_sub(One::one());
             // keep genesis hash
             if !to_remove.is_zero() {
-                BlockHash::remove(U256::from(
+                BlockHash::<T>::remove(U256::from(
                     UniqueSaturatedInto::<u32>::unique_saturated_into(to_remove)
                 ));
             }
         }
 
         pub fn on_initialize(_n: T::BlockNumber) -> Weight {
-            Pending::kill();
+            Pending::<T>::kill();
 
             if let Ok(log) = fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()) {
                 let PreLog::Block(block) = log;

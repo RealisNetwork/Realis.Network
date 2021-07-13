@@ -209,3 +209,13 @@ fn ensure_linear_cost(
 
     Ok(cost)
 }
+
+#[derive(PartialEq, Eq, Clone, Default, Encode, Decode)]
+pub struct OpaqueExtrinsic(Vec<u8>);
+
+impl OpaqueExtrinsic {
+    /// Convert an encoded extrinsic to an `OpaqueExtrinsic`.
+    pub fn from_bytes(mut bytes: &[u8]) -> Result<Self, codec::Error> {
+        OpaqueExtrinsic::decode(&mut bytes)
+    }
+}

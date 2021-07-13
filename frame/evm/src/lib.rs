@@ -334,7 +334,6 @@ pub mod pallet {
     }
 
     #[pallet::storage]
-    #[pallet::getter(fn account_codes)]
     pub(crate) type AccountCodes<T: Config> = StorageMap<_, Blake2_128Concat, H160, Vec<u8>>;
 
     #[pallet::storage]

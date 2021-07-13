@@ -93,10 +93,12 @@ pallet-nft = { version = "0.0.2", default-features = false, path = "../../../fra
 realis-game-api = { version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api" }
 runtime-common = {version = "0.0.1", default-features = false, path = "../runtime-common"}
 pallet-evm = { version = "0.0.1", path = "../../../frame/evm", default-features = false}
+realis-primitives = { version = "0.0.2", default-features = false, path = "../../../primitives"}
+fp-rpc = {version = "2.0.0", path = "../../../primitives/rpc", default-features = false}
 pallet-evm-precompile-simple = { default-features = false, path = "../../../frame/evm/precompile/simple" }
 pallet-evm-precompile-sha3fips = { default-features = false, path = "../../../frame/evm/precompile/sha3fips" }
 pallet-evm-precompile-modexp = { default-features = false, path = "../../../frame/evm/precompile/modexp" }
-#pallet-ethereum = { version = "3.0.0-dev", path = "../../../frame/ethereum", default-features = false}
+pallet-ethereum = { version = "3.0.0-dev", path = "../../../frame/ethereum", default-features = false}
 pallet-dynamic-fee = { version = "3.0.0-dev", path = "../../../frame/dynamic-fee", default-features = false}
 #chain-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/chainbridge" }
 #realis-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/realis-bridge" }

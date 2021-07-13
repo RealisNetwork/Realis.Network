@@ -416,6 +416,8 @@ pub fn testnet_genesis(
             nft_masters: nft_master,
         },
         claims: Default::default(),
+        evm: Default::default(),
+        ethereum: Default::default(),
     }
 }
 
@@ -582,6 +584,8 @@ pub fn realis_genesis(
             nft_masters: nft_master,
         },
         claims: Default::default(),
+        evm: Default::default(),
+        ethereum: Default::default(),
     }
 }
 

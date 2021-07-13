@@ -4290,6 +4290,7 @@ dependencies = [
 name = "node-runtime"
 version = "2.0.1"
 dependencies = [
+ "fp-rpc",
  "frame-benchmarking",
  "frame-election-provider-support",
  "frame-executive",
@@ -4316,6 +4317,7 @@ dependencies = [
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
+ "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-precompile-modexp",
  "pallet-evm-precompile-sha3fips",
@@ -4352,6 +4354,7 @@ dependencies = [
  "parity-scale-codec",
  "primitive-types",
  "realis-game-api",
+ "realis-primitives",
  "runtime-common",
  "sp-api",
  "sp-authority-discovery",
@@ -10120,7 +10123,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04f8ab788026715fa63b31960869617cba39117e520eb415b0139543e325ab59"
 dependencies = [
  "cfg-if 0.1.10",
- "rand 0.3.23",
+ "rand 0.7.3",
  "static_assertions",
 ]
 
