@@ -25,7 +25,7 @@ use frame_support::{
 };
 use mock::*;
 use pallet_balances::Error as BalancesError;
-use sp_runtime::traits::{BadOrigin};
+use sp_runtime::traits::BadOrigin;
 use sp_staking::offence::OffenceDetails;
 use substrate_test_utils::assert_eq_uvec;
 

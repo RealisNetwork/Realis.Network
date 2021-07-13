@@ -20,74 +20,80 @@
 use super::*;
 use crate::mock::*;
 
-use std::{str::FromStr, collections::BTreeMap};
 use frame_support::assert_ok;
+use std::{collections::BTreeMap, str::FromStr};
 
 type Balances = pallet_balances::Module<Test>;
 type EVM = Module<Test>;
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+    let mut t = frame_system::GenesisConfig::default()
+        .build_storage::<Test>()
+        .unwrap();
 
-	let mut accounts = BTreeMap::new();
-	accounts.insert(
-		H160::from_str("1000000000000000000000000000000000000001").unwrap(),
-		GenesisAccount {
-			nonce: U256::from(1),
-			balance: U256::from(1000000),
-			storage: Default::default(),
-			code: vec![
-				0x00, // STOP
-			],
-		}
-	);
-	accounts.insert(
-		H160::from_str("1000000000000000000000000000000000000002").unwrap(),
-		GenesisAccount {
-			nonce: U256::from(1),
-			balance: U256::from(1000000),
-			storage: Default::default(),
-			code: vec![
-				0xff, // INVALID
-			],
-		}
-	);
+    let mut accounts = BTreeMap::new();
+    accounts.insert(
+        H160::from_str("1000000000000000000000000000000000000001").unwrap(),
+        GenesisAccount {
+            nonce: U256::from(1),
+            balance: U256::from(1000000),
+            storage: Default::default(),
+            code: vec![
+                0x00, // STOP
+            ],
+        },
+    );
+    accounts.insert(
+        H160::from_str("1000000000000000000000000000000000000002").unwrap(),
+        GenesisAccount {
+            nonce: U256::from(1),
+            balance: U256::from(1000000),
+            storage: Default::default(),
+            code: vec![
+                0xff, // INVALID
+            ],
+        },
+    );
 
-	pallet_balances::GenesisConfig::<Test>::default().assimilate_storage(&mut t).unwrap();
-	GenesisConfig { accounts }.assimilate_storage::<Test>(&mut t).unwrap();
-	t.into()
+    pallet_balances::GenesisConfig::<Test>::default()
+        .assimilate_storage(&mut t)
+        .unwrap();
+    GenesisConfig { accounts }
+        .assimilate_storage::<Test>(&mut t)
+        .unwrap();
+    t.into()
 }
 
 #[test]
 fn fail_call_return_ok() {
-	new_test_ext().execute_with(|| {
-		assert_ok!(EVM::call(
-			Origin::root(),
-			H160::default(),
-			H160::from_str("1000000000000000000000000000000000000001").unwrap(),
-			Vec::new(),
-			U256::default(),
-			1000000,
-			U256::default(),
-			None,
-		));
+    new_test_ext().execute_with(|| {
+        assert_ok!(EVM::call(
+            Origin::root(),
+            H160::default(),
+            H160::from_str("1000000000000000000000000000000000000001").unwrap(),
+            Vec::new(),
+            U256::default(),
+            1000000,
+            U256::default(),
+            None,
+        ));
 
-		assert_ok!(EVM::call(
-			Origin::root(),
-			H160::default(),
-			H160::from_str("1000000000000000000000000000000000000002").unwrap(),
-			Vec::new(),
-			U256::default(),
-			1000000,
-			U256::default(),
-			None,
-		));
-	});
+        assert_ok!(EVM::call(
+            Origin::root(),
+            H160::default(),
+            H160::from_str("1000000000000000000000000000000000000002").unwrap(),
+            Vec::new(),
+            U256::default(),
+            1000000,
+            U256::default(),
+            None,
+        ));
+    });
 }
 
 #[test]
 fn fee_deduction() {
-	new_test_ext().execute_with(|| {
+    new_test_ext().execute_with(|| {
 		// Create an EVM address and the corresponding Substrate address that will be charged fees and refunded
 		let evm_addr = H160::from_str("1000000000000000000000000000000000000003").unwrap();
 		let substrate_addr = <Test as Config>::AddressMapping::into_account_id(evm_addr);
@@ -108,8 +114,11 @@ fn fee_deduction() {
 
 #[test]
 fn find_author() {
-	new_test_ext().execute_with(|| {
-		let author = EVM::find_author();
-		assert_eq!(author, H160::from_str("1234500000000000000000000000000000000000").unwrap());
-	});
+    new_test_ext().execute_with(|| {
+        let author = EVM::find_author();
+        assert_eq!(
+            author,
+            H160::from_str("1234500000000000000000000000000000000000").unwrap()
+        );
+    });
 }

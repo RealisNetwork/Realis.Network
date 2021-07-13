@@ -1,14 +1,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use evm::ExitReason;
+use evm::{executor::PrecompileOutput, Context, ExitError, ExitSucceed};
 use frame_support::pallet_prelude::{Decode, Encode};
+use impl_trait_for_tuples::impl_for_tuples;
 use primitive_types::U256;
 #[cfg(feature = "std")]
-use serde::{Serialize, Deserialize};
-use sp_std::vec::Vec;
+use serde::{Deserialize, Serialize};
 use sp_core::H160;
-use evm::ExitReason;
-use impl_trait_for_tuples::impl_for_tuples;
-use evm::{ExitSucceed, ExitError, Context, executor::PrecompileOutput};
+use sp_std::vec::Vec;
 
 pub use evm::backend::{Basic as Account, Log};
 
@@ -166,10 +166,7 @@ pub trait LinearCostPrecompile {
     const BASE: u64;
     const WORD: u64;
 
-    fn execute(
-        input: &[u8],
-        cost: u64,
-    ) -> core::result::Result<(ExitSucceed, Vec<u8>), ExitError>;
+    fn execute(input: &[u8], cost: u64) -> core::result::Result<(ExitSucceed, Vec<u8>), ExitError>;
 }
 
 impl<T: LinearCostPrecompile> Precompile for T {
@@ -195,15 +192,18 @@ fn ensure_linear_cost(
     target_gas: Option<u64>,
     len: u64,
     base: u64,
-    word: u64
+    word: u64,
 ) -> Result<u64, ExitError> {
-    let cost = base.checked_add(
-        word.checked_mul(len.saturating_add(31) / 32).ok_or(ExitError::OutOfGas)?
-    ).ok_or(ExitError::OutOfGas)?;
+    let cost = base
+        .checked_add(
+            word.checked_mul(len.saturating_add(31) / 32)
+                .ok_or(ExitError::OutOfGas)?,
+        )
+        .ok_or(ExitError::OutOfGas)?;
 
     if let Some(target_gas) = target_gas {
         if cost > target_gas {
-            return Err(ExitError::OutOfGas)
+            return Err(ExitError::OutOfGas);
         }
     }
 

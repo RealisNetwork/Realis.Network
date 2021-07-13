@@ -3,9 +3,9 @@
 mod benchmarking {
     use crate::Pallet as RealisGameApi;
     use crate::*;
+    use pallet_nft as Nft;
     use primitive_types::U256;
     use realis_primitives::*;
-    use pallet_nft as Nft;
 
     use frame_benchmarking::{account, benchmarks};
     use frame_support::traits::{Currency, Get};

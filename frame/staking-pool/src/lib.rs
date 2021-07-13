@@ -2515,7 +2515,8 @@ impl<T: Config> Pallet<T> {
     ) -> DispatchResultWithPostInfo {
         // Validate input data
         let current_era = CurrentEra::<T>::get().ok_or(
-            Error::<T>::InvalidEraToReward.with_weight(T::WeightInfo::payout_stakers_alive_staked(0))
+            Error::<T>::InvalidEraToReward
+                .with_weight(T::WeightInfo::payout_stakers_alive_staked(0)),
         )?;
         let history_depth = Self::history_depth();
         ensure!(
@@ -2594,7 +2595,7 @@ impl<T: Config> Pallet<T> {
             &ledger.stash,
             validator_staking_payout + validator_commission_payout,
         )
-            .is_ok()
+        .is_ok()
         {
             Self::deposit_event(Event::Reward(ledger.stash, validator_leftover_payout));
         }
@@ -2620,7 +2621,7 @@ impl<T: Config> Pallet<T> {
         Ok(Some(T::WeightInfo::payout_stakers_alive_staked(
             nominator_payout_count,
         ))
-            .into())
+        .into())
     }
 
     /// Update the ledger for a controller.

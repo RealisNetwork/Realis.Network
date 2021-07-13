@@ -26,25 +26,26 @@ use codec::{Decode, Encode};
 use frame_support::{
     construct_runtime, parameter_types,
     traits::{
-        Currency, Imbalance, KeyOwnerProofSystem, LockIdentifier, MaxEncodedLen, OnUnbalanced,
-        U128CurrencyToVote, FindAuthor
+        Currency, FindAuthor, Imbalance, KeyOwnerProofSystem, LockIdentifier, MaxEncodedLen,
+        OnUnbalanced, U128CurrencyToVote,
     },
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
         DispatchClass, IdentityFee, Weight,
-    }, ConsensusEngineId,
-    RuntimeDebug,
+    },
+    ConsensusEngineId, RuntimeDebug,
 };
 use frame_support::{traits::InstanceFilter, PalletId};
 use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureOneOf, EnsureRoot,
 };
-use sp_std::{prelude::*, marker::PhantomData};
 pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 use pallet_contracts::weights::WeightInfo;
 use pallet_election_provider_multi_phase::FallbackStrategy;
+// use pallet_evm::*;
+pub use pallet_evm;
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -52,14 +53,16 @@ use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking;
 pub use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
+use primitive_types::U256;
 pub use realis_game_api;
 use sp_api::impl_runtime_apis;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{
     crypto::KeyTypeId,
     u32_trait::{_1, _2, _3, _4, _5},
-    OpaqueMetadata, H160, H256
+    OpaqueMetadata, H160, H256,
 };
+use pallet_evm::{EnsureAddressTruncated, HashedAddressMapping};
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::curve::PiecewiseLinear;
 use sp_runtime::traits::{
@@ -73,11 +76,8 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys, ApplyExtrinsicResult, FixedPointNumber, Perbill,
     Percent, Permill, Perquintill,
 };
-use pallet_evm::{
-    EnsureAddressTruncated, HashedAddressMapping,
-};
-use primitive_types::U256;
 use sp_std::prelude::*;
+use sp_std::{marker::PhantomData, prelude::*};
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -704,7 +704,7 @@ parameter_types! {
     pub const ProposalBond: Permill = Permill::from_percent(5);
     pub const ProposalBondMinimum: Balance = 1 * DOLLARS;
     pub const SpendPeriod: BlockNumber = 1 * DAYS;
-    pub const Burn: Permill = Permill::from_percent(50);
+    pub const Burn: Permill = Permill::from_percent(0);
     pub const TipCountdown: BlockNumber = 1 * DAYS;
     pub const TipFindersFee: Percent = Percent::from_percent(20);
     pub const TipReportDepositBase: Balance = 1 * DOLLARS;
@@ -1141,15 +1141,16 @@ impl pallet_staking::Config for Runtime {
     type SlashCancelOrigin = EnsureOneOf<
         AccountId,
         EnsureRoot<AccountId>,
-        pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>
+        pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>,
     >;
     type SessionInterface = Self;
     type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
     type NextNewSession = Session;
     type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
     type ElectionProvider = ElectionProviderMultiPhase;
-    type GenesisElectionProvider =
-    onchain::OnChainSequentialPhragmen<pallet_election_provider_multi_phase::OnChainConfig<Self>>;
+    type GenesisElectionProvider = onchain::OnChainSequentialPhragmen<
+        pallet_election_provider_multi_phase::OnChainConfig<Self>,
+    >;
     type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
 
@@ -1179,24 +1180,23 @@ impl runtime_common::Config for Runtime {
     type WeightInfo = runtime_common::weights::WeightInfo<Runtime>;
 }
 
-
 pub struct FindAuthorTruncated<F>(PhantomData<F>);
-// impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F>
-// {
-//     fn find_author<'a, I>(digests: I) -> Option<H160> where
-//         I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
-//     {
-//         if let Some(author_index) = F::find_author(digests) {
-//             let authority_id = pallet_babe::Pallet::authorities()[author_index as usize].clone();
-//             return Some(H160::from_slice(&authority_id));
-//         }
-//         None
-//     }
-// }
+impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F>
+{
+    fn find_author<'a, I>(digests: I) -> Option<H160> where
+        I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
+    {
+        if let Some(author_index) = F::find_author(digests) {
+            let authority_id = pallet_babe::Pallet::authorities()[author_index as usize].clone();
+            return Some(H160::from_slice(&authority_id));
+        }
+        None
+    }
+}
 
 parameter_types! {
-	pub const ChainId: u64 = 42;
-	pub BlockGasLimit: U256 = U256::from(u32::max_value());
+    pub const ChainId: u64 = 42;
+    pub BlockGasLimit: U256 = U256::from(u32::max_value());
 }
 
 impl pallet_evm::Config for Runtime {
@@ -1222,7 +1222,7 @@ impl pallet_evm::Config for Runtime {
     type ChainId = ChainId;
     type BlockGasLimit = BlockGasLimit;
     type OnChargeTransaction = ();
-    type FindAuthor = FindAuthorTruncated<Aura>;
+    type FindAuthor = FindAuthorTruncated<Babe>;
 }
 
 // impl pallet_ethereum::Config for Runtime {
@@ -1231,11 +1231,11 @@ impl pallet_evm::Config for Runtime {
 // }
 //
 frame_support::parameter_types! {
-	pub BoundDivision: U256 = U256::from(1024);
+    pub BoundDivision: U256 = U256::from(1024);
 }
 
 impl pallet_dynamic_fee::Config for Runtime {
-   type MinGasPriceBoundDivisor = BoundDivision;
+    type MinGasPriceBoundDivisor = BoundDivision;
 }
 
 // parameter_types! {
@@ -1310,8 +1310,8 @@ construct_runtime!(
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
         Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
         // Ethereum: pallet_ethereum::{Module, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
-		EVM: pallet_evm::{Pallet, Call, Storage, Event<T>, Config<T>},
-		// DynamicFee: pallet_dynamic_fee::{Module, Call, Storage, Config, Inherent},
+        EVM: pallet_evm::{Pallet, Call, Storage, Event<T>, Config},
+        // DynamicFee: pallet_dynamic_fee::{Module, Call, Storage, Config, Inherent},
     }
 );
 
@@ -1330,7 +1330,6 @@ construct_runtime!(
 //         opaque::UncheckedExtrinsic::decode(&mut &encoded[..]).expect("Encoded extrinsic is always valid")
 //     }
 // }
-
 
 /// The address format for describing accounts.
 pub type Address = sp_runtime::MultiAddress<AccountId, AccountIndex>;

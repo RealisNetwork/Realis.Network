@@ -28,7 +28,7 @@ docker:
 
 .PHONY: fmt
 fmt:
-	cargo fmt -p pallet-staking -p pallet-nft -p realis-game-api -p realis-primitives -p node-runtime -p node-cli
+	cargo fmt -p pallet-staking -p pallet-nft -p realis-game-api -p realis-primitives -p node-runtime -p node-cli -p pallet-evm -p pallet-ethereum -p pallet-dynamic-fee
 
 .PHONY: clippy
 clippy:
