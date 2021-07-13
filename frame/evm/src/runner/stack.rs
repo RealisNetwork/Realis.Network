@@ -35,7 +35,7 @@ use crate::pallet as EVM;
 use crate::runner::Runner as RunnerT;
 
 use std::option::Option::None;
-use crate::pallet::OnChargeEVMTransaction;
+use crate::pallet::{OnChargeEVMTransaction, FeeCalculator, BlockHashMapping, AddressMapping};
 
 #[derive(Default)]
 pub struct Runner<T: EVM::Config> {
@@ -80,7 +80,7 @@ impl<T: EVM::Config> Runner<T> {
 		let total_fee = gas_price.checked_mul(U256::from(gas_limit))
 			.ok_or(EVM::Error::<T>::FeeOverflow)?;
 		let total_payment = value.checked_add(total_fee).ok_or(EVM::Error::<T>::PaymentOverflow)?;
-		let source_account = EVM::Pallet::account_basic(&source);
+		let source_account = EVM::Pallet::<T>::account_basic(&source);
 		ensure!(source_account.balance >= total_payment, EVM::Error::<T>::BalanceLow);
 
 		if let Some(nonce) = nonce {
@@ -116,7 +116,7 @@ impl<T: EVM::Config> Runner<T> {
 				"Deleting account at {:?}",
 				address
 			);
-				EVM::Pallet::remove_account(&address)
+				EVM::Pallet::<T>::remove_account(&address)
 		}
 
 		for log in &state.substate.logs {
@@ -129,7 +129,7 @@ impl<T: EVM::Config> Runner<T> {
 				log.data.len(),
 				log.data
 			);
-			EVM::Pallet::deposit_event(EVM::Event::Log(Log {
+			EVM::Pallet::<T>::deposit_event(EVM::Event::Log(Log {
 				address: log.address,
 				topics: log.topics.clone(),
 				data: log.data.clone(),
@@ -146,6 +146,7 @@ impl<T: EVM::Config> Runner<T> {
 }
 
 impl<T: EVM::Config> RunnerT<T> for Runner<T> {
+	type Error = EVM::Error<T>;
 
 	fn call(
 		source: H160,
@@ -358,7 +359,7 @@ impl<'vicinity, 'config, T: EVM::Config> BackendT for SubstrateStackState<'vicin
 	}
 
 	fn block_coinbase(&self) -> H160 {
-		EVM::Pallet::find_author()
+		EVM::Pallet::<T>::find_author()
 	}
 
 	fn block_timestamp(&self) -> U256 {
@@ -383,7 +384,7 @@ impl<'vicinity, 'config, T: EVM::Config> BackendT for SubstrateStackState<'vicin
 	}
 
 	fn basic(&self, address: H160) -> evm::backend::Basic {
-		let account = EVM::Pallet::account_basic(&address);
+		let account = EVM::Pallet::<T>::account_basic(&address);
 
 		evm::backend::Basic {
 			balance: account.balance,
@@ -392,11 +393,11 @@ impl<'vicinity, 'config, T: EVM::Config> BackendT for SubstrateStackState<'vicin
 	}
 
 	fn code(&self, address: H160) -> Vec<u8> {
-		EVM::AccountCodes::get(&address).unwrap()
+		EVM::AccountCodes::<T>::get(&address).unwrap()
 	}
 
 	fn storage(&self, address: H160, index: H256) -> H256 {
-		EVM::AccountStorages::get(address, index).unwrap()
+		EVM::AccountStorages::<T>::get(address, index).unwrap()
 	}
 
 	fn original_storage(&self, _address: H160, _index: H256) -> Option<H256> {
@@ -430,7 +431,7 @@ impl<'vicinity, 'config, T: EVM::Config> StackStateT<'config> for SubstrateStack
 	}
 
 	fn is_empty(&self, address: H160) -> bool {
-		EVM::Pallet::is_account_empty(&address)
+		EVM::Pallet::<T>::is_account_empty(&address)
 	}
 
 	fn deleted(&self, address: H160) -> bool {
@@ -438,7 +439,7 @@ impl<'vicinity, 'config, T: EVM::Config> StackStateT<'config> for SubstrateStack
 	}
 
 	fn inc_nonce(&mut self, address: H160) {
-		let account_id = EVM::AddressMapping::into_account_id(address);
+		let account_id = T::AddressMapping::into_account_id(address);
 		frame_system::Pallet::<T>::inc_account_nonce(&account_id);
 	}
 
@@ -450,7 +451,7 @@ impl<'vicinity, 'config, T: EVM::Config> StackStateT<'config> for SubstrateStack
 				address,
 				index,
 			);
-			EVM::AccountStorages::remove(address, index);
+			EVM::AccountStorages::<T>::remove(address, index);
 		} else {
 			log::debug!(
 				target: "evm",
@@ -459,12 +460,12 @@ impl<'vicinity, 'config, T: EVM::Config> StackStateT<'config> for SubstrateStack
 				index,
 				value,
 			);
-			EVM::AccountStorages::insert(address, index, value);
+			EVM::AccountStorages::<T>::insert(address, index, value);
 		}
 	}
 
 	fn reset_storage(&mut self, address: H160) {
-		EVM::AccountStorages::remove_prefix(address, Some(1 as u32));
+		EVM::AccountStorages::<T>::remove_prefix(address, Some(1 as u32));
 	}
 
 	fn log(&mut self, address: H160, topics: Vec<H256>, data: Vec<u8>) {
@@ -486,8 +487,8 @@ impl<'vicinity, 'config, T: EVM::Config> StackStateT<'config> for SubstrateStack
 	}
 
 	fn transfer(&mut self, transfer: Transfer) -> Result<(), ExitError> {
-		let source = EVM::AddressMapping::into_account_id(transfer.source);
-		let target = EVM::AddressMapping::into_account_id(transfer.target);
+		let source = T::AddressMapping::into_account_id(transfer.source);
+		let target = T::AddressMapping::into_account_id(transfer.target);
 
 		T::Currency::transfer(
 			&source,

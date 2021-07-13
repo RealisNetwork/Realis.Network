@@ -354,8 +354,8 @@ pub mod pallet {
 	#[pallet::genesis_build]
 	impl<T: Config> GenesisBuild<T> for GenesisConfig {
 		fn build(&self) {
-			for (address, account) in self.accounts {
-				let account_id = T::AddressMapping::into_account_id(address);
+			for (address, account) in &self.accounts {
+				let account_id = T::AddressMapping::into_account_id(*address);
 
 				// ASSUME: in one single EVM transaction, the nonce will not increase more than
 				// `u128::max_value()`.
