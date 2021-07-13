@@ -1226,11 +1226,11 @@ impl pallet_evm::Config for Runtime {
     type FindAuthor = FindAuthorTruncated<Babe>;
 }
 
-// impl pallet_ethereum::Config for Runtime {
-//    type Event = Event;
-//    type StateRoot = pallet_ethereum::IntermediateStateRoot;
-// }
-//
+impl pallet_ethereum::Config for Runtime {
+   type Event = Event;
+   type StateRoot = pallet_ethereum::IntermediateStateRoot;
+}
+
 frame_support::parameter_types! {
     pub BoundDivision: U256 = U256::from(1024);
 }
@@ -1310,7 +1310,7 @@ construct_runtime!(
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
         Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
-        // Ethereum: pallet_ethereum::{Module, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
+        Ethereum: pallet_ethereum::{Module, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
         EVM: pallet_evm::{Pallet, Call, Storage, Event<T>, Config},
         // DynamicFee: pallet_dynamic_fee::{Module, Call, Storage, Config, Inherent},
     }
