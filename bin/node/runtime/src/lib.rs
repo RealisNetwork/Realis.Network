@@ -1190,7 +1190,7 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F>
             // let id = authority_id.0;
             // let bytes = bincode::serialize(&authority_id).unwrap();
             // let authority_id = pallet_babe::Pallet::authorities()[author_index as usize];
-            let authority = Babe::authorities().get(author_index as usize);
+            let authority = Babe::authorities().get(author_index as usize).unwrap().clone();
             let authority_id = frame_support::dispatch::Encode::encode(&authority);
             return Some(H160::from_slice(&authority_id));
         }
