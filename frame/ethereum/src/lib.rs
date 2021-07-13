@@ -41,9 +41,9 @@ use sp_runtime::{
     traits::{One, UniqueSaturatedInto},
     transaction_validity::{ ValidTransactionBuilder }
 };
+
 pub use ethereum::{Block, Log, Receipt, Transaction, TransactionAction, TransactionMessage};
 pub use fp_rpc::TransactionStatus;
-use fp_storage::PALLET_ETHEREUM_SCHEMA;
 
 #[cfg(all(feature = "std", test))]
 mod tests;
@@ -58,6 +58,8 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
     use super::*;
+    use fp_storage::PALLET_ETHEREUM_SCHEMA;
+    use sp_runtime::traits::{Saturating, Zero};
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -111,6 +113,7 @@ pub mod pallet {
 
     /// Current building block's transactions and receipts.
     #[pallet::storage]
+    #[pallet::getter(fn pending)]
     pub(crate) type Pending<T: Config> = StorageValue<_, Vec<(ethereum::Transaction, TransactionStatus, ethereum::Receipt)>, ValueQuery>;
 
     /// The current Ethereum block.
@@ -128,26 +131,31 @@ pub mod pallet {
 
     // Mapping for block number and hashes.
     #[pallet::storage]
-    pub(crate) type BlockHash<T: Config> = StorageMap<_, Twox64Concat, U256, H256>;
+    pub(crate) type BlockHash<T> = StorageMap<_, Blake2_128Concat, U256, H256>;
 
+    /// Returns the Ethereum block hash by number.
+    pub struct EthereumBlockHashMapping<T>(sp_std::marker::PhantomData<T>);
 
-#[pallet::genesis_config]
-pub struct GenesisConfig {
-    pub accounts: std::collections::BTreeMap<H160, GenesisAccount>,
-}
+    impl<T: Config> BlockHashMapping for EthereumBlockHashMapping<T> {
+        fn block_hash(number: u32) -> H256 {
+            BlockHash::<T>::get(U256::from(number)).unwrap()
+        }
+    }
+
+    #[pallet::genesis_config]
+    pub struct GenesisConfig {
+    }
 
     #[cfg(feature = "std")]
     impl Default for GenesisConfig {
         fn default() -> Self {
-            Self {
-                accounts: Default::default()
-            }
+            Self{}
         }
     }
 
-#[pallet::genesis_build]
-impl<T: Config> GenesisBuild<T> for GenesisConfig {
-    fn build(&self) {
+    #[pallet::genesis_build]
+    impl<T: Config> GenesisBuild<T> for GenesisConfig {
+        fn build(&self) {
             // Calculate the ethereum genesis block
             <Pallet<T>>::store_block(false, U256::zero());
 
@@ -156,9 +164,9 @@ impl<T: Config> GenesisBuild<T> for GenesisConfig {
         }
     }
 
-#[pallet::event]
-#[pallet::generate_deposit(pub (super) fn deposit_event)]
-pub enum Event<T: Config> {
+    #[pallet::event]
+    #[pallet::generate_deposit(pub (super) fn deposit_event)]
+    pub enum Event<T: Config> {
         /// An ethereum transaction was successfully executed. [from, to/contract_address, transaction_hash, exit_reason]
         Executed(H160, H160, H256, ExitReason),
     }
@@ -186,48 +194,6 @@ pub enum Event<T: Config> {
             // ensure_none(origin)?;
 
             Self::do_transact(transaction)
-        }
-    }
-
-    fn on_finalize(n: T::BlockNumber) {
-        <Pallet<T>>::store_block(
-            fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()).is_err(),
-            U256::from(
-                UniqueSaturatedInto::<u128>::unique_saturated_into(
-                    frame_system::Pallet::<T>::block_number()
-                )
-            ),
-        );
-        // move block hash pruning window by one block
-        let block_hash_count = T::BlockHashCount::get();
-        let to_remove = n.saturating_sub(block_hash_count).saturating_sub(One::one());
-        // keep genesis hash
-        if !to_remove.is_zero() {
-            BlockHash::remove(U256::from(
-                UniqueSaturatedInto::<u32>::unique_saturated_into(to_remove)
-            ));
-        }
-    }
-
-    pub fn on_initialize(_n: T::BlockNumber) -> Weight {
-        Pending::kill();
-
-        if let Ok(log) = fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()) {
-            let PreLog::Block(block) = log;
-
-            for transaction in block.transactions {
-                Self::do_transact(transaction)
-                    .expect("pre-block transaction verification failed; the block cannot be built");
-            }
-        }
-        0
-    }
-    /// Returns the Ethereum block hash by number.
-    pub struct EthereumBlockHashMapping;
-
-    impl BlockHashMapping for EthereumBlockHashMapping {
-        fn block_hash(number: u32) -> H256 {
-            BlockHash::<T>::get(U256::from(number)).unwrap()
         }
     }
 
@@ -301,6 +267,40 @@ pub enum Event<T: Config> {
     }
 
     impl<T: Config> Pallet<T> {
+        pub fn on_finalize(n: T::BlockNumber) {
+            <Pallet<T>>::store_block(
+                fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()).is_err(),
+                U256::from(
+                    UniqueSaturatedInto::<u128>::unique_saturated_into(
+                        frame_system::Pallet::<T>::block_number()
+                    )
+                ),
+            );
+            // move block hash pruning window by one block
+            let block_hash_count = T::BlockHashCount::get();
+            let to_remove = n.saturating_sub(block_hash_count).saturating_sub(One::one());
+            // keep genesis hash
+            if !to_remove.is_zero() {
+                BlockHash::<T>::remove(U256::from(
+                    UniqueSaturatedInto::<u32>::unique_saturated_into(to_remove)
+                ));
+            }
+        }
+
+        pub fn on_initialize(_n: T::BlockNumber) -> Weight {
+            Pending::<T>::kill();
+
+            if let Ok(log) = fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()) {
+                let PreLog::Block(block) = log;
+
+                for transaction in block.transactions {
+                    Self::do_transact(transaction)
+                        .expect("pre-block transaction verification failed; the block cannot be built");
+                }
+            }
+            0
+        }
+
         fn recover_signer(transaction: &ethereum::Transaction) -> Option<H160> {
             let mut sig = [0u8; 65];
             let mut msg = [0u8; 32];
@@ -320,7 +320,7 @@ pub enum Event<T: Config> {
             let mut statuses = Vec::new();
             let mut receipts = Vec::new();
             let mut logs_bloom = Bloom::default();
-            for (transaction, status, receipt) in Pending::get() {
+            for (transaction, status, receipt) in Pending::<T>::get() {
                 transactions.push(transaction);
                 statuses.push(status);
                 receipts.push(receipt.clone());
@@ -354,10 +354,10 @@ pub enum Event<T: Config> {
             let mut block = ethereum::Block::new(partial_header, transactions.clone(), ommers);
             block.header.state_root = T::StateRoot::get();
 
-            CurrentBlock::put(block.clone());
-            CurrentReceipts::put(receipts.clone());
-            CurrentTransactionStatuses::put(statuses.clone());
-            BlockHash::insert(block_number, block.header.hash());
+            CurrentBlock::<T>::put(Some(block.clone()));
+            CurrentReceipts::<T>::put(Some(receipts.clone()));
+            CurrentTransactionStatuses::<T>::put(Some(statuses.clone()));
+            BlockHash::<T>::insert(block_number, block.header.hash());
 
             if post_log {
                 let digest = DigestItem::<T::Hash>::Consensus(
@@ -377,7 +377,7 @@ pub enum Event<T: Config> {
             }
         }
 
-        fn do_transact(transaction: ethereum::Transaction) -> DispatchResultWithPostInfo {
+        pub fn do_transact(transaction: ethereum::Transaction) -> DispatchResultWithPostInfo {
             ensure!(
             fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()).is_err(),
             Error::<T>::PreLogExists,
@@ -468,8 +468,8 @@ pub enum Event<T: Config> {
         }
 
         /// Get the transaction status with given index.
-        pub fn current_transaction_statuses() -> Vec<TransactionStatus> {
-            CurrentTransactionStatuses::<T>::get().unwrap()
+        pub fn current_transaction_statuses() -> Option<Vec<TransactionStatus>> {
+            CurrentTransactionStatuses::<T>::get()
         }
 
         /// Get current block.

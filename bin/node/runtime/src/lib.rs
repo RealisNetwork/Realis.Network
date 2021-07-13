@@ -56,6 +56,8 @@ use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitive_types::U256;
 pub use realis_game_api;
 use sp_api::impl_runtime_apis;
+use fp_rpc::*;
+pub use realis_primitives::OpaqueExtrinsic;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{
     crypto::KeyTypeId,
@@ -145,6 +147,7 @@ pub fn native_version() -> NativeVersion {
         can_author_with: Default::default(),
     }
 }
+
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 
 pub struct DealWithFees;
@@ -1187,7 +1190,10 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F>
         I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
     {
         if let Some(author_index) = F::find_author(digests) {
-            let authority = Babe::authorities().get(author_index as usize);
+            // let id = authority_id.0;
+            // let bytes = bincode::serialize(&authority_id).unwrap();
+            // let authority_id = pallet_babe::Pallet::authorities()[author_index as usize];
+            let authority = Babe::authorities().get(author_index as usize).unwrap().clone();
             let authority_id = frame_support::dispatch::Encode::encode(&authority);
             return Some(H160::from_slice(&authority_id));
         }
@@ -1203,7 +1209,7 @@ parameter_types! {
 impl pallet_evm::Config for Runtime {
     type FeeCalculator = pallet_dynamic_fee::Module<Self>;
     type GasWeightMapping = ();
-    type BlockHashMapping = (); //pallet_ethereum::EthereumBlockHashMapping;
+    type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping<Self>;
     type CallOrigin = EnsureAddressTruncated;
     type WithdrawOrigin = EnsureAddressTruncated;
     type AddressMapping = HashedAddressMapping<BlakeTwo256>;
@@ -1310,27 +1316,27 @@ construct_runtime!(
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
         Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
-        Ethereum: pallet_ethereum::{Module, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
+        Ethereum: pallet_ethereum::{Pallet, Call, Storage, Event<T>, Config},
         EVM: pallet_evm::{Pallet, Call, Storage, Event<T>, Config},
         // DynamicFee: pallet_dynamic_fee::{Module, Call, Storage, Config, Inherent},
     }
 );
 
-// pub struct TransactionConverter;
-//
-// impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
-//     fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
-//         UncheckedExtrinsic::new_unsigned(pallet_ethereum::Call::<Runtime>::transact(transaction).into())
-//     }
-// }
-//
-// impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConverter {
-//     fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> opaque::UncheckedExtrinsic {
-//         let extrinsic = UncheckedExtrinsic::new_unsigned(pallet_ethereum::Call::<Runtime>::transact(transaction).into());
-//         let encoded = extrinsic.encode();
-//         opaque::UncheckedExtrinsic::decode(&mut &encoded[..]).expect("Encoded extrinsic is always valid")
-//     }
-// }
+pub struct TransactionConverter;
+
+impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
+    fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
+        UncheckedExtrinsic::new_unsigned(pallet_ethereum::Call::<Runtime>::transact(transaction).into())
+    }
+}
+
+impl fp_rpc::ConvertTransaction<OpaqueExtrinsic> for TransactionConverter {
+    fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> OpaqueExtrinsic {
+        let extrinsic = UncheckedExtrinsic::new_unsigned(pallet_ethereum::Call::<Runtime>::transact(transaction).into());
+        let encoded = extrinsic.encode();
+        OpaqueExtrinsic::decode(&mut &encoded[..]).expect("Encoded extrinsic is always valid")
+    }
+}
 
 /// The address format for describing accounts.
 pub type Address = sp_runtime::MultiAddress<AccountId, AccountIndex>;
