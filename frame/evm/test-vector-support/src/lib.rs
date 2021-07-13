@@ -16,7 +16,7 @@
 // limitations under the License.
 
 use realis_primitives::Precompile;
-use evm::{ExitSucceed, Context, executor::PrecompileOutput};
+use evm::{ExitSucceed, Context};
 
 #[cfg(feature = "std")]
 use serde::Deserialize;

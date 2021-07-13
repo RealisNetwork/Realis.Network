@@ -56,13 +56,12 @@ use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitive_types::U256;
 pub use realis_game_api;
 use sp_api::impl_runtime_apis;
-use fp_rpc::*;
 pub use realis_primitives::OpaqueExtrinsic;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{
     crypto::KeyTypeId,
     u32_trait::{_1, _2, _3, _4, _5},
-    OpaqueMetadata, H160, H256,
+    OpaqueMetadata, H160,
 };
 use pallet_evm::{EnsureAddressTruncated, HashedAddressMapping};
 use sp_inherents::{CheckInherentsResult, InherentData};
@@ -79,7 +78,7 @@ use sp_runtime::{
     Percent, Permill, Perquintill,
 };
 use sp_std::prelude::*;
-use sp_std::{marker::PhantomData, prelude::*};
+use sp_std::marker::PhantomData;
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
