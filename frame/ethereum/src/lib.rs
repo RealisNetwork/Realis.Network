@@ -27,16 +27,13 @@ use frame_support::{
     decl_error, decl_event, decl_module, decl_storage,
     dispatch::DispatchResultWithPostInfo,
     traits::Get,
-    weights::{Pays, PostDispatchInfo, Weight},
+    weights::PostDispatchInfo,
 };
 use sp_std::prelude::*;
 // use frame_system::ensure_signed;
-use codec::{Decode, Encode};
 use ethereum_types::{Bloom, BloomInput, H160, H256, H64, U256};
 use evm::ExitReason;
 use fp_consensus::{PostLog, PreLog, FRONTIER_ENGINE_ID};
-use fp_storage::PALLET_ETHEREUM_SCHEMA;
-use frame_support::ensure;
 use pallet_evm::{BlockHashMapping, FeeCalculator, GasWeightMapping, Runner};
 use realis_primitives::CallOrCreateInfo;
 use sha3::{Digest, Keccak256};
@@ -179,11 +176,11 @@ decl_module! {
             }
         }
 
-        fn on_initialize(_n: T::BlockNumber) -> Weight {
-            Pending::kill();
+    pub fn on_initialize(_n: T::BlockNumber) -> Weight {
+        Pending::kill();
 
-            if let Ok(log) = fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()) {
-                let PreLog::Block(block) = log;
+        if let Ok(log) = fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()) {
+            let PreLog::Block(block) = log;
 
                 for transaction in block.transactions {
                     Self::do_transact(transaction)
