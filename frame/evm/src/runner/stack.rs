@@ -22,17 +22,20 @@ use sp_core::{U256, H256, H160};
 use sp_runtime::traits::UniqueSaturatedInto;
 use frame_support::{
 	ensure, traits::{Get, Currency, ExistenceRequirement},
-	storage::{StorageMap, StorageDoubleMap},
+	// storage::{StorageMap, StorageDoubleMap},
 };
 use sha3::{Keccak256, Digest};
 use realis_primitives::{ExecutionInfo, CallInfo, CreateInfo, Log, Vicinity};
 use evm::{ExitReason, ExitError, Transfer};
 use evm::backend::Backend as BackendT;
 use evm::executor::{StackExecutor, StackSubstateMetadata, StackState as StackStateT};
-use crate::{Precompile, PrecompileSet};
+use crate::{/*Precompile,*/ PrecompileSet};
 use crate::pallet as EVM;
-use crate::*;
+// use crate::*;
 use crate::runner::Runner as RunnerT;
+
+use std::option::Option::None;
+use crate::pallet::OnChargeEVMTransaction;
 
 #[derive(Default)]
 pub struct Runner<T: EVM::Config> {
@@ -447,7 +450,7 @@ impl<'vicinity, 'config, T: EVM::Config> StackStateT<'config> for SubstrateStack
 				address,
 				index,
 			);
-			EVM::<T>::AccountStorages::remove(address, index);
+			EVM::AccountStorages::remove(address, index);
 		} else {
 			log::debug!(
 				target: "evm",
@@ -456,7 +459,7 @@ impl<'vicinity, 'config, T: EVM::Config> StackStateT<'config> for SubstrateStack
 				index,
 				value,
 			);
-			EVM::<T>::AccountStorages::insert(address, index, value);
+			EVM::AccountStorages::insert(address, index, value);
 		}
 	}
 
@@ -483,8 +486,8 @@ impl<'vicinity, 'config, T: EVM::Config> StackStateT<'config> for SubstrateStack
 	}
 
 	fn transfer(&mut self, transfer: Transfer) -> Result<(), ExitError> {
-		let source = T::AddressMapping::into_account_id(transfer.source);
-		let target = T::AddressMapping::into_account_id(transfer.target);
+		let source = EVM::AddressMapping::into_account_id(transfer.source);
+		let target = EVM::AddressMapping::into_account_id(transfer.target);
 
 		T::Currency::transfer(
 			&source,

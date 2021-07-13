@@ -334,26 +334,28 @@ pub mod pallet {
 		H256>;
 
 	#[pallet::genesis_config]
-	pub struct GenesisConfig<T: Config> {
+	pub struct GenesisConfig {
 		pub account_codes: Vec<u8>,
-		pub account_storages: H256
+		pub account_storages: H256,
+		pub accounts: std::collections::BTreeMap<H160, GenesisAccount>
 	}
 
 	#[cfg(feature = "std")]
-	impl<T: Config> Default for GenesisConfig<T> {
+	impl Default for GenesisConfig {
 		fn default() -> Self {
 			Self {
 				account_codes: Default::default(),
 				account_storages: Default::default(),
+				accounts: Default::default(),
 			}
 		}
 	}
 
 	#[pallet::genesis_build]
-	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+	impl<T: Config> GenesisBuild<T> for GenesisConfig {
 		fn build(&self) {
 			for (address, account) in self.accounts {
-				let account_id = T::AddressMapping::into_account_id(*address);
+				let account_id = T::AddressMapping::into_account_id(address);
 
 				// ASSUME: in one single EVM transaction, the nonce will not increase more than
 				// `u128::max_value()`.
@@ -366,10 +368,10 @@ pub mod pallet {
 					account.balance.low_u128().unique_saturated_into(),
 				);
 
-				AccountCodes::insert(address, &account.code);
+				AccountCodes::<T>::insert(address, &account.code);
 
 				for (index, value) in &account.storage {
-					AccountStorages::insert(address, index, value);
+					AccountStorages::<T>::insert(address, index, value);
 				}
 			}
 		}
@@ -577,7 +579,7 @@ pub mod pallet {
 		/// Check whether an account is empty.
 		pub fn is_account_empty(address: &H160) -> bool {
 			let account = Self::account_basic(address);
-			let code_len = AccountCodes::decode_len(address).unwrap_or(0);
+			let code_len = AccountCodes::<T>::decode_len(address).unwrap_or(0);
 
 			account.nonce == U256::zero() &&
 				account.balance == U256::zero() &&
@@ -593,14 +595,14 @@ pub mod pallet {
 
 		/// Remove an account.
 		pub fn remove_account(address: &H160) {
-			if AccountCodes::contains_key(address) {
+			if AccountCodes::<T>::contains_key(address) {
 				let account_id = T::AddressMapping::into_account_id(*address);
 				let _ = frame_system::Pallet::<T>::dec_consumers(&account_id);
 			}
 			// let k = Some(1 as u32);
 
-			AccountCodes::remove(address);
-			AccountStorages::remove_prefix(address, Some(1 as u32));
+			AccountCodes::<T>::remove(address);
+			AccountStorages::<T>::remove_prefix(address, Some(1 as u32));
 		}
 
 		/// Create an account.
@@ -609,12 +611,12 @@ pub mod pallet {
 				return
 			}
 
-			if !AccountCodes::contains_key(&address) {
+			if !AccountCodes::<T>::contains_key(&address) {
 				let account_id = T::AddressMapping::into_account_id(address);
 				let _ = frame_system::Pallet::<T>::inc_consumers(&account_id);
 			}
 
-			AccountCodes::insert(address, code);
+			AccountCodes::<T>::insert(address, code);
 		}
 
 		/// Get the account basic in EVM format.
