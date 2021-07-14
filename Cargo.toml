@@ -10,7 +10,7 @@ members = [
     "frame/nft",
     "frame/realis-game-api",
     "frame/staking-pool",
-    "primitives",
+    "primitives/realis",
     "frame/evm",
     "primitives/consensus",
     "primitives/rpc",

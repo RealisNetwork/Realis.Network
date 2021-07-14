@@ -31,7 +31,7 @@
 // --wasm-execution
 // compiled
 // --pallet
-// pallet-nft
+// pallet-realis
 // --extrinsic
 // *
 // --steps
@@ -39,7 +39,7 @@
 // --repeat
 // 10
 // --raw
-// --output=./frame/nft/src/weights.rs
+// --output=./frame/realis/src/weights.rs
 // --template=./.maintain/frame-weight-template.hbs
 
 #![allow(unused_parens)]
