@@ -18,7 +18,7 @@
 pub mod stack;
 
 use crate::pallet as EVM;
-use realis_primitives::{CallInfo, CreateInfo};
+use fp_precompile::{CallInfo, CreateInfo};
 use sp_core::{H160, H256, U256};
 use sp_std::vec::Vec;
 

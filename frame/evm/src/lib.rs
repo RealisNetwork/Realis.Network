@@ -64,7 +64,7 @@ mod mock;
 
 pub use crate::runner::Runner;
 pub use evm::{ExitError, ExitFatal, ExitReason, ExitRevert, ExitSucceed};
-pub use realis_primitives::{
+pub use fp_precompile::{
     Account, CallInfo, CreateInfo, ExecutionInfo, LinearCostPrecompile, Log, Precompile,
     PrecompileSet, Vicinity,
 };
@@ -92,7 +92,7 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
 
-    use realis_primitives::*;
+    use fp_precompile::*;
 
     use super::*;
 

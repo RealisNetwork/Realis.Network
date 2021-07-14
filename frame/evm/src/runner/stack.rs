@@ -27,7 +27,7 @@ use frame_support::{
     traits::{Currency, ExistenceRequirement, Get},
     // storage::{StorageMap, StorageDoubleMap},
 };
-use realis_primitives::{CallInfo, CreateInfo, ExecutionInfo, Log, Vicinity};
+use fp_precompile::{CallInfo, CreateInfo, ExecutionInfo, Log, Vicinity};
 use sha3::{Digest, Keccak256};
 use sp_core::{H160, H256, U256};
 use sp_runtime::traits::UniqueSaturatedInto;

@@ -21,7 +21,7 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use core::cmp::min;
-use realis_primitives::LinearCostPrecompile;
+use fp_precompile::LinearCostPrecompile;
 use evm::{ExitSucceed, ExitError};
 
 /// The identity precompile.

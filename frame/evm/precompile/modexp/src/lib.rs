@@ -20,7 +20,7 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use realis_primitives::Precompile;
+use fp_precompile::Precompile;
 use evm::{ExitSucceed, ExitError, Context, executor::PrecompileOutput};
 use num::{BigUint, Zero, One, ToPrimitive, FromPrimitive};
 

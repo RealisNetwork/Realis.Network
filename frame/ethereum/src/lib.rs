@@ -30,7 +30,7 @@ use ethereum_types::{Bloom, BloomInput, H160, H256, H64, U256};
 use evm::ExitReason;
 use fp_consensus::{PostLog, PreLog, FRONTIER_ENGINE_ID};
 use pallet_evm::{BlockHashMapping, FeeCalculator, GasWeightMapping, Runner};
-use realis_primitives::CallOrCreateInfo;
+use fp_precompile::CallOrCreateInfo;
 use sha3::{Digest, Keccak256};
 use sp_runtime::{
     generic::DigestItem,

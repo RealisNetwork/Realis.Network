@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use realis_primitives::Precompile;
+use fp_precompile::Precompile;
 use evm::{ExitSucceed, Context};
 
 #[cfg(feature = "std")]
