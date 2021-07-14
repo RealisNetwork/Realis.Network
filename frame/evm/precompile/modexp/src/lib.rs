@@ -46,7 +46,6 @@ fn calculate_gas_cost(
             words += 1;
         }
 
-        // TODO: prevent/handle overflow
         words * words
     }
 
@@ -156,7 +155,6 @@ impl Precompile for Modexp {
             let exponent = BigUint::from_bytes_be(&input[exp_start..exp_start + exp_len]);
 
             // do our gas accounting
-            // TODO: we could technically avoid reading base first...
             let gas_cost =
                 calculate_gas_cost(base_len as u64, exp_len as u64, mod_len as u64, &exponent);
             if let Some(gas_left) = target_gas {
@@ -327,7 +325,7 @@ mod tests {
                 assert_eq!(result, expected);
             }
             Err(_) => {
-                panic!("Modexp::execute() returned error"); // TODO: how to pass error on?
+                panic!("Modexp::execute() returned error");
             }
         }
     }
@@ -362,7 +360,7 @@ mod tests {
                 assert_eq!(result, expected);
             }
             Err(_) => {
-                panic!("Modexp::execute() returned error"); // TODO: how to pass error on?
+                panic!("Modexp::execute() returned error");
             }
         }
     }
@@ -395,7 +393,7 @@ mod tests {
                 assert_eq!(result, expected);
             }
             Err(_) => {
-                panic!("Modexp::execute() returned error"); // TODO: how to pass error on?
+                panic!("Modexp::execute() returned error");
             }
         }
     }

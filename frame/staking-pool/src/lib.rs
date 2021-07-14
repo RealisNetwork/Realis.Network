@@ -942,7 +942,6 @@ pub mod pallet {
 
     #[pallet::extra_constants]
     impl<T: Config> Pallet<T> {
-        //TODO: rename to snake case after https://github.com/paritytech/substrate/issues/8826 fixed.
         #[allow(non_snake_case)]
         fn MaxNominations() -> u32 {
             T::MAX_NOMINATIONS
@@ -2420,7 +2419,6 @@ pub mod pallet {
         /// This can be helpful if bond requirements are updated, and we need to remove old users
         /// who do not satisfy these requirements.
         ///
-        // TODO: Maybe we can deprecate `chill` in the future.
         // https://github.com/paritytech/substrate/issues/9111
         #[pallet::weight(T::WeightInfo::chill_other())]
         pub fn chill_other(origin: OriginFor<T>, controller: T::AccountId) -> DispatchResult {
@@ -2901,7 +2899,6 @@ impl<T: Config> Pallet<T> {
                     // The initial era is allowed to have no exposures.
                     // In this case the SessionManager is expected to choose a sensible validator
                     // set.
-                    // TODO: this should be simplified #8911
                     CurrentEra::<T>::put(0);
                     ErasStartSessionIndex::<T>::insert(&0, &start_session_index);
                 }

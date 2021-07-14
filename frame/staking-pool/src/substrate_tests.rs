@@ -543,7 +543,6 @@ fn no_candidate_emergency_condition() {
 			// trigger era
 			start_active_era(1);
 
-			// Previous ones are elected. chill is invalidates. TODO: #2494
 			assert_eq_uvec!(validator_controllers(), vec![10, 20, 30, 40]);
 			// Though the validator preferences has been removed.
 			assert!(Staking::validators(11) != prefs);

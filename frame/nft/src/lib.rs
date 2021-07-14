@@ -717,7 +717,6 @@ pub mod pallet {
         //             if !existed && exists {
         //                 Self::on_created_account(k.clone());
         //             } else if existed && !exists {
-        //                 // TODO:
         //                 //Self::on_killed_account(k.clone());
         //             }
         //             v
@@ -730,7 +729,6 @@ pub mod pallet {
         // ) -> Option<AccountData<<T as Config>::Balance>> {
         //     let total = new.total();
         //     if total < T::ExistentialDeposit::get() {
-        //         // TODO:
         //         /*
         //     if !total.is_zero() {
         //         T::DustRemoval::on_unbalanced(NegativeImbalance::new(total));
