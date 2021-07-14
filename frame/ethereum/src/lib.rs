@@ -23,11 +23,7 @@
 // Ensure we're `no_std` when compiling for Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::{
-    dispatch::DispatchResultWithPostInfo,
-    traits::Get,
-    weights::PostDispatchInfo,
-};
+use frame_support::weights::PostDispatchInfo;
 use sp_std::prelude::*;
 // use frame_system::ensure_signed;
 use ethereum_types::{Bloom, BloomInput, H160, H256, H64, U256};
@@ -39,7 +35,7 @@ use sha3::{Digest, Keccak256};
 use sp_runtime::{
     generic::DigestItem,
     traits::{One, UniqueSaturatedInto},
-    transaction_validity::{ ValidTransactionBuilder }
+    transaction_validity::ValidTransactionBuilder,
 };
 
 pub use ethereum::{Block, Log, Receipt, Transaction, TransactionAction, TransactionMessage};
@@ -55,16 +51,15 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::pallet_prelude::*;
-    use frame_system::pallet_prelude::*;
     use super::*;
     use fp_storage::PALLET_ETHEREUM_SCHEMA;
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
     use sp_runtime::traits::{Saturating, Zero};
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
     pub struct Pallet<T>(PhantomData<T>);
-
 
     #[derive(Eq, PartialEq, Clone, sp_runtime::RuntimeDebug)]
     pub enum ReturnValue {
@@ -100,10 +95,10 @@ pub mod pallet {
     /// Configuration trait for Ethereum pallet.
     #[pallet::config]
     pub trait Config:
-    frame_system::Config<Hash=H256>
-    + pallet_balances::Config
-    + pallet_timestamp::Config
-    + pallet_evm::Config
+        frame_system::Config<Hash = H256>
+        + pallet_balances::Config
+        + pallet_timestamp::Config
+        + pallet_evm::Config
     {
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
@@ -114,20 +109,25 @@ pub mod pallet {
     /// Current building block's transactions and receipts.
     #[pallet::storage]
     #[pallet::getter(fn pending)]
-    pub(crate) type Pending<T: Config> = StorageValue<_, Vec<(ethereum::Transaction, TransactionStatus, ethereum::Receipt)>, ValueQuery>;
+    pub(crate) type Pending<T: Config> = StorageValue<
+        _,
+        Vec<(ethereum::Transaction, TransactionStatus, ethereum::Receipt)>,
+        ValueQuery,
+    >;
 
     /// The current Ethereum block.
     #[pallet::storage]
     pub(crate) type CurrentBlock<T: Config> = StorageValue<_, Option<ethereum::Block>, ValueQuery>;
 
-
     /// The current Ethereum receipts.
     #[pallet::storage]
-    pub(crate) type CurrentReceipts<T: Config> = StorageValue<_, Option<Vec<ethereum::Receipt>>, ValueQuery>;
+    pub(crate) type CurrentReceipts<T: Config> =
+        StorageValue<_, Option<Vec<ethereum::Receipt>>, ValueQuery>;
 
     /// The current transaction statuses.
     #[pallet::storage]
-    pub(crate) type CurrentTransactionStatuses<T: Config> = StorageValue<_, Option<Vec<TransactionStatus>>, ValueQuery>;
+    pub(crate) type CurrentTransactionStatuses<T: Config> =
+        StorageValue<_, Option<Vec<TransactionStatus>>, ValueQuery>;
 
     // Mapping for block number and hashes.
     #[pallet::storage]
@@ -143,13 +143,12 @@ pub mod pallet {
     }
 
     #[pallet::genesis_config]
-    pub struct GenesisConfig {
-    }
+    pub struct GenesisConfig {}
 
     #[cfg(feature = "std")]
     impl Default for GenesisConfig {
         fn default() -> Self {
-            Self{}
+            Self {}
         }
     }
 
@@ -160,7 +159,10 @@ pub mod pallet {
             <Pallet<T>>::store_block(false, U256::zero());
 
             // Initialize the storage schema at the well known key.
-            frame_support::storage::unhashed::put::<EthereumStorageSchema>(&PALLET_ETHEREUM_SCHEMA, &EthereumStorageSchema::V1);
+            frame_support::storage::unhashed::put::<EthereumStorageSchema>(
+                &PALLET_ETHEREUM_SCHEMA,
+                &EthereumStorageSchema::V1,
+            );
         }
     }
 
@@ -190,7 +192,10 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         /// Transact an Ethereum transaction.
         #[pallet::weight(< T as pallet_evm::Config >::GasWeightMapping::gas_to_weight(transaction.gas_limit.unique_saturated_into()))]
-        pub fn transact(_origin: OriginFor<T>, transaction: ethereum::Transaction) -> DispatchResultWithPostInfo {
+        pub fn transact(
+            _origin: OriginFor<T>,
+            transaction: ethereum::Transaction,
+        ) -> DispatchResultWithPostInfo {
             // ensure_none(origin)?;
 
             Self::do_transact(transaction)
@@ -216,7 +221,7 @@ pub mod pallet {
                         return InvalidTransaction::Custom(
                             TransactionValidationError::InvalidChainId as u8,
                         )
-                            .into();
+                        .into();
                     }
                 }
 
@@ -228,7 +233,7 @@ pub mod pallet {
                     return InvalidTransaction::Custom(
                         TransactionValidationError::InvalidGasLimit as u8,
                     )
-                        .into();
+                    .into();
                 }
 
                 let account_data = pallet_evm::Pallet::<T>::account_basic(&origin);
@@ -270,19 +275,19 @@ pub mod pallet {
         pub fn on_finalize(n: T::BlockNumber) {
             <Pallet<T>>::store_block(
                 fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()).is_err(),
-                U256::from(
-                    UniqueSaturatedInto::<u128>::unique_saturated_into(
-                        frame_system::Pallet::<T>::block_number()
-                    )
-                ),
+                U256::from(UniqueSaturatedInto::<u128>::unique_saturated_into(
+                    frame_system::Pallet::<T>::block_number(),
+                )),
             );
             // move block hash pruning window by one block
             let block_hash_count = T::BlockHashCount::get();
-            let to_remove = n.saturating_sub(block_hash_count).saturating_sub(One::one());
+            let to_remove = n
+                .saturating_sub(block_hash_count)
+                .saturating_sub(One::one());
             // keep genesis hash
             if !to_remove.is_zero() {
                 BlockHash::<T>::remove(U256::from(
-                    UniqueSaturatedInto::<u32>::unique_saturated_into(to_remove)
+                    UniqueSaturatedInto::<u32>::unique_saturated_into(to_remove),
                 ));
             }
         }
@@ -294,8 +299,9 @@ pub mod pallet {
                 let PreLog::Block(block) = log;
 
                 for transaction in block.transactions {
-                    Self::do_transact(transaction)
-                        .expect("pre-block transaction verification failed; the block cannot be built");
+                    Self::do_transact(transaction).expect(
+                        "pre-block transaction verification failed; the block cannot be built",
+                    );
                 }
             }
             0
@@ -379,9 +385,9 @@ pub mod pallet {
 
         pub fn do_transact(transaction: ethereum::Transaction) -> DispatchResultWithPostInfo {
             ensure!(
-            fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()).is_err(),
-            Error::<T>::PreLogExists,
-        );
+                fp_consensus::find_pre_log(&frame_system::Pallet::<T>::digest()).is_err(),
+                Error::<T>::PreLogExists,
+            );
 
             let source =
                 Self::recover_signer(&transaction).ok_or_else(|| Error::<T>::InvalidSignature)?;
@@ -464,7 +470,7 @@ pub mod pallet {
                 )),
                 pays_fee: Pays::No,
             })
-                .into()
+            .into()
         }
 
         /// Get the transaction status with given index.
@@ -510,7 +516,7 @@ pub mod pallet {
                         nonce,
                         config.as_ref().unwrap_or(T::config()),
                     )
-                        .map_err(Into::into)?;
+                    .map_err(Into::into)?;
 
                     Ok((Some(target), None, CallOrCreateInfo::Call(res)))
                 }
@@ -524,7 +530,7 @@ pub mod pallet {
                         nonce,
                         config.as_ref().unwrap_or(T::config()),
                     )
-                        .map_err(Into::into)?;
+                    .map_err(Into::into)?;
 
                     Ok((None, Some(res.value), CallOrCreateInfo::Create(res)))
                 }

@@ -46,6 +46,7 @@ use pallet_contracts::weights::WeightInfo;
 use pallet_election_provider_multi_phase::FallbackStrategy;
 // use pallet_evm::*;
 pub use pallet_evm;
+use pallet_evm::{EnsureAddressTruncated, HashedAddressMapping};
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -55,16 +56,14 @@ pub use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdj
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitive_types::U256;
 pub use realis_game_api;
-use sp_api::impl_runtime_apis;
-use fp_rpc::*;
 pub use realis_primitives::OpaqueExtrinsic;
+use sp_api::impl_runtime_apis;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{
     crypto::KeyTypeId,
     u32_trait::{_1, _2, _3, _4, _5},
-    OpaqueMetadata, H160, H256,
+    OpaqueMetadata, H160,
 };
-use pallet_evm::{EnsureAddressTruncated, HashedAddressMapping};
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::curve::PiecewiseLinear;
 use sp_runtime::traits::{
@@ -78,8 +77,8 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys, ApplyExtrinsicResult, FixedPointNumber, Perbill,
     Percent, Permill, Perquintill,
 };
+use sp_std::marker::PhantomData;
 use sp_std::prelude::*;
-use sp_std::{marker::PhantomData, prelude::*};
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -1184,16 +1183,19 @@ impl runtime_common::Config for Runtime {
 }
 
 pub struct FindAuthorTruncated<F>(PhantomData<F>);
-impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F>
-{
-    fn find_author<'a, I>(digests: I) -> Option<H160> where
-        I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
+impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
+    fn find_author<'a, I>(digests: I) -> Option<H160>
+    where
+        I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
     {
         if let Some(author_index) = F::find_author(digests) {
             // let id = authority_id.0;
             // let bytes = bincode::serialize(&authority_id).unwrap();
             // let authority_id = pallet_babe::Pallet::authorities()[author_index as usize];
-            let authority = Babe::authorities().get(author_index as usize).unwrap().clone();
+            let authority = Babe::authorities()
+                .get(author_index as usize)
+                .unwrap()
+                .clone();
             let authority_id = frame_support::dispatch::Encode::encode(&authority);
             return Some(H160::from_slice(&authority_id));
         }
@@ -1233,8 +1235,8 @@ impl pallet_evm::Config for Runtime {
 }
 
 impl pallet_ethereum::Config for Runtime {
-   type Event = Event;
-   type StateRoot = pallet_ethereum::IntermediateStateRoot;
+    type Event = Event;
+    type StateRoot = pallet_ethereum::IntermediateStateRoot;
 }
 
 frame_support::parameter_types! {
@@ -1326,13 +1328,17 @@ pub struct TransactionConverter;
 
 impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
     fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
-        UncheckedExtrinsic::new_unsigned(pallet_ethereum::Call::<Runtime>::transact(transaction).into())
+        UncheckedExtrinsic::new_unsigned(
+            pallet_ethereum::Call::<Runtime>::transact(transaction).into(),
+        )
     }
 }
 
 impl fp_rpc::ConvertTransaction<OpaqueExtrinsic> for TransactionConverter {
     fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> OpaqueExtrinsic {
-        let extrinsic = UncheckedExtrinsic::new_unsigned(pallet_ethereum::Call::<Runtime>::transact(transaction).into());
+        let extrinsic = UncheckedExtrinsic::new_unsigned(
+            pallet_ethereum::Call::<Runtime>::transact(transaction).into(),
+        );
         let encoded = extrinsic.encode();
         OpaqueExtrinsic::decode(&mut &encoded[..]).expect("Encoded extrinsic is always valid")
     }

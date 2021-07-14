@@ -77,6 +77,7 @@ use frame_support::traits::{
 };
 use frame_support::weights::PostDispatchInfo;
 use frame_system::RawOrigin;
+pub use pallet::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::{Hasher, H160, H256, U256};
@@ -85,7 +86,6 @@ use sp_runtime::{
     AccountId32,
 };
 use sp_std::vec::Vec;
-pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
