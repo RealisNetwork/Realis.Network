@@ -28,11 +28,12 @@ frame-support-test = { git = "https://github.com/paritytech/substrate", rev = "4
 sp-keystore = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f" }
 trie-db = "0.22.3"
 serde_json = "1.0.61"
-libsecp256k1 = "0.3.5"
+#libsecp256k1 = "0.3.5"
 
 [features]
 default = ["std"]
 std = [
+#    "libsecp256k1/std",
     "parity-scale-codec/std",
     "serde_derive",
     "serde/std",
@@ -42,5 +43,4 @@ std = [
     "frame-support/std",
     "sp-runtime/std",
     "frame-system/std",
-    "libsecp256k1/std",
 ]
