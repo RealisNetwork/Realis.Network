@@ -23,10 +23,10 @@ use hex_literal::hex;
 use node_runtime::constants::currency::*;
 use node_runtime::Block;
 use node_runtime::{
-    wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, CouncilConfig,
-    DemocracyConfig, ElectionsConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, NftConfig,
-    SessionConfig, SessionKeys, SocietyConfig, StakerStatus, StakingConfig, SudoConfig,
-    SystemConfig, TechnicalCommitteeConfig, MAX_NOMINATIONS,
+    wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, /*CouncilConfig,*/
+    /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig, NftConfig,
+    SessionConfig, SessionKeys, /*SocietyConfig,*/ StakerStatus, StakingConfig, SudoConfig,
+    SystemConfig, /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
@@ -320,7 +320,7 @@ pub fn testnet_genesis(
         }))
         .collect::<Vec<_>>();
 
-    let num_endowed_accounts = endowed_accounts.len();
+    let _num_endowed_accounts = endowed_accounts.len();
 
     const ENDOWMENT: Balance = 30_000 * DOLLARS / 10;
     const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
@@ -371,24 +371,24 @@ pub fn testnet_genesis(
             stakers,
             ..Default::default()
         },
-        democracy: DemocracyConfig::default(),
-        elections: ElectionsConfig {
-            members: endowed_accounts
-                .iter()
-                .take((num_endowed_accounts + 1) / 2)
-                .cloned()
-                .map(|member| (member, STASH))
-                .collect(),
-        },
-        council: CouncilConfig::default(),
-        technical_committee: TechnicalCommitteeConfig {
-            members: endowed_accounts
-                .iter()
-                .take((num_endowed_accounts + 1) / 2)
-                .cloned()
-                .collect(),
-            phantom: Default::default(),
-        },
+        // democracy: DemocracyConfig::default(),
+        // elections: ElectionsConfig {
+        //     members: endowed_accounts
+        //         .iter()
+        //         .take((num_endowed_accounts + 1) / 2)
+        //         .cloned()
+        //         .map(|member| (member, STASH))
+        //         .collect(),
+        // },
+        // council: CouncilConfig::default(),
+        // technical_committee: TechnicalCommitteeConfig {
+        //     members: endowed_accounts
+        //         .iter()
+        //         .take((num_endowed_accounts + 1) / 2)
+        //         .cloned()
+        //         .collect(),
+        //     phantom: Default::default(),
+        // },
         sudo: SudoConfig { key: root_key },
         babe: BabeConfig {
             authorities: vec![],
@@ -399,17 +399,17 @@ pub fn testnet_genesis(
         grandpa: GrandpaConfig {
             authorities: vec![],
         },
-        technical_membership: Default::default(),
-        treasury: Default::default(),
-        society: SocietyConfig {
-            members: endowed_accounts
-                .iter()
-                .take((num_endowed_accounts + 1) / 2)
-                .cloned()
-                .collect(),
-            pot: 0,
-            max_members: 999,
-        },
+        // technical_membership: Default::default(),
+        // treasury: Default::default(),
+        // society: SocietyConfig {
+        //     members: endowed_accounts
+        //         .iter()
+        //         .take((num_endowed_accounts + 1) / 2)
+        //         .cloned()
+        //         .collect(),
+        //     pot: 0,
+        //     max_members: 999,
+        // },
         vesting: Default::default(),
         gilt: Default::default(),
         nft: NftConfig {
@@ -488,7 +488,7 @@ pub fn realis_genesis(
             )
         }))
         .collect::<Vec<_>>();
-    let num_endowed_accounts = endowed_accounts.len();
+    let _num_endowed_accounts = endowed_accounts.len();
 
     const ENDOWMENT: Balance = 197_335 * DOLLARS / 10;
     const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
@@ -539,24 +539,24 @@ pub fn realis_genesis(
             stakers,
             ..Default::default()
         },
-        democracy: DemocracyConfig::default(),
-        elections: ElectionsConfig {
-            members: endowed_accounts
-                .iter()
-                .take((num_endowed_accounts + 1) / 2)
-                .cloned()
-                .map(|member| (member, STASH))
-                .collect(),
-        },
-        council: CouncilConfig::default(),
-        technical_committee: TechnicalCommitteeConfig {
-            members: endowed_accounts
-                .iter()
-                .take((num_endowed_accounts + 1) / 2)
-                .cloned()
-                .collect(),
-            phantom: Default::default(),
-        },
+        // democracy: DemocracyConfig::default(),
+        // elections: ElectionsConfig {
+        //     members: endowed_accounts
+        //         .iter()
+        //         .take((num_endowed_accounts + 1) / 2)
+        //         .cloned()
+        //         .map(|member| (member, STASH))
+        //         .collect(),
+        // },
+        // council: CouncilConfig::default(),
+        // technical_committee: TechnicalCommitteeConfig {
+        //     members: endowed_accounts
+        //         .iter()
+        //         .take((num_endowed_accounts + 1) / 2)
+        //         .cloned()
+        //         .collect(),
+        //     phantom: Default::default(),
+        // },
         sudo: SudoConfig { key: root_key },
         babe: BabeConfig {
             authorities: vec![],
@@ -567,17 +567,17 @@ pub fn realis_genesis(
         grandpa: GrandpaConfig {
             authorities: vec![],
         },
-        technical_membership: Default::default(),
-        treasury: Default::default(),
-        society: SocietyConfig {
-            members: endowed_accounts
-                .iter()
-                .take((num_endowed_accounts + 1) / 2)
-                .cloned()
-                .collect(),
-            pot: 0,
-            max_members: 999,
-        },
+        // technical_membership: Default::default(),
+        // treasury: Default::default(),
+        // society: SocietyConfig {
+        //     members: endowed_accounts
+        //         .iter()
+        //         .take((num_endowed_accounts + 1) / 2)
+        //         .cloned()
+        //         .collect(),
+        //     pot: 0,
+        //     max_members: 999,
+        // },
         vesting: Default::default(),
         gilt: Default::default(),
         nft: NftConfig {

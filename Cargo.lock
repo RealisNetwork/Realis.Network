@@ -4308,15 +4308,11 @@ dependencies = [
  "pallet-authorship",
  "pallet-babe",
  "pallet-balances",
- "pallet-bounties",
- "pallet-collective",
  "pallet-contracts",
  "pallet-contracts-primitives",
  "pallet-contracts-rpc-runtime-api",
- "pallet-democracy",
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase",
- "pallet-elections-phragmen",
  "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-precompile-modexp",
@@ -4328,27 +4324,22 @@ dependencies = [
  "pallet-im-online",
  "pallet-indices",
  "pallet-lottery",
- "pallet-membership",
  "pallet-mmr",
  "pallet-multisig",
  "pallet-nft",
  "pallet-offences",
  "pallet-offences-benchmarking",
- "pallet-proxy",
  "pallet-randomness-collective-flip",
  "pallet-recovery",
  "pallet-scheduler",
  "pallet-session",
  "pallet-session-benchmarking",
- "pallet-society",
  "pallet-staking 0.0.2",
  "pallet-staking-reward-curve",
  "pallet-sudo",
  "pallet-timestamp",
- "pallet-tips",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
- "pallet-treasury",
  "pallet-utility",
  "pallet-vesting",
  "parity-scale-codec",
@@ -4674,36 +4665,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-bounties"
-version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "pallet-treasury",
- "parity-scale-codec",
- "sp-runtime",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
-]
-
-[[package]]
-name = "pallet-collective"
-version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "log",
- "parity-scale-codec",
- "sp-core 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
- "sp-io",
- "sp-runtime",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
-]
-
-[[package]]
 name = "pallet-contracts"
 version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
@@ -4784,21 +4745,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-democracy"
-version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "serde",
- "sp-io",
- "sp-runtime",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
-]
-
-[[package]]
 name = "pallet-dynamic-fee"
 version = "3.0.0-dev"
 dependencies = [
@@ -4832,23 +4778,6 @@ dependencies = [
  "sp-runtime",
  "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
  "static_assertions",
-]
-
-[[package]]
-name = "pallet-elections-phragmen"
-version = "4.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "log",
- "parity-scale-codec",
- "sp-core 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
- "sp-io",
- "sp-npos-elections",
- "sp-runtime",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
 ]
 
 [[package]]
@@ -5050,21 +4979,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-membership"
-version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "log",
- "parity-scale-codec",
- "sp-io",
- "sp-runtime",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
-]
-
-[[package]]
 name = "pallet-mmr"
 version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
@@ -5189,22 +5103,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-proxy"
-version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "max-encoded-len",
- "parity-scale-codec",
- "sp-core 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
- "sp-io",
- "sp-runtime",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
-]
-
-[[package]]
 name = "pallet-randomness-collective-flip"
 version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
@@ -5279,19 +5177,6 @@ dependencies = [
  "rand 0.7.3",
  "sp-runtime",
  "sp-session",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
-]
-
-[[package]]
-name = "pallet-society"
-version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
-dependencies = [
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "rand_chacha 0.2.2",
- "sp-runtime",
  "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
 ]
 
@@ -5395,21 +5280,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-tips"
-version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "pallet-treasury",
- "parity-scale-codec",
- "serde",
- "sp-runtime",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
-]
-
-[[package]]
 name = "pallet-transaction-payment"
 version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
@@ -5451,22 +5321,6 @@ dependencies = [
  "parity-scale-codec",
  "sp-api",
  "sp-runtime",
-]
-
-[[package]]
-name = "pallet-treasury"
-version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f#4cb42231b31ed0dda753144f1e2958b7c78f381f"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "impl-trait-for-tuples 0.2.1",
- "pallet-balances",
- "parity-scale-codec",
- "serde",
- "sp-runtime",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?rev=4cb42231b31ed0dda753144f1e2958b7c78f381f)",
 ]
 
 [[package]]

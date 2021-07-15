@@ -55,25 +55,26 @@ impl frame_system::Config for Test {
     type BaseCallFilter = ();
     type BlockWeights = ();
     type BlockLength = ();
-    type DbWeight = ();
     type Origin = Origin;
+    type Call = Call;
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
-    type Call = ();
     type Hashing = BlakeTwo256;
-    type AccountId = H160;
+    type AccountId = u64;
     type Lookup = IdentityLookup<Self::AccountId>;
-    type Header = generic::Header<u64, BlakeTwo256>;
-    type Event = ();
+    type Header = Header;
+    type Event = Event<T>;
     type BlockHashCount = BlockHashCount;
+    type DbWeight = ();
     type Version = ();
     type PalletInfo = PalletInfo;
-    type AccountData = pallet_balances::AccountData<u64>;
+    type AccountData = pallet_balances::AccountData<u128>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type SystemWeightInfo = ();
     type SS58Prefix = ();
+    type OnSetCode = ();
 }
 
 parameter_types! {
@@ -81,9 +82,11 @@ parameter_types! {
 }
 impl pallet_balances::Config for Test {
     type MaxLocks = ();
-    type Balance = u64;
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
+    type Balance = u128;
+    type Event = Event<T>;
     type DustRemoval = ();
-    type Event = ();
     type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = System;
     type WeightInfo = ();
