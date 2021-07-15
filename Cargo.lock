@@ -6500,7 +6500,6 @@ dependencies = [
  "frame-support-test",
  "frame-system",
  "hex-literal 0.3.2",
- "libsecp256k1",
  "parity-scale-codec",
  "rustc-hex",
  "serde",

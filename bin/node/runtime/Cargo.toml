@@ -182,9 +182,10 @@ std = [
 	"realis-game-api/std",
 	"pallet-evm/std",
 	"pallet-ethereum/std",
-	"pallet-dynamic-fee/std"
+	"pallet-dynamic-fee/std",
 #	"chain-bridge/std",
 #	"realis-bridge/std",
+	"runtime-common/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",

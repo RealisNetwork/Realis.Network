@@ -44,7 +44,6 @@ pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 use pallet_contracts::weights::WeightInfo;
 use pallet_election_provider_multi_phase::FallbackStrategy;
-// use pallet_evm::*;
 pub use pallet_evm;
 use pallet_evm::{EnsureAddressTruncated, HashedAddressMapping};
 use pallet_grandpa::fg_primitives;
@@ -55,6 +54,7 @@ pub use pallet_staking;
 pub use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitive_types::U256;
+pub use runtime_common;
 pub use realis_game_api;
 pub use realis_primitives::OpaqueExtrinsic;
 use sp_api::impl_runtime_apis;
@@ -79,6 +79,7 @@ use sp_runtime::{
 };
 use sp_std::marker::PhantomData;
 use sp_std::prelude::*;
+
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -118,7 +119,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 
 /// Runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("realis"),0
+    spec_name: create_runtime_str!("realis"),
     impl_name: create_runtime_str!("realis-node"),
     authoring_version: 10,
     // Per convention: if the runtime behavior changes, increment spec_version
@@ -267,7 +268,7 @@ parameter_types! {
 
 /// The type used to represent the kinds of proxying allowed.
 #[derive(
-    Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen,
+Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen,
 )]
 pub enum ProxyType {
     Any,
@@ -373,7 +374,7 @@ impl pallet_babe::Config for Runtime {
     )>>::IdentificationTuple;
 
     type HandleEquivocation =
-        pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
+    pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
 
     type WeightInfo = ();
 }
@@ -422,7 +423,7 @@ impl pallet_transaction_payment::Config for Runtime {
     type TransactionByteFee = TransactionByteFee;
     type WeightToFee = IdentityFee<Balance>;
     type FeeMultiplierUpdate =
-        TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
+    TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
 }
 
 parameter_types! {
@@ -823,8 +824,8 @@ parameter_types! {
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
-where
-    Call: From<LocalCall>,
+    where
+        Call: From<LocalCall>,
 {
     fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
         call: Call,
@@ -874,8 +875,8 @@ impl frame_system::offchain::SigningTypes for Runtime {
 }
 
 impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
-where
-    Call: From<C>,
+    where
+        Call: From<C>,
 {
     type Extrinsic = UncheckedExtrinsic;
     type OverarchingCall = Call;
@@ -906,7 +907,7 @@ impl pallet_grandpa::Config for Runtime {
     type KeyOwnerProofSystem = Historical;
 
     type KeyOwnerProof =
-        <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
+    <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
 
     type KeyOwnerIdentification = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(
         KeyTypeId,
@@ -1176,8 +1177,8 @@ impl runtime_common::Config for Runtime {
 pub struct FindAuthorTruncated<F>(PhantomData<F>);
 impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
     fn find_author<'a, I>(digests: I) -> Option<H160>
-    where
-        I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
+        where
+            I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
     {
         if let Some(author_index) = F::find_author(digests) {
             // let id = authority_id.0;
@@ -1725,8 +1726,8 @@ mod tests {
     #[test]
     fn validate_transaction_submitter_bounds() {
         fn is_submit_signed_transaction<T>()
-        where
-            T: CreateSignedTransaction<Call>,
+            where
+                T: CreateSignedTransaction<Call>,
         {
         }
 
