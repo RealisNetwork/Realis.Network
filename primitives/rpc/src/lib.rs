@@ -23,7 +23,7 @@ use ethereum_types::Bloom;
 use codec::{Encode, Decode};
 use sp_std::vec::Vec;
 use sp_runtime::traits::Block as BlockT;
-use realis_primitives;
+use fp_precompile;
 
 #[derive(Eq, PartialEq, Clone, Encode, Decode, sp_runtime::RuntimeDebug)]
 pub struct TransactionStatus {
@@ -56,7 +56,7 @@ sp_api::decl_runtime_apis! {
 		/// Returns runtime defined pallet_evm::ChainId.
 		fn chain_id() -> u64;
 		/// Returns pallet_evm::Accounts by address.
-		fn account_basic(address: H160) -> realis_primitives::Account;
+		fn account_basic(address: H160) -> fp_precompile::Account;
 		/// Returns FixedGasPrice::min_gas_price
 		fn gas_price() -> U256;
 		/// For a given account address, returns pallet_evm::AccountCodes.
@@ -76,7 +76,7 @@ sp_api::decl_runtime_apis! {
 			gas_price: Option<U256>,
 			nonce: Option<U256>,
 			estimate: bool,
-		) -> Result<realis_primitives::CallInfo, sp_runtime::DispatchError>;
+		) -> Result<fp_precompile::CallInfo, sp_runtime::DispatchError>;
 		/// Returns a frame_ethereum::create response.
 		#[skip_initialize_block]
 		fn create(
@@ -87,7 +87,7 @@ sp_api::decl_runtime_apis! {
 			gas_price: Option<U256>,
 			nonce: Option<U256>,
 			estimate: bool,
-		) -> Result<realis_primitives::CreateInfo, sp_runtime::DispatchError>;
+		) -> Result<fp_precompile::CreateInfo, sp_runtime::DispatchError>;
 		/// Return the current block.
 		fn current_block() -> Option<EthereumBlock>;
 		/// Return the current receipt.

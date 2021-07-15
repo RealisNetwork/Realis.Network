@@ -23,7 +23,7 @@ mod eip_152;
 
 use alloc::vec::Vec;
 use core::mem::size_of;
-use realis_primitives::Precompile;
+use fp-precompile::Precompile;
 use evm::{ExitSucceed, ExitError, Context, executor::PrecompileOutput};
 
 pub struct Blake2F;

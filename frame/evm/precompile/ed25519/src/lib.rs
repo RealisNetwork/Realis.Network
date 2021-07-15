@@ -21,7 +21,7 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use core::convert::TryFrom;
-use realis_primitives::LinearCostPrecompile;
+use fp_precompile::LinearCostPrecompile;
 use evm::{ExitSucceed, ExitError};
 use ed25519_dalek::{PublicKey, Verifier, Signature};
 
