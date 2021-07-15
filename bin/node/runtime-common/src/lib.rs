@@ -31,6 +31,7 @@ use sp_runtime::{
         TransactionValidity, ValidTransaction, InvalidTransaction, TransactionValidityError,
     },
 };
+use parity_scale_codec::alloc::vec;
 pub mod weights;
 pub use pallet::*;
 
