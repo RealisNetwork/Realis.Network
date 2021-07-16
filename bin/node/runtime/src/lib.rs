@@ -33,9 +33,8 @@ use frame_support::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
         DispatchClass, IdentityFee, Weight,
     },
-    ConsensusEngineId, RuntimeDebug,
+    ConsensusEngineId, RuntimeDebug, PalletId
 };
-use frame_support::PalletId;
 use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot,
