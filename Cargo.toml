@@ -11,6 +11,8 @@ members = [
     "frame/realis-game-api",
     "frame/staking-pool",
     "primitives/realis",
+    "frame/realis-game-api/rpc",
+    "frame/realis-game-api/rpc/runtime-api",
 ]
 
 # Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.
