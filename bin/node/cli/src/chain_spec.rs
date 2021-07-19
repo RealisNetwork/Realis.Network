@@ -23,10 +23,11 @@ use hex_literal::hex;
 use node_runtime::constants::currency::*;
 use node_runtime::Block;
 use node_runtime::{
-    wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, /*CouncilConfig,*/
-    /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig, NftConfig,
-    SessionConfig, SessionKeys, /*SocietyConfig,*/ StakerStatus, StakingConfig, SudoConfig,
-    SystemConfig, /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
+    wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
+    BalancesConfig, /*CouncilConfig,*/
+    /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
+    NftConfig, SessionConfig, SessionKeys, /*SocietyConfig,*/ StakerStatus, StakingConfig,
+    SudoConfig, SystemConfig, /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;

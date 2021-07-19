@@ -23,11 +23,12 @@
 #![recursion_limit = "256"]
 
 use codec::{Decode, Encode};
+use frame_support::PalletId;
 use frame_support::{
     construct_runtime, parameter_types,
     traits::{
-        Currency, Imbalance, KeyOwnerProofSystem, LockIdentifier, MaxEncodedLen,
-        OnUnbalanced, U128CurrencyToVote,
+        Currency, Imbalance, KeyOwnerProofSystem, LockIdentifier, MaxEncodedLen, OnUnbalanced,
+        U128CurrencyToVote,
     },
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -35,7 +36,6 @@ use frame_support::{
     },
     RuntimeDebug,
 };
-use frame_support::PalletId;
 use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot,
@@ -51,9 +51,9 @@ use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking;
 pub use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
-pub use runtime_common;
 pub use realis_game_api;
 pub use realis_primitives::OpaqueExtrinsic;
+pub use runtime_common;
 use sp_api::impl_runtime_apis;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{
@@ -264,7 +264,7 @@ parameter_types! {
 
 /// The type used to represent the kinds of proxying allowed.
 #[derive(
-Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen,
+    Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen,
 )]
 pub enum ProxyType {
     Any,
@@ -370,7 +370,7 @@ impl pallet_babe::Config for Runtime {
     )>>::IdentificationTuple;
 
     type HandleEquivocation =
-    pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
+        pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
 
     type WeightInfo = ();
 }
@@ -419,7 +419,7 @@ impl pallet_transaction_payment::Config for Runtime {
     type TransactionByteFee = TransactionByteFee;
     type WeightToFee = IdentityFee<Balance>;
     type FeeMultiplierUpdate =
-    TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
+        TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
 }
 
 parameter_types! {
@@ -820,8 +820,8 @@ parameter_types! {
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
-    where
-        Call: From<LocalCall>,
+where
+    Call: From<LocalCall>,
 {
     fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
         call: Call,
@@ -871,8 +871,8 @@ impl frame_system::offchain::SigningTypes for Runtime {
 }
 
 impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
-    where
-        Call: From<C>,
+where
+    Call: From<C>,
 {
     type Extrinsic = UncheckedExtrinsic;
     type OverarchingCall = Call;
@@ -903,7 +903,7 @@ impl pallet_grandpa::Config for Runtime {
     type KeyOwnerProofSystem = Historical;
 
     type KeyOwnerProof =
-    <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
+        <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
 
     type KeyOwnerIdentification = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(
         KeyTypeId,
@@ -1169,7 +1169,6 @@ impl runtime_common::Config for Runtime {
     type MoveClaimOrigin = EnsureRoot<AccountId>;
     type WeightInfo = runtime_common::weights::WeightInfo<Runtime>;
 }
-
 
 // parameter_types! {
 //     pub const ChainId: u8 = 5;
@@ -1635,8 +1634,8 @@ mod tests {
     #[test]
     fn validate_transaction_submitter_bounds() {
         fn is_submit_signed_transaction<T>()
-            where
-                T: CreateSignedTransaction<Call>,
+        where
+            T: CreateSignedTransaction<Call>,
         {
         }
 
