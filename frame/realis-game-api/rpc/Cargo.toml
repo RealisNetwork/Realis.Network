@@ -17,5 +17,3 @@ sp-core = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44
 sp-rpc = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "0bda86540d44b09da6f1ea6656f3f52d5447db81" }
 realis-game-api-rpc-runtime-api = {version = "0.1.0", path = "./runtime-api"}
-
-realis-primitives = { version = "0.0.2", path = "../../../primitives/realis"}

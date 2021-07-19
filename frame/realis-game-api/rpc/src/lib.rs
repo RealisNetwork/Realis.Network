@@ -1,8 +1,6 @@
 use jsonrpc_core::Result;
 use jsonrpc_derive::rpc;
-// use realis_primitives::*;
-use sp_runtime::DispatchResult
-;
+use sp_runtime::DispatchResult;
 
 pub use realis_game_api_rpc_runtime_api::GameApi as GameRuntimeApi;
 

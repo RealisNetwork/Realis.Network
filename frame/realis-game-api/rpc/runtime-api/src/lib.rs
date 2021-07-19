@@ -3,7 +3,6 @@
 use codec::Codec;
 use realis_primitives::*;
 use sp_runtime::DispatchResult;
-use sp_std::vec::Vec;
 
 sp_api::decl_runtime_apis! {
     /// The API to interact with contracts without using executive.

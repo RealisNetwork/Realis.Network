@@ -51,6 +51,7 @@ use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking;
 pub use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
+use pallet_nft;
 pub use realis_game_api;
 pub use realis_primitives::OpaqueExtrinsic;
 pub use runtime_common;
@@ -72,9 +73,13 @@ use sp_runtime::transaction_validity::{
 };
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys, ApplyExtrinsicResult, FixedPointNumber, Perbill,
-    Percent, Permill, Perquintill,
+    Percent, Permill, Perquintill, DispatchResult
 };
 use sp_std::prelude::*;
+
+use realis_game_api_rpc_runtime_api;
+use realis_primitives::*;
+
 
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
@@ -1295,6 +1300,69 @@ mod mmr {
 }
 
 impl_runtime_apis! {
+
+    impl realis_game_api_rpc_runtime_api::GameApi<
+        Block,
+        AccountId,
+        Balance,
+        BlockNumber,
+        Hash
+    > for Runtime {
+        fn mint_basic_nft(
+            origin: AccountId,
+            target_account: AccountId,
+            token_id: TokenId,
+            basic: Basic,
+        ) -> DispatchResult {
+            pallet_nft::Pallet::<Runtime>::mint_basic(Origin::signed(origin), target_account, token_id, basic)
+        }
+
+        fn burn_basic_nft(origin: AccountId, token_id: TokenId) -> DispatchResult {
+            Ok(())
+        }
+
+        fn transfer_basic_nft(
+            origin: AccountId,
+            dest_account: AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            Ok(())
+        }
+
+        fn transfer_from_pallet(
+            origin: AccountId,
+            dest: AccountId,
+            value: Balance,
+        ) -> DispatchResult {
+            Ok(())
+        }
+
+        fn transfer_to_pallet(
+            origin: AccountId,
+            from: AccountId,
+            value: Balance,
+        ) -> DispatchResult {
+            Ok(())
+        }
+
+        fn transfer_from_ptp(
+            origin: AccountId,
+            from: AccountId,
+            to: AccountId,
+            value: Balance,
+        ) -> DispatchResult {
+            Ok(())
+        }
+
+        fn spend_in_game(
+            origin: AccountId,
+            from: AccountId,
+            amount: Balance,
+        ) -> DispatchResult {
+            Ok(())
+        }
+    }
+
     impl sp_api::Core<Block> for Runtime {
         fn version() -> RuntimeVersion {
             VERSION
