@@ -1313,11 +1313,11 @@ impl_runtime_apis! {
             token_id: TokenId,
             basic: Basic,
         ) -> DispatchResult {
-            pallet_nft::Pallet::<Runtime>::mint_basic(Origin::signed(origin), target_account, token_id, basic)
+            realis_game_api::Pallet::<Runtime>::mint_basic_nft(Origin::signed(origin), target_account, token_id, basic)
         }
 
         fn burn_basic_nft(origin: AccountId, token_id: TokenId) -> DispatchResult {
-            Ok(())
+            realis_game_api::Pallet::<Runtime>::burn_basic_nft(Origin::signed(origin), token_id)
         }
 
         fn transfer_basic_nft(
@@ -1325,7 +1325,7 @@ impl_runtime_apis! {
             dest_account: AccountId,
             token_id: TokenId,
         ) -> DispatchResult {
-            Ok(())
+            realis_game_api::Pallet::<Runtime>::transfer_basic_nft(Origin::signed(origin), dest_account, token_id)
         }
 
         fn transfer_from_pallet(
@@ -1333,7 +1333,7 @@ impl_runtime_apis! {
             dest: AccountId,
             value: Balance,
         ) -> DispatchResult {
-            Ok(())
+            realis_game_api::Pallet::<Runtime>::transfer_from_pallet(Origin::signed(origin), dest, value)
         }
 
         fn transfer_to_pallet(
@@ -1341,7 +1341,7 @@ impl_runtime_apis! {
             from: AccountId,
             value: Balance,
         ) -> DispatchResult {
-            Ok(())
+            realis_game_api::Pallet::<Runtime>::transfer_to_pallet(Origin::signed(origin), from, value)
         }
 
         fn transfer_from_ptp(
@@ -1350,7 +1350,7 @@ impl_runtime_apis! {
             to: AccountId,
             value: Balance,
         ) -> DispatchResult {
-            Ok(())
+            realis_game_api::Pallet::<Runtime>::transfer_from_ptp(Origin::signed(origin), from, to, value)
         }
 
         fn spend_in_game(
@@ -1358,7 +1358,7 @@ impl_runtime_apis! {
             from: AccountId,
             amount: Balance,
         ) -> DispatchResult {
-            Ok(())
+            realis_game_api::Pallet::<Runtime>::spend_in_game(Origin::signed(origin), from, amount)
         }
     }
 
