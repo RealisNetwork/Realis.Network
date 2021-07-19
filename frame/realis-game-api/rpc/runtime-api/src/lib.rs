@@ -6,7 +6,7 @@ use sp_runtime::DispatchResult;
 
 sp_api::decl_runtime_apis! {
     /// The API to interact with contracts without using executive.
-    pub trait GameApi<AccountId, Balance, BlockNumber, Hash> where
+    pub trait RealisGameApi<AccountId, Balance, BlockNumber, Hash> where
         AccountId: Codec,
         Balance: Codec,
         BlockNumber: Codec,

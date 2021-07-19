@@ -2,7 +2,7 @@ use jsonrpc_core::Result;
 use jsonrpc_derive::rpc;
 use sp_runtime::DispatchResult;
 
-pub use realis_game_api_rpc_runtime_api::GameApi as GameRuntimeApi;
+pub use realis_game_api_rpc_runtime_api::RealisGameApi as GameRuntimeApi;
 
 pub type Weight = u64;
 
@@ -16,9 +16,5 @@ pub trait GameApi<BlockHash, BlockNumber, AccountId, Balance, Hash> {
     ) -> Result<DispatchResult>;
 
     #[rpc(name = "transfer_from_pallet")]
-    fn transfer_from_pallet(
-        &self,
-        dest: AccountId,
-        value: Balance,
-    ) -> Result<DispatchResult>;
+    fn transfer_from_pallet(&self, dest: AccountId, value: Balance) -> Result<DispatchResult>;
 }
