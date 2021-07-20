@@ -116,19 +116,19 @@ pub mod pallet {
         #[pallet::weight((10000, Pays::No))]
         pub fn transfer_token_to_realis(
             origin: OriginFor<T>,
-            from: T::AccountId,
-            to: H160,
+            from: H160,
+            to: T::AccountId,
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             ensure_signed(origin)?;
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &pallet_id,
-                &from,
+                &to,
                 value,
                 ExistenceRequirement::KeepAlive,
             )?;
-            Self::deposit_event(Event::<T>::TransferTokenToBSC(from, to, value));
+            Self::deposit_event(Event::<T>::TransferTokenToRealis(from, to, value));
             Ok(())
         }
 
@@ -156,7 +156,7 @@ pub mod pallet {
         //     let who = ensure_signed(origin)?;
         //     // TODO implement logic
         //     let pallet_id = Self::account_id();
-        //     //Nft::transfer(origin, who, token_id);
+        //     //Nft::transfer(Origin::signed(pallet_id), who, token_id);
         //
         //     Self::deposit_event(Event::<T>::TransferNftToRealis(from, who, token_id));
         //     Ok(())

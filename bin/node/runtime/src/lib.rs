@@ -75,6 +75,7 @@ use pallet_contracts::weights::WeightInfo;
 use pallet_election_provider_multi_phase::FallbackStrategy;
 pub use pallet_staking;
 pub use realis_game_api;
+pub use realis_bridge;
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
