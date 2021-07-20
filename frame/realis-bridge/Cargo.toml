@@ -11,13 +11,13 @@ serde = { version = '1.0.114', optional = true }
 
 frame-support = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
-pallet-nft = { version = '0.0.2', default-features = false, path = '../nft' }
 sp-std = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 sp-io = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 sp-core = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 sp-arithmetic = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 realis-primitives = { path = "../../primitives/realis", default-features = false }
+pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
 
 [dev-dependencies]
 pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }

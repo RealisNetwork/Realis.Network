@@ -29,9 +29,11 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
     use frame_support::traits::{Currency, ExistenceRequirement};
-    use sp_runtime::traits::{AtLeast32BitUnsigned, AccountIdConversion};
+    use sp_runtime::traits::{AtLeast32BitUnsigned, AccountIdConversion, Saturating};
     use sp_core::H160;
     use frame_support::PalletId;
+    use pallet_nft as Nft;
+    use sp_runtime::traits::Zero;
 
     type BalanceOf<T> =
     <<T as Config>::BridgeCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -41,13 +43,11 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + Nft::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         /// Some identifier for this token type, possibly the originating ethereum address.
         /// This is not explicitly used for anything, but may reflect the bridge's notion of resource ID.
         type BridgeCurrency: Currency<Self::AccountId, Balance = Self::Balance>;
-
-        type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy;
 
         type PalletId: Get<PalletId>;
     }
@@ -60,6 +60,7 @@ pub mod pallet {
 
         TransferTokenToRealis(H160, T::AccountId, BalanceOf<T>),
         TransferNftToRealis(H160, T::AccountId, TokenId),
+        Balance(T::AccountId, BalanceOf<T>),
     }
 
     #[pallet::error]
@@ -70,6 +71,8 @@ pub mod pallet {
         TokenAlreadyExists,
         /// Origin is not owner
         NotOwner,
+
+        InsufficientBalance,
     }
 
     #[pallet::genesis_config]
@@ -121,6 +124,9 @@ pub mod pallet {
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             ensure_signed(origin)?;
+            ensure!(
+                value.is_zero(), Error::<T>::InsufficientBalance
+            );
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &pallet_id,
@@ -128,33 +134,42 @@ pub mod pallet {
                 value,
                 ExistenceRequirement::KeepAlive,
             )?;
+
             Self::deposit_event(Event::<T>::TransferTokenToRealis(from, to, value));
             Ok(())
         }
 
-        // #[pallet::weight((10000, Pays::No))]
-        // fn transfer_nft_to_bsc(
-        //     origin: OriginFor<T>,
-        //     dest: H160,
-        //     token_id: TokenId
-        // ) -> DispatchResult {
-        //     let who = ensure_signed(origin)?;
-        //     // TODO implement logic
-        //     let pallet_id = Self::account_id();
-        //     //Nft::transfer(origin, pallet_id, token_id);
+        #[pallet::weight((90000000, Pays::No))]
+        pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let account_id = Self::account_id();
+            let balance = <T as Config>::BridgeCurrency::free_balance(&account_id)
+                .saturating_sub(<T as Config>::BridgeCurrency::minimum_balance());
+            Self::deposit_event(Event::Balance(account_id, balance));
+            Ok(())
+        }
+
+        #[pallet::weight((10000, Pays::No))]
+        pub fn transfer_nft_to_bsc(
+            origin: OriginFor<T>,
+            dest: H160,
+            token_id: TokenId
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let pallet_id = Self::account_id();
+            Nft::Pallet::<T>::transfer_basic_nft(token_id, None, &pallet_id)?;
+
+            Self::deposit_event(Event::<T>::TransferNftToBSC(who, dest, token_id));
+            Ok(())
+        }
         //
-        //     Self::deposit_event(Event::<T>::TransferNftToBSC(who, dest, token_id));
-        //     Ok(())
-        // }
-        //
         // #[pallet::weight((10000, Pays::No))]
-        // fn transfer_nft_to_realis(
+        //pub fn transfer_nft_to_realis(
         //     origin: OriginFor<T>,
         //     from: H160,
         //     token_id: TokenId
         // ) -> DispatchResult {
         //     let who = ensure_signed(origin)?;
-        //     // TODO implement logic
         //     let pallet_id = Self::account_id();
         //     //Nft::transfer(Origin::signed(pallet_id), who, token_id);
         //

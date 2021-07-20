@@ -1262,7 +1262,6 @@ parameter_types! {
 impl realis_bridge::Config for Runtime {
 	type Event = Event;
 	type BridgeCurrency = Balances;
-    type Balance = u128;
     type PalletId = RealisBridgePalletId;
 }
 
