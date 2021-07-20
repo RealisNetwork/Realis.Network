@@ -417,6 +417,7 @@ pub fn testnet_genesis(
             nft_masters: nft_master,
         },
         claims: Default::default(),
+        realis_bridge: Default::default(),
     }
 }
 
@@ -583,6 +584,7 @@ pub fn realis_genesis(
             nft_masters: nft_master,
         },
         claims: Default::default(),
+        realis_bridge: Default::default(),
     }
 }
 
