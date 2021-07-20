@@ -10,11 +10,10 @@ use frame_system::{self as system, ensure_root, ensure_signed};
 use sp_core::U256;
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
+use realis_primitives::TokenId;
 
 mod mock;
 mod tests;
-
-type TokenId = U256;
 
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
 pub struct Erc721Token {
