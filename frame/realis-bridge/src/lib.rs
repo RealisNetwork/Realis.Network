@@ -165,20 +165,21 @@ pub mod pallet {
             Self::deposit_event(Event::<T>::TransferNftToBSC(who, dest, token_id));
             Ok(())
         }
-        //
-        // #[pallet::weight((10000, Pays::No))]
-        //pub fn transfer_nft_to_realis(
-        //     origin: OriginFor<T>,
-        //     from: H160,
-        //     token_id: TokenId
-        // ) -> DispatchResult {
-        //     let who = ensure_signed(origin)?;
-        //     let pallet_id = Self::account_id();
-        //     //Nft::transfer(Origin::signed(pallet_id), who, token_id);
-        //
-        //     Self::deposit_event(Event::<T>::TransferNftToRealis(from, who, token_id));
-        //     Ok(())
-        // }
+
+        #[pallet::weight((10000, Pays::No))]
+        pub fn transfer_nft_to_realis(
+            origin: OriginFor<T>,
+            from: H160,
+            to: T::AccountId,
+            token_id: TokenId
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let pallet_id = Self::account_id();
+            Nft::Pallet::<T>::transfer_basic_nft(token_id, None, &to)?;
+
+            Self::deposit_event(Event::<T>::TransferNftToRealis(from, to, token_id));
+            Ok(())
+        }
     }
 
     impl<T: Config> Pallet<T> {
