@@ -105,6 +105,9 @@ pub mod pallet {
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             ensure_signed(origin)?;
+            ensure!(
+                value.is_zero(), Error::<T>::InsufficientBalance
+            );
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &from,
