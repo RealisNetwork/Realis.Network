@@ -169,8 +169,7 @@ std = [
 	"sp-npos-elections/std",
 	"pallet-nft/std",
 	"realis-game-api/std",
-#	"chain-bridge/std",
-#	"realis-bridge/std",
+	"realis-bridge/std",
 	"runtime-common/std",
 ]
 runtime-benchmarks = [
