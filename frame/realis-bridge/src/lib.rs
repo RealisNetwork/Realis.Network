@@ -3,11 +3,10 @@
 
 use codec::{Decode, Encode};
 use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage, dispatch::DispatchResult, ensure,
+    dispatch::DispatchResult, ensure,
     traits::Get,
 };
-use frame_system::{ensure_root, ensure_signed};
-use sp_core::U256;
+use frame_system::{ensure_signed};
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
 use realis_primitives::TokenId;
@@ -29,7 +28,7 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
     use frame_support::traits::{Currency, ExistenceRequirement};
-    use sp_runtime::traits::{AtLeast32BitUnsigned, AccountIdConversion, Saturating};
+    use sp_runtime::traits::{AccountIdConversion, Saturating};
     use sp_core::H160;
     use frame_support::PalletId;
     use pallet_nft as Nft;
@@ -71,8 +70,14 @@ pub mod pallet {
         TokenAlreadyExists,
         /// Origin is not owner
         NotOwner,
-
+        /// Not enought balance
         InsufficientBalance,
+        /// Not Nft master
+        NotNftMaster,
+        /// Haven`t permission at this token
+        NotTokenOwner,
+        /// No such token exists
+        NonExistentToken,
     }
 
     #[pallet::genesis_config]
@@ -144,7 +149,7 @@ pub mod pallet {
 
         #[pallet::weight((90000000, Pays::No))]
         pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
-            let who = ensure_signed(origin)?;
+            let _who = ensure_signed(origin)?;
             let account_id = Self::account_id();
             let balance = <T as Config>::BridgeCurrency::free_balance(&account_id)
                 .saturating_sub(<T as Config>::BridgeCurrency::minimum_balance());
@@ -160,6 +165,8 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let pallet_id = Self::account_id();
+            let have_token =  Nft::AccountForToken::<T>::get(&token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(who != have_token, Error::<T>::NotTokenOwner);
             Nft::Pallet::<T>::transfer_basic_nft(token_id, None, &pallet_id)?;
 
             Self::deposit_event(Event::<T>::TransferNftToBSC(who, dest, token_id));
@@ -175,7 +182,11 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let pallet_id = Self::account_id();
-            Nft::Pallet::<T>::transfer_basic_nft(token_id, None, &to)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(
+                nft_master.contains(&who), Error::<T>::NotNftMaster
+            );
+            Nft::Pallet::<T>::transfer_basic_nft(token_id, Some(pallet_id), &to)?;
 
             Self::deposit_event(Event::<T>::TransferNftToRealis(from, to, token_id));
             Ok(())

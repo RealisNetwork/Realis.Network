@@ -223,7 +223,7 @@ pub mod pallet {
     /// value - vector vector of TokenId and Token that belong specific account for each account
     #[pallet::storage]
     #[pallet::getter(fn tokens_of_owner_by_index)]
-    pub(crate) type VecOfTokensOnAccount<T: Config> =
+    pub type VecOfTokensOnAccount<T: Config> =
         StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
 
     /// Map where
