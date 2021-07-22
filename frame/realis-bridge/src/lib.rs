@@ -9,7 +9,7 @@ use frame_support::{
 use frame_system::{ensure_signed};
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
-use realis_primitives::TokenId;
+pub use realis_primitives::TokenId;
 
 mod mock;
 mod tests;
