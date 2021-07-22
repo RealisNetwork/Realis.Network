@@ -34,7 +34,7 @@ pub mod pallet {
     use pallet_nft as Nft;
     use sp_runtime::traits::Zero;
 
-    type BalanceOf<T> =
+    pub type BalanceOf<T> =
     <<T as Config>::BridgeCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
     #[pallet::pallet]
@@ -102,7 +102,7 @@ pub mod pallet {
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight((10000, Pays::No))]
+        #[pallet::weight(10000)]
         pub fn transfer_token_to_bsc(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -110,9 +110,10 @@ pub mod pallet {
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             ensure_signed(origin)?;
-            ensure!(
-                value.is_zero(), Error::<T>::InsufficientBalance
-            );
+            let zero = T::Balance::zero();
+                if value == zero {
+                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"))
+            }
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &from,
@@ -124,7 +125,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((10000, Pays::No))]
+        #[pallet::weight(10000)]
         pub fn transfer_token_to_realis(
             origin: OriginFor<T>,
             from: H160,
@@ -132,9 +133,10 @@ pub mod pallet {
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             ensure_signed(origin)?;
-            ensure!(
-                value.is_zero(), Error::<T>::InsufficientBalance
-            );
+            let zero = T::Balance::zero();
+            if value == zero {
+                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"))
+            }
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &pallet_id,
@@ -147,7 +149,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((90000000, Pays::No))]
+        #[pallet::weight(90000000)]
         pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
             let _who = ensure_signed(origin)?;
             let account_id = Self::account_id();
@@ -157,7 +159,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((10000, Pays::No))]
+        #[pallet::weight(10000)]
         pub fn transfer_nft_to_bsc(
             origin: OriginFor<T>,
             dest: H160,
@@ -173,7 +175,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((10000, Pays::No))]
+        #[pallet::weight(10000)]
         pub fn transfer_nft_to_realis(
             origin: OriginFor<T>,
             from: H160,
