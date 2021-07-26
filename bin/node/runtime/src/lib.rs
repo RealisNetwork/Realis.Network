@@ -380,7 +380,7 @@ impl pallet_indices::Config for Runtime {
 }
 
 parameter_types! {
-    pub const ExistentialDeposit: Balance = 1 * CENTS;
+    pub const ExistentialDeposit: Balance = 100 * CENTS;
     // For weight estimation, we assume that the most locks on an individual account will be 50.
     // This number may need to be adjusted in the future if this assumption no longer holds true.
     pub const MaxLocks: u32 = 50;
@@ -1249,7 +1249,7 @@ impl realis_game_api::Config for Runtime {
 }
 
 parameter_types! {
-    pub Prefix: &'static [u8] = b"Pay DOTs to the Polkadot account:";
+    pub Prefix: &'static [u8] = b"Pay LIS to the Realis account:";
 }
 
 impl runtime_common::Config for Runtime {
