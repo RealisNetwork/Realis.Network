@@ -2,14 +2,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{
-    dispatch::DispatchResult, ensure,
-    traits::Get,
-};
-use frame_system::{ensure_signed};
+use frame_support::{dispatch::DispatchResult, ensure, traits::Get};
+use frame_system::ensure_signed;
+pub use realis_primitives::TokenId;
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
-pub use realis_primitives::TokenId;
 
 mod mock;
 mod tests;
@@ -26,16 +23,18 @@ pub use pallet::*;
 pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
-    use frame_system::pallet_prelude::*;
     use frame_support::traits::{Currency, ExistenceRequirement};
-    use sp_runtime::traits::{AccountIdConversion, Saturating};
-    use sp_core::H160;
     use frame_support::PalletId;
+    use frame_system::pallet_prelude::*;
     use pallet_nft as Nft;
+    use realis_primitives::{Token, TokenType};
+    use sp_core::H160;
     use sp_runtime::traits::Zero;
+    use sp_runtime::traits::{AccountIdConversion, Saturating};
 
-    pub type BalanceOf<T> =
-    <<T as Config>::BridgeCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+    pub type BalanceOf<T> = <<T as Config>::BridgeCurrency as Currency<
+        <T as frame_system::Config>::AccountId,
+    >>::Balance;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -92,9 +91,7 @@ pub mod pallet {
 
     #[pallet::genesis_build]
     impl<T: Config> GenesisBuild<T> for GenesisConfig {
-        fn build(&self) {
-
-        }
+        fn build(&self) {}
     }
 
     #[pallet::hooks]
@@ -111,8 +108,8 @@ pub mod pallet {
         ) -> DispatchResult {
             ensure_signed(origin)?;
             let zero = T::Balance::zero();
-                if value == zero {
-                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"))
+            if value == zero {
+                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"));
             }
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
@@ -135,7 +132,7 @@ pub mod pallet {
             ensure_signed(origin)?;
             let zero = T::Balance::zero();
             if value == zero {
-                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"))
+                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"));
             }
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
@@ -162,16 +159,16 @@ pub mod pallet {
         #[pallet::weight(10000)]
         pub fn transfer_nft_to_bsc(
             origin: OriginFor<T>,
+            from: T::AccountId,
             dest: H160,
-            token_id: TokenId
+            token_id: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let pallet_id = Self::account_id();
-            let have_token =  Nft::AccountForToken::<T>::get(&token_id).ok_or(Error::<T>::NonExistentToken)?;
-            ensure!(who != have_token, Error::<T>::NotTokenOwner);
-            Nft::Pallet::<T>::transfer_basic_nft(token_id, None, &pallet_id)?;
+            // Only owner can transfer token
+            ensure!(who == from, Error::<T>::NotTokenOwner);
+            Nft::Pallet::<T>::burn_basic_nft(token_id, Some(who))?;
 
-            Self::deposit_event(Event::<T>::TransferNftToBSC(who, dest, token_id));
+            Self::deposit_event(Event::<T>::TransferNftToBSC(from, dest, token_id));
             Ok(())
         }
 
@@ -180,15 +177,17 @@ pub mod pallet {
             origin: OriginFor<T>,
             from: H160,
             to: T::AccountId,
-            token_id: TokenId
+            token_id: TokenId,
+            token_type: u8,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let pallet_id = Self::account_id();
             let nft_master = Nft::NftMasters::<T>::get();
-            ensure!(
-                nft_master.contains(&who), Error::<T>::NotNftMaster
-            );
-            Nft::Pallet::<T>::transfer_basic_nft(token_id, Some(pallet_id), &to)?;
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            let token = Token {
+                id: token_id,
+                token_type: TokenType::Basic(token_type),
+            };
+            Nft::Pallet::<T>::mint_basic_nft(&who, token_id, token)?;
 
             Self::deposit_event(Event::<T>::TransferNftToRealis(from, to, token_id));
             Ok(())
