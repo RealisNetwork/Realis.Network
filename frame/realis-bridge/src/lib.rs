@@ -56,8 +56,8 @@ pub mod pallet {
         TransferTokenToBSC(T::AccountId, H160, BalanceOf<T>),
         TransferNftToBSC(T::AccountId, H160, TokenId),
 
-        TransferTokenToRealis(H160, T::AccountId, BalanceOf<T>),
-        TransferNftToRealis(H160, T::AccountId, TokenId),
+        TransferTokenToRealis(T::AccountId, BalanceOf<T>),
+        TransferNftToRealis(T::AccountId, TokenId),
         Balance(T::AccountId, BalanceOf<T>),
     }
 
@@ -125,7 +125,6 @@ pub mod pallet {
         #[pallet::weight(10000)]
         pub fn transfer_token_to_realis(
             origin: OriginFor<T>,
-            from: H160,
             to: T::AccountId,
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
@@ -142,7 +141,7 @@ pub mod pallet {
                 ExistenceRequirement::KeepAlive,
             )?;
 
-            Self::deposit_event(Event::<T>::TransferTokenToRealis(from, to, value));
+            Self::deposit_event(Event::<T>::TransferTokenToRealis( to, value));
             Ok(())
         }
 
@@ -175,7 +174,6 @@ pub mod pallet {
         #[pallet::weight(10000)]
         pub fn transfer_nft_to_realis(
             origin: OriginFor<T>,
-            from: H160,
             to: T::AccountId,
             token_id: TokenId,
             token_type: u8,
@@ -189,7 +187,7 @@ pub mod pallet {
             };
             Nft::Pallet::<T>::mint_basic_nft(&who, token_id, token)?;
 
-            Self::deposit_event(Event::<T>::TransferNftToRealis(from, to, token_id));
+            Self::deposit_event(Event::<T>::TransferNftToRealis(to, token_id));
             Ok(())
         }
     }
