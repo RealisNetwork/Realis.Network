@@ -244,7 +244,7 @@ pub mod pallet {
     /// Map where (same as VecOfTokensOnAccount by not for Token, instead for Types)
     #[pallet::storage]
     #[pallet::getter(fn tokens_with_types)]
-    pub(crate) type TokensWithTypes<T: Config> =
+    pub type TokensWithTypes<T: Config> =
         StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
 
     /// Contains vector of all accounts ???

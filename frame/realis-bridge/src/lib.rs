@@ -31,6 +31,7 @@ pub mod pallet {
     use sp_core::H160;
     use sp_runtime::traits::Zero;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
+    use realis_primitives::TokenType::Basic;
 
     pub type BalanceOf<T> = <<T as Config>::BridgeCurrency as Currency<
         <T as frame_system::Config>::AccountId,
@@ -56,7 +57,7 @@ pub mod pallet {
         ///Token was tranfered to BEP-20 on BSC
         TransferTokenToBSC(T::AccountId, H160, BalanceOf<T>),
         ///NFT was tranfered to BEP-721 on BSC
-        TransferNftToBSC(T::AccountId, H160, TokenId),
+        TransferNftToBSC(T::AccountId, H160, TokenId, u8),
 
         ///Token was tranfered to Realis.Network from BEP-20 on BSC
         TransferTokenToRealis(T::AccountId, BalanceOf<T>),
@@ -120,7 +121,7 @@ pub mod pallet {
                 return Err(sp_runtime::DispatchError::Other("InsufficientBalance"));
             }
 
-            Self::deposit_event(Event::<T>::TransferTokenToBSC(from, to, value));
+            Self::deposit_event(Event::<T>::TransferTokenToBSC(from.clone(), to, value));
             Ok(())
         }
 
@@ -167,8 +168,19 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             // Only owner can transfer token
             ensure!(who == from, Error::<T>::NotTokenOwner);
+            let mut token = Nft::TokensWithTypes::<T>::get(from.clone()).unwrap();
 
-            Self::deposit_event(Event::<T>::TransferNftToBSC(from, dest, token_id));
+            let mut value: u8 = 1;
+
+            for t in token {
+                if t.id == token_id {
+                    if let Basic(v) = t.token_type {
+                        value = v;
+                    }
+                }
+            }
+
+            Self::deposit_event(Event::<T>::TransferNftToBSC(from, dest, token_id, value));
             Ok(())
         }
 
@@ -191,33 +203,44 @@ pub mod pallet {
             Self::deposit_event(Event::<T>::TransferNftToRealis(to, token_id));
             Ok(())
         }
-    }
 
-    impl<T: Config> Pallet<T> {
-        pub fn account_id() -> T::AccountId {
-            <T as Config>::PalletId::get().into_account()
-        }
-
-        pub fn transfer_token_to_bsc_success(from: T::AccountId, value: T::Balance) {
+        #[pallet::weight(10000)]
+        pub fn transfer_token_to_bsc_success(origin: OriginFor<T>, from: T::AccountId, value: T::Balance) -> DispatchResult {
+            let who = ensure_root(origin)?;
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &from,
                 &pallet_id,
                 value,
                 ExistenceRequirement::KeepAlive,
-            );
+            )
         }
 
-        pub fn transfer_token_to_bsc_error() -> crate::Error<T> {
-            return Error::<T>::TokensWasntTransfered;
+        #[pallet::weight(10000)]
+        pub fn transfer_token_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
+            let who = ensure_root(origin)?;
+            Error::<T>::TokensWasntTransfered;
+            Ok(())
         }
 
-        pub fn transfer_nft_to_bsc_success(from: T::AccountId, token_id: TokenId) {
+        #[pallet::weight(10000)]
+        pub fn transfer_nft_to_bsc_success(origin: OriginFor<T>, from: T::AccountId, token_id: TokenId) -> DispatchResult {
+            let who = ensure_root(origin)?;
             Nft::Pallet::<T>::burn_basic_nft(token_id, Some(from));
+            Ok(())
         }
 
-        pub fn transfer_nft_to_bsc_error() -> crate::Error<T> {
-            return Error::<T>::NFTWasntTransfered;
+        #[pallet::weight(10000)]
+        pub fn transfer_nft_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
+            let who = ensure_root(origin)?;
+            Error::<T>::NFTWasntTransfered;
+            Ok(())
+        }
+    }
+
+    impl<T: Config> Pallet<T> {
+        pub fn account_id() -> T::AccountId {
+            <T as Config>::PalletId::get().into_account()
         }
     }
 }
