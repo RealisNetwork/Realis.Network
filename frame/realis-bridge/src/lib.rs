@@ -4,7 +4,7 @@
 use codec::{Decode, Encode};
 use frame_support::{dispatch::DispatchResult, ensure, traits::Get};
 use frame_system::ensure_signed;
-pub use realis_primitives::TokenId;
+pub use realis_primitives::{TokenId, TokenType};
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
 
