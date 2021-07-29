@@ -53,10 +53,14 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
     pub enum Event<T: Config> {
+        ///Token was tranfered to BEP-20 on BSC
         TransferTokenToBSC(T::AccountId, H160, BalanceOf<T>),
+        ///NFT was tranfered to BEP-721 on BSC
         TransferNftToBSC(T::AccountId, H160, TokenId),
 
+        ///Token was tranfered to Realis.Network from BEP-20 on BSC
         TransferTokenToRealis(T::AccountId, BalanceOf<T>),
+        ///NFT was tranfered to Realis.Network from BEP-721 on BSC
         TransferNftToRealis(T::AccountId, TokenId),
         Balance(T::AccountId, BalanceOf<T>),
     }
@@ -77,6 +81,10 @@ pub mod pallet {
         NotTokenOwner,
         /// No such token exists
         NonExistentToken,
+        /// Token wasnt transferred to BEP-20
+        TokensWasntTransfered,
+        /// NFT wasnt trasnferred to BEP-721
+        NFTWasntTransfered,
     }
 
     #[pallet::genesis_config]
@@ -111,13 +119,7 @@ pub mod pallet {
             if value == zero {
                 return Err(sp_runtime::DispatchError::Other("InsufficientBalance"));
             }
-            let pallet_id = Self::account_id();
-            <T as Config>::BridgeCurrency::transfer(
-                &from,
-                &pallet_id,
-                value,
-                ExistenceRequirement::KeepAlive,
-            )?;
+
             Self::deposit_event(Event::<T>::TransferTokenToBSC(from, to, value));
             Ok(())
         }
@@ -141,7 +143,7 @@ pub mod pallet {
                 ExistenceRequirement::KeepAlive,
             )?;
 
-            Self::deposit_event(Event::<T>::TransferTokenToRealis( to, value));
+            Self::deposit_event(Event::<T>::TransferTokenToRealis(to, value));
             Ok(())
         }
 
@@ -165,7 +167,6 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             // Only owner can transfer token
             ensure!(who == from, Error::<T>::NotTokenOwner);
-            Nft::Pallet::<T>::burn_basic_nft(token_id, Some(who))?;
 
             Self::deposit_event(Event::<T>::TransferNftToBSC(from, dest, token_id));
             Ok(())
@@ -195,6 +196,28 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         pub fn account_id() -> T::AccountId {
             <T as Config>::PalletId::get().into_account()
+        }
+
+        pub fn transfer_token_to_bsc_success(from: T::AccountId, value: T::Balance) {
+            let pallet_id = Self::account_id();
+            <T as Config>::BridgeCurrency::transfer(
+                &from,
+                &pallet_id,
+                value,
+                ExistenceRequirement::KeepAlive,
+            );
+        }
+
+        pub fn transfer_token_to_bsc_error() -> crate::Error<T> {
+            return Error::<T>::TokensWasntTransfered;
+        }
+
+        pub fn transfer_nft_to_bsc_success(from: T::AccountId, token_id: TokenId) {
+            Nft::Pallet::<T>::burn_basic_nft(token_id, Some(from));
+        }
+
+        pub fn transfer_nft_to_bsc_error() -> crate::Error<T> {
+            return Error::<T>::NFTWasntTransfered;
         }
     }
 }
