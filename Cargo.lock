@@ -6024,11 +6024,13 @@ dependencies = [
 name = "realis-bridge"
 version = "0.0.1"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "pallet-balances",
  "pallet-nft",
  "parity-scale-codec",
+ "primitive-types 0.9.0",
  "realis-primitives",
  "serde",
  "sp-arithmetic",

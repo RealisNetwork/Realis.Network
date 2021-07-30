@@ -8,14 +8,9 @@ pub use realis_primitives::{TokenId, TokenType};
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
 
+mod benchmarking;
 mod mock;
 mod tests;
-
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-pub struct Erc721Token {
-    pub id: TokenId,
-    pub metadata: Vec<u8>,
-}
 
 pub use pallet::*;
 
@@ -168,7 +163,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             // Only owner can transfer token
             ensure!(who == from, Error::<T>::NotTokenOwner);
-            let mut token = Nft::TokensWithTypes::<T>::get(from.clone()).unwrap();
+            let token = Nft::TokensWithTypes::<T>::get(from.clone()).unwrap();
 
             let mut value: u8 = 1;
 
@@ -210,7 +205,7 @@ pub mod pallet {
             from: T::AccountId,
             value: T::Balance,
         ) -> DispatchResult {
-            let who = ensure_root(origin)?;
+            let _who = ensure_root(origin)?;
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &from,
@@ -221,26 +216,29 @@ pub mod pallet {
         }
 
         #[pallet::weight(10000)]
+        #[warn(path_statements)]
         pub fn transfer_token_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
-            let who = ensure_root(origin)?;
+            let _who = ensure_root(origin)?;
             Error::<T>::TokensWasntTransfered;
             Ok(())
         }
 
         #[pallet::weight(10000)]
+        #[warn(unused_must_use)]
         pub fn transfer_nft_to_bsc_success(
             origin: OriginFor<T>,
             from: T::AccountId,
             token_id: TokenId,
         ) -> DispatchResult {
-            let who = ensure_root(origin)?;
+            let _who = ensure_root(origin)?;
             Nft::Pallet::<T>::burn_basic_nft(token_id, Some(from));
             Ok(())
         }
 
         #[pallet::weight(10000)]
+        #[warn(path_statements)]
         pub fn transfer_nft_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
-            let who = ensure_root(origin)?;
+            let _who = ensure_root(origin)?;
             Error::<T>::NFTWasntTransfered;
             Ok(())
         }

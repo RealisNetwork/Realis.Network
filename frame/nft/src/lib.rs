@@ -1,12 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::{
-    dispatch,
-    traits::{OnNewAccount, WithdrawReasons},
-};
-use frame_system::RefCount;
+use frame_support::dispatch;
 pub use pallet::*;
-use sp_runtime::traits::{AtLeast32BitUnsigned, Saturating};
+use sp_runtime::traits::AtLeast32BitUnsigned;
 use sp_std::prelude::*;
 
 // Add test modules
@@ -34,85 +30,6 @@ pub mod pallet {
     #[pallet::generate_store(pub (super) trait Store)]
     pub struct Pallet<T>(PhantomData<T>);
 
-    /// Simplified reasons for withdrawing balance.
-    #[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug)]
-    pub enum Reasons {
-        /// Paying system transaction fees.
-        Fee = 0,
-        /// Any reason other than paying system transaction fees.
-        Misc = 1,
-        /// Any reason at all.
-        All = 2,
-    }
-
-    impl From<WithdrawReasons> for Reasons {
-        fn from(r: WithdrawReasons) -> Reasons {
-            if r == WithdrawReasons::TRANSACTION_PAYMENT {
-                Reasons::Fee
-            } else if r.contains(WithdrawReasons::TRANSACTION_PAYMENT) {
-                Reasons::All
-            } else {
-                Reasons::Misc
-            }
-        }
-    }
-
-    #[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]
-    pub struct AccountInfo<Index, AccountData> {
-        /// The number of transactions this account has sent.
-        pub nonce: Index,
-        /// The number of other modules that currently depend on this account's existence. The account
-        /// cannot be reaped until this is zero.
-        pub refcount: RefCount,
-        /// The additional data that belongs to this account. Used to store the balance(s) in a lot of
-        /// chains.
-        pub data: AccountData,
-    }
-
-    #[derive(Encode, Decode, Clone, PartialEq, Eq, Default, RuntimeDebug)]
-    pub struct AccountData<Balance> {
-        /// Non-reserved part of the balance. There may still be restrictions on this, but it is the
-        /// total pool what may in principle be transferred, reserved and used for tipping.
-        ///
-        /// This is the only balance that matters in terms of most operations on tokens. It
-        /// alone is used to determine the balance when in the contract execution environment.
-        pub free: Balance,
-        /// Balance which is reserved and may not be used at all.
-        ///
-        /// This can still get slashed, but gets slashed last of all.
-        ///
-        /// This balance is a 'reserve' balance that other subsystems use in order to set aside tokens
-        /// that are still 'owned' by the account holder, but which are suspendable.
-        pub reserved: Balance,
-        /// The amount that `free` may not drop below when withdrawing for *anything except transaction
-        /// fee payment*.
-        pub misc_frozen: Balance,
-        /// The amount that `free` may not drop below when withdrawing specifically for transaction
-        /// fee payment.
-        pub fee_frozen: Balance,
-    }
-
-    impl<Balance: Saturating + Copy + Ord> AccountData<Balance> {
-        /// How much this account's balance can be reduced for the given `reasons`.
-        #[allow(dead_code)]
-        fn usable(&self, reasons: Reasons) -> Balance {
-            self.free.saturating_sub(self.frozen(reasons))
-        }
-        /// The amount that this account's free balance may not be reduced beyond for the given
-        /// `reasons`.
-        fn frozen(&self, reasons: Reasons) -> Balance {
-            match reasons {
-                Reasons::All => self.misc_frozen.max(self.fee_frozen),
-                Reasons::Misc => self.misc_frozen,
-                Reasons::Fee => self.fee_frozen,
-            }
-        }
-        // /// The total balance in this account including any that is reserved and ignoring any frozen.
-        // fn total(&self) -> Balance {
-        //     self.free.saturating_add(self.reserved)
-        // }
-    }
-
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
     pub trait Config: frame_system::Config {
@@ -120,13 +37,6 @@ pub mod pallet {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         // type TokenId;
         type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy;
-
-        type OnNewAccount: OnNewAccount<(Self::RealisTokenId, Self::AccountId)>;
-
-        type ExistentialDeposit: Get<Self::Balance>;
-
-        type RealisTokenId: Parameter + AtLeast32BitUnsigned + Default + Copy;
-
         /// Weight information for extrinsics in this pallet.
         type WeightInfo: WeightInfo;
     }
@@ -149,24 +59,6 @@ pub mod pallet {
         BasicTokenBurned(TokenId),
         TokenTransferred(TokenId, T::AccountId),
         TokenBreeded(TokenId),
-        /// An account was created with some free balance. \[account, free_balance\]
-        Endowed(T::AccountId, T::RealisTokenId, T::Balance),
-        /// Some assets were transferred. \[token_id, from, to, amount\]
-        Transfer(T::AccountId, T::AccountId, T::RealisTokenId, T::Balance),
-        /// A balance was set by root. \[who, free, reserved\]
-        RealisTokenBalanceSet(T::AccountId, TokenId, T::Balance, T::Balance),
-        /// Some amount was deposited (e.g. for transaction fees). \[who, deposit\]
-        Deposit(T::AccountId, TokenId, T::Balance),
-        /// Some balance was reserved (moved from free to reserved). \[who, value\]
-        Reserved(T::AccountId, TokenId, T::Balance),
-        /// Some balance was unreserved (moved from reserved to free). \[who, value\]
-        Unreserved(T::AccountId, TokenId, T::Balance),
-        /// A new \[account\] was created.
-        NewAccount(T::AccountId, T::RealisTokenId),
-        TokenCreated(TokenId),
-        /// Some assets were issued. [token_id, owner, total_supply]
-        Issued(TokenId, T::AccountId, T::Balance),
-        // TokensTransferred(TokenId, AccountId, TokenId, AccountId),
     }
 
     // Errors inform users that something went wrong.
@@ -192,32 +84,13 @@ pub mod pallet {
         BalanceLow,
         /// Vesting balance too high to send value
         VestingBalance,
-        /// Account liquidity restrictions prevent withdrawal
-        LiquidityRestrictions,
         /// Got an overflow after adding
         Overflow,
         /// Balance too low to send value
         InsufficientBalance,
         /// Value too low to create account due to existential deposit
         ExistentialDeposit,
-        /// Transfer/payment would kill account
-        KeepAlive,
-        /// A vesting schedule already exists for this account
-        ExistingVestingSchedule,
-        /// Beneficiary account must pre-exist
-        DeadAccount,
-        InvalidTransfer,
-        /// Have no permission to transfer someone's balance
-        NotAllowed,
     }
-
-    #[pallet::storage]
-    #[pallet::getter(fn max_token_id)]
-    pub(super) type MaxTokenId<T: Config> = StorageValue<_, T::RealisTokenId, ValueQuery>;
-
-    #[pallet::storage]
-    pub(crate) type MinTokenId<T: Config> = StorageValue<_, T::RealisTokenId, ValueQuery>;
-
     /// Map where
     ///	key - AccountId
     /// value - vector vector of TokenId and Token that belong specific account for each account
@@ -569,11 +442,6 @@ pub mod pallet {
             });
 
             Ok(())
-        }
-
-        pub fn on_created_account(who: (T::RealisTokenId, T::AccountId)) {
-            <T as Config>::OnNewAccount::on_new_account(&who);
-            Self::deposit_event(Event::NewAccount(who.1, who.0));
         }
 
         fn inc_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
