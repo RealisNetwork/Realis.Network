@@ -27,11 +27,11 @@ pub mod pallet {
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use pallet_nft as Nft;
+    use realis_primitives::TokenType::Basic;
     use realis_primitives::{Token, TokenType};
     use sp_core::H160;
     use sp_runtime::traits::Zero;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
-    use realis_primitives::TokenType::Basic;
 
     pub type BalanceOf<T> = <<T as Config>::BridgeCurrency as Currency<
         <T as frame_system::Config>::AccountId,
@@ -205,7 +205,11 @@ pub mod pallet {
         }
 
         #[pallet::weight(10000)]
-        pub fn transfer_token_to_bsc_success(origin: OriginFor<T>, from: T::AccountId, value: T::Balance) -> DispatchResult {
+        pub fn transfer_token_to_bsc_success(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            value: T::Balance,
+        ) -> DispatchResult {
             let who = ensure_root(origin)?;
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
@@ -224,7 +228,11 @@ pub mod pallet {
         }
 
         #[pallet::weight(10000)]
-        pub fn transfer_nft_to_bsc_success(origin: OriginFor<T>, from: T::AccountId, token_id: TokenId) -> DispatchResult {
+        pub fn transfer_nft_to_bsc_success(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
             let who = ensure_root(origin)?;
             Nft::Pallet::<T>::burn_basic_nft(token_id, Some(from));
             Ok(())
