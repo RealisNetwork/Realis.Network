@@ -2,151 +2,251 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage, dispatch::DispatchResult, ensure,
-    traits::Get,
-};
-use frame_system::{self as system, ensure_root, ensure_signed};
-use sp_core::U256;
+use frame_support::{dispatch::DispatchResult, ensure, traits::Get};
+use frame_system::ensure_signed;
+pub use realis_primitives::{TokenId, TokenType};
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
 
+mod benchmarking;
 mod mock;
 mod tests;
 
-type TokenId = U256;
+pub use pallet::*;
 
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-pub struct Erc721Token {
-    pub id: TokenId,
-    pub metadata: Vec<u8>,
-}
+#[frame_support::pallet]
+pub mod pallet {
+    use super::*;
+    use frame_support::pallet_prelude::*;
+    use frame_support::traits::{Currency, ExistenceRequirement};
+    use frame_support::PalletId;
+    use frame_system::pallet_prelude::*;
+    use pallet_nft as Nft;
+    use realis_primitives::TokenType::Basic;
+    use realis_primitives::{Token, TokenType};
+    use sp_core::H160;
+    use sp_runtime::traits::Zero;
+    use sp_runtime::traits::{AccountIdConversion, Saturating};
 
-pub trait Config: system::Config {
-    type Event: From<Event<Self>> + Into<<Self as system::Config>::Event>;
+    pub type BalanceOf<T> = <<T as Config>::BridgeCurrency as Currency<
+        <T as frame_system::Config>::AccountId,
+    >>::Balance;
 
-    /// Some identifier for this token type, possibly the originating ethereum address.
-    /// This is not explicitly used for anything, but may reflect the bridge's notion of resource ID.
-    type Identifier: Get<[u8; 32]>;
-}
+    #[pallet::pallet]
+    #[pallet::generate_store(pub (super) trait Store)]
+    pub struct Pallet<T>(PhantomData<T>);
 
-decl_event! {
-    pub enum Event<T>
-    where
-        <T as system::Config>::AccountId,
-    {
-        /// New token created
-        Minted(AccountId, TokenId),
-        /// Token transfer between two parties
-        Transferred(AccountId, AccountId, TokenId),
-        /// Token removed from the system
-        Burned(TokenId),
+    #[pallet::config]
+    pub trait Config: frame_system::Config + Nft::Config {
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        /// Some identifier for this token type, possibly the originating ethereum address.
+        /// This is not explicitly used for anything, but may reflect the bridge's notion of resource ID.
+        type BridgeCurrency: Currency<Self::AccountId, Balance = Self::Balance>;
+
+        type PalletId: Get<PalletId>;
     }
-}
 
-decl_error! {
-    pub enum Error for Module<T: Config> {
+    #[pallet::event]
+    #[pallet::generate_deposit(pub (super) fn deposit_event)]
+    pub enum Event<T: Config> {
+        ///Token was tranfered to BEP-20 on BSC
+        TransferTokenToBSC(T::AccountId, H160, BalanceOf<T>),
+        ///NFT was tranfered to BEP-721 on BSC
+        TransferNftToBSC(T::AccountId, H160, TokenId, u8),
+
+        ///Token was tranfered to Realis.Network from BEP-20 on BSC
+        TransferTokenToRealis(T::AccountId, BalanceOf<T>),
+        ///NFT was tranfered to Realis.Network from BEP-721 on BSC
+        TransferNftToRealis(T::AccountId, TokenId),
+        Balance(T::AccountId, BalanceOf<T>),
+    }
+
+    #[pallet::error]
+    pub enum Error<T> {
         /// ID not recognized
         TokenIdDoesNotExist,
         /// Already exists with an owner
         TokenAlreadyExists,
         /// Origin is not owner
         NotOwner,
+        /// Not enought balance
+        InsufficientBalance,
+        /// Not Nft master
+        NotNftMaster,
+        /// Haven`t permission at this token
+        NotTokenOwner,
+        /// No such token exists
+        NonExistentToken,
+        /// Token wasnt transferred to BEP-20
+        TokensWasntTransfered,
+        /// NFT wasnt trasnferred to BEP-721
+        NFTWasntTransfered,
     }
-}
 
-decl_storage! {
-    trait Store for Module<T: Config> as TokenStorage {
-        /// Maps tokenId to Erc721 object
-        Tokens get(fn tokens): map hasher(opaque_blake2_256) TokenId => Option<Erc721Token>;
-        /// Maps tokenId to owner
-        TokenOwner get(fn owner_of): map hasher(opaque_blake2_256) TokenId => Option<T::AccountId>;
-        /// Total number of tokens in existence
-        TokenCount get(fn token_count): U256 = U256::zero();
+    #[pallet::genesis_config]
+    pub struct GenesisConfig {}
+
+    #[cfg(feature = "std")]
+    impl Default for GenesisConfig {
+        fn default() -> Self {
+            Self {}
+        }
     }
-}
 
-decl_module! {
-    pub struct Module<T: Config> for enum Call where origin: T::Origin {
-        type Error = Error<T>;
-        fn deposit_event() = default;
+    #[pallet::genesis_build]
+    impl<T: Config> GenesisBuild<T> for GenesisConfig {
+        fn build(&self) {}
+    }
 
-        /// Creates a new token with the given token ID and metadata, and gives ownership to owner
-        #[weight = 195_000_000]
-        pub fn mint(origin, owner: T::AccountId, id: TokenId, metadata: Vec<u8>) -> DispatchResult {
-            ensure_root(origin)?;
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-            Self::mint_token(owner, id, metadata)?;
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
+        #[pallet::weight(10000)]
+        pub fn transfer_token_to_bsc(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            to: H160,
+            #[pallet::compact] value: T::Balance,
+        ) -> DispatchResult {
+            ensure_signed(origin)?;
+            let zero = T::Balance::zero();
+            if value == zero {
+                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"));
+            }
 
+            Self::deposit_event(Event::<T>::TransferTokenToBSC(from.clone(), to, value));
             Ok(())
         }
 
-        /// Changes ownership of a token sender owns
-        #[weight = 195_000_000]
-        pub fn transfer(origin, to: T::AccountId, id: TokenId) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
+        #[pallet::weight(10000)]
+        pub fn transfer_token_to_realis(
+            origin: OriginFor<T>,
+            to: T::AccountId,
+            #[pallet::compact] value: T::Balance,
+        ) -> DispatchResult {
+            ensure_signed(origin)?;
+            let zero = T::Balance::zero();
+            if value == zero {
+                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"));
+            }
+            let pallet_id = Self::account_id();
+            <T as Config>::BridgeCurrency::transfer(
+                &pallet_id,
+                &to,
+                value,
+                ExistenceRequirement::KeepAlive,
+            )?;
 
-            Self::transfer_from(sender, to, id)?;
-
+            Self::deposit_event(Event::<T>::TransferTokenToRealis(to, value));
             Ok(())
         }
 
-        /// Remove token from the system
-        #[weight = 195_000_000]
-        pub fn burn(origin, id: TokenId) -> DispatchResult {
-            ensure_root(origin)?;
+        #[pallet::weight(90000000)]
+        pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
+            let _who = ensure_signed(origin)?;
+            let account_id = Self::account_id();
+            let balance = <T as Config>::BridgeCurrency::free_balance(&account_id)
+                .saturating_sub(<T as Config>::BridgeCurrency::minimum_balance());
+            Self::deposit_event(Event::Balance(account_id, balance));
+            Ok(())
+        }
 
-            let owner = Self::owner_of(id).ok_or(Error::<T>::TokenIdDoesNotExist)?;
+        #[pallet::weight(10000)]
+        pub fn transfer_nft_to_bsc(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            dest: H160,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            // Only owner can transfer token
+            ensure!(who == from, Error::<T>::NotTokenOwner);
+            let token = Nft::TokensWithTypes::<T>::get(from.clone()).unwrap();
 
-            Self::burn_token(owner, id)?;
+            let mut value: u8 = 1;
 
+            for t in token {
+                if t.id == token_id {
+                    if let Basic(v) = t.token_type {
+                        value = v;
+                    }
+                }
+            }
+
+            Self::deposit_event(Event::<T>::TransferNftToBSC(from, dest, token_id, value));
+            Ok(())
+        }
+
+        #[pallet::weight(10000)]
+        pub fn transfer_nft_to_realis(
+            origin: OriginFor<T>,
+            to: T::AccountId,
+            token_id: TokenId,
+            token_type: u8,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            let token = Token {
+                id: token_id,
+                token_type: TokenType::Basic(token_type),
+            };
+            Nft::Pallet::<T>::mint_basic_nft(&who, token_id, token)?;
+
+            Self::deposit_event(Event::<T>::TransferNftToRealis(to, token_id));
+            Ok(())
+        }
+
+        #[pallet::weight(10000)]
+        pub fn transfer_token_to_bsc_success(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            value: T::Balance,
+        ) -> DispatchResult {
+            let _who = ensure_root(origin)?;
+            let pallet_id = Self::account_id();
+            <T as Config>::BridgeCurrency::transfer(
+                &from,
+                &pallet_id,
+                value,
+                ExistenceRequirement::KeepAlive,
+            )
+        }
+
+        #[pallet::weight(10000)]
+        #[warn(path_statements)]
+        pub fn transfer_token_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
+            let _who = ensure_root(origin)?;
+            Error::<T>::TokensWasntTransfered;
+            Ok(())
+        }
+
+        #[pallet::weight(10000)]
+        #[warn(unused_must_use)]
+        pub fn transfer_nft_to_bsc_success(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            let _who = ensure_root(origin)?;
+            Nft::Pallet::<T>::burn_basic_nft(token_id, Some(from));
+            Ok(())
+        }
+
+        #[pallet::weight(10000)]
+        #[warn(path_statements)]
+        pub fn transfer_nft_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
+            let _who = ensure_root(origin)?;
+            Error::<T>::NFTWasntTransfered;
             Ok(())
         }
     }
-}
 
-impl<T: Config> Module<T> {
-    /// Creates a new token in the system.
-    pub fn mint_token(owner: T::AccountId, id: TokenId, metadata: Vec<u8>) -> DispatchResult {
-        ensure!(!Tokens::contains_key(id), Error::<T>::TokenAlreadyExists);
-
-        let new_token = Erc721Token { id, metadata };
-
-        <Tokens>::insert(&id, new_token);
-        <TokenOwner<T>>::insert(&id, owner.clone());
-        let new_total = <TokenCount>::get().saturating_add(U256::one());
-        <TokenCount>::put(new_total);
-
-        Self::deposit_event(RawEvent::Minted(owner, id));
-
-        Ok(())
-    }
-
-    /// Modifies ownership of a token
-    pub fn transfer_from(from: T::AccountId, to: T::AccountId, id: TokenId) -> DispatchResult {
-        // Check from is owner and token exists
-        let owner = Self::owner_of(id).ok_or(Error::<T>::TokenIdDoesNotExist)?;
-        ensure!(owner == from, Error::<T>::NotOwner);
-        // Update owner
-        <TokenOwner<T>>::insert(&id, to.clone());
-
-        Self::deposit_event(RawEvent::Transferred(from, to, id));
-
-        Ok(())
-    }
-
-    /// Deletes a token from the system.
-    pub fn burn_token(from: T::AccountId, id: TokenId) -> DispatchResult {
-        let owner = Self::owner_of(id).ok_or(Error::<T>::TokenIdDoesNotExist)?;
-        ensure!(owner == from, Error::<T>::NotOwner);
-
-        <Tokens>::remove(&id);
-        <TokenOwner<T>>::remove(&id);
-        let new_total = <TokenCount>::get().saturating_sub(U256::one());
-        <TokenCount>::put(new_total);
-
-        Self::deposit_event(RawEvent::Burned(id));
-
-        Ok(())
+    impl<T: Config> Pallet<T> {
+        pub fn account_id() -> T::AccountId {
+            <T as Config>::PalletId::get().into_account()
+        }
     }
 }

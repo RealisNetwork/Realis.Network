@@ -647,7 +647,7 @@ benchmarks! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock::{Balances, ExtBuilder, Origin, Staking, Test};
+    use crate::mock::{ExtBuilder, Staking, Test};
     use frame_support::assert_ok;
 
     #[test]

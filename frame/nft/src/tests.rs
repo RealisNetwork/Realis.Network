@@ -164,7 +164,7 @@ fn mint_token_and_transfer_it_two_times() {
         );
     })
 }
-// TODO fix this bug
+
 /// Mint token than transfer it to other account
 /// than burn from that account by new owner
 /// main - ok
@@ -217,7 +217,6 @@ fn mint_token_and_transfer_it_two_times_then_burn() {
     })
 }
 
-// TODO fix this bug
 /// Mint token than transfer it from 1 to 2, than from 2 to 3
 /// Burn token by 3 user
 /// mint - ok

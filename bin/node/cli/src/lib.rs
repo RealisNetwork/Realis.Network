@@ -36,8 +36,9 @@ pub mod chain_spec;
 mod service;
 #[cfg(feature = "browser")]
 mod browser;
+///
 #[cfg(feature = "cli")]
-mod cli;
+pub mod cli;
 #[cfg(feature = "cli")]
 mod command;
 

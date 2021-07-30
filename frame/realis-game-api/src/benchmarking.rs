@@ -4,6 +4,8 @@ mod benchmarking {
     use crate::Pallet as RealisGameApi;
     use crate::*;
     use pallet_nft as Nft;
+    use primitive_types::U256;
+    use realis_primitives::*;
 
     use frame_benchmarking::{account, benchmarks};
     use frame_support::traits::{Currency, Get};
@@ -27,8 +29,8 @@ mod benchmarking {
           }: _(
               owner_origin,
               caller.clone(),
-              Nft::U256([1, 0, 0, 0]),
-              Nft::Types { tape: 1 }
+              U256([1, 0, 0, 0]),
+              1
           )
 
           burn_basic_nft {
@@ -37,12 +39,12 @@ mod benchmarking {
               RealisGameApi::<T>::mint_basic_nft(
                   owner_origin,
                   caller.clone(),
-                  Nft::U256([1, 0, 0, 0]),
-                  Nft::Types { tape: 1 }
+                  U256([1, 0, 0, 0]),
+                  1
               )?;
           }: _(
               SystemOrigin::Signed(caller.clone()),
-              Nft::U256([1, 0, 0, 0])
+              U256([1, 0, 0, 0])
           )
 
           transfer_basic_nft {
@@ -52,19 +54,18 @@ mod benchmarking {
               RealisGameApi::<T>::mint_basic_nft(
                   owner_origin,
                   caller.clone(),
-                  Nft::U256([1, 0, 0, 0]),
-                  Nft::Types { tape: 1 }
+                  U256([1, 0, 0, 0]),
+                  1
               )?;
           }: _(
               SystemOrigin::Signed(caller.clone()),
               recipient,
-              Nft::U256([1, 0, 0, 0])
+              U256([1, 0, 0, 0])
           )
 
           transfer_from_pallet {
               let caller = alice::<T>();
               let owner_origin = SystemOrigin::Signed(caller.clone());
-              let existential_deposit = T::ExistentialDeposit::get();
               let recipient: T::AccountId = account("recipient", 1, SEED);
 
               let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
@@ -79,7 +80,6 @@ mod benchmarking {
           transfer_to_pallet {
               let caller = alice::<T>();
               let owner_origin = SystemOrigin::Signed(caller.clone());
-              let existential_deposit = T::ExistentialDeposit::get();
               let recipient: T::AccountId = account("recipient", 1, SEED);
 
               let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
@@ -94,7 +94,6 @@ mod benchmarking {
           transfer_from_ptp {
               let caller = alice::<T>();
               let owner_origin = SystemOrigin::Signed(caller.clone());
-              let existential_deposit = T::ExistentialDeposit::get();
               let recipient: T::AccountId = account("recipient", 1, SEED);
 
               let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
@@ -110,7 +109,6 @@ mod benchmarking {
           spend_in_game {
               let caller = alice::<T>();
               let owner_origin = SystemOrigin::Signed(caller.clone());
-              let existential_deposit = T::ExistentialDeposit::get();
               let recipient: T::AccountId = account("recipient", 1, SEED);
 
               let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
