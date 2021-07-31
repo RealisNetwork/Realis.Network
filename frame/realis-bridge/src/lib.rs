@@ -55,7 +55,7 @@ pub mod pallet {
         TransferNftToBSC(T::AccountId, H160, TokenId, u8),
 
         ///Token was tranfered to Realis.Network from BEP-20 on BSC
-        TransferTokenToRealis(T::AccountId, BalanceOf<T>),
+        TransferTokenToRealis(H160, T::AccountId, BalanceOf<T>),
         ///NFT was tranfered to Realis.Network from BEP-721 on BSC
         TransferNftToRealis(H160, T::AccountId, TokenId, u8),
         Balance(T::AccountId, BalanceOf<T>),
@@ -123,6 +123,7 @@ pub mod pallet {
         #[pallet::weight(10000)]
         pub fn transfer_token_to_realis(
             origin: OriginFor<T>,
+            from: H160,
             to: T::AccountId,
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
@@ -139,7 +140,7 @@ pub mod pallet {
                 ExistenceRequirement::KeepAlive,
             )?;
 
-            Self::deposit_event(Event::<T>::TransferTokenToRealis(to, value));
+            Self::deposit_event(Event::<T>::TransferTokenToRealis(from, to, value));
             Ok(())
         }
 
