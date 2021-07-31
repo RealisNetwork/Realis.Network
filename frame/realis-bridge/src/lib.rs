@@ -126,11 +126,11 @@ pub mod pallet {
             to: T::AccountId,
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
-            ensure_signed(origin)?;
-            let zero = T::Balance::zero();
-            if value == zero {
-                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"));
-            }
+            let who = ensure_signed(origin)?;
+            ensure!(
+                Nft::NftMasters::<T>::get().contains(&who),
+                Error::<T>::NotNftMaster
+            );
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &pallet_id,
