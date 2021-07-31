@@ -57,7 +57,7 @@ pub mod pallet {
         ///Token was tranfered to Realis.Network from BEP-20 on BSC
         TransferTokenToRealis(T::AccountId, BalanceOf<T>),
         ///NFT was tranfered to Realis.Network from BEP-721 on BSC
-        TransferNftToRealis(T::AccountId, TokenId),
+        TransferNftToRealis(T::AccountId, TokenId, u8),
         Balance(T::AccountId, BalanceOf<T>),
     }
 
@@ -195,7 +195,7 @@ pub mod pallet {
             };
             Nft::Pallet::<T>::mint_basic_nft(&who, token_id, token)?;
 
-            Self::deposit_event(Event::<T>::TransferNftToRealis(to, token_id));
+            Self::deposit_event(Event::<T>::TransferNftToRealis(to, token_id, token_type));
             Ok(())
         }
 
