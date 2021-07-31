@@ -205,20 +205,25 @@ pub mod pallet {
             from: T::AccountId,
             value: T::Balance,
         ) -> DispatchResult {
-            let _who = ensure_root(origin)?;
+            let who = ensure_signed(origin)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &from,
                 &pallet_id,
                 value,
                 ExistenceRequirement::KeepAlive,
-            )
+            )?;
+            Ok(())
         }
 
         #[pallet::weight(10000)]
         #[warn(path_statements)]
         pub fn transfer_token_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
-            let _who = ensure_root(origin)?;
+            let who = ensure_signed(origin)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             Error::<T>::TokensWasntTransfered;
             Ok(())
         }
@@ -230,7 +235,9 @@ pub mod pallet {
             from: T::AccountId,
             token_id: TokenId,
         ) -> DispatchResult {
-            let _who = ensure_root(origin)?;
+            let who = ensure_signed(origin)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             Nft::Pallet::<T>::burn_basic_nft(token_id, Some(from));
             Ok(())
         }
@@ -238,7 +245,9 @@ pub mod pallet {
         #[pallet::weight(10000)]
         #[warn(path_statements)]
         pub fn transfer_nft_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
-            let _who = ensure_root(origin)?;
+            let who = ensure_signed(origin)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             Error::<T>::NFTWasntTransfered;
             Ok(())
         }
