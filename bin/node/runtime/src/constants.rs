@@ -70,9 +70,4 @@ pub mod time {
     pub const MINUTES: BlockNumber = 60 / (SECS_PER_BLOCK as BlockNumber);
     pub const HOURS: BlockNumber = MINUTES * 60;
     pub const DAYS: BlockNumber = HOURS * 24;
-
-    // pub const COIN: Balance = 1_000 * MILLISECS_PER_BLOCK;
-
-    // pub const CAP: Balance = 10_000_000_000 * COIN;
-    pub const TOTAL_POWER: u32 = 1_000_000_000;
 }

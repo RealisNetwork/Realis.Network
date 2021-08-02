@@ -30,7 +30,7 @@ pub struct Token {
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub enum TokenType {
-    // Skin 		,
+    // Skin,
     Mergeable(Mergeable),
     Stackable(Stackable),
     Basic(Basic),

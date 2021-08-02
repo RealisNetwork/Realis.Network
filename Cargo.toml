@@ -11,8 +11,7 @@ members = [
     "frame/realis-game-api",
     "frame/staking-pool",
     "primitives/realis",
-    "frame/realis-game-api/rpc",
-    "frame/realis-game-api/rpc/runtime-api",
+    "frame/realis-bridge",
 ]
 
 # Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.
@@ -23,6 +22,7 @@ node-runtime = { path = "bin/node/runtime" }
 runtime-common = { path = "bin/node/runtime-common" }
 pallet-staking = { path = "frame/staking-pool" }
 pallet-nft = { path = "frame/nft" }
+realis-bridge = {path = "frame/realis-bridge"}
 
 [profile.dev]
 split-debuginfo = "unpacked"

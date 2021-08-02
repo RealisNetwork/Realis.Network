@@ -115,7 +115,7 @@ parameter_types! {
 }
 
 impl frame_system::Config for Test {
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::AllowAll;
     type BlockWeights = ();
     type BlockLength = ();
     type Origin = Origin;
@@ -193,6 +193,7 @@ impl pallet_timestamp::Config for Test {
     type MinimumPeriod = MinimumPeriod;
     type WeightInfo = ();
 }
+
 pallet_staking_reward_curve::build! {
     const I_NPOS: PiecewiseLinear<'static> = curve!(
         min_inflation: 0_025_000,
@@ -260,9 +261,6 @@ parameter_types! {
 impl pallet_nft::Config for Test {
     type Event = Event;
     type Balance = u128;
-    type ExistentialDeposit = ExistentialDepositOfRealisTokens;
-    type OnNewAccount = ();
-    type RealisTokenId = u32;
     type WeightInfo = pallet_nft::weights::SubstrateWeight<Test>;
 }
 

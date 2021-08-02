@@ -639,7 +639,7 @@ mod tests {
     };
     use sp_runtime::{key_types::BABE, traits::IdentifyAccount, RuntimeAppPublic};
     use sp_timestamp;
-    use sp_transaction_pool::{ChainEvent, MaintainedTransactionPool};
+    // use sp_transaction_pool::{ChainEvent, MaintainedTransactionPool};
     use std::{borrow::Cow, convert::TryInto, sync::Arc};
 
     type AccountPublic = <Signature as Verify>::Signer;
@@ -708,12 +708,12 @@ mod tests {
                 let parent_hash = parent_header.hash();
                 let parent_number = *parent_header.number();
 
-                futures::executor::block_on(service.transaction_pool().maintain(
-                    ChainEvent::NewBestBlock {
-                        hash: parent_header.hash(),
-                        tree_route: None,
-                    },
-                ));
+                // futures::executor::block_on(service.transaction_pool().maintain(
+                //     ChainEvent::NewBestBlock {
+                //         hash: parent_header.hash(),
+                //         tree_route: None,
+                //     },
+                // ));
 
                 let mut proposer_factory = sc_basic_authorship::ProposerFactory::new(
                     service.spawn_handle(),

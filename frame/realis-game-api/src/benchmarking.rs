@@ -66,7 +66,6 @@ mod benchmarking {
           transfer_from_pallet {
               let caller = alice::<T>();
               let owner_origin = SystemOrigin::Signed(caller.clone());
-              let existential_deposit = T::ExistentialDeposit::get();
               let recipient: T::AccountId = account("recipient", 1, SEED);
 
               let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
@@ -81,7 +80,6 @@ mod benchmarking {
           transfer_to_pallet {
               let caller = alice::<T>();
               let owner_origin = SystemOrigin::Signed(caller.clone());
-              let existential_deposit = T::ExistentialDeposit::get();
               let recipient: T::AccountId = account("recipient", 1, SEED);
 
               let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
@@ -96,7 +94,6 @@ mod benchmarking {
           transfer_from_ptp {
               let caller = alice::<T>();
               let owner_origin = SystemOrigin::Signed(caller.clone());
-              let existential_deposit = T::ExistentialDeposit::get();
               let recipient: T::AccountId = account("recipient", 1, SEED);
 
               let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
@@ -112,7 +109,6 @@ mod benchmarking {
           spend_in_game {
               let caller = alice::<T>();
               let owner_origin = SystemOrigin::Signed(caller.clone());
-              let existential_deposit = T::ExistentialDeposit::get();
               let recipient: T::AccountId = account("recipient", 1, SEED);
 
               let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());

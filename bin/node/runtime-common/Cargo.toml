@@ -10,22 +10,22 @@ serde = { version = "1.0.123", default-features = false }
 serde_derive = { version = "1.0.117", optional = true }
 rustc-hex = { version = "2.1.0", default-features = false }
 
-sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f", default-features = false }
-sp-io = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f", default-features = false }
-sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f", default-features = false }
-sp-core = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f", default-features = false }
-frame-support = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f", default-features = false }
-frame-system = {git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f", default-features = false }
+sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
+sp-io = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
+sp-core = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
+frame-support = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
+frame-system = {git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f", default-features = false, optional = true }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false, optional = true }
 
 [dev-dependencies]
 hex-literal = "0.3.1"
-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f" }
-sp-trie = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f" }
-sp-application-crypto = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f" }
-frame-support-test = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f" }
-sp-keystore = { git = "https://github.com/paritytech/substrate", rev = "4cb42231b31ed0dda753144f1e2958b7c78f381f" }
+keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
+sp-trie = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
+sp-application-crypto = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
+frame-support-test = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
+sp-keystore = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 trie-db = "0.22.3"
 serde_json = "1.0.61"
 #libsecp256k1 = "0.3.5"
