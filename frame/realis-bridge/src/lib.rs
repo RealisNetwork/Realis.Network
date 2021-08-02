@@ -195,7 +195,7 @@ pub mod pallet {
                 id: token_id,
                 token_type: TokenType::Basic(token_type),
             };
-            Nft::Pallet::<T>::mint_basic_nft(&who, token_id, token)?;
+            Nft::Pallet::<T>::mint_basic_nft(&to, token_id, token)?;
 
             Self::deposit_event(Event::<T>::TransferNftToRealis(from,to, token_id, token_type));
             Ok(())
