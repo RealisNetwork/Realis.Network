@@ -181,7 +181,10 @@ pub mod pallet {
             // Check is signed correct
             let who = ensure_signed(origin)?;
             // Check if account that signed operation have permission for this operation
-            ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
+            ensure!(
+                Self::nft_masters().contains(&who),
+                Error::<T>::NotNftMaster
+            );
             // Create token by grouping up arguments
             let token = Token {
                 id: token_id,

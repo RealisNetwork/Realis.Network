@@ -55,9 +55,9 @@ pub mod pallet {
         TransferNftToBSC(T::AccountId, H160, TokenId, u8),
 
         ///Token was tranfered to Realis.Network from BEP-20 on BSC
-        TransferTokenToRealis(T::AccountId, BalanceOf<T>),
+        TransferTokenToRealis(H160, T::AccountId, BalanceOf<T>),
         ///NFT was tranfered to Realis.Network from BEP-721 on BSC
-        TransferNftToRealis(T::AccountId, TokenId),
+        TransferNftToRealis(H160, T::AccountId, TokenId, u8),
         Balance(T::AccountId, BalanceOf<T>),
     }
 
@@ -123,14 +123,15 @@ pub mod pallet {
         #[pallet::weight(10000)]
         pub fn transfer_token_to_realis(
             origin: OriginFor<T>,
+            from: H160,
             to: T::AccountId,
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
-            ensure_signed(origin)?;
-            let zero = T::Balance::zero();
-            if value == zero {
-                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"));
-            }
+            let who = ensure_signed(origin)?;
+            ensure!(
+                Nft::NftMasters::<T>::get().contains(&who),
+                Error::<T>::NotNftMaster
+            );
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &pallet_id,
@@ -139,7 +140,7 @@ pub mod pallet {
                 ExistenceRequirement::KeepAlive,
             )?;
 
-            Self::deposit_event(Event::<T>::TransferTokenToRealis(to, value));
+            Self::deposit_event(Event::<T>::TransferTokenToRealis(from, to, value));
             Ok(())
         }
 
@@ -182,6 +183,7 @@ pub mod pallet {
         #[pallet::weight(10000)]
         pub fn transfer_nft_to_realis(
             origin: OriginFor<T>,
+            from: H160,
             to: T::AccountId,
             token_id: TokenId,
             token_type: u8,
@@ -193,9 +195,9 @@ pub mod pallet {
                 id: token_id,
                 token_type: TokenType::Basic(token_type),
             };
-            Nft::Pallet::<T>::mint_basic_nft(&who, token_id, token)?;
+            Nft::Pallet::<T>::mint_basic_nft(&to, token_id, token)?;
 
-            Self::deposit_event(Event::<T>::TransferNftToRealis(to, token_id));
+            Self::deposit_event(Event::<T>::TransferNftToRealis(from,to, token_id, token_type));
             Ok(())
         }
 
@@ -205,20 +207,25 @@ pub mod pallet {
             from: T::AccountId,
             value: T::Balance,
         ) -> DispatchResult {
-            let _who = ensure_root(origin)?;
+            let who = ensure_signed(origin)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &from,
                 &pallet_id,
                 value,
                 ExistenceRequirement::KeepAlive,
-            )
+            )?;
+            Ok(())
         }
 
         #[pallet::weight(10000)]
         #[warn(path_statements)]
         pub fn transfer_token_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
-            let _who = ensure_root(origin)?;
+            let who = ensure_signed(origin)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             Error::<T>::TokensWasntTransfered;
             Ok(())
         }
@@ -230,7 +237,9 @@ pub mod pallet {
             from: T::AccountId,
             token_id: TokenId,
         ) -> DispatchResult {
-            let _who = ensure_root(origin)?;
+            let who = ensure_signed(origin)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             Nft::Pallet::<T>::burn_basic_nft(token_id, Some(from));
             Ok(())
         }
@@ -238,7 +247,9 @@ pub mod pallet {
         #[pallet::weight(10000)]
         #[warn(path_statements)]
         pub fn transfer_nft_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
-            let _who = ensure_root(origin)?;
+            let who = ensure_signed(origin)?;
+            let nft_master = Nft::NftMasters::<T>::get();
+            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             Error::<T>::NFTWasntTransfered;
             Ok(())
         }
