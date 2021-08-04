@@ -1544,7 +1544,7 @@ version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "567ce064a8232c16e2b2c2173a936b91fbe35c2f2c5278871f5a1a31688b42e9"
 dependencies = [
- "ethereum-types",
+ "ethereum-types 0.11.0",
  "funty",
  "hash-db",
  "hash256-std-hasher",
@@ -1568,6 +1568,18 @@ dependencies = [
  "impl-rlp",
  "impl-serde",
  "primitive-types 0.9.0",
+ "uint",
+]
+
+[[package]]
+name = "ethereum-types"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0dd6bde671199089e601e8d47e153368b893ef885f11f365a3261ec58153c211"
+dependencies = [
+ "ethbloom",
+ "fixed-hash",
+ "primitive-types 0.10.1",
  "uint",
 ]
 
@@ -6072,7 +6084,7 @@ name = "realis-primitives"
 version = "0.0.2"
 dependencies = [
  "ethereum",
- "ethereum-types",
+ "ethereum-types 0.12.0",
  "evm",
  "frame-support",
  "frame-system",
