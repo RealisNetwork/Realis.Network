@@ -4231,7 +4231,7 @@ dependencies = [
  "parity-scale-codec",
  "parking_lot 0.11.1",
  "platforms",
- "rand 0.7.3",
+ "rand 0.8.4",
  "regex",
  "sc-authority-discovery",
  "sc-basic-authorship",
