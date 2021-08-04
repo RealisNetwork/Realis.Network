@@ -36,7 +36,7 @@ crate-type = ["cdylib", "rlib"]
 # third-party dependencies
 codec = { package = "parity-scale-codec", version = "2.0.0" }
 serde = { version = "1.0.102", features = ["derive"] }
-futures = { version = "0.3.9", features = ["compat"] }
+futures = { version = "0.3.16", features = ["compat"] }
 hex-literal = "0.3.3"
 log = "0.4.8"
 rand = "0.8.4"
@@ -122,7 +122,7 @@ sc-consensus-babe = { git = "https://github.com/paritytech/substrate", rev = "03
 sc-consensus-epochs = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 sc-service-test = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 sp-io = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
-futures = "0.3.9"
+futures = "0.3.16"
 tempfile = "3.1.0"
 assert_cmd = "1.0"
 nix = "0.19"
