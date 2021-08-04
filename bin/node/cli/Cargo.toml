@@ -107,7 +107,7 @@ try-runtime-cli = { git = "https://github.com/paritytech/substrate", rev = "03d4
 wasm-bindgen = { version = "0.2.73", optional = true }
 wasm-bindgen-futures = { version = "0.4.18", optional = true }
 browser-utils = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178",package = "substrate-browser-utils",  optional = true}
-libp2p-wasm-ext = { version = "0.28", features = ["websocket"], optional = true }
+libp2p-wasm-ext = { version = "0.29", features = ["websocket"], optional = true }
 
 [target.'cfg(target_arch="x86_64")'.dependencies]
 node-executor = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", features = [ "wasmtime" ] }
