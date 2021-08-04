@@ -15,7 +15,7 @@ sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", 
 evm = { version = "0.27.0", default-features = false, features = ["with-codec"] }
 impl-trait-for-tuples = "0.1"
 ethereum = { version = "0.7.1", default-features = false, features = ["with-codec"] }
-ethereum-types = { version = "0.11", default-features = false }
+ethereum-types = { version = "0.12", default-features = false }
 
 
 [features]
