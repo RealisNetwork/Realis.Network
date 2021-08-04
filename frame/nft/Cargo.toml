@@ -12,7 +12,7 @@ version = "0.0.2"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-hex-literal = "0.2.1"
+hex-literal = "0.3.3"
 codec = { package = "parity-scale-codec", version = "2.0.1", default-features = false, features = ["derive"] }
 serde = { version = "1.0.102", optional = true }
 primitive-types = { version = "0.9.0", default-features = false }
