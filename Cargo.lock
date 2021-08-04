@@ -2417,28 +2417,9 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "hex-literal"
-version = "0.2.1"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "961de220ec9a91af2e1e5bd80d02109155695e516771762381ef8581317066e0"
-dependencies = [
- "hex-literal-impl",
- "proc-macro-hack",
-]
-
-[[package]]
-name = "hex-literal"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76505e26b6ca3bbdbbb360b68472abbb80998c5fa5dc43672eca34f28258e138"
-
-[[package]]
-name = "hex-literal-impl"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "853f769599eb31de176303197b7ba4973299c38c7a7604a6bc88c3eef05b9b46"
-dependencies = [
- "proc-macro-hack",
-]
+checksum = "21e4590e13640f19f249fe3e4eca5113bc4289f2497710378190e7f4bd96f45b"
 
 [[package]]
 name = "hex_fmt"
@@ -4079,7 +4060,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "futures 0.3.15",
- "hex-literal 0.3.2",
+ "hex-literal",
  "libp2p-wasm-ext",
  "log",
  "nix",
@@ -4242,7 +4223,7 @@ dependencies = [
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
  "frame-try-runtime",
- "hex-literal 0.3.2",
+ "hex-literal",
  "log",
  "node-primitives",
  "pallet-assets",
@@ -4815,7 +4796,7 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "hex-literal 0.2.1",
+ "hex-literal",
  "node-primitives",
  "pallet-balances",
  "parity-scale-codec",
@@ -4953,7 +4934,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "hex",
- "hex-literal 0.3.2",
+ "hex-literal",
  "log",
  "pallet-authorship",
  "pallet-balances",
@@ -6287,7 +6268,7 @@ dependencies = [
  "frame-support",
  "frame-support-test",
  "frame-system",
- "hex-literal 0.3.2",
+ "hex-literal",
  "parity-scale-codec",
  "rustc-hex",
  "serde",
@@ -7285,7 +7266,7 @@ dependencies = [
  "fdlimit",
  "futures 0.1.31",
  "futures 0.3.15",
- "hex-literal 0.3.2",
+ "hex-literal",
  "log",
  "parity-scale-codec",
  "parking_lot 0.11.1",

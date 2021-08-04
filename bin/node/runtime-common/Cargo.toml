@@ -20,7 +20,7 @@ frame-system = {git = "https://github.com/paritytech/substrate", rev = "03d4d0d7
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false, optional = true }
 
 [dev-dependencies]
-hex-literal = "0.3.1"
+hex-literal = "0.3.3"
 keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 sp-trie = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 sp-application-crypto = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
