@@ -22,7 +22,7 @@ pub mod pallet {
     use pallet_nft as Nft;
     use realis_primitives::Rarity::Common;
     use realis_primitives::TokenType::Basic;
-    use realis_primitives::{Rarity, Token, TokenType};
+    use realis_primitives::Rarity;
     use sp_core::H160;
     use sp_runtime::traits::Zero;
     use sp_runtime::traits::{AccountIdConversion, Saturating};

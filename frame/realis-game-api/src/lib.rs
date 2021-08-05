@@ -142,11 +142,11 @@ pub mod pallet {
         }
 
         #[pallet::weight((T::WeightInfoOf::burn_basic_nft(), Pays::No))]
-        pub fn burn_nft(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
+        pub fn burn_nft(origin: OriginFor<T>, from: T::AccountId, token_id: TokenId) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            NFT::Pallet::<T>::burn(origin, token_id);
+            NFT::Pallet::<T>::burn_nft(token_id, &from)?;
             Self::deposit_event(Event::<T>::TokenBurned);
             Ok(())
         }
@@ -154,6 +154,7 @@ pub mod pallet {
         #[pallet::weight((T::WeightInfoOf::transfer_basic_nft(), Pays::No))]
         pub fn transfer_nft(
             origin: OriginFor<T>,
+            from: T::AccountId,
             dest_account: T::AccountId,
             token_id: TokenId,
         ) -> DispatchResult {
@@ -161,7 +162,7 @@ pub mod pallet {
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
 
-            NFT::Pallet::<T>::transfer(origin, dest_account, token_id);
+            NFT::Pallet::<T>::transfer_nft(&dest_account, &from, token_id)?;
             Self::deposit_event(Event::<T>::TokenTransferred);
             Ok(())
         }

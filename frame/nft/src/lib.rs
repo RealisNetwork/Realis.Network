@@ -262,7 +262,7 @@ pub mod pallet {
             Ok(())
         }
 
-        fn transfer_nft(
+        pub fn transfer_nft(
             dest_account: &T::AccountId,
             owner: &T::AccountId,
             token_id: TokenId,
