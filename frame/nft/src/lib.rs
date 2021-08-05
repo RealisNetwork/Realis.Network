@@ -91,13 +91,6 @@ pub mod pallet {
         /// Value too low to create account due to existential deposit
         ExistentialDeposit,
     }
-    /// Map where
-    ///	key - AccountId
-    /// value - vector vector of TokenId and Token that belong specific account for each account
-    #[pallet::storage]
-    #[pallet::getter(fn tokens_of_owner_by_index)]
-    pub type VecOfTokensOnAccount<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
 
     /// Map where
     /// key - TokenId
@@ -117,7 +110,7 @@ pub mod pallet {
     /// Map where (same as VecOfTokensOnAccount by not for Token, instead for Types)
     #[pallet::storage]
     #[pallet::getter(fn tokens_with_types)]
-    pub type TokensWithTypes<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
+    pub type TokensList<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
 
     /// Contains vector of all accounts ???
     #[pallet::storage]
@@ -175,41 +168,6 @@ pub mod pallet {
             target_account: T::AccountId,
             token_id: TokenId,
             rarity: Rarity,
-            socket: Socket,
-            params: Params,
-        ) -> DispatchResult {
-            // Check is signed correct
-            let who = ensure_signed(origin)?;
-            // Check if account that signed operation have permission for this operation
-            ensure!(
-                Self::nft_masters().contains(&who),
-                Error::<T>::NotNftMaster
-            );
-            // Create token by grouping up arguments
-            let token = Token {
-                id: token_id,
-                token_type: TokenType::Mergeable(Mergeable {
-                    rarity,
-                    socket,
-                    params,
-                }),
-            };
-
-            // Push token on account
-            Self::mint_nft(&target_account, token_id, token)?;
-            // Call mint event
-            Self::deposit_event(Event::TokenMinted(target_account, token_id));
-
-            Ok(())
-        }
-
-        /// Create token(basic token) and push it to specific account
-        /// Token arguments are determined by functions arguments: type
-        #[pallet::weight(T::WeightInfo::mint_basic())]
-        pub fn mint_basic(
-            origin: OriginFor<T>,
-            target_account: T::AccountId,
-            token_id: TokenId,
             basic: Basic,
         ) -> DispatchResult {
             // Check is signed correct
@@ -219,12 +177,14 @@ pub mod pallet {
             // Create token by grouping up arguments
             let token = Token {
                 id: token_id,
-                token_type: TokenType::Basic(basic),
+                token_type: TokenType::Basic(basic, rarity),
             };
+
             // Push token on account
-            Self::mint_basic_nft(&target_account, token_id, token)?;
+            Self::mint_nft(&target_account, token_id, token)?;
             // Call mint event
             Self::deposit_event(Event::TokenMinted(target_account, token_id));
+
             Ok(())
         }
 
@@ -239,22 +199,6 @@ pub mod pallet {
             ensure!(origin == owner, Error::<T>::NotTokenOwner);
             // Burn token
             Self::burn_nft(token_id, &owner)?;
-            // Call burn event
-            Self::deposit_event(Event::TokenBurned());
-            Ok(())
-        }
-
-        /// Burn basic token(only owner)
-        #[pallet::weight(T::WeightInfo::burn_basic())]
-        pub fn burn_basic(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
-            // Check is signed correct
-            let origin = ensure_signed(origin)?;
-            // Get owner by token_id
-            let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
-            // Only owner can burn token
-            ensure!(origin == owner, Error::<T>::NotTokenOwner);
-            // Burn token
-            Self::burn_basic_nft(token_id, Some(owner))?;
             // Call burn event
             Self::deposit_event(Event::TokenBurned());
             Ok(())
@@ -279,26 +223,6 @@ pub mod pallet {
             Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
             Ok(())
         }
-
-        /// Transfer basic token(only owner)
-        #[pallet::weight(T::WeightInfo::transfer_basic())]
-        pub fn transfer_basic(
-            origin: OriginFor<T>,
-            dest_account: T::AccountId,
-            token_id: TokenId,
-        ) -> DispatchResult {
-            // Check is signed correct
-            let origin = ensure_signed(origin)?;
-            // Get owner by token_id
-            let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
-            // Only owner can transfer token
-            ensure!(origin == owner, Error::<T>::NotTokenOwner);
-            // Transfer token
-            Self::transfer_basic_nft(token_id, Some(owner), &dest_account)?;
-            // Call transfer event
-            Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
-            Ok(())
-        }
     }
 
     impl<T: Config> Pallet<T> {
@@ -314,29 +238,8 @@ pub mod pallet {
 
             Self::inc_total_for_account(target_account)?;
 
-            VecOfTokensOnAccount::<T>::mutate(&target_account, |tokens| {
+            TokensList::<T>::mutate(&target_account, |tokens| {
                 tokens.get_or_insert(Vec::default()).push(token);
-            });
-
-            AccountForToken::<T>::insert(token_id, &target_account);
-
-            Ok(token_id)
-        }
-
-        pub fn mint_basic_nft(
-            target_account: &T::AccountId,
-            token_id: TokenId,
-            basic_tokens: Token,
-        ) -> dispatch::result::Result<TokenId, dispatch::DispatchError> {
-            ensure!(
-                !AccountForToken::<T>::contains_key(token_id),
-                Error::<T>::TokenExist
-            );
-
-            Self::inc_total_for_account(target_account)?;
-
-            TokensWithTypes::<T>::mutate(&target_account, |tokens| {
-                tokens.get_or_insert(Vec::default()).push(basic_tokens);
             });
 
             AccountForToken::<T>::insert(token_id, &target_account);
@@ -347,30 +250,7 @@ pub mod pallet {
         pub fn burn_nft(token_id: TokenId, owner: &T::AccountId) -> dispatch::DispatchResult {
             Self::dec_total_for_account(owner)?;
 
-            VecOfTokensOnAccount::<T>::mutate(owner, |tokens| {
-                tokens
-                    .as_mut()
-                    .unwrap()
-                    .retain(|token| token.id != token_id);
-            });
-
-            AccountForToken::<T>::remove(&token_id);
-
-            Ok(())
-        }
-
-        pub fn burn_basic_nft(
-            token_id: TokenId,
-            owner: Option<T::AccountId>,
-        ) -> dispatch::DispatchResult {
-            let owner = match owner {
-                Some(owner) => owner,
-                None => Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?,
-            };
-
-            Self::dec_total_for_account(&owner)?;
-
-            TokensWithTypes::<T>::mutate(&owner, |tuple_tokens| {
+            TokensList::<T>::mutate(&owner, |tuple_tokens| {
                 tuple_tokens
                     .as_mut()
                     .unwrap()
@@ -398,49 +278,14 @@ pub mod pallet {
             AccountForToken::<T>::insert(token_id, dest_account);
 
             // Remove token from current owner
-            let token = VecOfTokensOnAccount::<T>::mutate(owner, |tokens| {
+            let token = TokensList::<T>::mutate(&owner, |tokens| {
                 let tokens_mut = tokens.as_mut().unwrap();
                 let index = tokens_mut.iter().position(|token| token.id == token_id);
                 tokens_mut.remove(index.unwrap())
             });
 
             // Transfer token to dest_account
-            VecOfTokensOnAccount::<T>::mutate(dest_account, |tokens| {
-                tokens.get_or_insert(Vec::default()).push(token);
-            });
-
-            Ok(())
-        }
-
-        pub fn transfer_basic_nft(
-            token_id: TokenId,
-            owner: Option<T::AccountId>,
-            dest_account: &T::AccountId,
-        ) -> dispatch::DispatchResult {
-            let owner = match owner {
-                Some(owner) => owner,
-                None => Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?,
-            };
-
-            ensure!(
-                owner != T::AccountId::default(),
-                Error::<T>::NonExistentToken
-            );
-
-            Self::dec_total_for_account(&owner)?;
-            Self::inc_total_for_account(dest_account)?;
-
-            AccountForToken::<T>::insert(token_id, dest_account);
-
-            // Remove token from current owner
-            let token = TokensWithTypes::<T>::mutate(&owner, |tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.id == token_id);
-                tokens_mut.remove(index.unwrap())
-            });
-
-            // Transfer token to dest_account
-            TokensWithTypes::<T>::mutate(dest_account, |tokens| {
+            TokensList::<T>::mutate(dest_account, |tokens| {
                 tokens.get_or_insert(Vec::default()).push(token);
             });
 

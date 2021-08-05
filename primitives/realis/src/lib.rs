@@ -13,34 +13,11 @@ pub type Basic = u8;
 pub struct Token {
     pub id: TokenId,
     pub token_type: TokenType,
-    // market_type: 	MarketType
 }
-
-// #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-// pub enum MarketType {
-// 	Tradeable 	(TradeStatus),
-// 	Untradeable
-// }
-
-// #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-// pub enum TradeStatus {
-// 	ForSale,
-// 	OnHands,
-// }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub enum TokenType {
-    // Skin,
-    Mergeable(Mergeable),
-    Stackable(Stackable),
-    Basic(Basic),
-}
-
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-pub struct Mergeable {
-    pub rarity: Rarity,
-    pub socket: Socket,
-    pub params: Params,
+    Basic(Basic, Rarity),
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
@@ -57,24 +34,6 @@ pub enum Rarity {
     Rare,
     Mythical,
     Legendary,
-}
-
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-pub enum Socket {
-    Head,
-    Body,
-    LegLeft,
-    LegRight,
-    ArmLeft,
-    ArmRight,
-    Weapon,
-}
-
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-pub struct Params {
-    pub strength: u8,
-    pub agility: u8,
-    pub intelligence: u8,
 }
 
 #[derive(PartialEq, Eq, Clone, Default, Encode, Decode)]

@@ -27,7 +27,7 @@ pub mod pallet {
     use sp_runtime::traits::{AccountIdConversion, Saturating, Zero};
 
     use pallet_nft as NFT;
-    use realis_primitives::{Basic, TokenId};
+    use realis_primitives::{Basic, Rarity, TokenId};
 
     type BalanceOf<T> =
         <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -120,10 +120,11 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::weight((T::WeightInfoOf::mint_basic_nft(), Pays::No))]
-        pub fn mint_basic_nft(
+        pub fn mint_nft(
             origin: OriginFor<T>,
             target_account: T::AccountId,
             token_id: TokenId,
+            rarity: Rarity,
             basic: Basic,
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
@@ -135,32 +136,32 @@ pub mod pallet {
                 Error::<T>::TokenExist
             );
 
-            NFT::Pallet::<T>::mint_basic(origin.clone(), target_account, token_id, basic)?;
+            NFT::Pallet::<T>::mint(origin.clone(), target_account, token_id, rarity, basic)?;
             Self::deposit_event(Event::<T>::TokenMinted);
             Ok(())
         }
 
         #[pallet::weight((T::WeightInfoOf::burn_basic_nft(), Pays::No))]
-        pub fn burn_basic_nft(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
+        pub fn burn_nft(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            NFT::Pallet::<T>::burn_basic(origin, token_id)?;
+            NFT::Pallet::<T>::burn(origin, token_id);
             Self::deposit_event(Event::<T>::TokenBurned);
             Ok(())
         }
 
         #[pallet::weight((T::WeightInfoOf::transfer_basic_nft(), Pays::No))]
-        pub fn transfer_basic_nft(
+        pub fn transfer_nft(
             origin: OriginFor<T>,
             dest_account: T::AccountId,
             token_id: TokenId,
         ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
+            let who = ensure_signed(origin.clone())?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
 
-            NFT::Pallet::<T>::transfer_basic_nft(token_id, None, &dest_account)?;
+            NFT::Pallet::<T>::transfer(origin, dest_account, token_id);
             Self::deposit_event(Event::<T>::TokenTransferred);
             Ok(())
         }
