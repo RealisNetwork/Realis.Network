@@ -12,9 +12,9 @@ frame-support = { git = "https://github.com/paritytech/substrate", rev = "03d4d0
 frame-system = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 sp-core = { git = "https://github.com/paritytech/substrate.git", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
-evm = { version = "0.28.0", default-features = false, features = ["with-codec"] }
+evm = { version = "0.30.1", default-features = false, features = ["with-codec"] }
 impl-trait-for-tuples = "0.2"
-ethereum = { version = "0.7.1", default-features = false, features = ["with-codec"] }
+ethereum = { version = "0.9.0", default-features = false, features = ["with-codec"] }
 ethereum-types = { version = "0.12", default-features = false }
 
 
