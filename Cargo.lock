@@ -6295,7 +6295,7 @@ dependencies = [
 name = "realis-primitives"
 version = "0.0.2"
 dependencies = [
- "ethereum 0.7.1",
+ "ethereum 0.9.0",
  "ethereum-types 0.12.0",
  "evm",
  "frame-support",
