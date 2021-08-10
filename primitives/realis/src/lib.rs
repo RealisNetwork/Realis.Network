@@ -3,6 +3,8 @@
 use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
 use sp_std::vec::Vec;
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 
 pub use evm::backend::{Basic as Account, Log};
 
@@ -28,6 +30,7 @@ pub enum Stackable {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Rarity {
     Common,
     Uncommon,
