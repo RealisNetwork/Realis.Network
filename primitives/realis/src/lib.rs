@@ -3,6 +3,8 @@
 use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
 use sp_std::vec::Vec;
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 
 pub use evm::backend::{Basic as Account, Log};
 
@@ -13,34 +15,11 @@ pub type Basic = u8;
 pub struct Token {
     pub id: TokenId,
     pub token_type: TokenType,
-    // market_type: 	MarketType
 }
-
-// #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-// pub enum MarketType {
-// 	Tradeable 	(TradeStatus),
-// 	Untradeable
-// }
-
-// #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-// pub enum TradeStatus {
-// 	ForSale,
-// 	OnHands,
-// }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub enum TokenType {
-    // Skin,
-    Mergeable(Mergeable),
-    Stackable(Stackable),
-    Basic(Basic),
-}
-
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-pub struct Mergeable {
-    pub rarity: Rarity,
-    pub socket: Socket,
-    pub params: Params,
+    Basic(Basic, Rarity),
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
@@ -51,30 +30,13 @@ pub enum Stackable {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Rarity {
     Common,
     Uncommon,
     Rare,
     Mythical,
     Legendary,
-}
-
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-pub enum Socket {
-    Head,
-    Body,
-    LegLeft,
-    LegRight,
-    ArmLeft,
-    ArmRight,
-    Weapon,
-}
-
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
-pub struct Params {
-    pub strength: u8,
-    pub agility: u8,
-    pub intelligence: u8,
 }
 
 #[derive(PartialEq, Eq, Clone, Default, Encode, Decode)]

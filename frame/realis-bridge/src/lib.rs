@@ -1,11 +1,9 @@
 // Ensure we're `no_std` when compiling for Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use codec::{Decode, Encode};
 use frame_support::{dispatch::DispatchResult, ensure, traits::Get};
 use frame_system::ensure_signed;
 pub use realis_primitives::{TokenId, TokenType};
-use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
 
 mod benchmarking;
@@ -22,8 +20,9 @@ pub mod pallet {
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use pallet_nft as Nft;
+    use realis_primitives::Rarity::Common;
     use realis_primitives::TokenType::Basic;
-    use realis_primitives::{Token, TokenType};
+    use realis_primitives::Rarity;
     use sp_core::H160;
     use sp_runtime::traits::Zero;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
@@ -52,12 +51,12 @@ pub mod pallet {
         ///Token was tranfered to BEP-20 on BSC
         TransferTokenToBSC(T::AccountId, H160, BalanceOf<T>),
         ///NFT was tranfered to BEP-721 on BSC
-        TransferNftToBSC(T::AccountId, H160, TokenId, u8),
+        TransferNftToBSC(T::AccountId, H160, TokenId, u8, Rarity),
 
         ///Token was tranfered to Realis.Network from BEP-20 on BSC
         TransferTokenToRealis(H160, T::AccountId, BalanceOf<T>),
         ///NFT was tranfered to Realis.Network from BEP-721 on BSC
-        TransferNftToRealis(H160, T::AccountId, TokenId, u8),
+        TransferNftToRealis(H160, T::AccountId, TokenId, u8, Rarity),
         Balance(T::AccountId, BalanceOf<T>),
     }
 
@@ -164,19 +163,24 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             // Only owner can transfer token
             ensure!(who == from, Error::<T>::NotTokenOwner);
-            let token = Nft::TokensWithTypes::<T>::get(from.clone()).unwrap();
+            let token = Nft::TokensList::<T>::get(from.clone()).unwrap();
 
             let mut value: u8 = 1;
 
+            let mut rarity: Rarity = Common;
+
             for t in token {
                 if t.id == token_id {
-                    if let Basic(v) = t.token_type {
+                    if let Basic(v, t) = t.token_type {
                         value = v;
+                        rarity = t;
                     }
                 }
             }
 
-            Self::deposit_event(Event::<T>::TransferNftToBSC(from, dest, token_id, value));
+            Self::deposit_event(Event::<T>::TransferNftToBSC(
+                from, dest, token_id, value, rarity,
+            ));
             Ok(())
         }
 
@@ -187,17 +191,17 @@ pub mod pallet {
             to: T::AccountId,
             token_id: TokenId,
             token_type: u8,
+            rarity: Rarity,
         ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
+            let who = ensure_signed(origin.clone())?;
             let nft_master = Nft::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            let token = Token {
-                id: token_id,
-                token_type: TokenType::Basic(token_type),
-            };
-            Nft::Pallet::<T>::mint_basic_nft(&to, token_id, token)?;
 
-            Self::deposit_event(Event::<T>::TransferNftToRealis(from,to, token_id, token_type));
+            Nft::Pallet::<T>::mint(origin, to.clone(), token_id, rarity, token_type)?;
+
+            Self::deposit_event(Event::<T>::TransferNftToRealis(
+                from, to, token_id, token_type, rarity,
+            ));
             Ok(())
         }
 
@@ -240,7 +244,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             let nft_master = Nft::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
-            Nft::Pallet::<T>::burn_basic_nft(token_id, Some(from));
+            Nft::Pallet::<T>::burn_nft(token_id, &from);
             Ok(())
         }
 
