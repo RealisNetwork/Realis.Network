@@ -2,11 +2,11 @@
 
 use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
-use sp_std::vec::Vec;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
+use sp_std::vec::Vec;
 
-pub use evm::backend::{Basic as Account, Log};
+use sp_std::str::FromStr;
 
 pub type TokenId = U256;
 pub type Basic = u8;
@@ -46,5 +46,20 @@ impl OpaqueExtrinsic {
     /// Convert an encoded extrinsic to an `OpaqueExtrinsic`.
     pub fn from_bytes(mut bytes: &[u8]) -> Result<Self, codec::Error> {
         OpaqueExtrinsic::decode(&mut bytes)
+    }
+}
+
+impl FromStr for Rarity {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Common" => Ok(Rarity::Common),
+            "Uncommon" => Ok(Rarity::Uncommon),
+            "Rare" => Ok(Rarity::Rare),
+            "Mythical" => Ok(Rarity::Mythical),
+            "Legendary" => Ok(Rarity::Legendary),
+            _ => Err(()),
+        }
     }
 }
