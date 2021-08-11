@@ -122,7 +122,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_version: 267,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 2,
+    transaction_version: 3,
 };
 
 /// The BABE epoch configuration at genesis.
@@ -1183,8 +1183,7 @@ parameter_types! {
 
 impl pallet_nft::Config for Runtime {
     type Event = Event;
-    type Balance = u128;
-    type WeightInfo = pallet_nft::weights::SubstrateWeight<Runtime>;
+    type WeightInfoNft = pallet_nft::weights::SubstrateWeight<Runtime>;
 }
 
 pallet_staking_reward_curve::build! {

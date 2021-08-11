@@ -20,9 +20,9 @@ pub mod pallet {
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use pallet_nft as Nft;
+    use realis_primitives::Rarity;
     use realis_primitives::Rarity::Common;
     use realis_primitives::TokenType::Basic;
-    use realis_primitives::Rarity;
     use sp_core::H160;
     use sp_runtime::traits::Zero;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
@@ -36,7 +36,7 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::config]
-    pub trait Config: frame_system::Config + Nft::Config {
+    pub trait Config: frame_system::Config + Nft::Config + pallet_balances::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         /// Some identifier for this token type, possibly the originating ethereum address.
         /// This is not explicitly used for anything, but may reflect the bridge's notion of resource ID.

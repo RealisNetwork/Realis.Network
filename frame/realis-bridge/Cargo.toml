@@ -18,11 +18,12 @@ sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c
 sp-io = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 sp-core = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 sp-arithmetic = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
+pallet-balances = { version = "4.0.0-dev", path = "../balances", default-features = false }
 realis-primitives = { path = "../../primitives/realis", default-features = false }
 pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
 
 [dev-dependencies]
-pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
+pallet-balances = { version = "4.0.0-dev", path = "../balances", default-features = false }
 
 [build-dependencies]
 wasm-builder-runner = { version = '3.0.0', package = 'substrate-wasm-builder-runner' }
