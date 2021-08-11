@@ -37,7 +37,9 @@ pub mod pallet {
     pub struct Pallet<T>(_);
 
     #[pallet::config]
-    pub trait Config: frame_system::Config + pallet_nft::Config + pallet_staking::Config {
+    pub trait Config:
+        frame_system::Config + pallet_nft::Config + pallet_staking::Config + pallet_balances::Config
+    {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 

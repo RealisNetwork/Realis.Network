@@ -52,7 +52,7 @@ use frame_support::{
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_nft.
-pub trait WeightInfo {
+pub trait WeightInfoNft {
     fn mint() -> Weight;
     fn mint_basic() -> Weight;
     fn burn() -> Weight;
@@ -63,7 +63,7 @@ pub trait WeightInfo {
 
 /// Weights for pallet_nft using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
-impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
+impl<T: frame_system::Config> WeightInfoNft for SubstrateWeight<T> {
     fn mint() -> Weight {
         (38_583_000 as Weight)
             .saturating_add(T::DbWeight::get().reads(4 as Weight))
@@ -97,7 +97,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 }
 
 // For backwards compatibility and tests
-impl WeightInfo for () {
+impl WeightInfoNft for () {
     fn mint() -> Weight {
         (38_583_000 as Weight)
             .saturating_add(RocksDbWeight::get().reads(4 as Weight))

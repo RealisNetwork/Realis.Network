@@ -19,6 +19,7 @@ sp-runtime = { default-features = false, git = "https://github.com/paritytech/su
 frame-benchmarking = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", optional = true }
 frame-support = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 frame-system = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
+pallet-nft = {path = "../nft", version = "0.0.2", default-features = false}
 log = { version = "0.4.14", default-features = false }
 
 [dev-dependencies]
