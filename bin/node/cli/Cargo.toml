@@ -83,7 +83,7 @@ pallet-indices = { git = "https://github.com/paritytech/substrate", rev = "03d4d
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 pallet-contracts = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 frame-system = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
-pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
+pallet-balances = { version = "4.0.0-dev", path = "../../../frame/balances", default-features = false }
 pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 frame-support = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }
 pallet-im-online = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false }

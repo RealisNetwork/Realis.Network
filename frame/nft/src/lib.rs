@@ -14,7 +14,7 @@ mod tests;
 // Add benchmarking modules
 mod benchmarking;
 pub mod weights;
-pub use weights::WeightInfo;
+pub use weights::WeightInfoNft;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -35,10 +35,8 @@ pub mod pallet {
     pub trait Config: frame_system::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-        // type TokenId;
-        type Balance: Member + Parameter + AtLeast32BitUnsigned + Default + Copy;
         /// Weight information for extrinsics in this pallet.
-        type WeightInfo: WeightInfo;
+        type WeightInfoNft: WeightInfoNft;
     }
 
     // Pallets use events to inform users when important changes are made.
@@ -162,7 +160,7 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         /// Create mergeable token and push it to specific account
         /// Token arguments are determined by functions arguments: rarity, socket, params
-        #[pallet::weight(T::WeightInfo::mint())]
+        #[pallet::weight(T::WeightInfoNft::mint())]
         pub fn mint(
             origin: OriginFor<T>,
             target_account: T::AccountId,
@@ -189,7 +187,7 @@ pub mod pallet {
         }
 
         /// Burn mergeable token(only owner)
-        #[pallet::weight(T::WeightInfo::burn())]
+        #[pallet::weight(T::WeightInfoNft::burn())]
         pub fn burn(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
             // Check is signed correct
             let origin = ensure_signed(origin)?;
@@ -205,7 +203,7 @@ pub mod pallet {
         }
 
         /// Transfer mergeable token(only owner)
-        #[pallet::weight(T::WeightInfo::transfer())]
+        #[pallet::weight(T::WeightInfoNft::transfer())]
         pub fn transfer(
             origin: OriginFor<T>,
             dest_account: T::AccountId,

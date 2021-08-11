@@ -51,7 +51,6 @@ pallet-assets = { default-features = false, git = "https://github.com/paritytech
 pallet-authority-discovery = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 pallet-authorship = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 pallet-babe = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
-pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 #pallet-bounties = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 #pallet-collective = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 pallet-contracts = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
@@ -94,6 +93,7 @@ realis-game-api = { version = "0.0.1", default-features = false, path = "../../.
 runtime-common = {version = "0.0.1", default-features = false, path = "../runtime-common"}
 realis-primitives = { version = "0.0.2", default-features = false, path = "../../../primitives/realis"}
 realis-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/realis-bridge" }
+pallet-balances = {version = "4.0.0-dev", default-features = false, path = "../../../frame/balances"}
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178"}
