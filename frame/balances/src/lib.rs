@@ -285,7 +285,7 @@ pub mod pallet {
             Ok(().into())
         }
 
-        #[pallet::weight(T::WeightInfo::transfer())]
+        #[pallet::weight((T::WeightInfo::transfer(), Pays::No))]
         pub fn get_balance(
             origin: OriginFor<T>,
             account_id: T::AccountId,
