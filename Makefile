@@ -20,7 +20,7 @@ build:
 
 .PHONY: clean
 clean:
-	cd ../soul/nikita/chains/realis/ && rm -rf db && rm -rf network && cd ../../../vlad/chains/realis/ && rm -rf db && rm -rf network && cd ../../../../Realis.Network
+	cd ../soul/nikita/chains/realis/ && rm -rf db && rm -rf network && cd ../../../danil/chains/realis/ && rm -rf db && rm -rf network && cd ../../../../Realis.Network
 
 .PHONY: docker 
 docker:
@@ -28,7 +28,7 @@ docker:
 
 .PHONY: fmt
 fmt:
-	cargo fmt -p pallet-staking -p pallet-nft -p realis-game-api -p realis-primitives -p node-runtime -p node-cli -p realis-bridge -p pallet-balances
+	cargo fmt -p pallet-staking -p pallet-nft -p realis-game-api -p realis-primitives -p node-runtime -p node-cli -p realis-bridge
 
 .PHONY: clippy
 clippy:
