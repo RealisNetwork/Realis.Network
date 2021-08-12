@@ -23,6 +23,7 @@
 #![recursion_limit = "256"]
 
 use codec::{Decode, Encode, MaxEncodedLen};
+use frame_support::traits::StorageMapShim;
 use frame_support::PalletId;
 use frame_support::{
     construct_runtime, parameter_types,
@@ -119,10 +120,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 267,
+    spec_version: 280,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 3,
+    transaction_version: 6,
 };
 
 /// The BABE epoch configuration at genesis.
@@ -214,7 +215,7 @@ impl frame_system::Config for Runtime {
     type BlockHashCount = BlockHashCount;
     type Version = Version;
     type PalletInfo = PalletInfo;
-    type AccountData = pallet_balances::AccountData<Balance>;
+    type AccountData = ();
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type SystemWeightInfo = frame_system::weights::SubstrateWeight<Runtime>;
@@ -397,7 +398,12 @@ impl pallet_balances::Config for Runtime {
     type DustRemoval = ();
     type Event = Event;
     type ExistentialDeposit = ExistentialDeposit;
-    type AccountStore = frame_system::Pallet<Runtime>;
+    type AccountStore = StorageMapShim<
+        pallet_balances::Account<Runtime>,
+        frame_system::Provider<Runtime>,
+        AccountId,
+        pallet_balances::AccountData<Balance>,
+    >;
     type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
 }
 
