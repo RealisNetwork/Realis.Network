@@ -1,0 +1,29 @@
+{
+  "Rarity": {
+    "_enum": [
+      "Common",
+      "Uncommon",
+      "Rare",
+      "Mythical",
+      "Legendary"
+    ]
+  },
+  "Basic": "u8",
+  "TokenId": "U256",
+  "Stackable": {
+    "_enum": [
+      "Silver",
+      "Gold",
+      "Diamond"
+    ]
+  },
+  "TokenType": {
+    "_enum": {
+      "Basic": "(Basic, Rarity)"
+    }
+  },
+  "Token": {
+    "token_id": "TokenId",
+    "token": "TokenType"
+ }
+}
