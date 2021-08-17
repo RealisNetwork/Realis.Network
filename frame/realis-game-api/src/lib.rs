@@ -181,7 +181,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(value.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(!value.is_zero(), Error::<T>::InsufficientBalance);
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
@@ -202,7 +202,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(value.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(!value.is_zero(), Error::<T>::InsufficientBalance);
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
@@ -224,7 +224,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(value.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(!value.is_zero(), Error::<T>::InsufficientBalance);
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             <T as Config>::ApiCurrency::transfer(
                 &from,
@@ -244,7 +244,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(amount.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let imbalance = <T as Config>::ApiCurrency::withdraw(
                 &from,
