@@ -18,6 +18,7 @@ pub struct Token {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum TokenType {
     Basic(Basic, Rarity),
 }
