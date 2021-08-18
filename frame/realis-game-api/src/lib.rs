@@ -55,12 +55,17 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        /// Event documentation should end with an array that provides descriptive names for event
-        /// parameters. [something, who]
-        TokenMinted,
-        TokenTransferred,
-        TokenBurned,
-        FundsTransferred,
+        /// NFT was minted in game
+        TokenMinted(T::AccountId, TokenId),
+        /// NFT was trasnfered from player to player
+        TokenTransferred(T::AccountId, T::AccountId, TokenId),
+        /// NFT was burned by player
+        TokenBurned(T::AccountId, TokenId),
+        /// LIS was trasfered from player to player
+        FundsTransferred(T::AccountId, T::AccountId, BalanceOf<T>),
+        /// User was spended tokens in game
+        SpendInGame(T::AccountId, BalanceOf<T>),
+        /// Pallet Balance
         Balance(T::AccountId, BalanceOf<T>),
     }
 
@@ -138,8 +143,14 @@ pub mod pallet {
                 Error::<T>::TokenExist
             );
 
-            NFT::Pallet::<T>::mint(origin.clone(), target_account, token_id, rarity, basic)?;
-            Self::deposit_event(Event::<T>::TokenMinted);
+            NFT::Pallet::<T>::mint(
+                origin.clone(),
+                target_account.clone(),
+                token_id,
+                rarity,
+                basic,
+            )?;
+            Self::deposit_event(Event::<T>::TokenMinted(target_account.clone(), token_id));
             Ok(())
         }
 
@@ -153,7 +164,7 @@ pub mod pallet {
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             NFT::Pallet::<T>::burn_nft(token_id, &from)?;
-            Self::deposit_event(Event::<T>::TokenBurned);
+            Self::deposit_event(Event::<T>::TokenBurned(from, token_id));
             Ok(())
         }
 
@@ -169,7 +180,7 @@ pub mod pallet {
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
 
             NFT::Pallet::<T>::transfer_nft(&dest_account, &from, token_id)?;
-            Self::deposit_event(Event::<T>::TokenTransferred);
+            Self::deposit_event(Event::<T>::TokenTransferred(from, dest_account, token_id));
             Ok(())
         }
 
@@ -190,7 +201,7 @@ pub mod pallet {
                 value,
                 ExistenceRequirement::KeepAlive,
             )?;
-            Self::deposit_event(Event::<T>::FundsTransferred);
+            Self::deposit_event(Event::<T>::FundsTransferred(pallet_id, dest, value));
             Ok(())
         }
 
@@ -211,7 +222,7 @@ pub mod pallet {
                 value,
                 ExistenceRequirement::KeepAlive,
             )?;
-            Self::deposit_event(Event::<T>::FundsTransferred);
+            Self::deposit_event(Event::<T>::FundsTransferred(from, pallet_id, value));
             Ok(())
         }
 
@@ -232,7 +243,7 @@ pub mod pallet {
                 value,
                 ExistenceRequirement::KeepAlive,
             )?;
-            Self::deposit_event(Event::<T>::FundsTransferred);
+            Self::deposit_event(Event::<T>::FundsTransferred(from, to, value));
             Ok(())
         }
 
@@ -258,6 +269,7 @@ pub mod pallet {
             let (to_game_api, to_staking) = imbalance.ration(80, 20);
             <T as Config>::ApiCurrency::resolve_creating(&pallet_id_game_api, to_game_api);
             <T as Config>::ApiCurrency::resolve_creating(&pallet_id_staking, to_staking);
+            Self::deposit_event(Event::<T>::SpendInGame(from, amount));
             Ok(())
         }
 
