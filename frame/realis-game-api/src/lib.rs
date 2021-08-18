@@ -188,20 +188,20 @@ pub mod pallet {
         pub fn transfer_from_pallet(
             origin: OriginFor<T>,
             dest: T::AccountId,
-            #[pallet::compact] value: T::Balance,
+            #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(!value.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &pallet_id,
                 &dest,
-                value,
+                amount,
                 ExistenceRequirement::KeepAlive,
             )?;
-            Self::deposit_event(Event::<T>::FundsTransferred(pallet_id, dest, value));
+            Self::deposit_event(Event::<T>::FundsTransferred(pallet_id, dest, amount));
             Ok(())
         }
 
@@ -209,20 +209,20 @@ pub mod pallet {
         pub fn transfer_to_pallet(
             origin: OriginFor<T>,
             from: T::AccountId,
-            #[pallet::compact] value: T::Balance,
+            #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(!value.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &from,
                 &pallet_id,
-                value,
+                amount,
                 ExistenceRequirement::KeepAlive,
             )?;
-            Self::deposit_event(Event::<T>::FundsTransferred(from, pallet_id, value));
+            Self::deposit_event(Event::<T>::FundsTransferred(from, pallet_id, amount));
             Ok(())
         }
 
@@ -231,19 +231,19 @@ pub mod pallet {
             origin: OriginFor<T>,
             from: T::AccountId,
             to: T::AccountId,
-            #[pallet::compact] value: T::Balance,
+            #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(!value.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             <T as Config>::ApiCurrency::transfer(
                 &from,
                 &to,
-                value,
+                amount,
                 ExistenceRequirement::KeepAlive,
             )?;
-            Self::deposit_event(Event::<T>::FundsTransferred(from, to, value));
+            Self::deposit_event(Event::<T>::FundsTransferred(from, to, amount));
             Ok(())
         }
 
