@@ -120,7 +120,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 287,
+    spec_version: 288,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 9,
@@ -1190,7 +1190,7 @@ impl pallet_nft::Config for Runtime {
 pallet_staking_reward_curve::build! {
     const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
         min_inflation: 0_025_000,
-        max_inflation: 0_100_000,
+        max_inflation: 0_200_000,
         ideal_stake: 0_500_000,
         falloff: 0_050_000,
         max_piece_count: 40,
