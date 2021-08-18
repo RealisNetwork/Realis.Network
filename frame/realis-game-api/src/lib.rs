@@ -172,15 +172,15 @@ pub mod pallet {
         pub fn transfer_nft(
             origin: OriginFor<T>,
             from: T::AccountId,
-            dest_account: T::AccountId,
+            dest: T::AccountId,
             token_id: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             let nft_master = NFT::NftMasters::<T>::get();
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
 
-            NFT::Pallet::<T>::transfer_nft(&dest_account, &from, token_id)?;
-            Self::deposit_event(Event::<T>::TokenTransferred(from, dest_account, token_id));
+            NFT::Pallet::<T>::transfer_nft(&dest, &from, token_id)?;
+            Self::deposit_event(Event::<T>::TokenTransferred(from, dest, token_id));
             Ok(())
         }
 
@@ -230,7 +230,7 @@ pub mod pallet {
         pub fn transfer_from_ptp(
             origin: OriginFor<T>,
             from: T::AccountId,
-            to: T::AccountId,
+            dest: T::AccountId,
             #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
@@ -239,18 +239,18 @@ pub mod pallet {
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             <T as Config>::ApiCurrency::transfer(
                 &from,
-                &to,
+                &dest,
                 amount,
                 ExistenceRequirement::KeepAlive,
             )?;
-            Self::deposit_event(Event::<T>::FundsTransferred(from, to, amount));
+            Self::deposit_event(Event::<T>::FundsTransferred(from, dest, amount));
             Ok(())
         }
 
         #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
         pub fn spend_in_game(
             origin: OriginFor<T>,
-            from: T::AccountId,
+            dest: T::AccountId,
             #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
@@ -258,7 +258,7 @@ pub mod pallet {
             ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
             ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let imbalance = <T as Config>::ApiCurrency::withdraw(
-                &from,
+                &dest,
                 amount,
                 WithdrawReasons::all(),
                 ExistenceRequirement::KeepAlive,
@@ -269,7 +269,7 @@ pub mod pallet {
             let (to_game_api, to_staking) = imbalance.ration(80, 20);
             <T as Config>::ApiCurrency::resolve_creating(&pallet_id_game_api, to_game_api);
             <T as Config>::ApiCurrency::resolve_creating(&pallet_id_staking, to_staking);
-            Self::deposit_event(Event::<T>::SpendInGame(from, amount));
+            Self::deposit_event(Event::<T>::SpendInGame(dest, amount));
             Ok(())
         }
 
