@@ -136,7 +136,7 @@ pub mod pallet {
                 &pallet_id,
                 &to,
                 value,
-                ExistenceRequirement::KeepAlive,
+                ExistenceRequirement::AllowDeath,
             )?;
 
             Self::deposit_event(Event::<T>::TransferTokenToRealis(from, to, value));
