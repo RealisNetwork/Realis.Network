@@ -1,11 +1,17 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![feature(specialization)]
+#![feature(alloc)]
+
+extern crate alloc;
 
 use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_std::vec::Vec;
+use core::fmt;
 
+use alloc::string::{ToString, String};
 use sp_std::str::FromStr;
 
 pub type TokenId = U256;
@@ -61,6 +67,18 @@ impl FromStr for Rarity {
             "Mythical" => Ok(Rarity::Mythical),
             "Legendary" => Ok(Rarity::Legendary),
             _ => Err(()),
+        }
+    }
+}
+
+impl ToString for Rarity {
+    default fn to_string(&self) -> String {
+        match &self {
+            Rarity::Common => "Common".parse().unwrap(),
+            Rarity::Uncommon => "Uncommon".parse().unwrap(),
+            Rarity::Rare => "Rare".parse().unwrap(),
+            Rarity::Mythical => "Mythical".parse().unwrap(),
+            Rarity::Legendary => "Legendary".parse().unwrap(),
         }
     }
 }
