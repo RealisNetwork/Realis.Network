@@ -88,6 +88,8 @@ pub mod pallet {
         InsufficientBalance,
         /// Value too low to create account due to existential deposit
         ExistentialDeposit,
+        /// Nft Master was added early
+        NftMasterWasAddedEarly
     }
 
     /// Map where
@@ -219,6 +221,36 @@ pub mod pallet {
             Self::transfer_nft(&dest_account, &owner, token_id)?;
             // Call transfer event
             Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
+            Ok(())
+        }
+
+        /// Add new nft_master
+        #[pallet::weight(T::WeightInfoNft::transfer())]
+        pub fn add_nft_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
+            // Check is signed correct
+            let who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
+            ensure!(!Self::nft_masters().contains(&account), Error::<T>::NftMasterWasAddedEarly);
+
+            NftMasters::<T>::mutate(| nft_masters| {
+                nft_masters.push(account);
+            });
+            Ok(())
+        }
+
+        /// Remove new nft_master
+        #[pallet::weight(T::WeightInfoNft::transfer())]
+        pub fn remove_nft_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
+            // Check is signed correct
+            let who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
+
+            NftMasters::<T>::mutate(| nft_masters| {
+                let index = nft_masters.iter().position(|token| *token == account);
+                nft_masters.remove(index.unwrap())
+            });
             Ok(())
         }
     }
