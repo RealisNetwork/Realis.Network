@@ -8,6 +8,7 @@ use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
+use sp_std::fmt::{Display, Formatter};
 use sp_std::vec::Vec;
 use core::fmt;
 
@@ -71,14 +72,8 @@ impl FromStr for Rarity {
     }
 }
 
-impl ToString for Rarity {
-    default fn to_string(&self) -> String {
-        match &self {
-            Rarity::Common => "Common".parse().unwrap(),
-            Rarity::Uncommon => "Uncommon".parse().unwrap(),
-            Rarity::Rare => "Rare".parse().unwrap(),
-            Rarity::Mythical => "Mythical".parse().unwrap(),
-            Rarity::Legendary => "Legendary".parse().unwrap(),
-        }
+impl Display for Rarity {
+    fn fmt(&self, f: &mut Formatter<'_>) -> sp_std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
