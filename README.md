@@ -5,8 +5,8 @@
 <div align="center">
 
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AcalaNetwork/Acala/Test?label=Actions&logo=github)](https://github.com/cryptosoulgame/Realis.Network/actions?query=workflow%3ATest)
-[![GitHub tag (latest by date)](https://img.shields.io/badge/tag-v1.1.2-blue)](https://github.com/cryptosoulgame/Realis.Network/tags)
-[![Substrate version](https://img.shields.io/badge/Substrate-3.0.0-brightgreen?logo=Parity%20Substrate)](https://substrate.dev/)
+[![GitHub tag (latest by date)](https://img.shields.io/badge/tag-v1.1.3-blue)](https://github.com/cryptosoulgame/Realis.Network/tags)
+[![Substrate version](https://img.shields.io/badge/Substrate-4.0.0dev-brightgreen?logo=Parity%20Substrate)](https://substrate.dev/)
 [![License](https://img.shields.io/github/license/AcalaNetwork/Acala?color=green)](https://github.com/cryptosoulgame/Realis.Network/blob/main/LICENSE)
  <br />
 [![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FAcalaNetwork)](https://twitter.com/realisnetwork)

@@ -23,7 +23,6 @@
 #![recursion_limit = "256"]
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::traits::StorageMapShim;
 use frame_support::PalletId;
 use frame_support::{
     construct_runtime, parameter_types,
@@ -41,7 +40,6 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot,
 };
-pub use pallet_utility;
 pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 pub use pallet_balances;
@@ -55,6 +53,7 @@ use pallet_session::historical as pallet_session_historical;
 pub use pallet_staking;
 pub use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
+pub use pallet_utility;
 pub use realis_bridge;
 pub use realis_game_api;
 use sp_api::impl_runtime_apis;
@@ -121,10 +120,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 293,
-    impl_version: 4,
+    spec_version: 301,
+    impl_version: 8,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 14,
+    transaction_version: 18,
 };
 
 /// The BABE epoch configuration at genesis.
@@ -1317,9 +1316,9 @@ construct_runtime!(
         Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
         // Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>},
         // TransactionStorage: pallet_transaction_storage::{Pallet, Call, Storage, Inherent, Config<T>, Event<T>},
-        RealisBridge: realis_bridge::{Pallet, Call, Event<T>, Config},
+        RealisBridge: realis_bridge::{Pallet, Call, Event<T>, Config<T>, Storage},
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
-        RealisGameApi: realis_game_api::{Pallet, Call, Event<T>},
+        RealisGameApi: realis_game_api::{Pallet, Call, Event<T>, Config<T>, Storage},
         Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
     }
 );

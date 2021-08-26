@@ -35,7 +35,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 # third-party dependencies
 codec = { package = "parity-scale-codec", version = "2.0.0" }
-serde = { version = "1.0.127", features = ["derive"] }
+serde = { version = "1.0.129", features = ["derive"] }
 futures = { version = "0.3.16", features = ["compat"] }
 hex-literal = "0.3.3"
 log = "0.4.8"
@@ -105,7 +105,7 @@ try-runtime-cli = { git = "https://github.com/paritytech/substrate", rev = "03d4
 
 # WASM-specific dependencies
 wasm-bindgen = { version = "0.2.76", optional = true }
-wasm-bindgen-futures = { version = "0.4.25", optional = true }
+wasm-bindgen-futures = { version = "0.4.26", optional = true }
 browser-utils = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178",package = "substrate-browser-utils",  optional = true}
 libp2p-wasm-ext = { version = "0.29", features = ["websocket"], optional = true }
 
