@@ -89,7 +89,7 @@ pub mod pallet {
         /// Value too low to create account due to existential deposit
         ExistentialDeposit,
         /// Nft Master was added early
-        NftMasterWasAddedEarly
+        NftMasterWasAddedEarly,
     }
 
     /// Map where
@@ -231,9 +231,12 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             // Check if account that signed operation have permission for this operation
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
-            ensure!(!Self::nft_masters().contains(&account), Error::<T>::NftMasterWasAddedEarly);
+            ensure!(
+                !Self::nft_masters().contains(&account),
+                Error::<T>::NftMasterWasAddedEarly
+            );
 
-            NftMasters::<T>::mutate(| nft_masters| {
+            NftMasters::<T>::mutate(|nft_masters| {
                 nft_masters.push(account);
             });
             Ok(())
@@ -247,7 +250,7 @@ pub mod pallet {
             // Check if account that signed operation have permission for this operation
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
 
-            NftMasters::<T>::mutate(| nft_masters| {
+            NftMasters::<T>::mutate(|nft_masters| {
                 let index = nft_masters.iter().position(|token| *token == account);
                 nft_masters.remove(index.unwrap())
             });

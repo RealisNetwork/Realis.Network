@@ -26,8 +26,9 @@ use node_runtime::{
     wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
     BalancesConfig, /*CouncilConfig,*/
     /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
-    NftConfig, SessionConfig, SessionKeys, /*SocietyConfig,*/ StakerStatus, StakingConfig,
-    SudoConfig, SystemConfig, /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
+    NftConfig, RealisBridgeConfig, RealisGameApiConfig, SessionConfig, SessionKeys,
+    /*SocietyConfig,*/ StakerStatus, StakingConfig, SudoConfig, SystemConfig,
+    /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
@@ -156,6 +157,24 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
             hex!["482a3389a6cf42d8ed83888cfd920fec738ea30f97e44699ada7323f08c3380a"]
                 .unchecked_into(),
         ),
+        (
+            // 5HYZnKWe5FVZQ33ZRJK1rG3WaLMztxWrrNDb1JRwaHHVWyP9
+            hex!["f26cdb14b5aec7b2789fd5ca80f979cef3761897ae1f37ffb3e154cbcc1c2663"].into(),
+            // 5EPQdAQ39WQNLCRjWsCk5jErsCitHiY5ZmjfWzzbXDoAoYbn
+            hex!["66bc1e5d275da50b72b15de072a2468a5ad414919ca9054d2695767cf650012f"].into(),
+            // 5DMa31Hd5u1dwoRKgC4uvqyrdK45RHv3CpwvpUC1EzuwDit4
+            hex!["3919132b851ef0fd2dae42a7e734fe547af5a6b809006100f48944d7fae8e8ef"]
+                .unchecked_into(),
+            // 5C4vDQxA8LTck2xJEy4Yg1hM9qjDt4LvTQaMo4Y8ne43aU6x
+            hex!["00299981a2b92f878baaf5dbeba5c18d4e70f2a1fcd9c61b32ea18daf38f4378"]
+                .unchecked_into(),
+            // 5C4vDQxA8LTck2xJEy4Yg1hM9qjDt4LvTQaMo4Y8ne43aU6x
+            hex!["00299981a2b92f878baaf5dbeba5c18d4e70f2a1fcd9c61b32ea18daf38f4378"]
+                .unchecked_into(),
+            // 5C4vDQxA8LTck2xJEy4Yg1hM9qjDt4LvTQaMo4Y8ne43aU6x
+            hex!["00299981a2b92f878baaf5dbeba5c18d4e70f2a1fcd9c61b32ea18daf38f4378"]
+                .unchecked_into(),
+        ),
     ];
 
     // generated with secret: subkey inspect "$secret"/fir
@@ -171,6 +190,18 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
     ]
     .into()];
 
+    let api_master: Vec<AccountId> = vec![hex![
+        // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
+        "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
+    ]
+    .into()];
+
+    let bridge_master: Vec<AccountId> = vec![hex![
+        // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
+        "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
+    ]
+    .into()];
+
     let endowed_accounts: Vec<AccountId> = vec![root_key.clone()];
 
     testnet_genesis(
@@ -178,6 +209,8 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
         vec![],
         root_key,
         nft_master,
+        api_master,
+        bridge_master,
         Some(endowed_accounts),
     )
 }
@@ -250,17 +283,24 @@ pub fn testnet_genesis(
     initial_nominators: Vec<AccountId>,
     root_key: AccountId,
     nft_master: Vec<AccountId>,
+    api_master: Vec<AccountId>,
+    bridge_master: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
     let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
         vec![
-            hex!["781f4331933557680355932ef7f39b88e938fcb4338cc0e03edb3c523e47fd09"].into(),
-            hex!["fe8823fb870f61eed24638a228adbe5885de6e945bb1375ca6a7415a4824756e"].into(),
-            hex!["bc95bdafa3582b0ecbf5caf1e30b00412fa7c2dfbccd518f3b842c63890cc979"].into(),
-            hex!["08bdc3547dc26a647391b509960b00adafa550496e9a95339a2faa02343be20f"].into(),
-            hex!["d4c2ffb1322efb7fe78463ad6f24301751454685edd96640197cab2c44e1b16c"].into(),
-            pallet_staking::Pallet::<Runtime>::account_id(),
-            realis_game_api::Pallet::<Runtime>::account_id(),
+            get_account_id_from_seed::<sr25519::Public>("Alice"),
+            get_account_id_from_seed::<sr25519::Public>("Bob"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie"),
+            get_account_id_from_seed::<sr25519::Public>("Dave"),
+            get_account_id_from_seed::<sr25519::Public>("Eve"),
+            get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+            get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
         ]
     });
     // endow all authorities and nominators.
@@ -300,7 +340,7 @@ pub fn testnet_genesis(
 
     let _num_endowed_accounts = endowed_accounts.len();
 
-    const ENDOWMENT: Balance = 60_000 * DOLLARS / 10;
+    const ENDOWMENT: Balance = 30_000 * DOLLARS / 10;
     const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
     const STAKING_POOL: Balance = 30_000 * DOLLARS / 10;
     const STASH: Balance = ENDOWMENT / 1000;
@@ -393,8 +433,13 @@ pub fn testnet_genesis(
         nft: NftConfig {
             nft_masters: nft_master,
         },
+        realis_game_api: RealisGameApiConfig {
+            api_masters: api_master,
+        },
         claims: Default::default(),
-        realis_bridge: Default::default(),
+        realis_bridge: RealisBridgeConfig {
+            bridge_masters: bridge_master,
+        },
     }
 }
 
@@ -411,6 +456,8 @@ pub fn realis_genesis(
     initial_nominators: Vec<AccountId>,
     root_key: AccountId,
     nft_master: Vec<AccountId>,
+    api_master: Vec<AccountId>,
+    bridge_master: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
     let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
@@ -556,8 +603,13 @@ pub fn realis_genesis(
         nft: NftConfig {
             nft_masters: nft_master,
         },
+        realis_game_api: RealisGameApiConfig {
+            api_masters: api_master,
+        },
         claims: Default::default(),
-        realis_bridge: Default::default(),
+        realis_bridge: RealisBridgeConfig {
+            bridge_masters: bridge_master,
+        },
     }
 }
 
@@ -626,6 +678,10 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
     //NFT Master
     let nft_master =
         vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
+    let api_master =
+        vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
+    let bridge_master =
+        vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
     let endowed_accounts =
         vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
     realis_genesis(
@@ -633,6 +689,8 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         vec![],
         root_key,
         nft_master,
+        api_master,
+        bridge_master,
         Some(endowed_accounts),
     )
 }
@@ -643,10 +701,12 @@ pub fn realis_config() -> Result<ChainSpec, String> {
 }
 
 fn development_config_genesis() -> GenesisConfig {
-    realis_genesis(
+    testnet_genesis(
         vec![authority_keys_from_seed("Alice")],
         vec![],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
+        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         None,
     )
@@ -668,13 +728,15 @@ pub fn development_config() -> ChainSpec {
 }
 
 fn local_testnet_genesis() -> GenesisConfig {
-    realis_genesis(
+    testnet_genesis(
         vec![
             authority_keys_from_seed("Alice"),
             authority_keys_from_seed("Bob"),
         ],
         vec![],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
+        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         None,
     )
@@ -707,6 +769,8 @@ pub(crate) mod tests {
             vec![authority_keys_from_seed("Alice")],
             vec![],
             get_account_id_from_seed::<sr25519::Public>("Alice"),
+            vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+            vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
             vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
             None,
         )
