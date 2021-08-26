@@ -2,8 +2,8 @@
 
 // 1. Imports and Dependencies
 pub use frame_support::traits::Currency;
-
 pub use pallet::*;
+use sp_std::prelude::*;
 
 #[cfg(test)]
 mod mock;
@@ -83,21 +83,24 @@ pub mod pallet {
         NotNftMaster,
 
         InsufficientBalance,
+
+        NotApiMaster,
     }
 
-    // #[pallet::storage]
-    // pub(crate) type NftMasters<T: Config> = StorageValue<_, T::AccountId, ValueQuery>;
+    #[pallet::storage]
+    #[pallet::getter(fn api_masters)]
+    pub type ApiMasters<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
-        pub nft_masters: Vec<T::AccountId>,
+        pub api_masters: Vec<T::AccountId>,
     }
 
     #[cfg(feature = "std")]
     impl<T: Config> Default for GenesisConfig<T> {
         fn default() -> Self {
             Self {
-                nft_masters: Default::default(),
+                api_masters: Default::default(),
             }
         }
     }
@@ -105,7 +108,7 @@ pub mod pallet {
     #[pallet::genesis_build]
     impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
         fn build(&self) {
-            NFT::NftMasters::<T>::put(&self.nft_masters);
+            ApiMasters::<T>::put(&self.api_masters);
         }
     }
 
@@ -135,8 +138,7 @@ pub mod pallet {
             basic: Basic,
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
-            let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
 
             ensure!(
                 !NFT::AccountForToken::<T>::contains_key(token_id),
@@ -161,8 +163,7 @@ pub mod pallet {
             token_id: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
-            let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
             NFT::Pallet::<T>::burn_nft(token_id, &from)?;
             Self::deposit_event(Event::<T>::TokenBurned(from, token_id));
             Ok(())
@@ -176,8 +177,7 @@ pub mod pallet {
             token_id: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
-            let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
 
             NFT::Pallet::<T>::transfer_nft(&dest, &from, token_id)?;
             Self::deposit_event(Event::<T>::TokenTransferred(from, dest, token_id));
@@ -191,9 +191,8 @@ pub mod pallet {
             #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &pallet_id,
@@ -212,9 +211,8 @@ pub mod pallet {
             #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
             ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &from,
@@ -234,9 +232,8 @@ pub mod pallet {
             #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
             ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             <T as Config>::ApiCurrency::transfer(
                 &from,
                 &dest,
@@ -254,9 +251,8 @@ pub mod pallet {
             #[pallet::compact] amount: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = NFT::NftMasters::<T>::get();
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
             ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
             let imbalance = <T as Config>::ApiCurrency::withdraw(
                 &dest,
                 amount,
@@ -276,8 +272,7 @@ pub mod pallet {
         #[pallet::weight((90_000_000, Pays::No))]
         pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = NFT::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
             let account_id = Self::account_id();
             let balance = <T as Config>::ApiCurrency::free_balance(&account_id)
                 .saturating_sub(<T as Config>::ApiCurrency::minimum_balance());
