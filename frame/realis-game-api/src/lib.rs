@@ -79,12 +79,12 @@ pub mod pallet {
         NotTokenOwner,
         ///
         NonExistentToken,
-        ///
-        NotNftMaster,
 
         InsufficientBalance,
 
         NotApiMaster,
+
+        ApiMasterWasAddedEarly,
     }
 
     #[pallet::storage]
@@ -212,7 +212,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &from,
@@ -233,7 +233,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
             <T as Config>::ApiCurrency::transfer(
                 &from,
                 &dest,
@@ -252,7 +252,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(!amount.is_zero(), Error::<T>::InsufficientBalance);
+            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
             let imbalance = <T as Config>::ApiCurrency::withdraw(
                 &dest,
                 amount,
@@ -277,6 +277,38 @@ pub mod pallet {
             let balance = <T as Config>::ApiCurrency::free_balance(&account_id)
                 .saturating_sub(<T as Config>::ApiCurrency::minimum_balance());
             Self::deposit_event(Event::Balance(account_id, balance));
+            Ok(())
+        }
+
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn add_api_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
+            // Check is signed correct
+            let who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                !Self::api_masters().contains(&account),
+                Error::<T>::ApiMasterWasAddedEarly
+            );
+
+            ApiMasters::<T>::mutate(|nft_masters| {
+                nft_masters.push(account);
+            });
+            Ok(())
+        }
+
+        /// Remove api_master
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn remove_api_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
+            // Check is signed correct
+            let who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+
+            ApiMasters::<T>::mutate(|api_masters| {
+                let index = api_masters.iter().position(|token| *token == account);
+                api_masters.remove(index.unwrap())
+            });
             Ok(())
         }
     }

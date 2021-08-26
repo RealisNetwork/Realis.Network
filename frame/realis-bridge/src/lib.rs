@@ -71,7 +71,9 @@ pub mod pallet {
         /// Not enought balance
         InsufficientBalance,
         /// Not Nft master
-        NotNftMaster,
+        NotBridgeMaster,
+        /// Bridge Master was added early
+        BridgeMasterWasAddedEarly,
         /// Haven`t permission at this token
         NotTokenOwner,
         /// No such token exists
@@ -82,19 +84,39 @@ pub mod pallet {
         NFTWasntTransfered,
     }
 
+    #[pallet::storage]
+    #[pallet::getter(fn bridge_masters)]
+    pub type BridgeMasters<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+
     #[pallet::genesis_config]
-    pub struct GenesisConfig {}
+    pub struct GenesisConfig<T: Config> {
+        pub bridge_masters: Vec<T::AccountId>,
+    }
 
     #[cfg(feature = "std")]
-    impl Default for GenesisConfig {
+    impl<T: Config> Default for GenesisConfig<T> {
         fn default() -> Self {
-            Self {}
+            Self {
+                bridge_masters: Default::default(),
+            }
         }
     }
 
     #[pallet::genesis_build]
-    impl<T: Config> GenesisBuild<T> for GenesisConfig {
-        fn build(&self) {}
+    impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+        fn build(&self) {
+            BridgeMasters::<T>::put(&self.bridge_masters);
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl<T: Config> GenesisConfig<T> {
+        /// Direct implementation of `GenesisBuild::build_storage`.
+        ///
+        /// Kept in order not to break dependency.
+        pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
+            <Self as GenesisBuild<T>>::build_storage(self)
+        }
     }
 
     #[pallet::hooks]
@@ -128,8 +150,8 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(
-                Nft::NftMasters::<T>::get().contains(&who),
-                Error::<T>::NotNftMaster
+                Self::bridge_masters().contains(&who),
+                Error::<T>::NotBridgeMaster
             );
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
@@ -145,7 +167,11 @@ pub mod pallet {
 
         #[pallet::weight(90000000)]
         pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
-            let _who = ensure_signed(origin)?;
+            let who = ensure_signed(origin)?;
+            ensure!(
+                Self::bridge_masters().contains(&who),
+                Error::<T>::NotBridgeMaster
+            );
             let account_id = Self::account_id();
             let balance = <T as Config>::BridgeCurrency::free_balance(&account_id)
                 .saturating_sub(<T as Config>::BridgeCurrency::minimum_balance());
@@ -194,8 +220,10 @@ pub mod pallet {
             rarity: Rarity,
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
-            let nft_master = Nft::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(
+                Self::bridge_masters().contains(&who),
+                Error::<T>::NotBridgeMaster
+            );
 
             Nft::Pallet::<T>::mint(origin, to.clone(), token_id, rarity, token_type)?;
 
@@ -212,8 +240,10 @@ pub mod pallet {
             value: T::Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = Nft::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(
+                Self::bridge_masters().contains(&who),
+                Error::<T>::NotBridgeMaster
+            );
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
                 &from,
@@ -228,8 +258,10 @@ pub mod pallet {
         #[warn(path_statements)]
         pub fn transfer_token_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = Nft::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(
+                Self::bridge_masters().contains(&who),
+                Error::<T>::NotBridgeMaster
+            );
             Error::<T>::TokensWasntTransfered;
             Ok(())
         }
@@ -242,8 +274,10 @@ pub mod pallet {
             token_id: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = Nft::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(
+                Self::bridge_masters().contains(&who),
+                Error::<T>::NotBridgeMaster
+            );
             Nft::Pallet::<T>::burn_nft(token_id, &from);
             Ok(())
         }
@@ -252,9 +286,49 @@ pub mod pallet {
         #[warn(path_statements)]
         pub fn transfer_nft_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let nft_master = Nft::NftMasters::<T>::get();
-            ensure!(nft_master.contains(&who), Error::<T>::NotNftMaster);
+            ensure!(
+                Self::bridge_masters().contains(&who),
+                Error::<T>::NotBridgeMaster
+            );
             Error::<T>::NFTWasntTransfered;
+            Ok(())
+        }
+
+        #[pallet::weight(10000)]
+        pub fn add_bridge_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
+            // Check is signed correct
+            let who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            ensure!(
+                Self::bridge_masters().contains(&who),
+                Error::<T>::NotBridgeMaster
+            );
+            ensure!(
+                !Self::bridge_masters().contains(&account),
+                Error::<T>::BridgeMasterWasAddedEarly
+            );
+
+            BridgeMasters::<T>::mutate(|bridge_masters| {
+                bridge_masters.push(account);
+            });
+            Ok(())
+        }
+
+        /// Remove bridge_master
+        #[pallet::weight(10000)]
+        pub fn remove_bridge_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
+            // Check is signed correct
+            let who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            ensure!(
+                Self::bridge_masters().contains(&who),
+                Error::<T>::NotBridgeMaster
+            );
+
+            BridgeMasters::<T>::mutate(|bridge_masters| {
+                let index = bridge_masters.iter().position(|token| *token == account);
+                bridge_masters.remove(index.unwrap())
+            });
             Ok(())
         }
     }

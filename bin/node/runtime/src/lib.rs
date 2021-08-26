@@ -120,10 +120,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 296,
-    impl_version: 5,
+    spec_version: 301,
+    impl_version: 8,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 15,
+    transaction_version: 18,
 };
 
 /// The BABE epoch configuration at genesis.
@@ -1316,7 +1316,7 @@ construct_runtime!(
         Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
         // Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>},
         // TransactionStorage: pallet_transaction_storage::{Pallet, Call, Storage, Inherent, Config<T>, Event<T>},
-        RealisBridge: realis_bridge::{Pallet, Call, Event<T>, Config},
+        RealisBridge: realis_bridge::{Pallet, Call, Event<T>, Config<T>, Storage},
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>, Config<T>, Storage},
         Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},

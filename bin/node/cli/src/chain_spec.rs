@@ -26,7 +26,7 @@ use node_runtime::{
     wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
     BalancesConfig, /*CouncilConfig,*/
     /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
-    NftConfig, RealisGameApiConfig, SessionConfig, SessionKeys,
+    NftConfig, RealisBridgeConfig, RealisGameApiConfig, SessionConfig, SessionKeys,
     /*SocietyConfig,*/ StakerStatus, StakingConfig, SudoConfig, SystemConfig,
     /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
 };
@@ -196,6 +196,12 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
     ]
     .into()];
 
+    let bridge_master: Vec<AccountId> = vec![hex![
+        // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
+        "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
+    ]
+    .into()];
+
     let endowed_accounts: Vec<AccountId> = vec![root_key.clone()];
 
     testnet_genesis(
@@ -204,6 +210,7 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
         root_key,
         nft_master,
         api_master,
+        bridge_master,
         Some(endowed_accounts),
     )
 }
@@ -277,6 +284,7 @@ pub fn testnet_genesis(
     root_key: AccountId,
     nft_master: Vec<AccountId>,
     api_master: Vec<AccountId>,
+    bridge_master: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
     let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
@@ -429,7 +437,9 @@ pub fn testnet_genesis(
             api_masters: api_master,
         },
         claims: Default::default(),
-        realis_bridge: Default::default(),
+        realis_bridge: RealisBridgeConfig {
+            bridge_masters: bridge_master,
+        },
     }
 }
 
@@ -447,7 +457,7 @@ pub fn realis_genesis(
     root_key: AccountId,
     nft_master: Vec<AccountId>,
     api_master: Vec<AccountId>,
-    // bridge_master: Vec<AccountId>,
+    bridge_master: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
     let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
@@ -597,7 +607,9 @@ pub fn realis_genesis(
             api_masters: api_master,
         },
         claims: Default::default(),
-        realis_bridge: Default::default(),
+        realis_bridge: RealisBridgeConfig {
+            bridge_masters: bridge_master,
+        },
     }
 }
 
@@ -668,6 +680,8 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
     let api_master =
         vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
+    let bridge_master =
+        vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
     let endowed_accounts =
         vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
     realis_genesis(
@@ -676,6 +690,7 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         root_key,
         nft_master,
         api_master,
+        bridge_master,
         Some(endowed_accounts),
     )
 }
@@ -690,6 +705,7 @@ fn development_config_genesis() -> GenesisConfig {
         vec![authority_keys_from_seed("Alice")],
         vec![],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
+        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         None,
@@ -719,6 +735,7 @@ fn local_testnet_genesis() -> GenesisConfig {
         ],
         vec![],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
+        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         None,
@@ -754,6 +771,8 @@ pub(crate) mod tests {
             get_account_id_from_seed::<sr25519::Public>("Alice"),
             vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
             vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+            vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+            None,
         )
     }
 
