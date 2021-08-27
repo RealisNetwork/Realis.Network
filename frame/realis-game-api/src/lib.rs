@@ -80,8 +80,6 @@ pub mod pallet {
         ///
         NonExistentToken,
 
-        InsufficientBalance,
-
         NotApiMaster,
 
         ApiMasterWasAddedEarly,
@@ -192,7 +190,6 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &pallet_id,
@@ -212,7 +209,6 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &from,
@@ -233,7 +229,6 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
             <T as Config>::ApiCurrency::transfer(
                 &from,
                 &dest,
@@ -252,7 +247,6 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
             let imbalance = <T as Config>::ApiCurrency::withdraw(
                 &dest,
                 amount,
