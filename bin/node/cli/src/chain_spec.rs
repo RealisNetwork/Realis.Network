@@ -510,7 +510,7 @@ pub fn realis_genesis(
         .collect::<Vec<_>>();
     let _num_endowed_accounts = endowed_accounts.len();
 
-    const ENDOWMENT: Balance = 975_000 * DOLLARS / 13;
+    const ENDOWMENT: Balance = 975_000 * DOLLARS / 12;
     const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
     const STAKING_POOL: Balance = 30_000 * DOLLARS / 10;
     const STASH: Balance = ENDOWMENT / 1000;
@@ -670,6 +670,18 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
             hex!["dc869f188c87d823da3d8e6b069a2688d0772d2dc3f09d8dfa96b8551a601513"]
                 .unchecked_into(),
             hex!["dc869f188c87d823da3d8e6b069a2688d0772d2dc3f09d8dfa96b8551a601513"]
+                .unchecked_into(),
+        ),
+        (
+            hex!["a662140fcc5ff36f191a4f8ce6fd314a33c0149a5864060d50fd06c44535b777"].into(),
+            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"].into(),
+            hex!["1e8dd20fc7e98d6a73e24732b5759c4860f90ee67e044384bdd9932d04b76f74"]
+                .unchecked_into(),
+            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"]
+                .unchecked_into(),
+            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"]
+                .unchecked_into(),
+            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"]
                 .unchecked_into(),
         ),
     ];
