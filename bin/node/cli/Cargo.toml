@@ -41,7 +41,7 @@ hex-literal = "0.3.3"
 log = "0.4.8"
 rand = "0.8.4"
 structopt = { version = "0.3.8", optional = true }
-parking_lot = "0.11.1"
+parking_lot = "0.11.2"
 
 # primitives
 sp-authority-discovery = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
