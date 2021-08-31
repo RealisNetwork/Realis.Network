@@ -14,7 +14,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 static_assertions = "1.1.0"
-serde = { version = "1.0.129", optional = true }
+serde = { version = "1.0.130", optional = true }
 codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
 sp-std = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false  }
 sp-io ={ git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", default-features = false  }
@@ -44,7 +44,7 @@ substrate-test-utils = { git = "https://github.com/paritytech/substrate", rev = 
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 frame-election-provider-support = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", features = ["runtime-benchmarks"] }
 rand_chacha = { version = "0.3" }
-parking_lot = "0.11.1"
+parking_lot = "0.11.2"
 hex = "0.4"
 hex-literal = "0.3.3"
 
