@@ -2,7 +2,6 @@
 
 use frame_support::dispatch;
 pub use pallet::*;
-use sp_runtime::traits::AtLeast32BitUnsigned;
 use sp_std::prelude::*;
 
 // Add test modules
@@ -116,9 +115,6 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn nft_masters)]
     pub type NftMasters<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
-
-    // #[pallet::storage]
-    // pub(crate) type SystemAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::RealisTokenId, T::AccountId, AccountInfo<T::Index, AccountData<<T as Config>::Balance>>>;
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {

@@ -1,10 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![feature(specialization)]
-#![feature(alloc)]
 
-extern crate alloc;
-
-use core::fmt;
 use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
 #[cfg(feature = "std")]
@@ -12,7 +7,6 @@ use serde::{Deserialize, Serialize};
 use sp_std::fmt::{Display, Formatter};
 use sp_std::vec::Vec;
 
-use alloc::string::{String, ToString};
 use sp_std::str::FromStr;
 
 pub type TokenId = U256;
