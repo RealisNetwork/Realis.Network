@@ -24,7 +24,6 @@ pub mod pallet {
     use realis_primitives::Rarity::Common;
     use realis_primitives::TokenType::Basic;
     use sp_core::H160;
-    use sp_runtime::traits::Zero;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
 
     pub type BalanceOf<T> = <<T as Config>::BridgeCurrency as Currency<
@@ -132,10 +131,6 @@ pub mod pallet {
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
             ensure_signed(origin)?;
-            let zero = T::Balance::zero();
-            if value == zero {
-                return Err(sp_runtime::DispatchError::Other("InsufficientBalance"));
-            }
 
             Self::deposit_event(Event::<T>::TransferTokenToBSC(from.clone(), to, value));
             Ok(())
