@@ -36,11 +36,11 @@ crate-type = ["cdylib", "rlib"]
 # third-party dependencies
 codec = { package = "parity-scale-codec", version = "2.0.0" }
 serde = { version = "1.0.129", features = ["derive"] }
-futures = { version = "0.3.16", features = ["compat"] }
+futures = { version = "0.3.17", features = ["compat"] }
 hex-literal = "0.3.3"
 log = "0.4.8"
 rand = "0.8.4"
-structopt = { version = "0.3.8", optional = true }
+structopt = { version = "0.3.23", optional = true }
 parking_lot = "0.11.1"
 
 # primitives
@@ -122,18 +122,18 @@ sc-consensus-babe = { git = "https://github.com/paritytech/substrate", rev = "03
 sc-consensus-epochs = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 sc-service-test = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
 sp-io = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178" }
-futures = "0.3.16"
+futures = "0.3.17"
 tempfile = "3.1.0"
 assert_cmd = "2.0"
 nix = "0.22"
 serde_json = "1.0"
 regex = "1"
 platforms = "1.1"
-async-std = { version = "1.6.5", features = ["attributes"] }
+async-std = { version = "1.10.0", features = ["attributes"] }
 soketto = "0.6.0"
 
 [build-dependencies]
-structopt = { version = "0.3.8", optional = true }
+structopt = { version = "0.3.23", optional = true }
 node-inspect = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", optional = true }
 frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", optional = true }
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", optional = true }
