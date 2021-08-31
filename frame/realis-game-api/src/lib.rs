@@ -24,7 +24,7 @@ pub mod pallet {
     use frame_support::weights::Pays;
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
-    use sp_runtime::traits::{AccountIdConversion, Saturating, Zero};
+    use sp_runtime::traits::{AccountIdConversion, Saturating};
 
     use pallet_nft as NFT;
     use realis_primitives::{Basic, Rarity, TokenId};
@@ -80,16 +80,22 @@ pub mod pallet {
         ///
         NonExistentToken,
 
-        InsufficientBalance,
-
         NotApiMaster,
 
         ApiMasterWasAddedEarly,
+
+        UserNotFoundInWhitelist,
+
+        AccountAlreadyInWhitelist,
     }
 
     #[pallet::storage]
     #[pallet::getter(fn api_masters)]
     pub type ApiMasters<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+
+    #[pallet::storage]
+    #[pallet::getter(fn whitelist)]
+    pub type Whitelist<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
@@ -139,6 +145,10 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&target_account),
+                Error::<T>::UserNotFoundInWhitelist
+            );
 
             ensure!(
                 !NFT::AccountForToken::<T>::contains_key(token_id),
@@ -164,6 +174,10 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&from),
+                Error::<T>::UserNotFoundInWhitelist
+            );
             NFT::Pallet::<T>::burn_nft(token_id, &from)?;
             Self::deposit_event(Event::<T>::TokenBurned(from, token_id));
             Ok(())
@@ -178,6 +192,14 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&from),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            ensure!(
+                Self::whitelist().contains(&dest),
+                Error::<T>::UserNotFoundInWhitelist
+            );
 
             NFT::Pallet::<T>::transfer_nft(&dest, &from, token_id)?;
             Self::deposit_event(Event::<T>::TokenTransferred(from, dest, token_id));
@@ -192,7 +214,10 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
+            ensure!(
+                Self::whitelist().contains(&dest),
+                Error::<T>::UserNotFoundInWhitelist
+            );
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &pallet_id,
@@ -212,7 +237,10 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
+            ensure!(
+                Self::whitelist().contains(&from),
+                Error::<T>::UserNotFoundInWhitelist
+            );
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &from,
@@ -233,7 +261,10 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
+            ensure!(
+                Self::whitelist().contains(&dest),
+                Error::<T>::UserNotFoundInWhitelist
+            );
             <T as Config>::ApiCurrency::transfer(
                 &from,
                 &dest,
@@ -252,7 +283,10 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            ensure!(amount == Zero::zero(), Error::<T>::InsufficientBalance);
+            ensure!(
+                Self::whitelist().contains(&dest),
+                Error::<T>::UserNotFoundInWhitelist
+            );
             let imbalance = <T as Config>::ApiCurrency::withdraw(
                 &dest,
                 amount,
@@ -308,6 +342,35 @@ pub mod pallet {
             ApiMasters::<T>::mutate(|api_masters| {
                 let index = api_masters.iter().position(|token| *token == account);
                 api_masters.remove(index.unwrap())
+            });
+            Ok(())
+        }
+
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn add_to_whitelist(origin: OriginFor<T>) -> DispatchResult {
+            // Check is signed correct
+            let who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            ensure!(
+                !Self::whitelist().contains(&who),
+                Error::<T>::AccountAlreadyInWhitelist
+            );
+
+            Whitelist::<T>::mutate(|member_whitelist| {
+                member_whitelist.push(who);
+            });
+            Ok(())
+        }
+
+        /// Remove api_master
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn remove_from_whitelist(origin: OriginFor<T>) -> DispatchResult {
+            // Check is signed correct
+            let who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            Whitelist::<T>::mutate(|member_whitelist| {
+                let index = member_whitelist.iter().position(|token| *token == who);
+                member_whitelist.remove(index.unwrap())
             });
             Ok(())
         }

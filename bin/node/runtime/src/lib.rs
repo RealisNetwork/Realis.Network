@@ -120,10 +120,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 301,
-    impl_version: 8,
+    spec_version: 309,
+    impl_version: 12,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 18,
+    transaction_version: 22,
 };
 
 /// The BABE epoch configuration at genesis.
