@@ -133,7 +133,7 @@ async-std = { version = "1.10.0", features = ["attributes"] }
 soketto = "0.6.0"
 
 [build-dependencies]
-structopt = { version = "0.3.8", optional = true }
+structopt = { version = "0.3.23", optional = true }
 node-inspect = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", optional = true }
 frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", optional = true }
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate", rev = "03d4d0d7c129eec3d3ab2876bddbe5d6dfa1f178", optional = true }
