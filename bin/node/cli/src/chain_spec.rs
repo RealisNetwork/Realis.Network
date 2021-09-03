@@ -217,6 +217,7 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
 
 /// Staging testnet config.
 pub fn staging_testnet_config() -> ChainSpec {
+
     let boot_nodes = vec![];
     ChainSpec::from_genesis(
         "Staging Testnet",
@@ -616,7 +617,7 @@ pub fn realis_genesis(
 ///Realis test chain-spec
 pub fn realis_testnet_config() -> ChainSpec {
     let mut properties = Map::new();
-    properties.insert("tokenDecimals".into(), 10.into());
+    properties.insert("tokenDecimals".into(), 12.into());
     properties.insert("tokenSymbol".into(), "LIS".into());
     properties.insert("ss58Format".into(), 42.into());
 
@@ -713,19 +714,38 @@ pub fn realis_config() -> Result<ChainSpec, String> {
 }
 
 fn development_config_genesis() -> GenesisConfig {
+
+    let sudo_1: AccountId = hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
+    // let sudo_2: AccountId = 
+    // let sudo_3: AccountId = 
+    // let sudo_4: AccountId = 
+    // let sudo_5: AccountId = 
+
+    let nft_master =
+        vec![sudo_1];
+    let api_master =
+        vec![sudo_1];
+    let bridge_master =
+        vec![sudo_1];
+
     testnet_genesis(
         vec![authority_keys_from_seed("Alice")],
         vec![],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+        nft_master,
+        api_master,
+        bridge_master,
         None,
     )
 }
 
 /// Development config (single validator Alice)
 pub fn development_config() -> ChainSpec {
+    let mut properties = Map::new();
+    properties.insert("tokenDecimals".into(), 12.into());
+    properties.insert("tokenSymbol".into(), "LIS".into());
+    properties.insert("ss58Format".into(), 42.into());
+
     ChainSpec::from_genesis(
         "Development",
         "dev",
@@ -734,7 +754,7 @@ pub fn development_config() -> ChainSpec {
         vec![],
         None,
         None,
-        None,
+        Some(properties),
         Default::default(),
     )
 }
