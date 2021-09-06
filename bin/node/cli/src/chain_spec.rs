@@ -713,7 +713,7 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
 
 ///Realis chain-spec from realis.json
 pub fn realis_config() -> Result<ChainSpec, String> {
-    ChainSpec::from_json_bytes(&include_bytes!("../../../../realis.json")[..])
+    ChainSpec::from_json_bytes(&include_bytes!("../../../../docker/realis.json")[..])
 }
 
 fn development_config_genesis() -> GenesisConfig {

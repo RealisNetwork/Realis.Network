@@ -18,7 +18,6 @@ common.rs
 # The cache for chain data in container
 .local
 
-realis.json
 CustomSpecRaw.json
 customSpecRaw.json
 CustomSpecRealis.json
