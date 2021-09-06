@@ -512,7 +512,7 @@ pub fn realis_genesis(
             )
         }))
         .collect::<Vec<_>>();
-    let num_endowed_accounts = endowed_accounts.len();
+    let _num_endowed_accounts = endowed_accounts.len();
 
     const ENDOWMENT: Balance = 975_000 * DOLLARS / 12;
     const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
@@ -530,7 +530,6 @@ pub fn realis_genesis(
         balances: BalancesConfig {
             balances: endowed_accounts
                 .iter()
-                .take((num_endowed_accounts + 1) / 2)
                 .cloned()
                 .map(|x| {
                     if x == pallet_id_staking {
