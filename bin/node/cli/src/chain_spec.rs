@@ -722,11 +722,11 @@ fn development_config_genesis() -> GenesisConfig {
     // let sudo_5: AccountId = 
 
     let nft_master =
-        vec![sudo_1];
+        vec![sudo_1.clone()];
     let api_master =
-        vec![sudo_1];
+        vec![sudo_1.clone()];
     let bridge_master =
-        vec![sudo_1];
+        vec![sudo_1.clone()];
 
     testnet_genesis(
         vec![authority_keys_from_seed("Alice")],
