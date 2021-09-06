@@ -20,8 +20,6 @@
 
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
-use node_runtime::constants::currency::*;
-use node_runtime::Block;
 use node_runtime::{
     wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
     BalancesConfig, /*CouncilConfig,*/
@@ -46,9 +44,10 @@ use sp_runtime::{
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::pallet_staking;
 use node_runtime::realis_game_api;
-pub use node_runtime::GenesisConfig;
+pub use node_runtime::{GenesisConfig, Block};
 use node_runtime::Runtime;
 use sc_telemetry::serde_json::Map;
+use node_runtime::constants::currency::DOLLARS;
 
 type AccountPublic = <Signature as Verify>::Signer;
 
@@ -65,6 +64,8 @@ pub struct Extensions {
     pub fork_blocks: sc_client_api::ForkBlocks<Block>,
     /// Known bad block hashes.
     pub bad_blocks: sc_client_api::BadBlocks<Block>,
+    /// The light sync state extension used by the sync-state rpc.
+    pub light_sync_state: sc_sync_state_rpc::LightSyncStateExtension,
 }
 
 /// Specialized `ChainSpec`.
@@ -89,13 +90,16 @@ fn session_keys(
 }
 
 fn staging_testnet_config_genesis() -> GenesisConfig {
-    // stash, controller, session-key
-    // generated with secret:
-    // for i in 1 2 3 4 ; do for j in stash controller; do subkey inspect "$secret"/fir/$j/$i; done; done
-    // and
-    // for i in 1 2 3 4 ; do for j in session; do subkey --ed25519 inspect "$secret"//fir//$j//$i; done; done
+    #[rustfmt::skip]
+        // stash, controller, session-key
+        // generated with secret:
+        // for i in 1 2 3 4 ; do for j in stash controller; do subkey inspect "$secret"/fir/$j/$i; done; done
+        //
+        // and
+        //
+        // for i in 1 2 3 4 ; do for j in session; do subkey --ed25519 inspect "$secret"//fir//$j//$i; done; done
 
-    let initial_authorities: Vec<(
+        let initial_authorities: Vec<(
         AccountId,
         AccountId,
         GrandpaId,
@@ -508,7 +512,7 @@ pub fn realis_genesis(
             )
         }))
         .collect::<Vec<_>>();
-    let _num_endowed_accounts = endowed_accounts.len();
+    let num_endowed_accounts = endowed_accounts.len();
 
     const ENDOWMENT: Balance = 975_000 * DOLLARS / 12;
     const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
@@ -526,6 +530,7 @@ pub fn realis_genesis(
         balances: BalancesConfig {
             balances: endowed_accounts
                 .iter()
+                .take((num_endowed_accounts + 1) / 2)
                 .cloned()
                 .map(|x| {
                     if x == pallet_id_staking {
@@ -850,15 +855,15 @@ pub(crate) mod tests {
         );
     }
 
-    // #[test]
-    // fn test_create_development_chain_spec() {
-    //     development_config().build_storage().unwrap();
-    // }
+    #[test]
+    fn test_create_development_chain_spec() {
+        development_config().build_storage().unwrap();
+    }
 
-    // #[test]
-    // fn test_create_local_testnet_chain_spec() {
-    //     local_testnet_config().build_storage().unwrap();
-    // }
+    #[test]
+    fn test_create_local_testnet_chain_spec() {
+        local_testnet_config().build_storage().unwrap();
+    }
 
     #[test]
     fn test_staging_test_net_chain_spec() {
