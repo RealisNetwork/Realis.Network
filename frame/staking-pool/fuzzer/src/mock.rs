@@ -42,7 +42,7 @@ frame_support::construct_runtime!(
 );
 
 impl frame_system::Config for Test {
-	type BaseCallFilter = ();
+	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();
 	type DbWeight = ();
@@ -153,8 +153,8 @@ parameter_types! {
 pub type Extrinsic = sp_runtime::testing::TestXt<Call, ()>;
 
 impl<C> frame_system::offchain::SendTransactionTypes<C> for Test
-where
-	Call: From<C>,
+	where
+		Call: From<C>,
 {
 	type OverarchingCall = Call;
 	type Extrinsic = Extrinsic;
@@ -162,7 +162,7 @@ where
 
 pub struct MockElectionProvider;
 impl frame_election_provider_support::ElectionProvider<AccountId, BlockNumber>
-	for MockElectionProvider
+for MockElectionProvider
 {
 	type Error = ();
 	type DataProvider = pallet_staking::Module<Test>;
