@@ -514,7 +514,7 @@ pub fn realis_genesis(
         .collect::<Vec<_>>();
     let _num_endowed_accounts = endowed_accounts.len();
 
-    const ENDOWMENT: Balance = 975_000 * DOLLARS / 12;
+    const ENDOWMENT: Balance = 720_000 * DOLLARS / 12;
     const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
     const STAKING_POOL: Balance = 30_000 * DOLLARS / 10;
     const STASH: Balance = ENDOWMENT / 1000;
