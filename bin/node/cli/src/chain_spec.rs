@@ -305,6 +305,8 @@ pub fn testnet_genesis(
             get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
             get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
             get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+            realis_game_api::Pallet::<Runtime>::account_id(),
+            pallet_staking::Pallet::<Runtime>::account_id(),
         ]
     });
     // endow all authorities and nominators.
@@ -674,18 +676,6 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
             hex!["dc869f188c87d823da3d8e6b069a2688d0772d2dc3f09d8dfa96b8551a601513"]
                 .unchecked_into(),
             hex!["dc869f188c87d823da3d8e6b069a2688d0772d2dc3f09d8dfa96b8551a601513"]
-                .unchecked_into(),
-        ),
-        (
-            hex!["a662140fcc5ff36f191a4f8ce6fd314a33c0149a5864060d50fd06c44535b777"].into(),
-            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"].into(),
-            hex!["1e8dd20fc7e98d6a73e24732b5759c4860f90ee67e044384bdd9932d04b76f74"]
-                .unchecked_into(),
-            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"]
-                .unchecked_into(),
-            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"]
-                .unchecked_into(),
-            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"]
                 .unchecked_into(),
         ),
     ];
