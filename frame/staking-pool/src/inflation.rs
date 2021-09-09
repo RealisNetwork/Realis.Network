@@ -25,8 +25,8 @@ use sp_runtime::{curve::PiecewiseLinear, traits::AtLeast32BitUnsigned, Perbill};
 /// The total payout to all validators (and their nominators) per era and maximum payout.
 ///
 /// Defined as such:
-/// `staker-payout = yearly_inflation(npos_token_staked / total_tokens) * total_tokens / era_per_year`
-/// `maximum-payout = max_yearly_inflation * total_tokens / era_per_year`
+/// `staker-payout = yearly_inflation(npos_token_staked / total_tokens) * total_tokens /
+/// era_per_year` `maximum-payout = max_yearly_inflation * total_tokens / era_per_year`
 ///
 /// `era_duration` is expressed in millisecond.
 pub fn compute_total_payout<N>(
@@ -75,7 +75,7 @@ mod test {
             9_993
         );
 
-        //super::I_NPOS.calculate_for_fraction_times_denominator(25, 100)
+        // super::I_NPOS.calculate_for_fraction_times_denominator(25, 100)
         assert_eq!(
             super::compute_total_payout(&I_NPOS, 0, 100_000u64, YEAR).0,
             2_498
