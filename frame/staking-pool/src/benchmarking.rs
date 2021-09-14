@@ -21,11 +21,22 @@ use super::*;
 use crate::Pallet as Staking;
 use testing_utils::*;
 
+use frame_support::{
+    pallet_prelude::*,
+    traits::{Currency, Get, Imbalance},
+};
+use sp_runtime::{
+    traits::{StaticLookup, Zero},
+    Perbill, Percent,
+};
+use sp_staking::SessionIndex;
+use sp_std::prelude::*;
+
 pub use frame_benchmarking::{
     account, benchmarks, impl_benchmark_test_suite, whitelist_account, whitelisted_caller,
 };
 use frame_system::RawOrigin;
-use sp_runtime::traits::One;
+use sp_runtime::traits::{Bounded, One};
 
 const SEED: u32 = 0;
 const MAX_SPANS: u32 = 100;
@@ -647,7 +658,7 @@ benchmarks! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock::{ExtBuilder, Staking, Test};
+    use crate::mock::{Balances, ExtBuilder, Origin, Staking, Test};
     use frame_support::assert_ok;
 
     #[test]
@@ -675,29 +686,36 @@ mod tests {
             });
     }
 
-    // #[test]
-    // fn create_validator_with_nominators_works() {
-    //     ExtBuilder::default().has_stakers(true).build_and_execute(|| {
-    //         let n = 10;
-    //
-    //         let (validator_stash, nominators) = create_validator_with_nominators::<Test>(
-    //             n,
-    //             <Test as Config>::MaxNominatorRewardedPerValidator::get() as u32,
-    //             false,
-    //             RewardDestination::Staked,
-    //         ).unwrap();
-    //
-    //         assert_eq!(nominators.len() as u32, n);
-    //
-    //         let current_era = CurrentEra::<Test>::get().unwrap();
-    //
-    //         let original_free_balance = Balances::free_balance(&validator_stash);
-    //         assert_ok!(Staking::payout_stakers(Origin::signed(1337), validator_stash, current_era));
-    //         let new_free_balance = Balances::free_balance(&validator_stash);
-    //
-    //         assert!(original_free_balance < new_free_balance);
-    //     });
-    // }
+    #[test]
+    fn create_validator_with_nominators_works() {
+        ExtBuilder::default()
+            .has_stakers(true)
+            .build_and_execute(|| {
+                let n = 10;
+
+                let (validator_stash, nominators) = create_validator_with_nominators::<Test>(
+                    n,
+                    <Test as Config>::MaxNominatorRewardedPerValidator::get() as u32,
+                    false,
+                    RewardDestination::Staked,
+                )
+                .unwrap();
+
+                assert_eq!(nominators.len() as u32, n);
+
+                let current_era = CurrentEra::<Test>::get().unwrap();
+
+                let original_free_balance = Balances::free_balance(&validator_stash);
+                assert_ok!(Staking::payout_stakers(
+                    Origin::signed(1337),
+                    validator_stash,
+                    current_era
+                ));
+                let new_free_balance = Balances::free_balance(&validator_stash);
+
+                assert!(original_free_balance < new_free_balance);
+            });
+    }
 
     #[test]
     fn add_slashing_spans_works() {
@@ -762,9 +780,9 @@ mod tests {
     }
 }
 
-// impl_benchmark_test_suite!(
-// 	Staking,
-// 	crate::mock::ExtBuilder::default().has_stakers(true),
-// 	crate::mock::Test,
-// 	exec_name = build_and_execute
-// );
+impl_benchmark_test_suite!(
+    Staking,
+    crate::mock::ExtBuilder::default().has_stakers(true),
+    crate::mock::Test,
+    exec_name = build_and_execute
+);

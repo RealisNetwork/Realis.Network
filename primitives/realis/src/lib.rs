@@ -25,6 +25,14 @@ pub enum TokenType {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum Status {
+    OnSell,
+    InDelegation,
+    Free,
+}
+
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
 pub enum Stackable {
     Silver,
     Gold,

@@ -18,8 +18,7 @@
 //! Testing utils for staking. Provides some common functions to setup staking state, such as
 //! bonding validators, nominators, and generating different types of solutions.
 
-use crate::Pallet as Staking;
-use crate::*;
+use crate::{Pallet as Staking, *};
 use frame_benchmarking::account;
 use frame_system::RawOrigin;
 use rand_chacha::{
@@ -27,6 +26,10 @@ use rand_chacha::{
     ChaChaRng,
 };
 use sp_io::hashing::blake2_256;
+
+use frame_support::{pallet_prelude::*, traits::Currency};
+use sp_runtime::{traits::StaticLookup, Perbill};
+use sp_std::prelude::*;
 
 const SEED: u32 = 0;
 

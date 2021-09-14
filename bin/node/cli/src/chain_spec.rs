@@ -20,8 +20,6 @@
 
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
-use node_runtime::constants::currency::*;
-use node_runtime::Block;
 use node_runtime::{
     wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
     BalancesConfig, /*CouncilConfig,*/
@@ -44,10 +42,11 @@ use sp_runtime::{
 };
 
 pub use node_primitives::{AccountId, Balance, Signature};
+use node_runtime::constants::currency::DOLLARS;
 use node_runtime::pallet_staking;
 use node_runtime::realis_game_api;
-pub use node_runtime::GenesisConfig;
 use node_runtime::Runtime;
+pub use node_runtime::{Block, GenesisConfig};
 use sc_telemetry::serde_json::Map;
 
 type AccountPublic = <Signature as Verify>::Signer;
@@ -65,6 +64,8 @@ pub struct Extensions {
     pub fork_blocks: sc_client_api::ForkBlocks<Block>,
     /// Known bad block hashes.
     pub bad_blocks: sc_client_api::BadBlocks<Block>,
+    /// The light sync state extension used by the sync-state rpc.
+    pub light_sync_state: sc_sync_state_rpc::LightSyncStateExtension,
 }
 
 /// Specialized `ChainSpec`.
@@ -89,13 +90,16 @@ fn session_keys(
 }
 
 fn staging_testnet_config_genesis() -> GenesisConfig {
-    // stash, controller, session-key
-    // generated with secret:
-    // for i in 1 2 3 4 ; do for j in stash controller; do subkey inspect "$secret"/fir/$j/$i; done; done
-    // and
-    // for i in 1 2 3 4 ; do for j in session; do subkey --ed25519 inspect "$secret"//fir//$j//$i; done; done
+    #[rustfmt::skip]
+        // stash, controller, session-key
+        // generated with secret:
+        // for i in 1 2 3 4 ; do for j in stash controller; do subkey inspect "$secret"/fir/$j/$i; done; done
+        //
+        // and
+        //
+        // for i in 1 2 3 4 ; do for j in session; do subkey --ed25519 inspect "$secret"//fir//$j//$i; done; done
 
-    let initial_authorities: Vec<(
+        let initial_authorities: Vec<(
         AccountId,
         AccountId,
         GrandpaId,
@@ -301,6 +305,8 @@ pub fn testnet_genesis(
             get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
             get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
             get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+            realis_game_api::Pallet::<Runtime>::account_id(),
+            pallet_staking::Pallet::<Runtime>::account_id(),
         ]
     });
     // endow all authorities and nominators.
@@ -510,7 +516,7 @@ pub fn realis_genesis(
         .collect::<Vec<_>>();
     let _num_endowed_accounts = endowed_accounts.len();
 
-    const ENDOWMENT: Balance = 975_000 * DOLLARS / 12;
+    const ENDOWMENT: Balance = 900_000 * DOLLARS / 12;
     const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
     const STAKING_POOL: Balance = 30_000 * DOLLARS / 10;
     const STASH: Balance = ENDOWMENT / 1000;
@@ -616,7 +622,7 @@ pub fn realis_genesis(
 ///Realis test chain-spec
 pub fn realis_testnet_config() -> ChainSpec {
     let mut properties = Map::new();
-    properties.insert("tokenDecimals".into(), 10.into());
+    properties.insert("tokenDecimals".into(), 12.into());
     properties.insert("tokenSymbol".into(), "LIS".into());
     properties.insert("ss58Format".into(), 42.into());
 
@@ -672,18 +678,6 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
             hex!["dc869f188c87d823da3d8e6b069a2688d0772d2dc3f09d8dfa96b8551a601513"]
                 .unchecked_into(),
         ),
-        (
-            hex!["a662140fcc5ff36f191a4f8ce6fd314a33c0149a5864060d50fd06c44535b777"].into(),
-            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"].into(),
-            hex!["1e8dd20fc7e98d6a73e24732b5759c4860f90ee67e044384bdd9932d04b76f74"]
-                .unchecked_into(),
-            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"]
-                .unchecked_into(),
-            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"]
-                .unchecked_into(),
-            hex!["bfb9cc66c2e6557a49519f6856fde8781b1e291e23e1d17401ac5d4f97dd0b94"]
-                .unchecked_into(),
-        ),
     ];
     //sudo account
     let root_key = hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
@@ -709,23 +703,39 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
 
 ///Realis chain-spec from realis.json
 pub fn realis_config() -> Result<ChainSpec, String> {
-    ChainSpec::from_json_bytes(&include_bytes!("../../../../realis.json")[..])
+    ChainSpec::from_json_bytes(&include_bytes!("../../../../docker/realis.json")[..])
 }
 
 fn development_config_genesis() -> GenesisConfig {
+    let sudo_1: AccountId =
+        hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
+    // let sudo_2: AccountId =
+    // let sudo_3: AccountId =
+    // let sudo_4: AccountId =
+    // let sudo_5: AccountId =
+
+    let nft_master = vec![sudo_1.clone()];
+    let api_master = vec![sudo_1.clone()];
+    let bridge_master = vec![sudo_1.clone()];
+
     testnet_genesis(
         vec![authority_keys_from_seed("Alice")],
         vec![],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+        nft_master,
+        api_master,
+        bridge_master,
         None,
     )
 }
 
 /// Development config (single validator Alice)
 pub fn development_config() -> ChainSpec {
+    let mut properties = Map::new();
+    properties.insert("tokenDecimals".into(), 12.into());
+    properties.insert("tokenSymbol".into(), "LIS".into());
+    properties.insert("ss58Format".into(), 42.into());
+
     ChainSpec::from_genesis(
         "Development",
         "dev",
@@ -734,7 +744,7 @@ pub fn development_config() -> ChainSpec {
         vec![],
         None,
         None,
-        None,
+        Some(properties),
         Default::default(),
     )
 }
@@ -850,15 +860,15 @@ pub(crate) mod tests {
         );
     }
 
-    // #[test]
-    // fn test_create_development_chain_spec() {
-    //     development_config().build_storage().unwrap();
-    // }
+    #[test]
+    fn test_create_development_chain_spec() {
+        development_config().build_storage().unwrap();
+    }
 
-    // #[test]
-    // fn test_create_local_testnet_chain_spec() {
-    //     local_testnet_config().build_storage().unwrap();
-    // }
+    #[test]
+    fn test_create_local_testnet_chain_spec() {
+        local_testnet_config().build_storage().unwrap();
+    }
 
     #[test]
     fn test_staging_test_net_chain_spec() {

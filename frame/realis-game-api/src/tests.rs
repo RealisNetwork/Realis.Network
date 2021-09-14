@@ -11,7 +11,7 @@ fn alice<T: Config>() -> T::AccountId {
 #[test]
 fn mint_some_type() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
@@ -23,14 +23,14 @@ fn mint_some_type() {
 #[test]
 fn mint_existent_token() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
         assert_err!(
-            RealisGameApi::mint_basic_nft(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1),
+            RealisGameApi::mint_nft(Origin::signed(1), 1, U256([1, 0, 0, 0]), 1),
             Error::<Test>::TokenExist
         );
     })
@@ -40,7 +40,7 @@ fn mint_existent_token() {
 fn burn_none_existent_token() {
     new_test_ext(vec![1]).execute_with(|| {
         assert_err!(
-            RealisGameApi::burn_basic_nft(Origin::signed(1), U256([1, 0, 0, 0])),
+            RealisGameApi::burn_nft(Origin::signed(1), U256([1, 0, 0, 0])),
             NFT::Error::<Test>::NonExistentToken
         )
     })
@@ -49,13 +49,13 @@ fn burn_none_existent_token() {
 #[test]
 fn mint_and_burn() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::burn_basic_nft(
+        assert_ok!(RealisGameApi::burn_nft(
             Origin::signed(1),
             U256([1, 0, 0, 0])
         ));
@@ -65,23 +65,23 @@ fn mint_and_burn() {
 #[test]
 fn mint_1_2_burn_1_2() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([2, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::burn_basic_nft(
+        assert_ok!(RealisGameApi::burn_nft(
             Origin::signed(1),
             U256([1, 0, 0, 0])
         ));
-        assert_ok!(RealisGameApi::burn_basic_nft(
+        assert_ok!(RealisGameApi::burn_nft(
             Origin::signed(1),
             U256([2, 0, 0, 0])
         ));
@@ -91,23 +91,23 @@ fn mint_1_2_burn_1_2() {
 #[test]
 fn mint_1_2_burn_2_1() {
     new_test_ext(vec![1]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([2, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::burn_basic_nft(
+        assert_ok!(RealisGameApi::burn_nft(
             Origin::signed(1),
             U256([2, 0, 0, 0])
         ));
-        assert_ok!(RealisGameApi::burn_basic_nft(
+        assert_ok!(RealisGameApi::burn_nft(
             Origin::signed(1),
             U256([1, 0, 0, 0])
         ));
@@ -117,18 +117,18 @@ fn mint_1_2_burn_2_1() {
 #[test]
 fn mint_transfer_burn_by_owner() {
     new_test_ext(vec![1, 2]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::transfer_basic_nft(
+        assert_ok!(RealisGameApi::transfer_nft(
             Origin::signed(1),
             2,
             U256([1, 0, 0, 0])
         ));
-        assert_ok!(RealisGameApi::burn_basic_nft(
+        assert_ok!(RealisGameApi::burn_nft(
             Origin::signed(2),
             U256([1, 0, 0, 0])
         ));
@@ -138,19 +138,19 @@ fn mint_transfer_burn_by_owner() {
 #[test]
 fn mint_transfer_burn_not_by_owner() {
     new_test_ext(vec![1, 2]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::transfer_basic_nft(
+        assert_ok!(RealisGameApi::transfer_nft(
             Origin::signed(1),
             2,
             U256([1, 0, 0, 0])
         ));
         assert_err!(
-            RealisGameApi::burn_basic_nft(Origin::signed(1), U256([1, 0, 0, 0])),
+            RealisGameApi::burn_nft(Origin::signed(1), U256([1, 0, 0, 0])),
             NFT::Error::<Test>::NotTokenOwner
         );
     })
@@ -159,13 +159,13 @@ fn mint_transfer_burn_not_by_owner() {
 #[test]
 fn mint_and_transfer() {
     new_test_ext(vec![1, 2]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::transfer_basic_nft(
+        assert_ok!(RealisGameApi::transfer_nft(
             Origin::signed(1),
             2,
             U256([1, 0, 0, 0])
@@ -176,18 +176,18 @@ fn mint_and_transfer() {
 #[test]
 fn mint_and_transfer_2_times() {
     new_test_ext(vec![1, 2, 3]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::transfer_basic_nft(
+        assert_ok!(RealisGameApi::transfer_nft(
             Origin::signed(1),
             2,
             U256([1, 0, 0, 0])
         ));
-        assert_ok!(RealisGameApi::transfer_basic_nft(
+        assert_ok!(RealisGameApi::transfer_nft(
             Origin::signed(2),
             3,
             U256([1, 0, 0, 0])
@@ -198,23 +198,23 @@ fn mint_and_transfer_2_times() {
 #[test]
 fn mint_and_transfer_2_times_burn_by_owner() {
     new_test_ext(vec![1, 2, 3]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::transfer_basic_nft(
+        assert_ok!(RealisGameApi::transfer_nft(
             Origin::signed(1),
             2,
             U256([1, 0, 0, 0])
         ));
-        assert_ok!(RealisGameApi::transfer_basic_nft(
+        assert_ok!(RealisGameApi::transfer_nft(
             Origin::signed(2),
             3,
             U256([1, 0, 0, 0])
         ));
-        assert_ok!(RealisGameApi::burn_basic_nft(
+        assert_ok!(RealisGameApi::burn_nft(
             Origin::signed(3),
             U256([1, 0, 0, 0])
         ));
@@ -224,24 +224,24 @@ fn mint_and_transfer_2_times_burn_by_owner() {
 #[test]
 fn mint_and_transfer_2_times_burn_not_by_owner() {
     new_test_ext(vec![1, 2, 3]).execute_with(|| {
-        assert_ok!(RealisGameApi::mint_basic_nft(
+        assert_ok!(RealisGameApi::mint_nft(
             Origin::signed(1),
             1,
             U256([1, 0, 0, 0]),
             1
         ));
-        assert_ok!(RealisGameApi::transfer_basic_nft(
+        assert_ok!(RealisGameApi::transfer_nft(
             Origin::signed(1),
             2,
             U256([1, 0, 0, 0])
         ));
-        assert_ok!(RealisGameApi::transfer_basic_nft(
+        assert_ok!(RealisGameApi::transfer_nft(
             Origin::signed(2),
             3,
             U256([1, 0, 0, 0])
         ));
         assert_err!(
-            RealisGameApi::burn_basic_nft(Origin::signed(2), U256([1, 0, 0, 0])),
+            RealisGameApi::burn_nft(Origin::signed(2), U256([1, 0, 0, 0])),
             NFT::Error::<Test>::NotTokenOwner
         );
     })

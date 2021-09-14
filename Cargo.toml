@@ -12,6 +12,7 @@ members = [
     "frame/staking-pool",
     "primitives/realis",
     "frame/realis-bridge",
+#    "frame/marketplace"
 ]
 
 # Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.
