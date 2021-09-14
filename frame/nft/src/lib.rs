@@ -50,7 +50,7 @@ pub mod pallet {
     pub enum Event<T: Config> {
         NftMinted(T::AccountId, TokenId),
         NftBurned(),
-        NftTransferred(TokenId, T::AccountId)
+        NftTransferred(T::AccountId, T::AccountId, TokenId)
     }
 
     // Errors inform users that something went wrong.
@@ -212,7 +212,7 @@ pub mod pallet {
             // Transfer token
             Self::transfer_nft(&dest_account, &owner, token_id)?;
             // Call transfer event
-            Self::deposit_event(Event::NftTransferred(token_id, dest_account));
+            Self::deposit_event(Event::NftTransferred(origin, dest_account, token_id));
             Ok(())
         }
 
