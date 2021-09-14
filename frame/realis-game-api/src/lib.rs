@@ -56,7 +56,7 @@ pub mod pallet {
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         /// NFT was minted in game
-        NftMinted(T::AccountId, TokenId),
+        NftMinted(T::AccountId, TokenId, Vec<u8>),
         /// NFT was transfered from player to player
         NftTransferred(T::AccountId, T::AccountId, TokenId),
         /// NFT was burned by player
@@ -67,6 +67,7 @@ pub mod pallet {
         SpendInGame(T::AccountId, BalanceOf<T>),
         /// Pallet Balance
         Balance(T::AccountId, BalanceOf<T>),
+        ///
         AddToWhiteList(T::AccountId, T::AccountId),
     }
 
@@ -143,6 +144,7 @@ pub mod pallet {
             token_id: TokenId,
             rarity: Rarity,
             basic: Basic,
+            id: Vec<u8>
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
@@ -163,7 +165,7 @@ pub mod pallet {
                 rarity,
                 basic,
             )?;
-            Self::deposit_event(Event::<T>::NftMinted(target_account.clone(), token_id));
+            Self::deposit_event(Event::<T>::NftMinted(target_account.clone(), token_id, id));
             Ok(())
         }
 
