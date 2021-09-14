@@ -67,7 +67,7 @@ pub mod pallet {
         SpendInGame(T::AccountId, BalanceOf<T>),
         /// Pallet Balance
         Balance(T::AccountId, BalanceOf<T>),
-        AddToWhiteList(T::AccountId, T::AccountId)
+        AddToWhiteList(T::AccountId, T::AccountId),
     }
 
     #[pallet::error]
@@ -142,7 +142,7 @@ pub mod pallet {
             target_account: T::AccountId,
             token_id: TokenId,
             rarity: Rarity,
-            basic: Basic
+            basic: Basic,
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);

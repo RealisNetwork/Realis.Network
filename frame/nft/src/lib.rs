@@ -50,7 +50,7 @@ pub mod pallet {
     pub enum Event<T: Config> {
         NftMinted(T::AccountId, TokenId),
         NftBurned(),
-        NftTransferred(T::AccountId, T::AccountId, TokenId)
+        NftTransferred(T::AccountId, T::AccountId, TokenId),
     }
 
     // Errors inform users that something went wrong.
