@@ -56,7 +56,7 @@ pub mod pallet {
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         /// NFT was minted in game
-        NftMinted(T::AccountId, TokenId, Vec<u8>),
+        NftMinted(T::AccountId, TokenId),
         /// NFT was transfered from player to player
         NftTransferred(T::AccountId, T::AccountId, TokenId),
         /// NFT was burned by player
@@ -125,7 +125,7 @@ pub mod pallet {
         /// Direct implementation of `GenesisBuild::build_storage`.
         ///
         /// Kept in order not to break dependency.
-        pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
+        pub fn build_storage(&self) -> Result<sp_runtime::Storage, std::string::String> {
             <Self as GenesisBuild<T>>::build_storage(self)
         }
     }
@@ -144,7 +144,7 @@ pub mod pallet {
             token_id: TokenId,
             rarity: Rarity,
             basic: Basic,
-            id: Vec<u8>
+            id: pallet_nft::String
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
@@ -164,8 +164,9 @@ pub mod pallet {
                 token_id,
                 rarity,
                 basic,
+                Some(id)
             )?;
-            Self::deposit_event(Event::<T>::NftMinted(target_account.clone(), token_id, id));
+            Self::deposit_event(Event::<T>::NftMinted(target_account.clone(), token_id));
             Ok(())
         }
 
