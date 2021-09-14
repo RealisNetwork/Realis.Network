@@ -42,12 +42,12 @@ use sp_runtime::{
 };
 
 pub use node_primitives::{AccountId, Balance, Signature};
+use node_runtime::constants::currency::DOLLARS;
 use node_runtime::pallet_staking;
 use node_runtime::realis_game_api;
-pub use node_runtime::{GenesisConfig, Block};
 use node_runtime::Runtime;
+pub use node_runtime::{Block, GenesisConfig};
 use sc_telemetry::serde_json::Map;
-use node_runtime::constants::currency::DOLLARS;
 
 type AccountPublic = <Signature as Verify>::Signer;
 
@@ -221,7 +221,6 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
 
 /// Staging testnet config.
 pub fn staging_testnet_config() -> ChainSpec {
-
     let boot_nodes = vec![];
     ChainSpec::from_genesis(
         "Staging Testnet",
@@ -708,19 +707,16 @@ pub fn realis_config() -> Result<ChainSpec, String> {
 }
 
 fn development_config_genesis() -> GenesisConfig {
+    let sudo_1: AccountId =
+        hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
+    // let sudo_2: AccountId =
+    // let sudo_3: AccountId =
+    // let sudo_4: AccountId =
+    // let sudo_5: AccountId =
 
-    let sudo_1: AccountId = hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
-    // let sudo_2: AccountId = 
-    // let sudo_3: AccountId = 
-    // let sudo_4: AccountId = 
-    // let sudo_5: AccountId = 
-
-    let nft_master =
-        vec![sudo_1.clone()];
-    let api_master =
-        vec![sudo_1.clone()];
-    let bridge_master =
-        vec![sudo_1.clone()];
+    let nft_master = vec![sudo_1.clone()];
+    let api_master = vec![sudo_1.clone()];
+    let bridge_master = vec![sudo_1.clone()];
 
     testnet_genesis(
         vec![authority_keys_from_seed("Alice")],

@@ -48,14 +48,9 @@ pub mod pallet {
         RealisTokenId = "T::RealisTokenId"
     )]
     pub enum Event<T: Config> {
-        /// Event documentation should end with an array that provides descriptive names for event
-        /// parameters. [something, who]
-        SomethingStored(TokenId, T::AccountId),
-        TokenMinted(T::AccountId, TokenId),
-        TokenBurned(),
-        BasicTokenBurned(TokenId),
-        TokenTransferred(TokenId, T::AccountId),
-        TokenBreeded(TokenId),
+        NftMinted(T::AccountId, TokenId),
+        NftBurned(),
+        NftTransferred(TokenId, T::AccountId)
     }
 
     // Errors inform users that something went wrong.
@@ -103,13 +98,14 @@ pub mod pallet {
     /// value - number of tokens that belong to this account
     #[pallet::storage]
     #[pallet::getter(fn total_for_account)]
-    pub(crate) type TotalForAccount<T: Config> =
+    pub type TotalForAccount<T: Config> =
         StorageMap<_, Twox64Concat, T::AccountId, u32, ValueQuery>;
 
     /// Map where (same as VecOfTokensOnAccount by not for Token, instead for Types)
     #[pallet::storage]
-    #[pallet::getter(fn tokens_with_types)]
-    pub type TokensList<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Token>>;
+    #[pallet::getter(fn token_list)]
+    pub type TokensList<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(Token, Status)>>;
 
     /// Contains vector of all accounts ???
     #[pallet::storage]
@@ -179,26 +175,26 @@ pub mod pallet {
             // Push token on account
             Self::mint_nft(&target_account, token_id, token)?;
             // Call mint event
-            Self::deposit_event(Event::TokenMinted(target_account, token_id));
+            Self::deposit_event(Event::NftMinted(target_account, token_id));
 
             Ok(())
         }
 
-        /// Burn mergeable token(only owner)
-        #[pallet::weight(T::WeightInfoNft::burn())]
-        pub fn burn(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
-            // Check is signed correct
-            let origin = ensure_signed(origin)?;
-            // Get owner by token_id
-            let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
-            // Only owner can burn token
-            ensure!(origin == owner, Error::<T>::NotTokenOwner);
-            // Burn token
-            Self::burn_nft(token_id, &owner)?;
-            // Call burn event
-            Self::deposit_event(Event::TokenBurned());
-            Ok(())
-        }
+        // /// Burn mergeable token(only owner)
+        // #[pallet::weight(T::WeightInfoNft::burn())]
+        // pub fn burn(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
+        //     // Check is signed correct
+        //     let origin = ensure_signed(origin)?;
+        //     // Get owner by token_id
+        //     let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
+        //     // Only owner can burn token
+        //     ensure!(origin == owner, Error::<T>::NotTokenOwner);
+        //     // Burn token
+        //     Self::burn_nft(token_id, &owner)?;
+        //     // Call burn event
+        //     Self::deposit_event(Event::NftBurned());
+        //     Ok(())
+        // }
 
         /// Transfer mergeable token(only owner)
         #[pallet::weight(T::WeightInfoNft::transfer())]
@@ -216,7 +212,7 @@ pub mod pallet {
             // Transfer token
             Self::transfer_nft(&dest_account, &owner, token_id)?;
             // Call transfer event
-            Self::deposit_event(Event::TokenTransferred(token_id, dest_account));
+            Self::deposit_event(Event::NftTransferred(token_id, dest_account));
             Ok(())
         }
 
@@ -264,11 +260,12 @@ pub mod pallet {
                 !AccountForToken::<T>::contains_key(token_id),
                 Error::<T>::TokenExist
             );
-
             Self::inc_total_for_account(target_account)?;
 
             TokensList::<T>::mutate(&target_account, |tokens| {
-                tokens.get_or_insert(Vec::default()).push(token);
+                tokens
+                    .get_or_insert(Vec::default())
+                    .push((token, Status::Free));
             });
 
             AccountForToken::<T>::insert(token_id, &target_account);
@@ -283,7 +280,7 @@ pub mod pallet {
                 tuple_tokens
                     .as_mut()
                     .unwrap()
-                    .retain(|token| token.id != token_id);
+                    .retain(|token| token.0.id != token_id);
             });
 
             AccountForToken::<T>::remove(&token_id);
@@ -309,7 +306,7 @@ pub mod pallet {
             // Remove token from current owner
             let token = TokensList::<T>::mutate(&owner, |tokens| {
                 let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.id == token_id);
+                let index = tokens_mut.iter().position(|token| token.0.id == token_id);
                 tokens_mut.remove(index.unwrap())
             });
 

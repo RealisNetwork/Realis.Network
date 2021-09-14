@@ -175,6 +175,7 @@ pub mod pallet {
         }
 
         #[pallet::weight(10000)]
+        #[allow(irrefutable_let_patterns)]
         pub fn transfer_nft_to_bsc(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -191,8 +192,8 @@ pub mod pallet {
             let mut rarity: Rarity = Common;
 
             for t in token {
-                if t.id == token_id {
-                    if let Basic(v, t) = t.token_type {
+                if t.0.id == token_id {
+                    if let Basic(v, t) = t.0.token_type {
                         value = v;
                         rarity = t;
                     }
@@ -250,7 +251,7 @@ pub mod pallet {
         }
 
         #[pallet::weight(10000)]
-        #[warn(path_statements)]
+        #[allow(path_statements)]
         pub fn transfer_token_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(
@@ -262,7 +263,7 @@ pub mod pallet {
         }
 
         #[pallet::weight(10000)]
-        #[warn(unused_must_use)]
+        #[allow(unused_must_use)]
         pub fn transfer_nft_to_bsc_success(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -278,7 +279,7 @@ pub mod pallet {
         }
 
         #[pallet::weight(10000)]
-        #[warn(path_statements)]
+        #[allow(path_statements)]
         pub fn transfer_nft_to_bsc_error(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(

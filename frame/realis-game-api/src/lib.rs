@@ -56,17 +56,18 @@ pub mod pallet {
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         /// NFT was minted in game
-        TokenMinted(T::AccountId, TokenId),
-        /// NFT was trasnfered from player to player
-        TokenTransferred(T::AccountId, T::AccountId, TokenId),
+        NftMinted(T::AccountId, TokenId),
+        /// NFT was transfered from player to player
+        NftTransferred(T::AccountId, T::AccountId, TokenId),
         /// NFT was burned by player
-        TokenBurned(T::AccountId, TokenId),
-        /// LIS was trasfered from player to player
+        NftBurned(T::AccountId, TokenId),
+        /// LIS was transfered from player to player
         FundsTransferred(T::AccountId, T::AccountId, BalanceOf<T>),
         /// User was spended tokens in game
         SpendInGame(T::AccountId, BalanceOf<T>),
         /// Pallet Balance
         Balance(T::AccountId, BalanceOf<T>),
+        AddToWhiteList(T::AccountId, T::AccountId)
     }
 
     #[pallet::error]
@@ -141,7 +142,7 @@ pub mod pallet {
             target_account: T::AccountId,
             token_id: TokenId,
             rarity: Rarity,
-            basic: Basic,
+            basic: Basic
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
@@ -162,7 +163,7 @@ pub mod pallet {
                 rarity,
                 basic,
             )?;
-            Self::deposit_event(Event::<T>::TokenMinted(target_account.clone(), token_id));
+            Self::deposit_event(Event::<T>::NftMinted(target_account.clone(), token_id));
             Ok(())
         }
 
@@ -179,7 +180,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
             NFT::Pallet::<T>::burn_nft(token_id, &from)?;
-            Self::deposit_event(Event::<T>::TokenBurned(from, token_id));
+            Self::deposit_event(Event::<T>::NftBurned(from, token_id));
             Ok(())
         }
 
@@ -202,7 +203,7 @@ pub mod pallet {
             );
 
             NFT::Pallet::<T>::transfer_nft(&dest, &from, token_id)?;
-            Self::deposit_event(Event::<T>::TokenTransferred(from, dest, token_id));
+            Self::deposit_event(Event::<T>::NftTransferred(from, dest, token_id));
             Ok(())
         }
 

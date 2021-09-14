@@ -51,6 +51,7 @@ const STAKING_ID: LockIdentifier = *b"staking ";
 #[frame_support::pallet]
 pub mod pallet {
     use super::*;
+    use sp_runtime::traits::Saturating;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(crate) trait Store)]
@@ -565,6 +566,7 @@ pub mod pallet {
         Chilled(T::AccountId),
         /// The stakers' rewards are getting paid. \[era_index, validator_stash\]
         PayoutStarted(EraIndex, T::AccountId),
+        Balance(T::AccountId, BalanceOf<T>),
     }
 
     #[pallet::error]
@@ -617,6 +619,8 @@ pub mod pallet {
         /// There are too many validators in the system. Governance needs to adjust the staking
         /// settings to keep things safe for the runtime.
         TooManyValidators,
+
+        NotApiMaster,
     }
 
     #[pallet::hooks]
@@ -739,6 +743,15 @@ pub mod pallet {
             Ok(())
         }
 
+        #[pallet::weight((90_000_000, Pays::No))]
+        pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
+            let _who = ensure_root(origin)?;
+            let account_id = Self::account_id();
+            let balance = <T as Config>::Currency::free_balance(&account_id)
+                .saturating_sub(<T as Config>::Currency::minimum_balance());
+            Self::deposit_event(Event::<T>::Balance(account_id, balance));
+            Ok(())
+        }
         /// Add some extra amount that have appeared in the stash `free_balance` into the balance up
         /// for staking.
         ///
