@@ -25,8 +25,6 @@ pub mod pallet {
 
     use super::*;
 
-    pub type String = Vec<u8>;
-
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
     pub struct Pallet<T>(PhantomData<T>);
@@ -50,7 +48,7 @@ pub mod pallet {
         RealisTokenId = "T::RealisTokenId"
     )]
     pub enum Event<T: Config> {
-        NftMinted(T::AccountId, TokenId, Option<String>),
+        NftMinted(T::AccountId, TokenId),
         NftBurned(),
         NftTransferred(T::AccountId, T::AccountId, TokenId),
     }
@@ -163,7 +161,6 @@ pub mod pallet {
             token_id: TokenId,
             rarity: Rarity,
             basic: Basic,
-            id: Option<String>
         ) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -178,7 +175,7 @@ pub mod pallet {
             // Push token on account
             Self::mint_nft(&target_account, token_id, token)?;
             // Call mint event
-            Self::deposit_event(Event::NftMinted(target_account, token_id, id));
+            Self::deposit_event(Event::NftMinted(target_account, token_id));
 
             Ok(())
         }

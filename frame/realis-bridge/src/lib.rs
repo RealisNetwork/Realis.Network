@@ -221,7 +221,7 @@ pub mod pallet {
                 Error::<T>::NotBridgeMaster
             );
 
-            Nft::Pallet::<T>::mint(origin, to.clone(), token_id, rarity, token_type, None)?;
+            Nft::Pallet::<T>::mint(origin, to.clone(), token_id, rarity, token_type)?;
 
             Self::deposit_event(Event::<T>::TransferNftToRealis(
                 from, to, token_id, token_type, rarity,

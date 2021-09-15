@@ -29,6 +29,7 @@ pub mod pallet {
     use pallet_nft as NFT;
     use realis_primitives::{Basic, Rarity, TokenId};
 
+    pub type String = Vec<u8>;
     type BalanceOf<T> =
         <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
@@ -56,7 +57,7 @@ pub mod pallet {
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         /// NFT was minted in game
-        NftMinted(T::AccountId, TokenId),
+        NftMinted(T::AccountId, TokenId, Option<String>),
         /// NFT was transfered from player to player
         NftTransferred(T::AccountId, T::AccountId, TokenId),
         /// NFT was burned by player
@@ -144,7 +145,7 @@ pub mod pallet {
             token_id: TokenId,
             rarity: Rarity,
             basic: Basic,
-            id: pallet_nft::String
+            id: String
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
@@ -164,9 +165,8 @@ pub mod pallet {
                 token_id,
                 rarity,
                 basic,
-                Some(id)
             )?;
-            Self::deposit_event(Event::<T>::NftMinted(target_account.clone(), token_id));
+            Self::deposit_event(Event::<T>::NftMinted(target_account.clone(), token_id, Some(id)));
             Ok(())
         }
 
