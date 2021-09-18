@@ -48,7 +48,7 @@ pub mod pallet {
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
     pub enum Event<T: Config> {
         ///Token was tranfered to BEP-20 on BSC
-        TransferTokenToBSC(T::AccountId, H160, BalanceOf<T>),
+        TransferTokenToBSC(T::AccountId, H160, BalanceOf<T>, BalanceOf<T>),
         ///NFT was tranfered to BEP-721 on BSC
         TransferNftToBSC(T::AccountId, H160, TokenId, u8, Rarity),
 
@@ -130,9 +130,11 @@ pub mod pallet {
             to: H160,
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
-            ensure_signed(origin)?;
+            let who = ensure_signed(origin)?;
+            let balance = <T as Config>::BridgeCurrency::free_balance(&who);
+            ensure!(balance > value, Error::<T>::InsufficientBalance);
 
-            Self::deposit_event(Event::<T>::TransferTokenToBSC(from.clone(), to, value));
+            Self::deposit_event(Event::<T>::TransferTokenToBSC(from.clone(), to, value, balance));
             Ok(())
         }
 

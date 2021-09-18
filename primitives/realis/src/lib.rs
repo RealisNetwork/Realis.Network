@@ -45,8 +45,9 @@ pub enum Rarity {
     Common,
     Uncommon,
     Rare,
-    Mythical,
+    Epic,
     Legendary,
+    Relic
 }
 
 #[derive(PartialEq, Eq, Clone, Default, Encode, Decode)]
@@ -67,8 +68,9 @@ impl FromStr for Rarity {
             "Common" => Ok(Rarity::Common),
             "Uncommon" => Ok(Rarity::Uncommon),
             "Rare" => Ok(Rarity::Rare),
-            "Mythical" => Ok(Rarity::Mythical),
+            "Mythical" => Ok(Rarity::Epic),
             "Legendary" => Ok(Rarity::Legendary),
+            "Relic" => Ok(Rarity::Relic),
             _ => Err(()),
         }
     }

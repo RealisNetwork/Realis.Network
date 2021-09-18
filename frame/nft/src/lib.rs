@@ -160,7 +160,7 @@ pub mod pallet {
             target_account: T::AccountId,
             token_id: TokenId,
             rarity: Rarity,
-            basic: Basic,
+            basic: Basic
         ) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
