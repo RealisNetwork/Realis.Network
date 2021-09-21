@@ -14,6 +14,7 @@ frame-system = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1
 sp-core = { git = "https://github.com/paritytech/substrate.git", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 impl-trait-for-tuples = "0.2"
+serde_repr = "0.1.7"
 
 
 [features]
