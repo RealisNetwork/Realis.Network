@@ -15,6 +15,7 @@ pub mod pallet {
     use frame_support::traits::{Currency, ExistenceRequirement};
     use node_primitives::Balance;
     use sp_runtime::ArithmeticError;
+    use sp_std::vec;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]

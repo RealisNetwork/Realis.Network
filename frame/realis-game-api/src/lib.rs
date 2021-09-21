@@ -27,7 +27,7 @@ pub mod pallet {
     use sp_runtime::traits::{AccountIdConversion, Saturating};
 
     use pallet_nft as NFT;
-    use realis_primitives::{Basic, Rarity, String, TokenId};
+    use realis_primitives::{Basic, Rarity, Status, String, TokenId};
 
     type BalanceOf<T> =
         <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -89,6 +89,10 @@ pub mod pallet {
         UserNotFoundInWhitelist,
 
         AccountAlreadyInWhitelist,
+
+        CannotTransferNftBecauseThisNftOnAnotherUser,
+
+        CannotTransferNftBecauseThisNftInMarketplace,
     }
 
     #[pallet::storage]
@@ -183,6 +187,19 @@ pub mod pallet {
                 Self::whitelist().contains(&from),
                 Error::<T>::UserNotFoundInWhitelist
             );
+            let tokens = NFT::TokensList::<T>::get(from.clone()).unwrap();
+            for token in tokens {
+                if token.0.id == token_id {
+                    ensure!(
+                        token.1 != Status::OnSell,
+                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
+                    );
+                    ensure!(
+                        token.1 != Status::InDelegation,
+                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
+                    );
+                };
+            }
             NFT::Pallet::<T>::burn_nft(token_id, &from)?;
             Self::deposit_event(Event::<T>::NftBurned(from, token_id));
             Ok(())
@@ -205,6 +222,19 @@ pub mod pallet {
                 Self::whitelist().contains(&dest),
                 Error::<T>::UserNotFoundInWhitelist
             );
+            let tokens = NFT::TokensList::<T>::get(who.clone()).unwrap();
+            for token in tokens {
+                if token.0.id == token_id {
+                    ensure!(
+                        token.1 != Status::OnSell,
+                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
+                    );
+                    ensure!(
+                        token.1 != Status::InDelegation,
+                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
+                    );
+                };
+            }
 
             NFT::Pallet::<T>::transfer_nft(&dest, &from, token_id)?;
             Self::deposit_event(Event::<T>::NftTransferred(from, dest, token_id));
