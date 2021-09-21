@@ -3,6 +3,7 @@
 use frame_support::dispatch;
 pub use pallet::*;
 use sp_std::prelude::*;
+use sp_std::vec;
 
 #[frame_support::pallet]
 pub mod pallet {
