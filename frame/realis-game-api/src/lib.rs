@@ -27,9 +27,7 @@ pub mod pallet {
     use sp_runtime::traits::{AccountIdConversion, Saturating};
 
     use pallet_nft as NFT;
-    use realis_primitives::{Basic, Rarity, TokenId};
-
-    pub type String = Vec<u8>;
+    use realis_primitives::{Basic, Rarity, TokenId, String};
 
     type BalanceOf<T> =
         <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -146,7 +144,8 @@ pub mod pallet {
             token_id: TokenId,
             rarity: Rarity,
             basic: Basic,
-            id: String
+            id: String,
+            link: String
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
@@ -166,6 +165,7 @@ pub mod pallet {
                 token_id,
                 rarity,
                 basic,
+                link
             )?;
             Self::deposit_event(Event::<T>::NftMinted(target_account.clone(), token_id, id));
             Ok(())
