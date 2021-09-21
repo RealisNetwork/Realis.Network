@@ -85,6 +85,10 @@ pub mod pallet {
         ExistentialDeposit,
         /// Nft Master was added early
         NftMasterWasAddedEarly,
+
+        CannotTransferNftBecauseThisNftInMarketplace,
+
+        CannotTransferNftBecauseThisNftOnAnotherUser,
     }
 
     /// Map where
@@ -210,6 +214,20 @@ pub mod pallet {
             let origin = ensure_signed(origin)?;
             // Get owner by token_id
             let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
+
+            let tokens = TokensList::<T>::get(origin.clone()).unwrap();
+            for token in tokens {
+                if token.0.id == token_id {
+                    ensure!(
+                        token.1 != Status::OnSell,
+                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
+                    );
+                    ensure!(
+                        token.1 != Status::InDelegation,
+                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
+                    );
+                };
+            }
             // Only owner can transfer token
             ensure!(origin == owner, Error::<T>::NotTokenOwner);
             // Transfer token
