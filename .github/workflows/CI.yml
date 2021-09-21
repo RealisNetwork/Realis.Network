@@ -1,12 +1,12 @@
 name: CI
 on:
-  push:
-    branches:
-      - ngubin
-      - main
-      - develop
-      - bridges
-      - dkireev
+#  push:
+#    branches:
+#      - ngubin
+#      - main
+#      - develop
+#      - bridges
+#      - dkireev
   pull_request:
     branches:
       - ngubin

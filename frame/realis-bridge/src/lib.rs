@@ -22,8 +22,8 @@ pub mod pallet {
     use pallet_nft as Nft;
     use realis_primitives::Rarity;
     use realis_primitives::Rarity::Common;
-    use realis_primitives::TokenType::Basic;
     use realis_primitives::String;
+    use realis_primitives::TokenType::Basic;
     use sp_core::H160;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
 
@@ -224,7 +224,7 @@ pub mod pallet {
             token_id: TokenId,
             token_type: u8,
             rarity: Rarity,
-            link: String
+            link: String,
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(
