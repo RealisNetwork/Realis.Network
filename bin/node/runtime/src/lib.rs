@@ -1272,9 +1272,10 @@ impl realis_bridge::Config for Runtime {
     type PalletId = RealisBridgePalletId;
 }
 
-// impl marketplace::Config for Runtime {
-//     type Event = Event;
-// }
+impl marketplace::Config for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+}
 
 construct_runtime!(
     pub enum Runtime where
@@ -1325,7 +1326,7 @@ construct_runtime!(
         RealisBridge: realis_bridge::{Pallet, Call, Event<T>, Config<T>, Storage},
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>, Config<T>, Storage},
-        // Marketplace: marketplace::{Pallet, Call, Event<T>, Storage},
+        Marketplace: marketplace::{Pallet, Call, Event<T>, Storage},
         Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
     }
 );

@@ -94,7 +94,7 @@ realis-game-api = { version = "0.0.1", default-features = false, path = "../../.
 runtime-common = {version = "0.0.1", default-features = false, path = "../runtime-common"}
 realis-primitives = { version = "0.0.2", default-features = false, path = "../../../primitives/realis"}
 realis-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/realis-bridge" }
-#marketplace = { version = "0.0.1", default-features = false, path = "../../../frame/marketplace" }
+marketplace = { version = "0.0.1", default-features = false, path = "../../../frame/marketplace" }
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f"}

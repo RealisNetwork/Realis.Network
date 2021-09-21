@@ -162,7 +162,7 @@ pub mod pallet {
             token_id: TokenId,
             rarity: Rarity,
             basic: Basic,
-            link: String
+            link: String,
         ) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;

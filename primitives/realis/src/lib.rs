@@ -1,13 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::pallet_prelude::{Decode, Encode};
-use serde_repr::{Serialize_repr, Deserialize_repr};
-use sp_std::fmt::{Display, Formatter};
 use primitive_types::U256;
-use sp_std::vec::Vec;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+use sp_std::fmt::{Display, Formatter};
 use sp_std::str::FromStr;
+use sp_std::vec::Vec;
 
 pub type TokenId = U256;
 pub type Basic = u8;
