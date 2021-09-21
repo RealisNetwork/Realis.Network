@@ -25,5 +25,14 @@
   "Token": {
     "token_id": "TokenId",
     "token": "TokenType"
- }
+ },
+ "String": "Vec<u8>",
+   "Status": {
+    "_enum": [
+      "OnSell",
+      "InDelegation",
+      "Free"
+    ]
+  }
 }
+

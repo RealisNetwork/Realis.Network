@@ -23,6 +23,7 @@ pub mod pallet {
     use realis_primitives::Rarity;
     use realis_primitives::Rarity::Common;
     use realis_primitives::TokenType::Basic;
+    use realis_primitives::String;
     use sp_core::H160;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
 
@@ -113,7 +114,9 @@ pub mod pallet {
         /// Direct implementation of `GenesisBuild::build_storage`.
         ///
         /// Kept in order not to break dependency.
-        pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
+        #[cfg(feature = "std")]
+        pub fn build_storage(&self) -> Result<sp_runtime::Storage, std::string::String> {
+            #[cfg(feature = "std")]
             <Self as GenesisBuild<T>>::build_storage(self)
         }
     }
@@ -134,7 +137,12 @@ pub mod pallet {
             let balance = <T as Config>::BridgeCurrency::free_balance(&who);
             ensure!(balance > value, Error::<T>::InsufficientBalance);
 
-            Self::deposit_event(Event::<T>::TransferTokenToBSC(from.clone(), to, value, balance));
+            Self::deposit_event(Event::<T>::TransferTokenToBSC(
+                from.clone(),
+                to,
+                value,
+                balance,
+            ));
             Ok(())
         }
 
@@ -195,7 +203,7 @@ pub mod pallet {
 
             for t in token {
                 if t.0.id == token_id {
-                    if let Basic(v, t) = t.0.token_type {
+                    if let Basic(v, t, _) = t.0.token_type {
                         value = v;
                         rarity = t;
                     }
@@ -216,6 +224,7 @@ pub mod pallet {
             token_id: TokenId,
             token_type: u8,
             rarity: Rarity,
+            link: String
         ) -> DispatchResult {
             let who = ensure_signed(origin.clone())?;
             ensure!(
@@ -223,7 +232,7 @@ pub mod pallet {
                 Error::<T>::NotBridgeMaster
             );
 
-            Nft::Pallet::<T>::mint(origin, to.clone(), token_id, rarity, token_type)?;
+            Nft::Pallet::<T>::mint(origin, to.clone(), token_id, rarity, token_type, link)?;
 
             Self::deposit_event(Event::<T>::TransferNftToRealis(
                 from, to, token_id, token_type, rarity,

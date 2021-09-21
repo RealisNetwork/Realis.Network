@@ -20,6 +20,7 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
     use sp_runtime::ArithmeticError;
+    use sp_std::borrow::ToOwned;
 
     use realis_primitives::*;
 
@@ -160,16 +161,18 @@ pub mod pallet {
             target_account: T::AccountId,
             token_id: TokenId,
             rarity: Rarity,
-            basic: Basic
+            basic: Basic,
+            link: String
         ) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
             // Check if account that signed operation have permission for this operation
             ensure!(Self::nft_masters().contains(&who), Error::<T>::NotNftMaster);
             // Create token by grouping up arguments
+            let link = "https://ipfs.io/ipfs/".to_owned() + sp_std::str::from_utf8(&link).unwrap();
             let token = Token {
                 id: token_id,
-                token_type: TokenType::Basic(basic, rarity),
+                token_type: TokenType::Basic(basic, rarity, String::from(link)),
             };
 
             // Push token on account

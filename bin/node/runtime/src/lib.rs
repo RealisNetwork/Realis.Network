@@ -115,10 +115,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 267,
-    impl_version: 0,
+    spec_version: 268,
+    impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 1,
+    transaction_version: 2,
 };
 
 /// The BABE epoch configuration at genesis.
@@ -1272,6 +1272,10 @@ impl realis_bridge::Config for Runtime {
     type PalletId = RealisBridgePalletId;
 }
 
+// impl marketplace::Config for Runtime {
+//     type Event = Event;
+// }
+
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
@@ -1321,6 +1325,7 @@ construct_runtime!(
         RealisBridge: realis_bridge::{Pallet, Call, Event<T>, Config<T>, Storage},
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>, Config<T>, Storage},
+        // Marketplace: marketplace::{Pallet, Call, Event<T>, Storage},
         Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
     }
 );
