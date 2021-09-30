@@ -3422,6 +3422,7 @@ dependencies = [
  "pallet-nft",
  "parity-scale-codec",
  "primitive-types",
+ "realis-game-api",
  "realis-primitives",
  "serde",
  "sp-arithmetic",

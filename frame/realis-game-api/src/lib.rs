@@ -191,11 +191,11 @@ pub mod pallet {
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
-                        token.1 != Status::OnSell,
+                        token.1 == Status::OnSell,
                         Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
                     );
                     ensure!(
-                        token.1 != Status::InDelegation,
+                        token.1 == Status::InDelegation,
                         Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
                 };
@@ -222,15 +222,15 @@ pub mod pallet {
                 Self::whitelist().contains(&dest),
                 Error::<T>::UserNotFoundInWhitelist
             );
-            let tokens = NFT::TokensList::<T>::get(who.clone()).unwrap();
+            let tokens = NFT::TokensList::<T>::get(from.clone()).unwrap();
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
-                        token.1 != Status::OnSell,
+                        token.1 == Status::OnSell,
                         Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
                     );
                     ensure!(
-                        token.1 != Status::InDelegation,
+                        token.1 == Status::InDelegation,
                         Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
                 };
@@ -409,6 +409,10 @@ pub mod pallet {
             });
             Ok(())
         }
+
+        // pub fn change_status_nft(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
+        //
+        // }
     }
 
     impl<T: Config> Pallet<T> {
