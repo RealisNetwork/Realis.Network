@@ -3,7 +3,7 @@
 
 use frame_support::{dispatch::DispatchResult, ensure, traits::Get};
 use frame_system::ensure_signed;
-pub use realis_primitives::{TokenId, TokenType};
+pub use realis_primitives::{TokenId, TokenType, Status};
 use sp_std::prelude::*;
 
 mod benchmarking;
@@ -82,6 +82,9 @@ pub mod pallet {
         TokensWasntTransfered,
         /// NFT wasnt trasnferred to BEP-721
         NFTWasntTransfered,
+        CannotTransferNftBecauseThisNftInMarketplace,
+        CannotTransferNftBecauseThisNftOnAnotherUser
+
     }
 
     #[pallet::storage]
@@ -196,6 +199,20 @@ pub mod pallet {
             // Only owner can transfer token
             ensure!(who == from, Error::<T>::NotTokenOwner);
             let token = Nft::TokensList::<T>::get(from.clone()).unwrap();
+
+            let tokens = Nft::TokensList::<T>::get(from.clone()).unwrap();
+            for token in tokens {
+                if token.0.id == token_id {
+                    ensure!(
+                        token.1 == Status::OnSell,
+                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
+                    );
+                    ensure!(
+                        token.1 == Status::InDelegation,
+                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
+                    );
+                };
+            }
 
             let mut value: u8 = 1;
 

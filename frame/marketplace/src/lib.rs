@@ -3,6 +3,7 @@
 use frame_support::dispatch;
 pub use pallet::*;
 use sp_std::prelude::*;
+#[allow(unused_imports)]
 use sp_std::vec;
 
 #[frame_support::pallet]
@@ -16,7 +17,6 @@ pub mod pallet {
     use frame_support::traits::{Currency, ExistenceRequirement};
     use node_primitives::Balance;
     use sp_runtime::ArithmeticError;
-    use sp_std::vec;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -24,7 +24,7 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-    pub trait Config: frame_system::Config + Nft::Config {
+    pub trait Config: frame_system::Config + Nft::Config + realis_game_api::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
@@ -55,6 +55,8 @@ pub mod pallet {
     #[pallet::error]
     pub enum Error<T> {
         CannotForSaleThisNft,
+        CannotTransferNftBecauseThisNftInMarketplace,
+        CannotTransferNftBecauseThisNftOnAnotherUser
     }
 
     #[pallet::storage]
@@ -72,11 +74,17 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         #[pallet::weight(90_000_000)]
         pub fn sell_nft(origin: OriginFor<T>, token_id: TokenId, price: Balance) -> DispatchResult {
-            let _who = ensure_signed(origin)?;
+            let who = ensure_signed(origin)?;
             let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
-            // if token_in_storage[0].1 == Status::InDelegation || token_in_storage[0].1 == Status::OnSell {
-            //     pallet::DispatchError::Other("CannotForSaleThisNft");
-            // }
+            let tokens = Nft::TokensList::<T>::get(who.clone()).unwrap();
+            for token in tokens {
+                if token.0.id == token_id {
+                    ensure!(
+                        token.1 != Status::Free,
+                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
+                    );
+                };
+            }
             let old_token = Self::sell(owner, token_id, price).unwrap();
             // Call mint event
             Self::deposit_event(Event::NftForSale(token_id, price, old_token));
@@ -103,9 +111,15 @@ pub mod pallet {
             price: Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            // if token_in_storage[0].1 == Status::InDelegation || token_in_storage[0].1 == Status::OnSell {
-            //     pallet::DispatchError::Other("CannotForSaleThisNft");
-            // }
+            let tokens = Nft::TokensList::<T>::get(who.clone()).unwrap();
+            for token in tokens {
+                if token.0.id == token_id {
+                    ensure!(
+                        token.1 != Status::Free,
+                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
+                    );
+                };
+            }
             Self::change_price(who.clone(), token_id, price).unwrap();
 
             // Call mint event
@@ -192,7 +206,15 @@ pub mod pallet {
                     });
             });
 
-            T::Currency::transfer(&buyer, &owner, balance[0], ExistenceRequirement::KeepAlive)?;
+            let five_percent = balance[0] / 100 * 5;
+
+            let amount = balance[0] / 100 * 95;
+
+            <T as pallet::Config>::Currency::transfer(&buyer, &owner, amount, ExistenceRequirement::KeepAlive)?;
+
+            let pallet_id: T::AccountId = realis_game_api::Pallet::<T>::account_id();
+
+            <T as pallet::Config>::Currency::transfer(&buyer, &pallet_id, five_percent, ExistenceRequirement::KeepAlive)?;
 
             NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
                 let tokens_mut = tokens.as_mut().unwrap();
