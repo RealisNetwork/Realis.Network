@@ -55,8 +55,8 @@ pub mod pallet {
     #[pallet::error]
     pub enum Error<T> {
         CannotForSaleThisNft,
-        CannotTransferNftBecauseThisNftInMarketplace,
-        CannotTransferNftBecauseThisNftOnAnotherUser
+        CannotSellAgainNft,
+        CannotChangePriceNft
     }
 
     #[pallet::storage]
@@ -80,8 +80,8 @@ pub mod pallet {
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
-                        token.1 != Status::Free,
-                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
+                        token.1 == Status::Free,
+                        Error::<T>::CannotSellAgainNft
                     );
                 };
             }
@@ -112,11 +112,12 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let tokens = Nft::TokensList::<T>::get(who.clone()).unwrap();
+            let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
-                        token.1 != Status::Free,
-                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
+                        who == owner,
+                        Error::<T>::CannotChangePriceNft
                     );
                 };
             }
