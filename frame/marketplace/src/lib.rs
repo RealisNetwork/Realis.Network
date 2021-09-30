@@ -3,6 +3,7 @@
 use frame_support::dispatch;
 pub use pallet::*;
 use sp_std::prelude::*;
+#[allow(unused_imports)]
 use sp_std::vec;
 
 #[frame_support::pallet]
@@ -79,12 +80,8 @@ pub mod pallet {
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
-                        token.1 == Status::OnSell,
+                        token.1 != Status::Free,
                         Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
-                    );
-                    ensure!(
-                        token.1 == Status::InDelegation,
-                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
                 };
             }
@@ -118,12 +115,8 @@ pub mod pallet {
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
-                        token.1 == Status::OnSell,
+                        token.1 != Status::Free,
                         Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
-                    );
-                    ensure!(
-                        token.1 == Status::InDelegation,
-                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
                 };
             }
