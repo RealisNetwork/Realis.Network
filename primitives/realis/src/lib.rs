@@ -9,7 +9,6 @@ use sp_std::fmt::{Display, Formatter};
 use sp_std::vec::Vec;
 
 pub type TokenId = U256;
-pub type Basic = u8;
 pub type String = Vec<u8>;
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
@@ -21,7 +20,7 @@ pub struct Token {
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum TokenType {
-    Basic(Basic, Rarity, String),
+    Basic(Rarity, String),
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]

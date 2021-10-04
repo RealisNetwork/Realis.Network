@@ -28,7 +28,7 @@ pub mod pallet {
     use sp_runtime::traits::{AccountIdConversion, Saturating};
 
     use pallet_nft as NFT;
-    use realis_primitives::{Basic, Rarity, Status, String, TokenId};
+    use realis_primitives::{Rarity, Status, String, TokenId};
 
     type BalanceOf<T> =
         <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -152,7 +152,6 @@ pub mod pallet {
             target_account: T::AccountId,
             token_id: TokenId,
             rarity: Rarity,
-            basic: Basic,
             id: String,
             link: String,
         ) -> DispatchResult {
@@ -173,7 +172,6 @@ pub mod pallet {
                 target_account.clone(),
                 token_id,
                 rarity,
-                basic,
                 link,
             )?;
             Self::deposit_event(Event::<T>::NftMinted(target_account.clone(), token_id, id));
@@ -430,7 +428,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::sell(account_id, token_id, amount);
+            marketplace::Pallet::<T>::sell(account_id, token_id, amount)?;
             Ok(())
         }
 
@@ -448,7 +446,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::buy(account_id, token_id);
+            marketplace::Pallet::<T>::buy(account_id, token_id)?;
             Ok(())
         }
 
@@ -467,7 +465,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::change_price(account_id, token_id, amount);
+            marketplace::Pallet::<T>::change_price(account_id, token_id, amount)?;
             Ok(())
         }
 
@@ -485,7 +483,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::remove(account_id, token_id);
+            marketplace::Pallet::<T>::remove(account_id, token_id)?;
             Ok(())
         }
     }

@@ -52,12 +52,12 @@ pub mod pallet {
         ///Token was tranfered to BEP-20 on BSC
         TransferTokenToBSC(T::AccountId, H160, BalanceOf<T>, BalanceOf<T>),
         ///NFT was tranfered to BEP-721 on BSC
-        TransferNftToBSC(T::AccountId, H160, TokenId, u8, Rarity),
+        TransferNftToBSC(T::AccountId, H160, TokenId, Rarity),
 
         ///Token was tranfered to Realis.Network from BEP-20 on BSC
         TransferTokenToRealis(H160, T::AccountId, BalanceOf<T>),
         ///NFT was tranfered to Realis.Network from BEP-721 on BSC
-        TransferNftToRealis(H160, T::AccountId, TokenId, u8, Rarity),
+        TransferNftToRealis(H160, T::AccountId, TokenId, Rarity),
         Balance(T::AccountId, BalanceOf<T>),
     }
 
@@ -214,21 +214,18 @@ pub mod pallet {
                 };
             }
 
-            let mut value: u8 = 1;
-
             let mut rarity: Rarity = Common;
 
             for t in token {
                 if t.0.id == token_id {
-                    if let Basic(v, t, _) = t.0.token_type {
-                        value = v;
+                    if let Basic(t, _) = t.0.token_type {
                         rarity = t;
                     }
                 }
             }
 
             Self::deposit_event(Event::<T>::TransferNftToBSC(
-                from, dest, token_id, value, rarity,
+                from, dest, token_id, rarity,
             ));
             Ok(())
         }
@@ -239,7 +236,6 @@ pub mod pallet {
             from: H160,
             to: T::AccountId,
             token_id: TokenId,
-            token_type: u8,
             rarity: Rarity,
             link: String,
         ) -> DispatchResult {
@@ -249,10 +245,10 @@ pub mod pallet {
                 Error::<T>::NotBridgeMaster
             );
 
-            Nft::Pallet::<T>::mint(origin, to.clone(), token_id, rarity, token_type, link)?;
+            Nft::Pallet::<T>::mint(origin, to.clone(), token_id, rarity, link)?;
 
             Self::deposit_event(Event::<T>::TransferNftToRealis(
-                from, to, token_id, token_type, rarity,
+                from, to, token_id, rarity,
             ));
             Ok(())
         }

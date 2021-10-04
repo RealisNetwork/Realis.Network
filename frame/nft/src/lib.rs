@@ -165,7 +165,6 @@ pub mod pallet {
             target_account: T::AccountId,
             token_id: TokenId,
             rarity: Rarity,
-            basic: Basic,
             link: String,
         ) -> DispatchResult {
             // Check is signed correct
@@ -176,7 +175,7 @@ pub mod pallet {
             let link = "https://ipfs.io/ipfs/".to_owned() + sp_std::str::from_utf8(&link).unwrap();
             let token = Token {
                 id: token_id,
-                token_type: TokenType::Basic(basic, rarity, String::from(link)),
+                token_type: TokenType::Basic( rarity, String::from(link)),
             };
 
             // Push token on account
