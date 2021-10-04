@@ -26,6 +26,7 @@ sp-staking = { default-features = false, git = "https://github.com/paritytech/su
 frame-election-provider-support = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false  }
 primitive-types = { version = "0.10.1", default-features = false }
 pallet-nft = { version = "0.0.2", default-features = false, path="../nft" }
+marketplace = { version = "0.0.1", default-features = false, path="../marketplace" }
 pallet-staking = {version = "0.0.2", default-features = false, path="../staking-pool" }
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", version = "4.0.0-dev", default-features = false, optional = true }
 realis-primitives = { version = "0.0.2", path = "../../primitives/realis", default-features = false}
@@ -49,7 +50,8 @@ std = [
     "sp-std/std",
     "pallet-nft/std",
     "pallet-staking/std",
-    "realis-primitives/std"
+    "realis-primitives/std",
+    "marketplace/std"
 ]
 
 runtime-benchmarks = ["frame-benchmarking"]

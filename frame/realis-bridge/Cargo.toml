@@ -21,6 +21,7 @@ sp-arithmetic = { git = "https://github.com/paritytech/substrate", rev = "e7b93e
 pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 realis-primitives = { path = "../../primitives/realis", default-features = false }
 pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
+realis-game-api = { version = "0.0.1", path = "../realis-game-api", default-features = false }
 
 [dev-dependencies]
 pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
@@ -40,7 +41,8 @@ std = [
 	'frame-support/std',
 	'frame-system/std',
 	'pallet-nft/std',
-	"realis-primitives/std"
+	"realis-primitives/std",
+	"realis-game-api/std"
 ]
 
 runtime-benchmarks = ["frame-benchmarking"]
