@@ -8,14 +8,13 @@ use sp_std::vec;
 
 #[frame_support::pallet]
 pub mod pallet {
+    use super::*;
     use frame_support::pallet_prelude::*;
+    use frame_support::traits::{Currency, ExistenceRequirement};
     use frame_system::pallet_prelude::*;
+    use node_primitives::Balance;
     use pallet_nft as Nft;
     use realis_primitives::*;
-
-    use super::*;
-    use frame_support::traits::{Currency, ExistenceRequirement};
-    use node_primitives::Balance;
     use sp_runtime::ArithmeticError;
 
     #[pallet::pallet]
@@ -24,7 +23,7 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-    pub trait Config: frame_system::Config + Nft::Config + realis_game_api::Config {
+    pub trait Config: frame_system::Config + Nft::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
@@ -56,7 +55,7 @@ pub mod pallet {
     pub enum Error<T> {
         CannotForSaleThisNft,
         CannotSellAgainNft,
-        CannotChangePriceNft
+        CannotChangePriceNft,
     }
 
     #[pallet::storage]
@@ -79,10 +78,7 @@ pub mod pallet {
             let tokens = Nft::TokensList::<T>::get(who.clone()).unwrap();
             for token in tokens {
                 if token.0.id == token_id {
-                    ensure!(
-                        token.1 == Status::Free,
-                        Error::<T>::CannotSellAgainNft
-                    );
+                    ensure!(token.1 == Status::Free, Error::<T>::CannotSellAgainNft);
                 };
             }
             let old_token = Self::sell(owner, token_id, price).unwrap();
@@ -115,10 +111,7 @@ pub mod pallet {
             let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
             for token in tokens {
                 if token.0.id == token_id {
-                    ensure!(
-                        who == owner,
-                        Error::<T>::CannotChangePriceNft
-                    );
+                    ensure!(who == owner, Error::<T>::CannotChangePriceNft);
                 };
             }
             Self::change_price(who.clone(), token_id, price).unwrap();
@@ -146,7 +139,7 @@ pub mod pallet {
     }
 
     impl<T: Config> Pallet<T> {
-        fn sell(
+        pub fn sell(
             seller: <T as frame_system::Config>::AccountId,
             token_id: TokenId,
             price: Balance,
@@ -187,7 +180,7 @@ pub mod pallet {
             Ok(old_token)
         }
 
-        fn buy(
+        pub fn buy(
             buyer: <T as frame_system::Config>::AccountId,
             token_id: TokenId,
         ) -> dispatch::result::Result<(), dispatch::DispatchError> {
@@ -207,15 +200,16 @@ pub mod pallet {
                     });
             });
 
-            let five_percent = balance[0] / 100 * 5;
+            // let five_percent = balance[0] / 100 * 5;
 
-            let amount = balance[0] / 100 * 95;
+            // let amount = balance[0] / 100 * 95;
 
-            <T as pallet::Config>::Currency::transfer(&buyer, &owner, amount, ExistenceRequirement::KeepAlive)?;
-
-            let pallet_id: T::AccountId = realis_game_api::Pallet::<T>::account_id();
-
-            <T as pallet::Config>::Currency::transfer(&buyer, &pallet_id, five_percent, ExistenceRequirement::KeepAlive)?;
+            <T as pallet::Config>::Currency::transfer(
+                &buyer,
+                &owner,
+                balance[0],
+                ExistenceRequirement::KeepAlive,
+            )?;
 
             NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
                 let tokens_mut = tokens.as_mut().unwrap();
@@ -262,7 +256,7 @@ pub mod pallet {
             Ok(())
         }
 
-        fn change_price(
+        pub fn change_price(
             owner: <T as frame_system::Config>::AccountId,
             token_id: TokenId,
             new_price: Balance,
@@ -302,7 +296,7 @@ pub mod pallet {
             Ok(())
         }
 
-        fn remove(
+        pub fn remove(
             owner: <T as frame_system::Config>::AccountId,
             token_id: TokenId,
         ) -> dispatch::result::Result<(), dispatch::DispatchError> {

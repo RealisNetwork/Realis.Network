@@ -24,6 +24,7 @@ pub mod pallet {
     use frame_support::weights::Pays;
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
+    use marketplace;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
 
     use pallet_nft as NFT;
@@ -38,7 +39,11 @@ pub mod pallet {
 
     #[pallet::config]
     pub trait Config:
-        frame_system::Config + pallet_nft::Config + pallet_staking::Config + pallet_balances::Config
+        frame_system::Config
+        + pallet_nft::Config
+        + pallet_staking::Config
+        + pallet_balances::Config
+        + marketplace::Config
     {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
@@ -410,9 +415,79 @@ pub mod pallet {
             Ok(())
         }
 
-        // pub fn change_status_nft(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
-        //
-        // }
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn sell_nft(
+            origin: OriginFor<T>,
+            account_id: T::AccountId,
+            token_id: TokenId,
+            amount: u128,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+
+            ensure!(
+                Self::whitelist().contains(&account_id),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+
+            marketplace::Pallet::<T>::sell(account_id, token_id, amount);
+            Ok(())
+        }
+
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn buy_nft(
+            origin: OriginFor<T>,
+            account_id: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+
+            ensure!(
+                Self::whitelist().contains(&account_id),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+
+            marketplace::Pallet::<T>::buy(account_id, token_id);
+            Ok(())
+        }
+
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn change_price_nft(
+            origin: OriginFor<T>,
+            account_id: T::AccountId,
+            token_id: TokenId,
+            amount: u128,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+
+            ensure!(
+                Self::whitelist().contains(&account_id),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+
+            marketplace::Pallet::<T>::change_price(account_id, token_id, amount);
+            Ok(())
+        }
+
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn remove_nft(
+            origin: OriginFor<T>,
+            account_id: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+
+            ensure!(
+                Self::whitelist().contains(&account_id),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+
+            marketplace::Pallet::<T>::remove(account_id, token_id);
+            Ok(())
+        }
     }
 
     impl<T: Config> Pallet<T> {

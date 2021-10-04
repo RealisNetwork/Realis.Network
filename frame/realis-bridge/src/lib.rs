@@ -3,7 +3,7 @@
 
 use frame_support::{dispatch::DispatchResult, ensure, traits::Get};
 use frame_system::ensure_signed;
-pub use realis_primitives::{TokenId, TokenType, Status};
+pub use realis_primitives::{Status, TokenId, TokenType};
 use sp_std::prelude::*;
 
 mod benchmarking;
@@ -20,6 +20,7 @@ pub mod pallet {
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use pallet_nft as Nft;
+    pub use realis_game_api::*;
     use realis_primitives::Rarity;
     use realis_primitives::Rarity::Common;
     use realis_primitives::String;
@@ -83,8 +84,7 @@ pub mod pallet {
         /// NFT wasnt trasnferred to BEP-721
         NFTWasntTransfered,
         CannotTransferNftBecauseThisNftInMarketplace,
-        CannotTransferNftBecauseThisNftOnAnotherUser
-
+        CannotTransferNftBecauseThisNftOnAnotherUser,
     }
 
     #[pallet::storage]
