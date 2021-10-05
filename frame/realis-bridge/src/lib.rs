@@ -218,7 +218,7 @@ pub mod pallet {
 
             for t in token {
                 if t.0.id == token_id {
-                    if let Basic(t, _) = t.0.token_type {
+                    if let Basic(t, _, _, _) = t.0.token_type {
                         rarity = t;
                     }
                 }
@@ -235,6 +235,8 @@ pub mod pallet {
             origin: OriginFor<T>,
             from: H160,
             to: T::AccountId,
+	    name: String,
+	    id: u32,
             token_id: TokenId,
             rarity: Rarity,
             link: String,
@@ -245,7 +247,7 @@ pub mod pallet {
                 Error::<T>::NotBridgeMaster
             );
 
-            Nft::Pallet::<T>::mint(origin, to.clone(), token_id, rarity, link)?;
+            Nft::Pallet::<T>::mint(origin, to.clone(), name, token_id, id, rarity, link)?;
 
             Self::deposit_event(Event::<T>::TransferNftToRealis(
                 from, to, token_id, rarity,

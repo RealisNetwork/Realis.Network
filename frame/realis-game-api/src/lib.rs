@@ -151,6 +151,8 @@ pub mod pallet {
             origin: OriginFor<T>,
             target_account: T::AccountId,
             token_id: TokenId,
+	        mint_id: u32,
+            name: String,
             rarity: Rarity,
             id: String,
             link: String,
@@ -170,7 +172,9 @@ pub mod pallet {
             NFT::Pallet::<T>::mint(
                 origin.clone(),
                 target_account.clone(),
-                token_id,
+                name,
+		token_id,
+		mint_id,
                 rarity,
                 link,
             )?;

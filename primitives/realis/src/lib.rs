@@ -20,7 +20,7 @@ pub struct Token {
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum TokenType {
-    Basic(Rarity, String),
+    Basic(Rarity, String, u32, String),
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
@@ -42,12 +42,12 @@ pub enum Stackable {
 #[cfg_attr(feature = "std", derive(Serialize_repr, Deserialize_repr))]
 #[repr(u8)]
 pub enum Rarity {
-    Common = 1,
-    Uncommon = 2,
-    Rare = 3,
-    Epic = 4,
-    Legendary = 5,
-    Relic = 6,
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary,
+    Relic,
 }
 
 impl Display for Rarity {
