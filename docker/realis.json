@@ -2,7 +2,10 @@
   "name": "Realis Network",
   "id": "realis",
   "chainType": "Live",
-  "bootNodes": [],
+  "bootNodes": ["/ip4/135.181.18.215/tcp/30333/p2p/12D3KooWQ2F7iJktW7785jXdwYbrxtwCmjGRYwymEqEfMbkAi578",
+"/ip4/65.21.121.115/tcp/30333/p2p/12D3KooWMiXnzxJ9s4Tf6w1BjeM1GmTB9Q6B4TsYfF93AHWo6E37",
+"/ip4/135.181.19.52/tcp/30333/p2p/12D3KooWN3aNtQdQXnj3Py31Asp3acbTWw2H4ZnYmqU7dtiGdvth"
+],
   "telemetryEndpoints": null,
   "protocolId": null,
   "properties": {
