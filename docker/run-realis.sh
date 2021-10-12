@@ -13,6 +13,7 @@ ${IMAGE} \
 --ws-port 9944 \
 --rpc-port 9933  \
 --validator  \
+--reserved-nodes /ip4/135.181.18.215/tcp/30333/p2p/12D3KooWQ2F7iJktW7785jXdwYbrxtwCmjGRYwymEqEfMbkAi578 \
 --rpc-methods=Unsafe  \
 --name MyNode01 \
 --unsafe-ws-external \
