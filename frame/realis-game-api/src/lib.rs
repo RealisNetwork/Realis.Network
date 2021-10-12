@@ -108,6 +108,10 @@ pub mod pallet {
     #[pallet::getter(fn whitelist)]
     pub type Whitelist<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 
+    #[pallet::storage]
+    #[pallet::getter(fn validator_whitelist)]
+    pub type ValidatorWhitelist<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
         pub api_masters: Vec<T::AccountId>,
@@ -412,6 +416,34 @@ pub mod pallet {
             // Check if account that signed operation have permission for this operation
             Whitelist::<T>::mutate(|member_whitelist| {
                 let index = member_whitelist.iter().position(|token| *token == who);
+                member_whitelist.remove(index.unwrap())
+            });
+            Ok(())
+        }
+
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn add_to_validator_whitelist(origin: OriginFor<T>, account_id: T::AccountId) -> DispatchResult {
+            // Check is signed correct
+            let who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            ensure!(
+                !Self::whitelist().contains(&who),
+                Error::<T>::AccountAlreadyInWhitelist
+            );
+
+            ValidatorWhitelist::<T>::mutate(|member_whitelist| {
+                member_whitelist.push(account_id);
+            });
+            Ok(())
+        }
+
+        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        pub fn remove_from_validator_whitelist(origin: OriginFor<T>, account_id: T::AccountId) -> DispatchResult {
+            // Check is signed correct
+            let _who = ensure_signed(origin)?;
+            // Check if account that signed operation have permission for this operation
+            ValidatorWhitelist::<T>::mutate(|member_whitelist| {
+                let index = member_whitelist.iter().position(|user| *user == account_id);
                 member_whitelist.remove(index.unwrap())
             });
             Ok(())
