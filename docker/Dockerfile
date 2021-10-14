@@ -1,6 +1,6 @@
 FROM ubuntu
 #ADD /blockchain_soul/ReAlis-Network/target/release/realis /realis/realis0
-#ENTRYPOINT ["bash","entrypoint.prod.sh"]tt
+#ENTRYPOINT ["bash","entrypoint.prod.sh"]tttt
 ADD ./realis /realis/realis
 RUN chmod +x /realis/realis
 RUN apt-get update
