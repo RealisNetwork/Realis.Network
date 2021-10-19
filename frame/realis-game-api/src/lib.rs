@@ -202,11 +202,11 @@ pub mod pallet {
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
-                        token.1 == Status::OnSell,
+                        token.1 != Status::OnSell,
                         Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
                     );
                     ensure!(
-                        token.1 == Status::InDelegation,
+                        token.1 != Status::InDelegation,
                         Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
                 };
