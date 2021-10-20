@@ -155,7 +155,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             target_account: T::AccountId,
             token_id: TokenId,
-	        mint_id: u32,
+            mint_id: u32,
             name: String,
             rarity: Rarity,
             id: String,
@@ -177,8 +177,8 @@ pub mod pallet {
                 origin.clone(),
                 target_account.clone(),
                 name,
-		token_id,
-		mint_id,
+                token_id,
+                mint_id,
                 rarity,
                 link,
             )?;
@@ -237,11 +237,11 @@ pub mod pallet {
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
-                        token.1 == Status::OnSell,
+                        token.1 != Status::OnSell,
                         Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
                     );
                     ensure!(
-                        token.1 == Status::InDelegation,
+                        token.1 != Status::InDelegation,
                         Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
                 };
@@ -422,7 +422,10 @@ pub mod pallet {
         }
 
         #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
-        pub fn add_to_validator_whitelist(origin: OriginFor<T>, account_id: T::AccountId) -> DispatchResult {
+        pub fn add_to_validator_whitelist(
+            origin: OriginFor<T>,
+            account_id: T::AccountId,
+        ) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
             // Check if account that signed operation have permission for this operation
@@ -438,7 +441,10 @@ pub mod pallet {
         }
 
         #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
-        pub fn remove_from_validator_whitelist(origin: OriginFor<T>, account_id: T::AccountId) -> DispatchResult {
+        pub fn remove_from_validator_whitelist(
+            origin: OriginFor<T>,
+            account_id: T::AccountId,
+        ) -> DispatchResult {
             // Check is signed correct
             let _who = ensure_signed(origin)?;
             // Check if account that signed operation have permission for this operation

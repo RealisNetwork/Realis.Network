@@ -51,6 +51,7 @@ const STAKING_ID: LockIdentifier = *b"staking ";
 #[frame_support::pallet]
 pub mod pallet {
     use super::*;
+    use frame_support::traits::ExistenceRequirement;
     use sp_runtime::traits::Saturating;
 
     #[pallet::pallet]
@@ -567,6 +568,8 @@ pub mod pallet {
         /// The stakers' rewards are getting paid. \[era_index, validator_stash\]
         PayoutStarted(EraIndex, T::AccountId),
         Balance(T::AccountId, BalanceOf<T>),
+        /// LIS was transfered from player to player
+        FundsTransferred(T::AccountId, T::AccountId, BalanceOf<T>),
     }
 
     #[pallet::error]
@@ -947,6 +950,24 @@ pub mod pallet {
 
             Self::do_remove_nominator(stash);
             Self::do_add_validator(stash, prefs);
+            Ok(())
+        }
+
+        #[pallet::weight(T::WeightInfo::validate())]
+        pub fn transfer_to_pallet(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            #[pallet::compact] amount: BalanceOf<T>,
+        ) -> DispatchResult {
+            let _who = ensure_root(origin)?;
+            let pallet_id = Self::account_id();
+            <T as Config>::Currency::transfer(
+                &from,
+                &pallet_id,
+                amount,
+                ExistenceRequirement::KeepAlive,
+            )?;
+            Self::deposit_event(Event::<T>::FundsTransferred(from, pallet_id, amount));
             Ok(())
         }
 

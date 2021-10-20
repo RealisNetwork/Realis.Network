@@ -221,9 +221,7 @@ pub mod pallet {
 
             Nft::Pallet::<T>::transfer_nft(&pallet_id, &from, token_id)?;
 
-            Self::deposit_event(Event::<T>::TransferNftToBSC(
-                from.clone(), dest, token_id
-            ));
+            Self::deposit_event(Event::<T>::TransferNftToBSC(from.clone(), dest, token_id));
             Ok(())
         }
 
@@ -244,12 +242,9 @@ pub mod pallet {
 
             Nft::Pallet::<T>::transfer_nft(&to, &pallet_id, token_id)?;
 
-            Self::deposit_event(Event::<T>::TransferNftToRealis(
-                from, to.clone(), token_id,
-            ));
+            Self::deposit_event(Event::<T>::TransferNftToRealis(from, to.clone(), token_id));
             Ok(())
         }
-
 
         #[pallet::weight(10000)]
         pub fn add_bridge_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {

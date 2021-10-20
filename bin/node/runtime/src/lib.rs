@@ -41,6 +41,7 @@ use frame_system::{
 };
 pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
+pub use pallet_balances;
 use pallet_contracts::weights::WeightInfo;
 use pallet_election_provider_multi_phase::FallbackStrategy;
 use pallet_grandpa::{
@@ -52,7 +53,6 @@ pub use pallet_staking;
 pub use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 pub use realis_game_api;
-pub use pallet_balances;
 use sp_api::impl_runtime_apis;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -116,10 +116,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 272,
+    spec_version: 273,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 4,
+    transaction_version: 5,
 };
 
 /// The BABE epoch configuration at genesis.
