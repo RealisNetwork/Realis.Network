@@ -73,7 +73,7 @@ pub mod pallet {
         /// Pallet Balance
         Balance(T::AccountId, BalanceOf<T>),
         ///
-        AddToWhiteList(T::AccountId, T::AccountId),
+        AddToWhiteList(T::AccountId),
     }
 
     #[pallet::error]
@@ -403,8 +403,11 @@ pub mod pallet {
             );
 
             Whitelist::<T>::mutate(|member_whitelist| {
-                member_whitelist.push(who);
+                member_whitelist.push(who.clone());
             });
+
+            Self::deposit_event(Event::AddToWhiteList(who));
+
             Ok(())
         }
 
