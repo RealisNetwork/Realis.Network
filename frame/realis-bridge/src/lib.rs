@@ -196,8 +196,8 @@ pub mod pallet {
         pub fn transfer_nft_to_bsc(
             origin: OriginFor<T>,
             from: T::AccountId,
-            dest: H160,
-            token_id: TokenId,
+            to: H160,
+            value: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             // Only owner can transfer token
@@ -205,7 +205,7 @@ pub mod pallet {
 
             let tokens = Nft::TokensList::<T>::get(from.clone()).unwrap();
             for token in tokens {
-                if token.0.id == token_id {
+                if token.0.id == value {
                     ensure!(
                         token.1 != Status::OnSell,
                         Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
@@ -219,9 +219,9 @@ pub mod pallet {
 
             let pallet_id = Self::account_id();
 
-            Nft::Pallet::<T>::transfer_nft(&pallet_id, &from, token_id)?;
+            Nft::Pallet::<T>::transfer_nft(&pallet_id, &from, value)?;
 
-            Self::deposit_event(Event::<T>::TransferNftToBSC(from.clone(), dest, token_id));
+            Self::deposit_event(Event::<T>::TransferNftToBSC(from.clone(), to, value));
             Ok(())
         }
 
