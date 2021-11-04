@@ -61,10 +61,10 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn nft_for_sale_in_account)]
     pub(super) type NFTForSaleInAccount<T: Config> =
-        StorageMap<_, Blake2_256, <T as frame_system::Config>::AccountId, Vec<(TokenId, Balance)>>;
+        StorageMap<_, Blake2_256, <T as frame_system::Config>::AccountId, Vec<(TokenId, Rarity, Balance)>>;
 
     #[pallet::storage]
-    pub(super) type AllNFTForSale<T: Config> = StorageValue<_, Vec<(TokenId, Balance)>>;
+    pub(super) type AllNFTForSale<T: Config> = StorageValue<_, Vec<(TokenId, Rarity, Balance)>>;
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
@@ -79,11 +79,13 @@ pub mod pallet {
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(token.1 == Status::Free, Error::<T>::CannotSellAgainNft);
+
+                    let TokenType::Basic(rarity, _, _, _) =  token.0.token_type;
+                    let old_token = Self::sell(owner.clone(), token_id, rarity, price).unwrap();
+                    // Call sell event
+                    Self::deposit_event(Event::NftForSale(token_id, price, old_token));
                 };
             }
-            let old_token = Self::sell(owner, token_id, price).unwrap();
-            // Call mint event
-            Self::deposit_event(Event::NftForSale(token_id, price, old_token));
             Ok(())
         }
 
@@ -142,14 +144,16 @@ pub mod pallet {
         pub fn sell(
             seller: <T as frame_system::Config>::AccountId,
             token_id: TokenId,
+            rarity: Rarity,
             price: Balance,
         ) -> dispatch::result::Result<Vec<(Token, Status)>, dispatch::DispatchError> {
+
             NFTForSaleInAccount::<T>::mutate(seller.clone(), |tokens| {
-                tokens.get_or_insert(Vec::default()).push((token_id, price));
+                tokens.get_or_insert(Vec::default()).push((token_id, rarity, price));
             });
 
             AllNFTForSale::<T>::mutate(|tokens| {
-                tokens.get_or_insert(Vec::default()).push((token_id, price));
+                tokens.get_or_insert(Vec::default()).push((token_id, rarity, price));
             });
 
             let mut old_token = vec![];
@@ -195,7 +199,7 @@ pub mod pallet {
                     .iter()
                     .for_each(|tuple_tokens| {
                         if tuple_tokens.0 == token_id {
-                            balance.push(tuple_tokens.1);
+                            balance.push(tuple_tokens.2);
                         }
                     });
             });
@@ -264,9 +268,9 @@ pub mod pallet {
             let mut old_token = vec![];
 
             NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
-                tokens.as_mut().unwrap().iter().for_each(|tuple_tokens| {
-                    if tuple_tokens.0 == token_id {
-                        old_token.push((tuple_tokens.0.clone(), new_price));
+                tokens.as_mut().unwrap().iter().for_each(|(id, rarity, _)| {
+                    if id.clone() == token_id {
+                        old_token.push((id.clone(), rarity.clone(), new_price));
                     }
                 });
             });
