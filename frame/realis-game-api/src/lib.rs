@@ -28,7 +28,7 @@ pub mod pallet {
     use sp_runtime::traits::{AccountIdConversion, Saturating};
 
     use pallet_nft as NFT;
-    use realis_primitives::{Rarity, Status, String, TokenId};
+    use realis_primitives::{Rarity, Status, String, TokenId, TokenType};
 
     type BalanceOf<T> =
         <<T as Config>::ApiCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -473,7 +473,17 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::sell(account_id, token_id, amount)?;
+            let tokens = NFT::TokensList::<T>::get(account_id.clone()).unwrap();
+            for token in tokens {
+                if token.0.id == token_id {
+                    ensure!(token.1 == Status::Free, Error::<T>::CannotTransferNftBecauseThisNftInMarketplace);
+
+                    let TokenType::Basic(rarity, _, _, _) =  token.0.token_type;
+                    marketplace::Pallet::<T>::sell(account_id.clone(), token_id, rarity, amount)?;
+                };
+            }
+
+
             Ok(())
         }
 
