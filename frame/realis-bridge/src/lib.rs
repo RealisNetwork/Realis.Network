@@ -116,7 +116,7 @@ pub mod pallet {
         #[cfg(feature = "std")]
         pub fn build_storage(&self) -> Result<sp_runtime::Storage, std::string::String> {
             #[cfg(feature = "std")]
-            <Self as GenesisBuild<T>>::build_storage(self)
+                <Self as GenesisBuild<T>>::build_storage(self)
         }
     }
 
@@ -128,7 +128,6 @@ pub mod pallet {
         #[pallet::weight(10000)]
         pub fn transfer_token_to_bsc(
             origin: OriginFor<T>,
-            from: T::AccountId,
             to: H160,
             #[pallet::compact] value: T::Balance,
         ) -> DispatchResult {
@@ -138,14 +137,14 @@ pub mod pallet {
 
             let pallet_id = Self::account_id();
             <T as Config>::BridgeCurrency::transfer(
-                &from,
+                &who,
                 &pallet_id,
                 value,
                 ExistenceRequirement::KeepAlive,
             )?;
 
             Self::deposit_event(Event::<T>::SendTokensToBsc(
-                from.clone(),
+                who,
                 to,
                 value,
                 balance,
@@ -195,15 +194,12 @@ pub mod pallet {
         #[allow(irrefutable_let_patterns)]
         pub fn transfer_nft_to_bsc(
             origin: OriginFor<T>,
-            from: T::AccountId,
             to: H160,
             value: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            // Only owner can transfer token
-            ensure!(who == from, Error::<T>::NotTokenOwner);
 
-            let tokens = Nft::TokensList::<T>::get(from.clone()).unwrap();
+            let tokens = Nft::TokensList::<T>::get(who.clone()).unwrap();
             for token in tokens {
                 if token.0.id == value {
                     ensure!(
@@ -219,9 +215,9 @@ pub mod pallet {
 
             let pallet_id = Self::account_id();
 
-            Nft::Pallet::<T>::transfer_nft(&pallet_id, &from, value)?;
+            Nft::Pallet::<T>::transfer_nft(&pallet_id, &who, value)?;
 
-            Self::deposit_event(Event::<T>::TransferNftToBSC(from.clone(), to, value));
+            Self::deposit_event(Event::<T>::TransferNftToBSC(who.clone(), to, value));
             Ok(())
         }
 
