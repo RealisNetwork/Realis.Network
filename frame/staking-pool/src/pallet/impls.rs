@@ -27,10 +27,7 @@ use frame_support::{
     weights::{Weight, WithPostDispatchInfo},
 };
 use pallet_session::historical;
-use sp_runtime::{
-    traits::{AccountIdConversion, Bounded, Convert, SaturatedConversion, Saturating, Zero},
-    Perbill,
-};
+use sp_runtime::{traits::{AccountIdConversion, Bounded, Convert, SaturatedConversion, Saturating, Zero}, Perbill};
 use sp_staking::{
     offence::{OffenceDetails, OnOffenceHandler},
     SessionIndex,
@@ -151,7 +148,7 @@ impl<T: Config> Pallet<T> {
 
         // This is how much validator + nominators are entitled to.
         let validator_total_payout = validator_total_reward_part * era_payout;
-
+        // total_stake / stake.individual then total stake %
         let validator_prefs = Self::eras_validator_prefs(&era, &validator_stash);
         // Validator first gets a cut off the top.
         let validator_commission = validator_prefs.commission;
@@ -160,17 +157,30 @@ impl<T: Config> Pallet<T> {
         let validator_leftover_payout = validator_total_payout - validator_commission_payout;
         // Now let's calculate how this is split to the validator.
         let validator_exposure_part = Perbill::from_rational(exposure.own, exposure.total);
-        let validator_staking_payout = validator_exposure_part * validator_leftover_payout;
+
+        // let validator_staking_payout = validator_exposure_part * validator_leftover_payout;
+
+        let some_test: BalanceOf<T> = Perbill::from_rational(175, 100_000).into();
+
+        // Total Stake
+        let total_stake = Self::eras_total_stake(current_era);
+
+        let account_id = Self::account_id();
+        let total_balance =
+            T::Currency::free_balance(&account_id)
+                .saturating_sub(T::Currency::minimum_balance());
+
+        let total_era_payout = total_balance * 175_u128 / 100_000_u128;
+        // Individual % reward
+        let percent_individual_reward = ledger.total / total_stake;
+
+        let payout = total_era_payout * percent_individual_reward;
+
 
         Self::deposit_event(Event::<T>::PayoutStarted(era, ledger.stash.clone()));
 
         // We can now make total validator payout:
-        if Self::make_payout(
-            &ledger.stash,
-            validator_staking_payout + validator_commission_payout,
-        )
-        .is_ok()
-        {
+        if Self::make_payout(&ledger.stash, payout).is_ok() {
             Self::deposit_event(Event::Rewarded(ledger.stash, validator_leftover_payout));
         }
 

@@ -34,11 +34,7 @@ pub mod pallet {
     // https://substrate.dev/docs/en/knowledgebase/runtime/events
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
-    #[pallet::metadata(
-        T::AccountId = "AccountId",
-        TokenBalance = "Balance",
-        RealisTokenId = "T::RealisTokenId"
-    )]
+    #[pallet::metadata(T::AccountId = "AccountId", TokenBalance = "Balance")]
     pub enum Event<T: Config> {
         /// This TokenId on sale in Marketplace!
         NftForSale(TokenId, Balance, Vec<(Token, Status)>),
@@ -60,8 +56,12 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn nft_for_sale_in_account)]
-    pub(super) type NFTForSaleInAccount<T: Config> =
-        StorageMap<_, Blake2_256, <T as frame_system::Config>::AccountId, Vec<(TokenId, Rarity, Balance)>>;
+    pub(super) type NFTForSaleInAccount<T: Config> = StorageMap<
+        _,
+        Blake2_256,
+        <T as frame_system::Config>::AccountId,
+        Vec<(TokenId, Rarity, Balance)>,
+    >;
 
     #[pallet::storage]
     pub(super) type AllNFTForSale<T: Config> = StorageValue<_, Vec<(TokenId, Rarity, Balance)>>;
@@ -80,7 +80,7 @@ pub mod pallet {
                 if token.0.id == token_id {
                     ensure!(token.1 == Status::Free, Error::<T>::CannotSellAgainNft);
 
-                    let TokenType::Basic(rarity, _, _, _) =  token.0.token_type;
+                    let TokenType::Basic(rarity, _, _, _) = token.0.token_type;
                     let old_token = Self::sell(owner.clone(), token_id, rarity, price).unwrap();
                     // Call sell event
                     Self::deposit_event(Event::NftForSale(token_id, price, old_token));
@@ -147,13 +147,16 @@ pub mod pallet {
             rarity: Rarity,
             price: Balance,
         ) -> dispatch::result::Result<Vec<(Token, Status)>, dispatch::DispatchError> {
-
             NFTForSaleInAccount::<T>::mutate(seller.clone(), |tokens| {
-                tokens.get_or_insert(Vec::default()).push((token_id, rarity, price));
+                tokens
+                    .get_or_insert(Vec::default())
+                    .push((token_id, rarity, price));
             });
 
             AllNFTForSale::<T>::mutate(|tokens| {
-                tokens.get_or_insert(Vec::default()).push((token_id, rarity, price));
+                tokens
+                    .get_or_insert(Vec::default())
+                    .push((token_id, rarity, price));
             });
 
             let mut old_token = vec![];
