@@ -51,7 +51,6 @@ hex-literal = "0.3.3"
 [features]
 default = ["std"]
 std = [
-	"serde",
 	"codec/std",
 	"sp-std/std",
 	"sp-io/std",
