@@ -160,7 +160,11 @@ impl<T: Config> Pallet<T> {
 
         // let validator_staking_payout = validator_exposure_part * validator_leftover_payout;
 
-        let some_test: BalanceOf<T> = Perbill::from_rational(175, 100_000).into();
+        // let some_test: BalanceOf<T> = Perbill::from_rational(175, 100_000).into();
+
+
+
+        let total_percent_per_era = Perbill::from_rational(175_u32, 100_000);
 
         // Total Stake
         let total_stake = Self::eras_total_stake(current_era);
@@ -172,8 +176,9 @@ impl<T: Config> Pallet<T> {
 
         let total_era_payout = total_percent_per_era * total_balance;
 
-        let total_era_payout = total_balance * 175_u128 / 100_000_u128;
-        // Individual % reward
+        // let total_balance = total_balance;
+                // let total_era_payout = total_balance * total_percent_per_era;
+                // Individual % reward
         let percent_individual_reward = ledger.total / total_stake;
 
         let payout = total_era_payout * percent_individual_reward;
