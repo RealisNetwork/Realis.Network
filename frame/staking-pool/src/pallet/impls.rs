@@ -160,10 +160,6 @@ impl<T: Config> Pallet<T> {
 
         // let validator_staking_payout = validator_exposure_part * validator_leftover_payout;
 
-        // let some_test: BalanceOf<T> = Perbill::from_rational(175, 100_000).into();
-
-
-
         let total_percent_per_era = Perbill::from_rational(175_u32, 100_000);
 
         // Total Stake
