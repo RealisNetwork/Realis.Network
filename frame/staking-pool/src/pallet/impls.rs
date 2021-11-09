@@ -170,6 +170,8 @@ impl<T: Config> Pallet<T> {
             T::Currency::free_balance(&account_id)
                 .saturating_sub(T::Currency::minimum_balance());
 
+        let total_era_payout = total_percent_per_era * total_balance;
+
         let total_era_payout = total_balance * 175_u128 / 100_000_u128;
         // Individual % reward
         let percent_individual_reward = ledger.total / total_stake;
