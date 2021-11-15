@@ -37,7 +37,7 @@ crate-type = ["cdylib", "rlib"]
 codec = { package = "parity-scale-codec", version = "2.0.0" }
 serde = { version = "1.0.130", features = ["derive"] }
 futures = { version = "0.3.17", features = ["compat"] }
-hex-literal = "0.3.3"
+hex-literal = "0.3.4"
 log = "0.4.8"
 rand = "0.8.4"
 structopt = { version = "0.3.25", optional = true }
@@ -122,7 +122,7 @@ serde_json = "1.0"
 regex = "1"
 platforms = "1.1"
 async-std = { version = "1.6.5", features = ["attributes"] }
-soketto = "0.7.0"
+soketto = "0.7.1"
 
 [build-dependencies]
 structopt = { version = "0.3.25", optional = true }
