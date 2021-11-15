@@ -4661,6 +4661,7 @@ dependencies = [
  "paste",
  "rand_chacha 0.3.1",
  "serde",
+ "serde_json",
  "sp-application-crypto",
  "sp-core",
  "sp-io",

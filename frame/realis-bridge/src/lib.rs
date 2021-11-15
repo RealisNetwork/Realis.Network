@@ -116,7 +116,7 @@ pub mod pallet {
         #[cfg(feature = "std")]
         pub fn build_storage(&self) -> Result<sp_runtime::Storage, std::string::String> {
             #[cfg(feature = "std")]
-                <Self as GenesisBuild<T>>::build_storage(self)
+            <Self as GenesisBuild<T>>::build_storage(self)
         }
     }
 
@@ -143,12 +143,7 @@ pub mod pallet {
                 ExistenceRequirement::KeepAlive,
             )?;
 
-            Self::deposit_event(Event::<T>::SendTokensToBsc(
-                who,
-                to,
-                value,
-                balance,
-            ));
+            Self::deposit_event(Event::<T>::SendTokensToBsc(who, to, value, balance));
             Ok(())
         }
 

@@ -116,10 +116,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 275,
-    impl_version: 1,
+    spec_version: 277,
+    impl_version: 2,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 5,
+    transaction_version: 6,
 };
 
 /// The BABE epoch configuration at genesis.
@@ -1203,7 +1203,7 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
     pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
-    pub const SessionsPerEra: sp_staking::SessionIndex = 6;
+    pub const SessionsPerEra: sp_staking::SessionIndex = 1;
     pub const BondingDuration: pallet_staking::EraIndex = 28;
     pub const SlashDeferDuration: pallet_staking::EraIndex = 27; // 1/4 the bonding duration.
     pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
@@ -1228,7 +1228,7 @@ impl pallet_staking::Config for Runtime {
     /// A super-majority of the council can cancel the slash.
     type SlashCancelOrigin = EnsureRoot<AccountId>;
     type SessionInterface = Self;
-    type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
+    type EraPayout = pallet_staking::NewConvertCurve<Self>;
     type NextNewSession = Session;
     type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
     type ElectionProvider = ElectionProviderMultiPhase;
