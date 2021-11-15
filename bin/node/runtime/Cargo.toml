@@ -90,6 +90,7 @@ pallet-vesting = { default-features = false, git = "https://github.com/paritytec
 
 pallet-staking = { version = "0.0.2", default-features = false, path = "../../../frame/staking-pool" }
 pallet-nft = { version = "0.0.2", default-features = false, path = "../../../frame/nft" }
+#pallet-nft-delegate = { version = "0.0.1", default-features = false, path = "../../../frame/nft-delegate" }
 realis-game-api = { version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api" }
 runtime-common = {version = "0.0.1", default-features = false, path = "../runtime-common"}
 realis-primitives = { version = "0.0.2", default-features = false, path = "../../../primitives/realis"}

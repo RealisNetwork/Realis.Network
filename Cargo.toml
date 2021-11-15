@@ -7,10 +7,11 @@ members = [
 	"bin/node/cli",
     "bin/node/runtime",
     "bin/node/runtime-common",
+    "primitives/realis",
     "frame/nft",
+    "frame/nft-delegate",
     "frame/realis-game-api",
     "frame/staking-pool",
-    "primitives/realis",
     "frame/realis-bridge",
     "frame/marketplace"
 ]
@@ -23,6 +24,7 @@ node-runtime = { path = "bin/node/runtime" }
 runtime-common = { path = "bin/node/runtime-common" }
 pallet-staking = { path = "frame/staking-pool" }
 pallet-nft = { path = "frame/nft" }
+#pallet-nft-delegate = { path = "frame/nft-delegate" }
 realis-bridge = {path = "frame/realis-bridge"}
 
 [profile.dev]
