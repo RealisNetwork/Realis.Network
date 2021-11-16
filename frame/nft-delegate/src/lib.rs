@@ -83,7 +83,7 @@ pub mod pallet {
             token_id: TokenId,
             delegated_time_in_blocks: u64,
         ) -> DispatchResult {
-            match PalletNft::Pallet::<T>::get_nft_status(&from, token_id) {
+            match PalletNft::Pallet::<T>::get_nft_status(token_id) {
                 None => Err(Error::<T>::NonExistentNft)?,
                 Some(Status::OnSell | Status::InDelegation) => Err(Error::<T>::NftAlreadyInUse)?,
                 Some(Status::Free) => {}
@@ -92,9 +92,8 @@ pub mod pallet {
             // TODO maybe can be simplify using append instead of mutate
             DelegatedTokens::<T>::mutate(|delegated_tokens| delegated_tokens.push((token_id, delegated_time_in_blocks)));
 
-            PalletNft::Pallet::<T>::set_nft_status(&from, token_id, Status::InDelegation);
+            PalletNft::Pallet::<T>::set_nft_status(token_id, Status::InDelegation);
 
-            // TODO emit event
             Self::deposit_event(Event::NftDelegated(from, to, token_id, delegated_time_in_blocks));
 
             Ok(())
