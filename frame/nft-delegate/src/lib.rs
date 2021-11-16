@@ -99,6 +99,30 @@ pub mod pallet {
             Ok(())
         }
 
+        pub fn drop_delegate_nft(
+            token_id: TokenId
+        ) {
+            DelegatedTokens::<T>::mutate(|delegated_tokens| {
+                *delegated_tokens = delegated_tokens
+                    .iter()
+                    .filter(|(current_token_id, _)| *current_token_id != token_id)
+                    .copied()
+                    .collect()
+                    // .retain(|(current_token_id, _)| current_token_id != &token_id)
+            });
 
+            // Remove token from current owner
+            // DelegatedTokens::<T>::mutate(|tokens| {
+            //     let tokens_mut = tokens.as_mut().unwrap();
+            //     let index = tokens_mut.iter().position(|token| token.0.id == token_id);
+            //     tokens_mut.remove(index.unwrap())
+            // });
+
+
+
+            PalletNft::Pallet::<T>::set_nft_status(token_id, Status::Free);
+
+            Self::deposit_event(Event::EndNftDelegation(token_id));
+        }
     }
 }
