@@ -1265,7 +1265,9 @@ impl marketplace::Config for Runtime {
     type Currency = Balances;
 }
 
-// impl
+impl pallet_nft_delegate::Config for Runtime {
+    type Event = Event;
+}
 
 construct_runtime!(
     pub enum Runtime where
@@ -1315,6 +1317,7 @@ construct_runtime!(
         // TransactionStorage: pallet_transaction_storage::{Pallet, Call, Storage, Inherent, Config<T>, Event<T>},
         RealisBridge: realis_bridge::{Pallet, Call, Event<T>, Config<T>, Storage},
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
+        NftDelegate: pallet_nft_delegate::{Pallet, Call, Storage, Event<T>},
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>, Config<T>, Storage},
         Marketplace: marketplace::{Pallet, Call, Event<T>, Storage},
         Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},

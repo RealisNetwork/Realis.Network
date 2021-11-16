@@ -340,6 +340,25 @@ pub mod pallet {
             Ok(())
         }
 
+        pub fn get_nft_status(owner: &T::AccountId, token_id: TokenId) -> Option<Status> {
+            let tokens = TokensList::<T>::get(owner)?;
+
+            tokens
+                .iter()
+                .find(|(token, _)| token.id == token_id)
+                .map(|(_, status)| status.clone())
+        }
+
+        pub fn set_nft_status(owner: &T::AccountId, token_id: TokenId, status: Status) {
+            TokensList::<T>::mutate(owner, |tokens| {
+                tokens.as_mut().unwrap().into_iter().for_each(|(token, current_status)| {
+                    if token.id == token_id {
+                        *current_status = status;
+                    }
+                })
+            });
+        }
+
         fn inc_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
             TotalForAccount::<T>::try_mutate(account, |cnt| {
                 cnt.checked_add(1)

@@ -3949,6 +3949,7 @@ dependencies = [
  "pallet-mmr",
  "pallet-multisig",
  "pallet-nft",
+ "pallet-nft-delegate",
  "pallet-offences",
  "pallet-offences-benchmarking",
  "pallet-randomness-collective-flip",
@@ -4531,7 +4532,9 @@ version = "0.0.1"
 dependencies = [
  "frame-support",
  "frame-system",
+ "pallet-nft",
  "parity-scale-codec",
+ "realis-primitives",
 ]
 
 [[package]]

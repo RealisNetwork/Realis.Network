@@ -4,7 +4,15 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::pallet_prelude::{PhantomData, IsType};
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
+
+    use frame_support::inherent::Vec;
+
+    use realis_primitives::{Status, TokenId};
+    use pallet_nft as PalletNft;
+
+    pub type DelegatedTime = u64;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -12,47 +20,78 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + PalletNft::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
     }
 
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", RealisTokenId = "T::RealisTokenId")]
-    pub enum Event<T: Config> {}
-
+    #[pallet::metadata(T::AccountId = "AccountId", TokenId = "T::TokenId", DelegatedTime="DelegatedTime")]
+    pub enum Event<T: Config> {
+        NftDelegated(T::AccountId, T::AccountId, TokenId, DelegatedTime),
+    }
 
     #[pallet::error]
-    pub enum Error<T> {}
+    pub enum Error<T> {
+        NonExistentNft,
+        NotNftOwner,
+        NftAlreadyInUse,
+    }
 
-    // #[pallet::genesis_config]
-    // pub struct GenesisConfig<T: Config> {}
-    //
-    // #[cfg(feature = "std")]
-    // impl<T: Config> Default for GenesisConfig<T> {
-    //     fn default() -> Self {
-    //         Self {}
-    //     }
-    // }
-    //
-    // #[pallet::genesis_build]
-    // impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
-    //     fn build(&self) {}
-    // }
-    //
-    // #[cfg(feature = "std")]
-    // impl<T: Config> GenesisConfig<T> {
-    //     /// Direct implementation of `GenesisBuild::build_storage`.
-    //     ///
-    //     /// Kept in order not to break dependency.
-    //     pub fn build_storage(&self) -> Result<sp_runtime::Storage, std::string::String> {
-    //         <Self as GenesisBuild<T>>::build_storage(self)
-    //     }
-    // }
+    #[pallet::storage]
+    #[pallet::getter(fn get_delegated_tokens)]
+    pub type DelegatedTokens<T: Config> = StorageValue<_, Vec<(TokenId, DelegatedTime)>, ValueQuery>;
+
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        fn on_finalize(_n: BlockNumberFor<T>) {
+            todo!()
+        }
+    }
 
     #[pallet::call]
-    impl<T: Config> Pallet<T> {}
+    impl<T: Config> Pallet<T> {
+        #[pallet::weight(90_000_000)]
+        pub fn delegate(
+            origin: OriginFor<T>,
+            to: T::AccountId,
+            token_id: TokenId,
+            delegated_time: DelegatedTime
+        ) -> DispatchResult {
+            // Check is signed
+            let origin = ensure_signed(origin)?;
+            let owner = PalletNft::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentNft)?;
 
-    impl<T: Config> Pallet<T> {}
+            ensure!(origin == owner, Error::<T>::NotNftOwner);
+
+            Self::delegate_nft(owner, to, token_id, delegated_time)
+        }
+    }
+
+    impl<T: Config> Pallet<T> {
+        pub fn delegate_nft(
+            from: T::AccountId,
+            to: T::AccountId,
+            token_id: TokenId,
+            delegated_time_in_blocks: DelegatedTime
+        ) -> DispatchResult {
+            match PalletNft::Pallet::<T>::get_nft_status(&from, token_id) {
+                None => Err(Error::<T>::NonExistentNft)?,
+                Some(Status::OnSell | Status::InDelegation) => Err(Error::<T>::NftAlreadyInUse)?,
+                Some(Status::Free) => {}
+            }
+
+            DelegatedTokens::<T>::mutate(|delegated_tokens| delegated_tokens.push((token_id, delegated_time_in_blocks)));
+
+            PalletNft::Pallet::<T>::set_nft_status(&from, token_id, Status::InDelegation);
+
+            // TODO emit event
+            Self::deposit_event(Event::NftDelegated(from, to, token_id, delegated_time_in_blocks));
+
+            Ok(())
+        }
+
+
+    }
 }
