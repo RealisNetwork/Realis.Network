@@ -38,6 +38,7 @@ pub mod pallet {
         NftAlreadyInUse,
     }
 
+    // TODO add account to which delegated
     #[pallet::storage]
     #[pallet::getter(fn get_delegated_tokens)]
     pub type DelegatedTokens<T: Config> = StorageValue<_, Vec<(TokenId, u64)>, ValueQuery>;
@@ -90,7 +91,8 @@ pub mod pallet {
             }
 
             // TODO maybe can be simplify using append instead of mutate
-            DelegatedTokens::<T>::mutate(|delegated_tokens| delegated_tokens.push((token_id, delegated_time_in_blocks)));
+            DelegatedTokens::<T>::mutate(|delegated_tokens|
+                delegated_tokens.push((token_id, delegated_time_in_blocks)));
 
             PalletNft::Pallet::<T>::set_nft_status(token_id, Status::InDelegation);
 
@@ -103,22 +105,8 @@ pub mod pallet {
             token_id: TokenId
         ) {
             DelegatedTokens::<T>::mutate(|delegated_tokens| {
-                *delegated_tokens = delegated_tokens
-                    .iter()
-                    .filter(|(current_token_id, _)| *current_token_id != token_id)
-                    .copied()
-                    .collect()
-                    // .retain(|(current_token_id, _)| current_token_id != &token_id)
+                    delegated_tokens.retain(|(current_token_id, _)| current_token_id != &token_id);
             });
-
-            // Remove token from current owner
-            // DelegatedTokens::<T>::mutate(|tokens| {
-            //     let tokens_mut = tokens.as_mut().unwrap();
-            //     let index = tokens_mut.iter().position(|token| token.0.id == token_id);
-            //     tokens_mut.remove(index.unwrap())
-            // });
-
-
 
             PalletNft::Pallet::<T>::set_nft_status(token_id, Status::Free);
 
