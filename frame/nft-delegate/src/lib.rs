@@ -46,16 +46,32 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_finalize(_n: BlockNumberFor<T>) {
-            DelegatedTokens::<T>::mutate(|delegated_tokens|
+            DelegatedTokens::<T>::mutate(|delegated_tokens| {
+                // Update nfts status
+                delegated_tokens
+                    .iter()
+                    .filter(|(_, time)| *time == 0_u64)
+                    .for_each(|(token_id, _)| PalletNft::Pallet::<T>::set_nft_status(token_id.clone(), Status::Free));
+
+                // Remove timeout delegations
+                delegated_tokens
+                    .retain(|(_, time)| {
+                        *time != 0_u64
+                    });
+
+                // Decrement time in blocks
                 delegated_tokens
                     .into_iter()
-                    .for_each(|(token_id, delegated_time_in_blocks)| {
+                    .for_each(|(_, delegated_time_in_blocks)| {
                         if *delegated_time_in_blocks > 0_u64 {
                             *delegated_time_in_blocks -= 1;
-                        } else {
-                            Self::drop_delegate_nft(token_id.clone());
                         }
-                    }));
+                        // FIXME do not work (cannot remove any value from storage)
+                        // else {
+                        //     Self::drop_delegated_nft(token_id.clone());
+                        // }
+                    })
+            });
         }
     }
 
@@ -70,7 +86,6 @@ pub mod pallet {
         ) -> DispatchResult {
             let origin = ensure_signed(origin)?;
             let owner = PalletNft::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentNft)?;
-
             ensure!(origin == owner, Error::<T>::NotNftOwner);
 
             Self::delegate_nft(owner, to, token_id, delegated_time)
@@ -91,8 +106,9 @@ pub mod pallet {
             }
 
             // TODO maybe can be simplify using append instead of mutate
-            DelegatedTokens::<T>::mutate(|delegated_tokens|
-                delegated_tokens.push((token_id, delegated_time_in_blocks)));
+            DelegatedTokens::<T>::append((token_id, delegated_time_in_blocks));
+            // DelegatedTokens::<T>::mutate(|delegated_tokens|
+            //     delegated_tokens.push((token_id, delegated_time_in_blocks)));
 
             PalletNft::Pallet::<T>::set_nft_status(token_id, Status::InDelegation);
 
@@ -101,7 +117,7 @@ pub mod pallet {
             Ok(())
         }
 
-        pub fn drop_delegate_nft(
+        pub fn drop_delegated_nft(
             token_id: TokenId
         ) {
             DelegatedTokens::<T>::mutate(|delegated_tokens| {
