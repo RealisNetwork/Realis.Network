@@ -36,6 +36,8 @@ pub mod pallet {
         NonExistentNft,
         NotNftOwner,
         NftAlreadyInUse,
+        NotNftMaster,
+        DelegationTimeTooLow,
     }
 
     // TODO add account to which delegated
@@ -87,8 +89,24 @@ pub mod pallet {
             let origin = ensure_signed(origin)?;
             let owner = PalletNft::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentNft)?;
             ensure!(origin == owner, Error::<T>::NotNftOwner);
+            ensure!(delegated_time != 0, Error::<T>::DelegationTimeTooLow);
+
+            Self::clean();
 
             Self::delegate_nft(owner, to, token_id, delegated_time)
+        }
+
+        #[pallet::weight((90_000_000, Pays::No))]
+        pub fn clean_delegations(
+            origin: OriginFor<T>,
+        ) -> DispatchResult {
+            let origin = ensure_signed(origin)?;
+            let masters = PalletNft::NftMasters::<T>::get();
+            ensure!(masters.contains(&origin), Error::<T>::NotNftMaster);
+
+            Self::clean();
+
+            Ok(())
         }
     }
 
@@ -121,12 +139,22 @@ pub mod pallet {
             token_id: TokenId
         ) {
             DelegatedTokens::<T>::mutate(|delegated_tokens| {
-                    delegated_tokens.retain(|(current_token_id, _)| current_token_id != &token_id);
+                delegated_tokens.retain(|(current_token_id, _)| current_token_id != &token_id);
             });
 
             PalletNft::Pallet::<T>::set_nft_status(token_id, Status::Free);
 
             Self::deposit_event(Event::EndNftDelegation(token_id));
+        }
+
+        pub fn clean() {
+            DelegatedTokens::<T>::get()
+                .into_iter()
+                .for_each(|(token_id, delegated_time_in_blocks)| {
+                    if delegated_time_in_blocks == 0_u64 {
+                        Self::drop_delegated_nft(token_id.clone())
+                    };
+                });
         }
     }
 }
