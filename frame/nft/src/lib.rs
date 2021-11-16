@@ -340,8 +340,9 @@ pub mod pallet {
             Ok(())
         }
 
-        pub fn get_nft_status(owner: &T::AccountId, token_id: TokenId) -> Option<Status> {
-            let tokens = TokensList::<T>::get(owner)?;
+        pub fn get_nft_status(token_id: TokenId) -> Option<Status> {
+            let owner = AccountForToken::<T>::get(token_id).unwrap();
+            let tokens = TokensList::<T>::get(&owner)?;
 
             tokens
                 .iter()
@@ -349,7 +350,9 @@ pub mod pallet {
                 .map(|(_, status)| status.clone())
         }
 
-        pub fn set_nft_status(owner: &T::AccountId, token_id: TokenId, status: Status) {
+        pub fn set_nft_status(token_id: TokenId, status: Status) {
+            let owner = AccountForToken::<T>::get(token_id).unwrap();
+
             TokensList::<T>::mutate(owner, |tokens| {
                 tokens.as_mut().unwrap().into_iter().for_each(|(token, current_status)| {
                     if token.id == token_id {
