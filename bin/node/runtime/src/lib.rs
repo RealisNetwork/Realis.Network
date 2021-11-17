@@ -1267,6 +1267,7 @@ impl marketplace::Config for Runtime {
 
 impl pallet_nft_delegate::Config for Runtime {
     type Event = Event;
+    type Currency = Balances;
 }
 
 construct_runtime!(

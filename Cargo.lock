@@ -4532,6 +4532,7 @@ version = "0.0.1"
 dependencies = [
  "frame-support",
  "frame-system",
+ "node-primitives",
  "pallet-nft",
  "parity-scale-codec",
  "realis-primitives",

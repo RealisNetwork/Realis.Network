@@ -12,6 +12,8 @@ pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
 
 frame-support = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
+node-primitives = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
+
 
 codec = { package = "parity-scale-codec", version = "2.0.1", default-features = false, features = ["derive"] }
 

@@ -26,6 +26,7 @@ pub enum TokenType {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Status {
     OnSell,
+    OnDelegateSell,
     InDelegation,
     Free,
 }
