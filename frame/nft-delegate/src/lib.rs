@@ -59,14 +59,13 @@ pub mod pallet {
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_finalize(_n: BlockNumberFor<T>) {
             Self::clean();
+
             DelegatedTokens::<T>::mutate(|delegated_tokens| {
                 // Decrement time in blocks
                 delegated_tokens
                     .into_iter()
                     .for_each(|(_, _, delegated_time_in_blocks)| {
-                        if *delegated_time_in_blocks > 0_u64 {
-                            *delegated_time_in_blocks -= 1;
-                        }
+                        *delegated_time_in_blocks -= 1;
                     })
             });
         }
