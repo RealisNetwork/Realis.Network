@@ -319,6 +319,7 @@ pub mod pallet {
 
         pub fn check_time(time: u64) -> DispatchResult {
             ensure!(time != 0, Error::<T>::DelegationTimeTooLow);
+            Ok(())
         }
     }
 }
