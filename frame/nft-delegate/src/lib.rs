@@ -47,7 +47,7 @@ pub mod pallet {
     }
 
     #[pallet::storage]
-    pub type TokensForAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<TokenId>>;
+    pub type TokensForAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<TokenId>, ValueQuery>;
 
     #[pallet::storage]
     pub type DelegatedTokens<T: Config> = StorageValue<_, Vec<(T::AccountId, TokenId, u64)>, ValueQuery>;
@@ -58,7 +58,14 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_finalize(_n: BlockNumberFor<T>) {
-            Self::clean();
+            DelegatedTokens::<T>::get()
+                .into_iter()
+                .filter(|(_, _, time)| *time == 0_u64)
+                .for_each(|(_, token_id, _)| Self::deposit_event(Event::EndNftDelegation(token_id)));
+
+            DelegatedTokens::<T>::mutate(|delegate_tokens| {
+                delegate_tokens.retain(|(_, _, time)| *time != 0_u64)
+            });
 
             DelegatedTokens::<T>::mutate(|delegated_tokens| {
                 // Decrement time in blocks
@@ -182,43 +189,11 @@ pub mod pallet {
         ){
             DelegatedTokens::<T>::append((to.clone(), token_id, delegated_time_in_blocks));
 
-            TokensForAccount::<T>::mutate(to.clone(), |delegated_tokens| {
-                delegated_tokens.get_or_insert(Vec::new())
-                    .push(token_id)
-            });
+            TokensForAccount::<T>::append(to.clone(), token_id);
 
             PalletNft::Pallet::<T>::set_nft_status(token_id, Status::InDelegation);
 
             Self::deposit_event(Event::NftDelegated(from, to, token_id, delegated_time_in_blocks));
-        }
-
-        pub fn clean() {
-            DelegatedTokens::<T>::get()
-                .into_iter()
-                .for_each(|(account_id, token_id, delegated_time_in_blocks)| {
-                    if delegated_time_in_blocks == 0_u64 {
-                        Self::drop_delegated_nft(account_id, token_id.clone())
-                    };
-                });
-        }
-
-        pub fn drop_delegated_nft(
-            account_id: T::AccountId,
-            token_id: TokenId,
-        ) {
-            TokensForAccount::<T>::mutate(account_id, |delegated_tokens| {
-                delegated_tokens
-                    .as_mut()
-                    .map(|delegated_tokens| delegated_tokens.retain(|id| *id != token_id))
-            });
-
-            DelegatedTokens::<T>::mutate(|delegated_tokens| {
-                delegated_tokens.retain(|(_, id, _)| *id != token_id);
-            });
-
-            PalletNft::Pallet::<T>::set_nft_status(token_id, Status::Free);
-
-            Self::deposit_event(Event::EndNftDelegation(token_id));
         }
 
         pub fn sale_delegate_nft(
