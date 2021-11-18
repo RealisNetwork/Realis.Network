@@ -10,10 +10,12 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
     use frame_support::inherent::Vec;
     use frame_support::traits::{ExistenceRequirement, Currency};
-    use node_primitives::Balance;
+    use node_primitives::{Balance};
+    use core::convert::From;
 
     use realis_primitives::{Status, TokenId};
     use pallet_nft as PalletNft;
+
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -32,7 +34,7 @@ pub mod pallet {
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
     #[pallet::metadata(T::AccountId = "AccountId", TokenId = "T::TokenId", Balance = "Balance")]
     pub enum Event<T: Config> {
-        NftDelegated(T::AccountId, T::AccountId, TokenId, u64),
+        NftDelegated(T::AccountId, T::AccountId, TokenId, T::BlockNumber),
         EndNftDelegation(TokenId),
         NftSold(T::AccountId, T::AccountId, TokenId, u64, Balance)
     }
@@ -53,28 +55,33 @@ pub mod pallet {
     pub type DelegatedTokens<T: Config> = StorageValue<_, Vec<(T::AccountId, TokenId, u64)>, ValueQuery>;
 
     #[pallet::storage]
-    pub type DelegateForSale<T: Config> = StorageValue<_, Vec<(TokenId, u64, Balance)>, ValueQuery>;
+    pub type DelegateForSale<T: Config> = StorageValue<_, Vec<(TokenId, u32, Balance)>, ValueQuery>;
+
+    #[pallet::storage]
+    pub type CurrentBlock<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-        fn on_finalize(_n: BlockNumberFor<T>) {
+        fn on_finalize(n: BlockNumberFor<T>) {
             DelegatedTokens::<T>::get()
                 .into_iter()
-                .filter(|(_, _, time)| *time == 0_u64)
-                .for_each(|(_, token_id, _)| Self::deposit_event(Event::EndNftDelegation(token_id)));
+                .filter(|(_, _, time)| *time <= n)
+                .for_each(|(_, token_id, _)| {
+                    PalletNft::Pallet::<T>::set_nft_status(token_id, Status::Free);
+                    Self::deposit_event(Event::EndNftDelegation(token_id));
+                });
 
             DelegatedTokens::<T>::mutate(|delegate_tokens| {
-                delegate_tokens.retain(|(_, _, time)| *time != 0_u64)
+                delegate_tokens.retain(|(_, _, time)| *time > n)
             });
+        }
 
-            DelegatedTokens::<T>::mutate(|delegated_tokens| {
-                // Decrement time in blocks
-                delegated_tokens
-                    .into_iter()
-                    .for_each(|(_, _, delegated_time_in_blocks)| {
-                        *delegated_time_in_blocks -= 1;
-                    })
-            });
+        fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+            let n = T::BlockNumber::from(n);
+
+            CurrentBlock::<T>::put(n);
+
+            T::DbWeight::get().writes(1)
         }
     }
 
@@ -187,13 +194,17 @@ pub mod pallet {
             token_id: TokenId,
             delegated_time_in_blocks: u64,
         ){
-            DelegatedTokens::<T>::append((to.clone(), token_id, delegated_time_in_blocks));
+            let current_block = CurrentBlock::<T>::get();
+
+            let end_delegate_block = current_block + T::BlockNumber::from(delegated_time_in_blocks);
+
+            DelegatedTokens::<T>::append((to.clone(), token_id, end_delegate_block.clone()));
 
             TokensForAccount::<T>::append(to.clone(), token_id);
 
             PalletNft::Pallet::<T>::set_nft_status(token_id, Status::InDelegation);
 
-            Self::deposit_event(Event::NftDelegated(from, to, token_id, delegated_time_in_blocks));
+            Self::deposit_event(Event::NftDelegated(from, to, token_id, end_delegate_block));
         }
 
         pub fn sale_delegate_nft(

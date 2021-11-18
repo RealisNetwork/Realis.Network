@@ -4536,6 +4536,7 @@ dependencies = [
  "pallet-nft",
  "parity-scale-codec",
  "realis-primitives",
+ "sp-std",
 ]
 
 [[package]]
