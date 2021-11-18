@@ -26,6 +26,7 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
     use marketplace;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
+    use node_primitives::Balance;
 
     use pallet_nft as NFT;
     use realis_primitives::{Rarity, Status, String, TokenId, TokenType};
@@ -44,6 +45,7 @@ pub mod pallet {
         + pallet_staking::Config
         + pallet_balances::Config
         + marketplace::Config
+        + pallet_nft_delegate::Config
     {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
@@ -98,6 +100,8 @@ pub mod pallet {
         CannotTransferNftBecauseThisNftOnAnotherUser,
 
         CannotTransferNftBecauseThisNftInMarketplace,
+
+        CannotBuyOwnNft,
     }
 
     #[pallet::storage]
@@ -541,6 +545,139 @@ pub mod pallet {
             );
 
             marketplace::Pallet::<T>::remove(account_id, token_id)?;
+            Ok(())
+        }
+
+        #[pallet::weight((90_000_000, Pays::No))]
+        pub fn delegate_nft(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            to: T::AccountId,
+            token_id: TokenId,
+            delegated_time: u32,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&from),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner = NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(from == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::check_time(delegated_time)?;
+            pallet_nft_delegate::Pallet::<T>::can_delegate_nft(token_id)?;
+
+            pallet_nft_delegate::Pallet::<T>::delegate_nft(owner, to, token_id, delegated_time);
+
+            Ok(())
+        }
+
+        #[pallet::weight((90_000_000, Pays::No))]
+        pub fn sell_delegate_nft(
+            origin: OriginFor<T>,
+            seller: T::AccountId,
+            token_id: TokenId,
+            delegated_time: u32,
+            price: Balance
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&seller),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner = NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(seller == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::check_time(delegated_time)?;
+            pallet_nft_delegate::Pallet::<T>::can_delegate_nft(token_id)?;
+
+            pallet_nft_delegate::Pallet::<T>::sale_delegate_nft(owner, token_id, delegated_time, price);
+
+            Ok(())
+        }
+
+        #[pallet::weight((90_000_000, Pays::No))]
+        pub fn buy_delegate_nft(
+            origin: OriginFor<T>,
+            buyer: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&buyer),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner = NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(buyer == owner, Error::<T>::NotTokenOwner);
+            ensure!(buyer != owner, Error::<T>::CannotBuyOwnNft);
+
+            pallet_nft_delegate::Pallet::<T>::buy_delegate_nft(buyer, token_id)
+        }
+
+        #[pallet::weight((90_000_000, Pays::No))]
+        pub fn change_price_delegate_nft(
+            origin: OriginFor<T>,
+            seller: T::AccountId,
+            token_id: TokenId,
+            new_price: Balance,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&seller),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner = NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(seller == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::change_price_delegate_nft(token_id, new_price);
+
+            Ok(())
+        }
+
+        #[pallet::weight((90_000_000, Pays::No))]
+        pub fn change_delegate_nft_time_on_sale(
+            origin: OriginFor<T>,
+            seller: T::AccountId,
+            token_id: TokenId,
+            new_time: u32,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&seller),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner = NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(seller == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::check_time(new_time)?;
+
+            pallet_nft_delegate::Pallet::<T>::change_delegate_nft_time_on_sale(token_id, new_time);
+
+            Ok(())
+        }
+
+        #[pallet::weight((90_000_000, Pays::No))]
+        pub fn remove_from_sell(
+            origin: OriginFor<T>,
+            seller: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&seller),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner = NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(seller == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::remove_nft_from_sell(token_id);
+
             Ok(())
         }
     }

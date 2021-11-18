@@ -25,11 +25,15 @@ pallet-authorship = { default-features = false, git = "https://github.com/parity
 sp-staking = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 frame-election-provider-support = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false  }
 primitive-types = { version = "0.10.1", default-features = false }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", version = "4.0.0-dev", default-features = false, optional = true }
+node-primitives = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
+
 pallet-nft = { version = "0.0.2", default-features = false, path="../nft" }
+pallet-nft-delegate = { default-features = false, path="../nft-delegate"}
 marketplace = { version = "0.0.1", default-features = false, path="../marketplace" }
 pallet-staking = {version = "0.0.2", default-features = false, path="../staking-pool" }
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", version = "4.0.0-dev", default-features = false, optional = true }
 realis-primitives = { version = "0.0.2", path = "../../primitives/realis", default-features = false}
+
 
 [dev-dependencies]
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }

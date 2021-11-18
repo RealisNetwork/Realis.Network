@@ -117,9 +117,10 @@ pub mod pallet {
             let owner = PalletNft::AccountForToken::<T>::get(token_id)
                 .ok_or(Error::<T>::NonExistentNft)?;
             ensure!(who == owner, Error::<T>::NotNftOwner);
-            ensure!(delegated_time != 0, Error::<T>::DelegationTimeTooLow);
 
+            Self::check_time(delegated_time)?;
             Self::can_delegate_nft(token_id)?;
+
             Self::sale_delegate_nft(owner, token_id, delegated_time, price);
 
             Ok(())
