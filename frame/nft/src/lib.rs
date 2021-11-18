@@ -227,6 +227,10 @@ pub mod pallet {
                         token.1 == Status::InDelegation,
                         Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
+                    ensure!(
+                        token.1 != Status::OnDelegateSell,
+                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
+                    );
                 };
             }
             // Only owner can transfer token
