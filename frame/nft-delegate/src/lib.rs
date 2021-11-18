@@ -36,7 +36,7 @@ pub mod pallet {
     pub enum Event<T: Config> {
         NftDelegated(T::AccountId, T::AccountId, TokenId, T::BlockNumber),
         EndNftDelegation(TokenId),
-        NftSold(T::AccountId, T::AccountId, TokenId, u64, Balance)
+        NftSold(T::AccountId, T::AccountId, TokenId, u32, Balance)
     }
 
     #[pallet::error]
@@ -52,7 +52,7 @@ pub mod pallet {
     pub type TokensForAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<TokenId>, ValueQuery>;
 
     #[pallet::storage]
-    pub type DelegatedTokens<T: Config> = StorageValue<_, Vec<(T::AccountId, TokenId, u64)>, ValueQuery>;
+    pub type DelegatedTokens<T: Config> = StorageValue<_, Vec<(T::AccountId, TokenId, T::BlockNumber)>, ValueQuery>;
 
     #[pallet::storage]
     pub type DelegateForSale<T: Config> = StorageValue<_, Vec<(TokenId, u32, Balance)>, ValueQuery>;
@@ -92,7 +92,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             to: T::AccountId,
             token_id: TokenId,
-            delegated_time: u64,
+            delegated_time: u32,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let owner = PalletNft::AccountForToken::<T>::get(token_id)
@@ -110,7 +110,7 @@ pub mod pallet {
         pub fn sell_delegate(
             origin: OriginFor<T>,
             token_id: TokenId,
-            delegated_time: u64,
+            delegated_time: u32,
             price: Balance
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
@@ -158,7 +158,7 @@ pub mod pallet {
         pub fn change_delegate_time_on_sale(
             origin: OriginFor<T>,
             token_id: TokenId,
-            new_time: u64,
+            new_time: u32,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let owner = PalletNft::AccountForToken::<T>::get(token_id)
@@ -192,7 +192,7 @@ pub mod pallet {
             from: T::AccountId,
             to: T::AccountId,
             token_id: TokenId,
-            delegated_time_in_blocks: u64,
+            delegated_time_in_blocks: u32,
         ){
             let current_block = CurrentBlock::<T>::get();
 
@@ -210,7 +210,7 @@ pub mod pallet {
         pub fn sale_delegate_nft(
             _who: T::AccountId,
             token_id: TokenId,
-            delegated_time: u64,
+            delegated_time: u32,
             price: Balance,
         ) {
             DelegateForSale::<T>::append((token_id, delegated_time, price));
@@ -263,7 +263,7 @@ pub mod pallet {
 
         pub fn change_delegate_nft_time_on_sale(
             token_id: TokenId,
-            new_time: u64,
+            new_time: u32,
         ) {
             DelegateForSale::<T>::mutate(|delegated_tokens| {
                 delegated_tokens
@@ -302,7 +302,7 @@ pub mod pallet {
             Ok(())
         }
 
-        pub fn check_time(time: u64) -> DispatchResult {
+        pub fn check_time(time: u32) -> DispatchResult {
             ensure!(time != 0, Error::<T>::DelegationTimeTooLow);
             Ok(())
         }
