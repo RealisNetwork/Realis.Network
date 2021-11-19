@@ -76,6 +76,8 @@ pub mod pallet {
         Balance(T::AccountId, BalanceOf<T>),
         ///
         AddToWhiteList(T::AccountId),
+        /// NFT delegated from player to player
+        NftDelegated(T::AccountId, T::AccountId, TokenId),
     }
 
     #[pallet::error]
@@ -684,6 +686,27 @@ pub mod pallet {
             ensure!(seller == owner, Error::<T>::NotTokenOwner);
 
             pallet_nft_delegate::Pallet::<T>::remove_nft_from_sell(token_id);
+
+            Ok(())
+        }
+
+        #[pallet::weight((90_000_000, Pays::No))]
+        pub fn remove_delegate(
+            origin: OriginFor<T>,
+            delegator: T::AccountId,
+            token_id: TokenId
+        ) -> DispatchResult {
+            let who = ensure_signed(origin.clone())?;
+
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(Self::whitelist().contains(&delegator), Error::<T>::UserNotFoundInWhitelist);
+
+            let owner = NFT::AccountForToken::<T>::get(token_id)
+                .ok_or(Error::<T>::NonExistentToken)?;
+
+            ensure!(delegator == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::remove_delegate(origin, token_id)?;
 
             Ok(())
         }
