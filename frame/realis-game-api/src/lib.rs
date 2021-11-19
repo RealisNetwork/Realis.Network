@@ -619,7 +619,6 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
             let owner = NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
-            ensure!(buyer == owner, Error::<T>::NotTokenOwner);
             ensure!(buyer != owner, Error::<T>::CannotBuyOwnNft);
 
             pallet_nft_delegate::Pallet::<T>::buy_delegate_nft(buyer, token_id)
