@@ -46,13 +46,15 @@ pub mod pallet {
         NftAlreadyInUse,
         DelegationTimeTooLow,
         CannotBuyOwnNft,
+        CannotDelegateToOwner,
+        NftStillDelegated,
     }
 
     #[pallet::storage]
     pub type TokensForAccount<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<TokenId>, ValueQuery>;
 
     #[pallet::storage]
-    pub type DelegatedTokens<T: Config> = StorageValue<_, Vec<(T::AccountId, TokenId, T::BlockNumber)>, ValueQuery>;
+    pub type DelegatedTokens<T: Config> = StorageMap<_, Blake2_128Concat, TokenId, (T::AccountId, T::BlockNumber)>;
 
     #[pallet::storage]
     pub type DelegateForSale<T: Config> = StorageValue<_, Vec<(TokenId, u32, Balance)>, ValueQuery>;
@@ -63,17 +65,13 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_finalize(n: BlockNumberFor<T>) {
-            DelegatedTokens::<T>::get()
-                .into_iter()
-                .filter(|(_, _, time)| *time <= n)
-                .for_each(|(_, token_id, _)| {
+            DelegatedTokens::<T>::iter()
+                .filter(|(_, (_, time))| *time <= n)
+                .for_each(|(token_id, (_, _))| {
                     PalletNft::Pallet::<T>::set_nft_status(token_id, Status::Free);
                     Self::deposit_event(Event::EndNftDelegation(token_id));
+                    DelegatedTokens::<T>::remove(token_id);
                 });
-
-            DelegatedTokens::<T>::mutate(|delegate_tokens| {
-                delegate_tokens.retain(|(_, _, time)| *time > n)
-            });
         }
 
         fn on_initialize(n: BlockNumberFor<T>) -> Weight {
@@ -98,6 +96,7 @@ pub mod pallet {
             let owner = PalletNft::AccountForToken::<T>::get(token_id)
                 .ok_or(Error::<T>::NonExistentNft)?;
             ensure!(who == owner, Error::<T>::NotNftOwner);
+            ensure!(who != to, Error::<T>::CannotDelegateToOwner);
             Self::check_time(delegated_time)?;
 
             Self::can_delegate_nft(token_id)?;
@@ -186,6 +185,22 @@ pub mod pallet {
 
             Ok(())
         }
+
+        #[pallet::weight(90_000_000)]
+        pub fn remove_delegate(
+            origin: OriginFor<T>,
+            token_id: TokenId
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            let owner = PalletNft::AccountForToken::<T>::get(token_id)
+                .ok_or(Error::<T>::NonExistentNft)?;
+            ensure!(who == owner, Error::<T>::NotNftOwner);
+
+            Self::check_delegation_time(token_id)?;
+            Self::remove_delegate_nft(token_id);
+
+            Ok(())
+        }
     }
 
     impl<T: Config> Pallet<T> {
@@ -199,7 +214,7 @@ pub mod pallet {
 
             let end_delegate_block = current_block + T::BlockNumber::from(delegated_time_in_blocks);
 
-            DelegatedTokens::<T>::append((to.clone(), token_id, end_delegate_block.clone()));
+            DelegatedTokens::<T>::insert(token_id, (to.clone(), end_delegate_block.clone()));
 
             TokensForAccount::<T>::append(to.clone(), token_id);
 
@@ -283,6 +298,12 @@ pub mod pallet {
             PalletNft::Pallet::<T>::set_nft_status(token_id, Status::Free);
         }
 
+        pub fn remove_delegate_nft(token_id: TokenId) {
+            DelegatedTokens::<T>::remove(token_id);
+
+            PalletNft::Pallet::<T>::set_nft_status(token_id, Status::Free);
+        }
+
         pub fn can_delegate_nft(token_id: TokenId) -> DispatchResult {
             match PalletNft::Pallet::<T>::get_nft_status(token_id) {
                 None => Err(Error::<T>::NonExistentNft)?,
@@ -305,6 +326,14 @@ pub mod pallet {
 
         pub fn check_time(time: u32) -> DispatchResult {
             ensure!(time != 0, Error::<T>::DelegationTimeTooLow);
+            Ok(())
+        }
+
+        pub fn check_delegation_time(token_id: TokenId) -> DispatchResult {
+            let end_delegation = DelegatedTokens::<T>::get(token_id).unwrap().1;
+            let current_block = CurrentBlock::<T>::get();
+
+            ensure!(current_block >= end_delegation, Error::<T>::NftStillDelegated);
             Ok(())
         }
     }
