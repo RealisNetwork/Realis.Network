@@ -110,7 +110,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn token_list)]
     pub type TokensList<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(Token, Status)>>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(Token, Status)>, ValueQuery>;
 
     /// Contains vector of all accounts ???
     #[pallet::storage]
@@ -216,7 +216,7 @@ pub mod pallet {
             // Get owner by token_id
             let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
 
-            let tokens = TokensList::<T>::get(origin.clone()).unwrap();
+            let tokens = TokensList::<T>::get(origin.clone());
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
@@ -288,11 +288,7 @@ pub mod pallet {
             );
             Self::inc_total_for_account(target_account)?;
 
-            TokensList::<T>::mutate(&target_account, |tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push((token, Status::Free));
-            });
+            TokensList::<T>::append(&target_account, (token, Status::Free));
 
             AccountForToken::<T>::insert(token_id, &target_account);
 
@@ -303,10 +299,7 @@ pub mod pallet {
             Self::dec_total_for_account(owner)?;
 
             TokensList::<T>::mutate(&owner, |tuple_tokens| {
-                tuple_tokens
-                    .as_mut()
-                    .unwrap()
-                    .retain(|token| token.0.id != token_id);
+                tuple_tokens.retain(|token| token.0.id != token_id);
             });
 
             AccountForToken::<T>::remove(&token_id);
@@ -324,29 +317,17 @@ pub mod pallet {
                 Error::<T>::NonExistentToken
             );
 
-            Self::dec_total_for_account(owner)?;
             Self::inc_total_for_account(dest_account)?;
-
+            let token = Self::pop(token_id);
             AccountForToken::<T>::insert(token_id, dest_account);
-
-            // Remove token from current owner
-            let token = TokensList::<T>::mutate(&owner, |tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0.id == token_id);
-                tokens_mut.remove(index.unwrap())
-            });
-
-            // Transfer token to dest_account
-            TokensList::<T>::mutate(dest_account, |tokens| {
-                tokens.get_or_insert(Vec::default()).push(token);
-            });
+            TokensList::<T>::append(dest_account, token);
 
             Ok(())
         }
 
         pub fn get_nft_status(token_id: TokenId) -> Option<Status> {
             let owner = AccountForToken::<T>::get(token_id).unwrap();
-            let tokens = TokensList::<T>::get(&owner)?;
+            let tokens = TokensList::<T>::get(&owner);
 
             tokens
                 .iter()
@@ -358,7 +339,7 @@ pub mod pallet {
             let owner = AccountForToken::<T>::get(token_id).unwrap();
 
             TokensList::<T>::mutate(owner, |tokens| {
-                tokens.as_mut().unwrap().into_iter().for_each(|(token, current_status)| {
+                tokens.into_iter().for_each(|(token, current_status)| {
                     if token.id == token_id {
                         *current_status = status;
                     }
@@ -366,7 +347,18 @@ pub mod pallet {
             });
         }
 
-        fn inc_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
+        pub fn pop(token_id: TokenId) -> (Token, Status) {
+            let owner = AccountForToken::<T>::get(token_id).unwrap();
+            let _result = Self::dec_total_for_account(&owner);
+
+            AccountForToken::<T>::remove(token_id);
+            TokensList::<T>::mutate(&owner, |tokens| {
+                let index = tokens.iter().position(|token| token.0.id == token_id);
+                tokens.remove(index.unwrap())
+            })
+        }
+
+        pub fn inc_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
             TotalForAccount::<T>::try_mutate(account, |cnt| {
                 cnt.checked_add(1)
                     .map_or(Err(ArithmeticError::Overflow), |new_cnt| {
@@ -376,7 +368,7 @@ pub mod pallet {
             })
         }
 
-        fn dec_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
+        pub fn dec_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
             TotalForAccount::<T>::try_mutate(account, |cnt| {
                 cnt.checked_sub(1)
                     .map_or(Err(ArithmeticError::Overflow), |new_cnt| {

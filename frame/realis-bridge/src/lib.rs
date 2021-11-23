@@ -194,7 +194,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
-            let tokens = Nft::TokensList::<T>::get(who.clone()).unwrap();
+            let tokens = Nft::TokensList::<T>::get(who.clone());
             for token in tokens {
                 if token.0.id == value {
                     ensure!(

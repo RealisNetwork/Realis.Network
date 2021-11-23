@@ -15,7 +15,6 @@ pub mod pallet {
     use node_primitives::Balance;
     use pallet_nft as Nft;
     use realis_primitives::*;
-    use sp_runtime::ArithmeticError;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -37,7 +36,7 @@ pub mod pallet {
     #[pallet::metadata(T::AccountId = "AccountId", TokenBalance = "Balance")]
     pub enum Event<T: Config> {
         /// This TokenId on sale in Marketplace!
-        NftForSale(TokenId, Balance, Vec<(Token, Status)>),
+        NftForSale(TokenId, Balance, TokenId),
         /// This TokenId was buyed in Marketplace!
         NftBuyed(<T as frame_system::Config>::AccountId, TokenId),
         /// This TokenId have a new price
@@ -52,6 +51,8 @@ pub mod pallet {
         CannotForSaleThisNft,
         CannotSellAgainNft,
         CannotChangePriceNft,
+        NonExistentToken,
+        NotTokenOwner,
     }
 
     #[pallet::storage]
@@ -75,15 +76,16 @@ pub mod pallet {
         pub fn sell_nft(origin: OriginFor<T>, token_id: TokenId, price: Balance) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
-            let tokens = Nft::TokensList::<T>::get(who.clone()).unwrap();
+            ensure!(who == owner, Error::NotTokenOwner);
+            let tokens = Nft::TokensList::<T>::get(who.clone());
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(token.1 == Status::Free, Error::<T>::CannotSellAgainNft);
 
                     let TokenType::Basic(rarity, _, _, _) = token.0.token_type;
-                    let old_token = Self::sell(owner.clone(), token_id, rarity, price).unwrap();
+                    Self::sell(owner.clone(), token_id, rarity, price);
                     // Call sell event
-                    Self::deposit_event(Event::NftForSale(token_id, price, old_token));
+                    Self::deposit_event(Event::NftForSale(token_id, price, token_id));
                 };
             }
             Ok(())
@@ -109,7 +111,7 @@ pub mod pallet {
             price: Balance,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            let tokens = Nft::TokensList::<T>::get(who.clone()).unwrap();
+            let tokens = Nft::TokensList::<T>::get(who.clone());
             let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
             for token in tokens {
                 if token.0.id == token_id {
@@ -129,6 +131,8 @@ pub mod pallet {
             token_id: TokenId,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
+            ensure!(who == owner, Error::NotTokenOwner);
             // if token_in_storage[0].1 == Status::InDelegation || token_in_storage[0].1 == Status::OnSell {
             //     pallet::DispatchError::Other("CannotForSaleThisNft");
             // }
@@ -146,11 +150,11 @@ pub mod pallet {
             token_id: TokenId,
             rarity: Rarity,
             price: Balance,
-        ) -> dispatch::result::Result<Vec<(Token, Status)>, dispatch::DispatchError> {
+        ) {
             NFTForSaleInAccount::<T>::mutate(seller.clone(), |tokens| {
                 tokens
                     .get_or_insert(Vec::default())
-                    .push((token_id, rarity, price));
+                    .push((token_id, rarity, price.clone()));
             });
 
             AllNFTForSale::<T>::mutate(|tokens| {
@@ -159,32 +163,7 @@ pub mod pallet {
                     .push((token_id, rarity, price));
             });
 
-            let mut old_token = vec![];
-
-            Nft::TokensList::<T>::mutate(&seller, |tuple_tokens| {
-                tuple_tokens
-                    .as_mut()
-                    .unwrap()
-                    .iter()
-                    .for_each(|tuple_tokens| {
-                        if tuple_tokens.0.id == token_id {
-                            old_token.push((tuple_tokens.0.clone(), Status::OnSell));
-                        }
-                    });
-            });
-
-            Nft::TokensList::<T>::mutate(&seller, |tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0.id == token_id);
-                tokens_mut.remove(index.unwrap());
-            });
-
-            Nft::TokensList::<T>::mutate(&seller, |tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push(old_token[0].clone());
-            });
-            Ok(old_token)
+            Nft::Pallet::<T>::set_nft_status(token_id, Status::OnSell);
         }
 
         pub fn buy(
@@ -193,19 +172,11 @@ pub mod pallet {
         ) -> dispatch::result::Result<(), dispatch::DispatchError> {
             let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
 
-            let mut balance = vec![];
-
-            NFTForSaleInAccount::<T>::mutate(&owner, |tuple_tokens| {
-                tuple_tokens
-                    .as_mut()
-                    .unwrap()
-                    .iter()
-                    .for_each(|tuple_tokens| {
-                        if tuple_tokens.0 == token_id {
-                            balance.push(tuple_tokens.2);
-                        }
-                    });
-            });
+            let (_, _, balance) = NFTForSaleInAccount::<T>::get(&owner)
+                .unwrap()
+                .into_iter()
+                .find(|(id, _, _)| *id == token_id)
+                .unwrap();
 
             // let five_percent = balance[0] / 100 * 5;
 
@@ -214,51 +185,23 @@ pub mod pallet {
             <T as pallet::Config>::Currency::transfer(
                 &buyer,
                 &owner,
-                balance[0],
+                balance.clone(),
                 ExistenceRequirement::KeepAlive,
             )?;
 
             NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0 == token_id);
-                tokens_mut.remove(index.unwrap())
+                tokens.as_mut().unwrap().retain(|(id, _, _)| *id == token_id)
             });
 
             AllNFTForSale::<T>::mutate(|tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0 == token_id);
-                tokens_mut.remove(index.unwrap())
+                tokens.as_mut().unwrap().retain(|(id, _, _)| *id == token_id)
             });
 
-            let mut old_token = vec![];
-
-            Nft::TokensList::<T>::mutate(&owner, |tuple_tokens| {
-                tuple_tokens
-                    .as_mut()
-                    .unwrap()
-                    .iter()
-                    .for_each(|tuple_tokens| {
-                        if tuple_tokens.0.id == token_id {
-                            old_token.push((tuple_tokens.0.clone(), Status::Free));
-                        }
-                    });
-            });
-
-            Nft::TokensList::<T>::mutate(&owner, |tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0.id == token_id);
-                tokens_mut.remove(index.unwrap())
-            });
+            let (token, _) = Nft::Pallet::<T>::pop(token_id);
 
             Nft::AccountForToken::<T>::insert(token_id, buyer.clone());
-            Self::dec_total_for_account(&owner)?;
-            Self::inc_total_for_account(&buyer.clone())?;
-
-            Nft::TokensList::<T>::mutate(buyer, |tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push(old_token[0].clone());
-            });
+            Nft::Pallet::<T>::inc_total_for_account(&buyer.clone())?;
+            Nft::TokensList::<T>::append(buyer, (token, Status::Free));
 
             Ok(())
         }
@@ -268,37 +211,13 @@ pub mod pallet {
             token_id: TokenId,
             new_price: Balance,
         ) -> dispatch::result::Result<(), dispatch::DispatchError> {
-            let mut old_token = vec![];
-
             NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
-                tokens.as_mut().unwrap().iter().for_each(|(id, rarity, _)| {
-                    if id.clone() == token_id {
-                        old_token.push((id.clone(), rarity.clone(), new_price));
-                    }
-                });
+                tokens.as_mut().unwrap().into_iter().find(|(id, _, _)| *id == token_id)
+                    .map(|(_, _, price)| *price = new_price.clone());
             });
             AllNFTForSale::<T>::mutate(|tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0 == token_id);
-                tokens_mut.remove(index.unwrap());
-            });
-
-            AllNFTForSale::<T>::mutate(|tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push(old_token[0].clone());
-            });
-
-            NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0 == token_id);
-                tokens_mut.remove(index.unwrap());
-            });
-
-            NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push(old_token[0].clone());
+                tokens.as_mut().unwrap().into_iter().find(|(id, _, _)| *id == token_id)
+                    .map(|(_, _, price)| *price = new_price);
             });
             Ok(())
         }
@@ -308,60 +227,17 @@ pub mod pallet {
             token_id: TokenId,
         ) -> dispatch::result::Result<(), dispatch::DispatchError> {
             NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0 == token_id);
-                tokens_mut.remove(index.unwrap())
+                tokens.as_mut().unwrap().retain(|(id, _, _)| *id != token_id);
             });
 
             AllNFTForSale::<T>::mutate(|tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0 == token_id);
-                tokens_mut.remove(index.unwrap())
+                tokens.as_mut().unwrap().retain(|(id, _, _)| *id != token_id);
             });
 
-            let mut old_token = vec![];
 
-            Nft::TokensList::<T>::mutate(&owner, |tokens| {
-                tokens.as_mut().unwrap().iter().for_each(|tuple_tokens| {
-                    if tuple_tokens.0.id == token_id {
-                        old_token.push((tuple_tokens.0.clone(), Status::Free));
-                    }
-                });
-            });
-
-            Nft::TokensList::<T>::mutate(&owner, |tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0.id == token_id);
-                tokens_mut.remove(index.unwrap())
-            });
-
-            Nft::TokensList::<T>::mutate(owner, |tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push(old_token[0].clone());
-            });
+            Nft::Pallet::<T>::set_nft_status(token_id, Status::Free);
 
             Ok(())
-        }
-
-        fn inc_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
-            Nft::TotalForAccount::<T>::try_mutate(account, |cnt| {
-                cnt.checked_add(1)
-                    .map_or(Err(ArithmeticError::Overflow), |new_cnt| {
-                        *cnt = new_cnt;
-                        Ok(())
-                    })
-            })
-        }
-
-        fn dec_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
-            Nft::TotalForAccount::<T>::try_mutate(account, |cnt| {
-                cnt.checked_sub(1)
-                    .map_or(Err(ArithmeticError::Overflow), |new_cnt| {
-                        *cnt = new_cnt;
-                        Ok(())
-                    })
-            })
         }
     }
 }
