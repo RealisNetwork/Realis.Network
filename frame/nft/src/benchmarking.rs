@@ -22,57 +22,31 @@ mod benchmarking {
         }: _(
             SystemOrigin::Signed(caller.clone()),
             caller.clone(),
+            b"QQ".to_vec(),
             U256([1, 0, 0, 0]),
+            1,
             Rarity::Common,
-            Socket::Head,
-            Params {
-                strength: 1,
-                agility: 1,
-                intelligence: 1
-            }
+            b"QQ".to_vec()
         )
 
-        mint_basic {
-            let caller = alice::<T>();
-        }: _(
-            SystemOrigin::Signed(caller.clone()),
-            caller.clone(),
-            U256([1, 0, 0, 0]),
-            1
-        )
-
-        burn {
-            let caller = alice::<T>();
-            let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            Nft::<T>::mint(
-            owner_origin,
-            caller.clone(),
-            U256([1, 0, 0, 0]),
-            Rarity::Common,
-            Socket::Head,
-            Params {
-                strength: 1,
-                agility: 1,
-                intelligence: 1
-            });
-        }: _(
-            SystemOrigin::Signed(caller.clone()),
-            U256([1, 0, 0, 0])
-        )
-
-        burn_basic {
-            let caller = alice::<T>();
-            let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            Nft::<T>::mint_basic(
-                owner_origin,
-                caller.clone(),
-                U256([1, 0, 0, 0]),
-                1
-            );
-        }: _(
-            SystemOrigin::Signed(caller.clone()),
-            U256([1, 0, 0, 0])
-        )
+        // burn {
+        //     let caller = alice::<T>();
+        //     let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
+        //     Nft::<T>::mint(
+        //     owner_origin,
+        //     caller.clone(),
+        //     U256([1, 0, 0, 0]),
+        //     Rarity::Common,
+        //     Socket::Head,
+        //     Params {
+        //         strength: 1,
+        //         agility: 1,
+        //         intelligence: 1
+        //     });
+        // }: _(
+        //     SystemOrigin::Signed(caller.clone()),
+        //     U256([1, 0, 0, 0])
+        // )
 
         transfer {
             let caller = alice::<T>();
@@ -81,37 +55,17 @@ mod benchmarking {
             Nft::<T>::mint(
                 owner_origin,
                 caller.clone(),
+                b"QQ".to_vec(),
                 U256([1, 0, 0, 0]),
+                1,
                 Rarity::Common,
-                Socket::Head,
-                Params {
-                    strength: 1,
-                    agility: 1,
-                    intelligence: 1
-                }
-            );
+                b"QQ".to_vec()
+                )?;
         }: _(
             SystemOrigin::Signed(caller.clone()),
             recipient,
             U256([1, 0, 0, 0])
         )
-
-        transfer_basic {
-            let caller = alice::<T>();
-            let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            let recipient: T::AccountId = account("recipient", 1, SEED);
-            Nft::<T>::mint_basic(
-                owner_origin,
-                caller.clone(),
-                U256([1, 0, 0, 0]),
-                1
-            );
-        }: _(
-            SystemOrigin::Signed(caller.clone()),
-            recipient,
-            U256([1, 0, 0, 0])
-        )
-
     }
 
     impl_benchmark_test_suite!(

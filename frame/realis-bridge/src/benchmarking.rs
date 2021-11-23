@@ -33,7 +33,6 @@ mod benchmarking {
               let transfer_amount = T::BridgeCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER_2 - 1).into());
         }: _(
             owner_origin,
-            recipient,
             H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
             transfer_amount
         )
@@ -48,6 +47,7 @@ mod benchmarking {
               let transfer_amount = T::BridgeCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER_2 - 1).into());
         }: _(
             owner_origin,
+            H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
             recipient,
             transfer_amount
         )
@@ -57,13 +57,12 @@ mod benchmarking {
               let owner_origin = SystemOrigin::Signed(caller.clone());
               RealisBridge::<T>::transfer_nft_to_realis(
                   owner_origin.clone().into(),
+                  H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
                   caller.clone(),
-                  U256([1, 0, 0, 0]),
-                  1
+                  U256([1, 0, 0, 0])
               )?;
           }: _(
               owner_origin.clone(),
-              caller.clone(),
               H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
               U256([1, 0, 0, 0])
           )

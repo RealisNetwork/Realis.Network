@@ -23,27 +23,36 @@ mod benchmarking {
     }
 
     benchmarks! {
-          mint_basic_nft {
+          mint_nft {
               let caller = alice::<T>();
               let owner_origin = SystemOrigin::Signed(caller.clone());
           }: _(
               owner_origin,
               caller.clone(),
               U256([1, 0, 0, 0]),
-              1
+              1,
+              b"qq".to_vec(),
+              Rarity::Common,
+              b"1".to_vec(),
+              b"Qq".to_vec()
           )
 
-          burn_basic_nft {
+          burn_nft {
               let caller = alice::<T>();
               let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
               RealisGameApi::<T>::mint_nft(
                   owner_origin,
                   caller.clone(),
                   U256([1, 0, 0, 0]),
-                  1
+                  1,
+                  b"qq".to_vec(),
+                  Rarity::Common,
+                  b"1".to_vec(),
+                  b"Qq".to_vec()
               )?;
           }: _(
               SystemOrigin::Signed(caller.clone()),
+              caller.clone(),
               U256([1, 0, 0, 0])
           )
 
@@ -51,14 +60,19 @@ mod benchmarking {
               let caller = alice::<T>();
               let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
               let recipient: T::AccountId = account("recipient", 1, SEED);
-              RealisGameApi::<T>::mint_basic_nft(
+              RealisGameApi::<T>::mint_nft(
                   owner_origin,
                   caller.clone(),
                   U256([1, 0, 0, 0]),
-                  1
+                  1,
+                  b"qq".to_vec(),
+                  Rarity::Common,
+                  b"1".to_vec(),
+                  b"Qq".to_vec()
               )?;
           }: _(
               SystemOrigin::Signed(caller.clone()),
+              caller.clone(),
               recipient,
               U256([1, 0, 0, 0])
           )
@@ -119,12 +133,5 @@ mod benchmarking {
               recipient,
               transfer_amount
           )
-    //
-    //   balance_pallet {
-    //     let caller = alice::<T>();
-    //     let owner_origin = SystemOrigin::Signed(caller.clone());
-    //   }: _(
-    //     owner_origin
-    //   )
     }
 }
