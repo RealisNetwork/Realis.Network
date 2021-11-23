@@ -1,5 +1,4 @@
 #[cfg(feature = "runtime-benchmarks")]
-
 mod benchmarking {
     use crate::Pallet as RealisBridge;
     use crate::*;
@@ -74,9 +73,9 @@ mod benchmarking {
               let owner_origin = SystemOrigin::Signed(caller.clone());
           }: _(
                   owner_origin,
+                  H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
                   caller.clone(),
-                  U256([1, 0, 0, 0]),
-                  1
+                  U256([1, 0, 0, 0])
           )
     }
 }

@@ -36,7 +36,7 @@ mod benchmarking {
           burn_basic_nft {
               let caller = alice::<T>();
               let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-              RealisGameApi::<T>::mint_basic_nft(
+              RealisGameApi::<T>::mint_nft(
                   owner_origin,
                   caller.clone(),
                   U256([1, 0, 0, 0]),
@@ -47,7 +47,7 @@ mod benchmarking {
               U256([1, 0, 0, 0])
           )
 
-          transfer_basic_nft {
+          transfer_nft {
               let caller = alice::<T>();
               let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
               let recipient: T::AccountId = account("recipient", 1, SEED);
