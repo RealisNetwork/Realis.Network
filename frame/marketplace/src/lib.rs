@@ -65,7 +65,7 @@ pub mod pallet {
     >;
 
     #[pallet::storage]
-    pub(super) type AllNFTForSale<T: Config> = StorageValue<_, Vec<(TokenId, Rarity, Balance)>>;
+    pub(super) type AllNFTForSale<T: Config> = StorageValue<_, Vec<(TokenId, Rarity, Balance)>, ValueQuery>;
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
@@ -76,7 +76,7 @@ pub mod pallet {
         pub fn sell_nft(origin: OriginFor<T>, token_id: TokenId, price: Balance) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
-            ensure!(who == owner, Error::NotTokenOwner);
+            ensure!(who == owner, Error::<T>::NotTokenOwner);
             let tokens = Nft::TokensList::<T>::get(who.clone());
             for token in tokens {
                 if token.0.id == token_id {
@@ -132,7 +132,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
-            ensure!(who == owner, Error::NotTokenOwner);
+            ensure!(who == owner, Error::<T>::NotTokenOwner);
             // if token_in_storage[0].1 == Status::InDelegation || token_in_storage[0].1 == Status::OnSell {
             //     pallet::DispatchError::Other("CannotForSaleThisNft");
             // }
@@ -158,9 +158,7 @@ pub mod pallet {
             });
 
             AllNFTForSale::<T>::mutate(|tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push((token_id, rarity, price));
+                tokens.push((token_id, rarity, price));
             });
 
             Nft::Pallet::<T>::set_nft_status(token_id, Status::OnSell);
@@ -194,7 +192,7 @@ pub mod pallet {
             });
 
             AllNFTForSale::<T>::mutate(|tokens| {
-                tokens.as_mut().unwrap().retain(|(id, _, _)| *id == token_id)
+                tokens.retain(|(id, _, _)| *id == token_id)
             });
 
             let (token, _) = Nft::Pallet::<T>::pop(token_id);
@@ -216,7 +214,7 @@ pub mod pallet {
                     .map(|(_, _, price)| *price = new_price.clone());
             });
             AllNFTForSale::<T>::mutate(|tokens| {
-                tokens.as_mut().unwrap().into_iter().find(|(id, _, _)| *id == token_id)
+                tokens.into_iter().find(|(id, _, _)| *id == token_id)
                     .map(|(_, _, price)| *price = new_price);
             });
             Ok(())
@@ -231,7 +229,7 @@ pub mod pallet {
             });
 
             AllNFTForSale::<T>::mutate(|tokens| {
-                tokens.as_mut().unwrap().retain(|(id, _, _)| *id != token_id);
+                tokens.retain(|(id, _, _)| *id != token_id);
             });
 
 
