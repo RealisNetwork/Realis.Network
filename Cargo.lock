@@ -4527,6 +4527,7 @@ dependencies = [
  "frame-system",
  "node-primitives",
  "pallet-nft",
+ "pallet-staking 0.0.2",
  "parity-scale-codec",
  "realis-primitives",
  "sp-std",

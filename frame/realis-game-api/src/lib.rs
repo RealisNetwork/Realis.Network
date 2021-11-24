@@ -25,8 +25,10 @@ pub mod pallet {
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use marketplace;
-    use sp_runtime::traits::{AccountIdConversion, Saturating};
+    use sp_runtime::traits::Saturating;
     use node_primitives::Balance;
+    use frame_support::sp_runtime::traits::AccountIdConversion;
+
 
     use pallet_nft as NFT;
     use realis_primitives::{Rarity, Status, String, TokenId, TokenType};
