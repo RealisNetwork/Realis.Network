@@ -17,6 +17,8 @@ pub mod pallet {
     use realis_primitives::{Status, TokenId};
     use pallet_nft as PalletNft;
 
+    use realis_primitives::constants::COMMISSION;
+
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -234,8 +236,8 @@ pub mod pallet {
                 .find(|(id, _, _)| *id == token_id)
                 .ok_or(Error::<T>::NonExistentNft)?;
 
-            let to_seller = price * 95 / 100;
-            let to_blockchain = price - to_seller;
+            let to_blockchain = price * COMMISSION / 100;
+            let to_seller = price - to_blockchain;
 
             let staking = Self::account_id_staking();
             <T as pallet::Config>::Currency::transfer(

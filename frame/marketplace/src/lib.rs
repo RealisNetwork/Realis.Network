@@ -3,8 +3,6 @@
 use frame_support::dispatch;
 pub use pallet::*;
 use sp_std::prelude::*;
-#[allow(unused_imports)]
-use sp_std::vec;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -15,6 +13,8 @@ pub mod pallet {
     use node_primitives::Balance;
     use pallet_nft as Nft;
     use realis_primitives::*;
+    use realis_primitives::constants::COMMISSION;
+    use frame_support::sp_runtime::traits::AccountIdConversion;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -22,7 +22,7 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-    pub trait Config: frame_system::Config + Nft::Config {
+    pub trait Config: frame_system::Config + Nft::Config + pallet_staking::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
@@ -168,20 +168,27 @@ pub mod pallet {
         ) -> dispatch::result::Result<(), dispatch::DispatchError> {
             let owner = pallet_nft::AccountForToken::<T>::get(token_id).unwrap();
 
-            let (_, _, balance) = NFTForSaleInAccount::<T>::get(&owner)
+            let (_, _, price) = NFTForSaleInAccount::<T>::get(&owner)
                 .unwrap()
                 .into_iter()
                 .find(|(id, _, _)| *id == token_id)
                 .ok_or(Error::<T>::NonExistentToken)?;
 
-            // let five_percent = balance[0] / 100 * 5;
+            let to_blockchain = price * COMMISSION / 100;
+            let to_seller = price - to_blockchain;
 
-            // let amount = balance[0] / 100 * 95;
+            let staking = Self::account_id_staking();
+            <T as pallet::Config>::Currency::transfer(
+                &buyer,
+                &staking,
+                to_blockchain,
+                ExistenceRequirement::KeepAlive,
+            )?;
 
             <T as pallet::Config>::Currency::transfer(
                 &buyer,
                 &owner,
-                balance.clone(),
+                to_seller,
                 ExistenceRequirement::KeepAlive,
             )?;
 
@@ -231,6 +238,10 @@ pub mod pallet {
 
 
             Nft::Pallet::<T>::set_nft_status(token_id, Status::Free);
+        }
+
+        pub fn account_id_staking() -> T::AccountId {
+            <T as pallet_staking::Config>::PalletId::get().into_account()
         }
     }
 }

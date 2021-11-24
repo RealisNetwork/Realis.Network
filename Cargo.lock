@@ -3416,6 +3416,7 @@ dependencies = [
  "node-primitives",
  "pallet-balances",
  "pallet-nft",
+ "pallet-staking 0.0.2",
  "parity-scale-codec",
  "primitive-types",
  "realis-primitives",

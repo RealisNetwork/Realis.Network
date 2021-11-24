@@ -1,5 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+pub mod constants;
+
 use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
 #[cfg(feature = "std")]
