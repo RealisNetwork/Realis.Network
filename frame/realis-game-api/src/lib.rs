@@ -534,7 +534,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::change_price(account_id, token_id, amount)?;
+            marketplace::Pallet::<T>::change_price(account_id, token_id, amount);
             Ok(())
         }
 
@@ -552,7 +552,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::remove(account_id, token_id)?;
+            marketplace::Pallet::<T>::remove(account_id, token_id);
             Ok(())
         }
 

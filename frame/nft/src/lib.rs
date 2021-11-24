@@ -57,10 +57,6 @@ pub mod pallet {
     // Errors inform users that something went wrong.
     #[pallet::error]
     pub enum Error<T> {
-        /// Error names should be descriptive.
-        NoneValue,
-        /// Errors should have helpful documentation associated with them.
-        StorageOverflow,
         /// Token use now another wallet
         TokenExist,
         /// Not token owner
@@ -69,26 +65,16 @@ pub mod pallet {
         NonExistentToken,
         ///
         NotNftMaster,
-        ///
-        InvalidTokenId,
-        /// Transfer amount should be non-zero
-        AmountZero,
-        /// Account balance must be greater than or equal to the transfer amount
-        BalanceLow,
-        /// Vesting balance too high to send value
-        VestingBalance,
         /// Got an overflow after adding
         Overflow,
-        /// Balance too low to send value
-        InsufficientBalance,
-        /// Value too low to create account due to existential deposit
-        ExistentialDeposit,
         /// Nft Master was added early
         NftMasterWasAddedEarly,
 
         CannotTransferNftBecauseThisNftInMarketplace,
 
         CannotTransferNftBecauseThisNftOnAnotherUser,
+
+        NftAlreadyInUse,
     }
 
     /// Map where
@@ -215,26 +201,9 @@ pub mod pallet {
             let origin = ensure_signed(origin)?;
             // Get owner by token_id
             let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
-
-            let tokens = TokensList::<T>::get(origin.clone());
-            for token in tokens {
-                if token.0.id == token_id {
-                    ensure!(
-                        token.1 == Status::OnSell,
-                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
-                    );
-                    ensure!(
-                        token.1 == Status::InDelegation,
-                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
-                    );
-                    ensure!(
-                        token.1 != Status::OnDelegateSell,
-                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
-                    );
-                };
-            }
             // Only owner can transfer token
             ensure!(origin == owner, Error::<T>::NotTokenOwner);
+            Self::is_nft_free(token_id)?;
             // Transfer token
             Self::transfer_nft(&dest_account, &owner, token_id)?;
             // Call transfer event
@@ -376,6 +345,16 @@ pub mod pallet {
                         Ok(())
                     })
             })
+        }
+
+        pub fn is_nft_free(token_id: TokenId) -> DispatchResult {
+            match Self::get_nft_status(token_id) {
+                None => Err(Error::<T>::NonExistentToken)?,
+                Some(Status::OnSell | Status::InDelegation | Status::OnDelegateSell) => Err(Error::<T>::NftAlreadyInUse)?,
+                Some(Status::Free) => {}
+            }
+
+            Ok(())
         }
     }
 }

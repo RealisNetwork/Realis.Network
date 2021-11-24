@@ -284,13 +284,7 @@ pub mod pallet {
         }
 
         pub fn can_delegate_nft(token_id: TokenId) -> DispatchResult {
-            match PalletNft::Pallet::<T>::get_nft_status(token_id) {
-                None => Err(Error::<T>::NonExistentNft)?,
-                Some(Status::OnSell | Status::InDelegation | Status::OnDelegateSell) => Err(Error::<T>::NftAlreadyInUse)?,
-                Some(Status::Free) => {}
-            }
-
-            Ok(())
+            PalletNft::Pallet::<T>::is_nft_free(token_id)
         }
 
         pub fn can_buy_nft(token_id: TokenId) -> DispatchResult {
