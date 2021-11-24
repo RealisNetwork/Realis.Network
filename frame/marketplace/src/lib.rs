@@ -72,7 +72,7 @@ pub mod pallet {
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfo::sell_nft())]
         pub fn sell_nft(origin: OriginFor<T>, token_id: TokenId, price: Balance) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let owner = pallet_nft::AccountForToken::<T>::get(token_id)
@@ -91,7 +91,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfo::buy_nft())]
         pub fn buy_nft(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
             let who = ensure_signed(origin)?;
             // if token_in_storage[0].1 == Status::InDelegation || token_in_storage[0].1 == Status::OnSell {
@@ -104,7 +104,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfo::change_price_nft())]
         pub fn change_price_nft(
             origin: OriginFor<T>,
             token_id: TokenId,
@@ -122,7 +122,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfo::remove_from_marketplace_nft())]
         pub fn remove_from_marketplace_nft(
             origin: OriginFor<T>,
             token_id: TokenId,

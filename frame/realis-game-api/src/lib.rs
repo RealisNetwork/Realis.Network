@@ -10,6 +10,7 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 pub mod weights;
 
@@ -459,7 +460,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn remove_from_validator_whitelist(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -474,7 +475,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn sell_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -523,7 +524,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn change_price_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -560,7 +561,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((90_000_000, Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn delegate_nft(
             origin: OriginFor<T>,
             from: T::AccountId,

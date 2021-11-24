@@ -1673,6 +1673,12 @@ impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_utility, Utility);
             list_benchmark!(list, extra, pallet_vesting, Vesting);
 
+            list_benchmark!(list, extra, pallet_nft, Nft);
+            list_benchmark!(list, extra, pallet_nft_delegate, NftDelegate);
+            list_benchmark!(list, extra, marketplace, Marketplace);
+            list_benchmark!(list, extra, realis_game_api, RealisGameApi);
+            list_benchmark!(list, extra, realis_bridge, RealisBridge);
+
             let storage_info = AllPalletsWithSystem::storage_info();
 
             return (list, storage_info)

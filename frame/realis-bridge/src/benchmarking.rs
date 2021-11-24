@@ -2,12 +2,11 @@
 mod benchmarking {
     use crate::Pallet as RealisBridge;
     use crate::*;
-    use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
+    use frame_benchmarking::{account, benchmarks};
     use frame_support::traits::Currency;
     use frame_system::RawOrigin as SystemOrigin;
     use pallet_nft as Nft;
     use primitive_types::U256;
-    use realis_primitives::*;
     use sp_core::H160;
     use sp_runtime::traits::Saturating;
 

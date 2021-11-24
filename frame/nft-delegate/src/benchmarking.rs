@@ -3,6 +3,7 @@
 mod benchmarking {
     use crate::Pallet as NftDelegate;
     use pallet_nft::Pallet as Nft;
+    use pallet::Pallet as NftDelegate;
     use crate::*;
     use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
     use frame_system::RawOrigin as SystemOrigin;
@@ -110,7 +111,7 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             Nft::<T>::mint(
-                owner_origin,
+                owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
                 U256([1, 0, 0, 0]),
@@ -135,6 +136,12 @@ mod benchmarking {
                 1,
                 Rarity::Common,
                 b"QQ".to_vec(),
+            )?;
+            NftDelegate::<T>::sell_delegate (
+                owner_origin,
+                U256([1, 0, 0, 0]),
+                2,
+                20
             )?;
         }: _(
             SystemOrigin::Signed(caller.clone()),
