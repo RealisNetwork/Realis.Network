@@ -1234,20 +1234,7 @@ impl realis_game_api::Config for Runtime {
     type PalletId = GameApiPalletId;
     type ApiCurrency = Balances;
     type StakingPoolId = StakingPalletId;
-    type WeightInfoOf = realis_game_api::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-    pub Prefix: &'static [u8] = b"Pay LIS to the Realis account:";
-}
-
-impl runtime_common::Config for Runtime {
-    type Event = Event;
-    type VestingSchedule = Vesting;
-    type Prefix = Prefix;
-    /// At least 3/4 of the council must agree to a claim move before it can happen.
-    type MoveClaimOrigin = EnsureRoot<AccountId>;
-    type WeightInfo = runtime_common::weights::WeightInfo<Runtime>;
+    // type WeightInfoOf = realis_game_api::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -1263,11 +1250,13 @@ impl realis_bridge::Config for Runtime {
 impl marketplace::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
+    type WeightInfo = marketplace::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_nft_delegate::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
+    type WeightInfoNftDelegate = pallet_nft_delegate::weights::SubstrateWeight<Runtime>;
 }
 
 construct_runtime!(
@@ -1321,7 +1310,6 @@ construct_runtime!(
         NftDelegate: pallet_nft_delegate::{Pallet, Call, Storage, Event<T>},
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>, Config<T>, Storage},
         Marketplace: marketplace::{Pallet, Call, Event<T>, Storage},
-        Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
     }
 );
 

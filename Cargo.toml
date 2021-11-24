@@ -6,7 +6,6 @@ resolver = "2"
 members = [
 	"bin/node/cli",
     "bin/node/runtime",
-    "bin/node/runtime-common",
     "primitives/realis",
     "frame/nft",
     "frame/nft-delegate",
@@ -21,7 +20,6 @@ members = [
 [patch.'https://github.com/paritytech/substrate']
 node-cli = { path = "bin/node/cli" }
 node-runtime = { path = "bin/node/runtime" }
-runtime-common = { path = "bin/node/runtime-common" }
 pallet-staking = { path = "frame/staking-pool" }
 pallet-nft = { path = "frame/nft" }
 pallet-nft-delegate = { path = "frame/nft-delegate" }

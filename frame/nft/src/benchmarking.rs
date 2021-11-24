@@ -3,7 +3,7 @@
 mod benchmarking {
     use crate::Pallet as Nft;
     use crate::*;
-    use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
+    use frame_benchmarking::{account, benchmarks};
     use frame_system::RawOrigin as SystemOrigin;
     use primitive_types::U256;
     use realis_primitives::*;
@@ -23,7 +23,7 @@ mod benchmarking {
             SystemOrigin::Signed(caller.clone()),
             caller.clone(),
             b"QQ".to_vec(),
-            U256([1, 0, 0, 0]),
+            U256([1, 1, 1, 0]),
             1,
             Rarity::Common,
             b"QQ".to_vec()
@@ -56,7 +56,7 @@ mod benchmarking {
                 owner_origin,
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 0, 0, 0]),
+                U256([1, 1, 1, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -64,13 +64,7 @@ mod benchmarking {
         }: _(
             SystemOrigin::Signed(caller.clone()),
             recipient,
-            U256([1, 0, 0, 0])
+            U256([1, 1, 1, 0])
         )
     }
-
-    impl_benchmark_test_suite!(
-        PalletModule,
-        crate::mock::new_test_ext(vec![1, 2, 3]),
-        crate::mock::Test
-    );
 }

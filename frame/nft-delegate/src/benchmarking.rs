@@ -28,6 +28,10 @@ mod benchmarking {
             let caller = alice::<T>();
             let account_to = bob::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
+            let buyer: T::AccountId = account("buyer", 0, 1);
+            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::Currency::make_free_balance_be(&caller, balance);
+            T::Currency::make_free_balance_be(&buyer, balance);
             Nft::<T>::mint(
                 owner_origin,
                 caller.clone(),
@@ -48,7 +52,7 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             Nft::<T>::mint(
-                owner_origin,
+                owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
                 U256([1, 0, 0, 0]),
@@ -66,6 +70,10 @@ mod benchmarking {
         buy_delegate {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
+            let buyer: T::AccountId = account("buyer", 0, 1);
+            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::Currency::make_free_balance_be(&caller, balance);
+            T::Currency::make_free_balance_be(&buyer, balance);
             Nft::<T>::mint(
                 owner_origin,
                 caller.clone(),
@@ -76,7 +84,7 @@ mod benchmarking {
                 b"QQ".to_vec(),
             )?;
         }: _(
-            SystemOrigin::Signed(caller.clone()),
+            SystemOrigin::Signed(buyer.clone()),
             U256([1, 0, 0, 0])
         )
 

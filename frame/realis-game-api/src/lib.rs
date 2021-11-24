@@ -13,7 +13,7 @@ mod tests;
 mod benchmarking;
 pub mod weights;
 
-pub use weights::WeightInfoOf;
+// pub use weights::WeightInfoOf;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -58,7 +58,7 @@ pub mod pallet {
 
         type StakingPoolId: From<<Self as pallet_staking::Config>::PalletId>;
 
-        type WeightInfoOf: WeightInfoOf;
+        // type WeightInfoOf: WeightInfoOf;
     }
 
     #[pallet::event]
@@ -158,7 +158,7 @@ pub mod pallet {
     // Functions that are callable from outside the runtime.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight((T::WeightInfoOf::mint_basic_nft(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn mint_nft(
             origin: OriginFor<T>,
             target_account: T::AccountId,
@@ -194,7 +194,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::burn_basic_nft(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn burn_nft(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -228,7 +228,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::transfer_basic_nft(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn transfer_nft(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -268,7 +268,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::transfer_from_pallet(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn transfer_from_pallet(
             origin: OriginFor<T>,
             dest: T::AccountId,
@@ -291,7 +291,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::transfer_to_pallet(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn transfer_to_pallet(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -314,7 +314,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::transfer_from_ptp(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn transfer_from_ptp(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -337,7 +337,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn spend_in_game(
             origin: OriginFor<T>,
             dest: T::AccountId,
@@ -376,7 +376,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn add_api_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -394,7 +394,7 @@ pub mod pallet {
         }
 
         /// Remove api_master
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn remove_api_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -408,7 +408,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn add_to_whitelist(origin: OriginFor<T>) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -428,7 +428,7 @@ pub mod pallet {
         }
 
         /// Remove api_master
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn remove_from_whitelist(origin: OriginFor<T>) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -440,7 +440,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn add_to_validator_whitelist(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -505,7 +505,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn buy_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -542,7 +542,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn remove_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,

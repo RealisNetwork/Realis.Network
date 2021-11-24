@@ -10,7 +10,6 @@ mod benchmarking {
     use realis_primitives::*;
     use sp_core::H160;
     use sp_runtime::traits::Saturating;
-    use std::str::FromStr;
 
     const SEED: u32 = 1;
     const ED_MULTIPLIER: u32 = 10;
@@ -33,7 +32,7 @@ mod benchmarking {
               let transfer_amount = T::BridgeCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER_2 - 1).into());
         }: _(
             owner_origin,
-            H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
+            H160::from_slice("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943".as_bytes()),
             transfer_amount
         )
 
@@ -47,7 +46,7 @@ mod benchmarking {
               let transfer_amount = T::BridgeCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER_2 - 1).into());
         }: _(
             owner_origin,
-            H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
+            H160::from_slice("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943".as_bytes()),
             recipient,
             transfer_amount
         )
@@ -57,13 +56,13 @@ mod benchmarking {
               let owner_origin = SystemOrigin::Signed(caller.clone());
               RealisBridge::<T>::transfer_nft_to_realis(
                   owner_origin.clone().into(),
-                  H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
+                  H160::from_slice("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943".as_bytes()),
                   caller.clone(),
                   U256([1, 0, 0, 0])
               )?;
           }: _(
               owner_origin.clone(),
-              H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
+              H160::from_slice("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943".as_bytes()),
               U256([1, 0, 0, 0])
           )
 
@@ -72,7 +71,7 @@ mod benchmarking {
               let owner_origin = SystemOrigin::Signed(caller.clone());
           }: _(
                   owner_origin,
-                  H160::from_str("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943").unwrap(),
+                  H160::from_slice("0x6D1eee1CFeEAb71A4d7Fcc73f0EF67A9CA2cD943".as_bytes()),
                   caller.clone(),
                   U256([1, 0, 0, 0])
           )

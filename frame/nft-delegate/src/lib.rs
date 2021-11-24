@@ -33,6 +33,8 @@ pub mod pallet {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
         type Currency: Currency<Self::AccountId, Balance = Balance>;
+
+        type WeightInfoNftDelegate: WeightInfoNftDelegate;
     }
 
     #[pallet::event]

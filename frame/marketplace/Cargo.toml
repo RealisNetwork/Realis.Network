@@ -38,7 +38,7 @@ sp-io ={ git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf08
 default = ["std"]
 std = [
     "codec/std",
-    "serde",
+    "serde/std",
     "frame-benchmarking/std",
     "frame-support/std",
     "frame-system/std",
@@ -49,6 +49,8 @@ std = [
     "realis-primitives/std",
     "pallet-nft/std",
     "sp-core/std",
+    "sp-io/std",
+    "serde_json/std"
 #    "realis-game-api/std"
 ]
 

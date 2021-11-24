@@ -92,7 +92,6 @@ pallet-staking = { version = "4.0.0-dev", default-features = false, path = "../.
 pallet-nft = { version = "0.0.2", default-features = false, path = "../../../frame/nft" }
 pallet-nft-delegate = { version = "0.0.1", default-features = false, path = "../../../frame/nft-delegate" }
 realis-game-api = { version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api" }
-runtime-common = {version = "0.0.1", default-features = false, path = "../runtime-common"}
 realis-primitives = { version = "0.0.2", default-features = false, path = "../../../primitives/realis"}
 realis-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/realis-bridge" }
 marketplace = { version = "0.0.1", default-features = false, path = "../../../frame/marketplace" }
@@ -172,7 +171,6 @@ std = [
 	"pallet-nft/std",
 	"realis-game-api/std",
 	"realis-bridge/std",
-	"runtime-common/std",
 #	"marketplace/std"
 ]
 runtime-benchmarks = [

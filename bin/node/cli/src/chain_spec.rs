@@ -442,7 +442,6 @@ pub fn testnet_genesis(
         realis_game_api: RealisGameApiConfig {
             api_masters: api_master,
         },
-        claims: Default::default(),
         realis_bridge: RealisBridgeConfig {
             bridge_masters: bridge_master,
         },
@@ -612,7 +611,6 @@ pub fn realis_genesis(
         realis_game_api: RealisGameApiConfig {
             api_masters: api_master,
         },
-        claims: Default::default(),
         realis_bridge: RealisBridgeConfig {
             bridge_masters: bridge_master,
         },
