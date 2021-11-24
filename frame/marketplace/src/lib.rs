@@ -1,5 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
+pub mod weights;
+use weights::WeightInfo;
+
 use frame_support::dispatch;
 pub use pallet::*;
 use sp_std::prelude::*;

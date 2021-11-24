@@ -1,6 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+pub mod weights;
+pub use weights::WeightInfoNftDelegate;
 
 pub use pallet::*;
 
@@ -92,7 +94,7 @@ pub mod pallet {
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoNftDelegate::delegate())]
         pub fn delegate(
             origin: OriginFor<T>,
             to: T::AccountId,
@@ -112,7 +114,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoNftDelegate::sell_delegate())]
         pub fn sell_delegate(
             origin: OriginFor<T>,
             token_id: TokenId,
@@ -132,7 +134,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoNftDelegate::buy_delegate())]
         pub fn buy_delegate(
             origin: OriginFor<T>,
             token_id: TokenId
@@ -145,7 +147,7 @@ pub mod pallet {
             Self::buy_delegate_nft(who, token_id)
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoNftDelegate::change_price_delegate())]
         pub fn change_price_delegate(
             origin: OriginFor<T>,
             token_id: TokenId,
@@ -161,7 +163,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoNftDelegate::change_delegate_time_on_sale())]
         pub fn change_delegate_time_on_sale(
             origin: OriginFor<T>,
             token_id: TokenId,
@@ -178,7 +180,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoNftDelegate::remove_from_sell())]
         pub fn remove_from_sell(
             origin: OriginFor<T>,
             token_id: TokenId,
@@ -193,7 +195,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight(T::WeightInfoNftDelegate::remove_delegate())]
         pub fn remove_delegate(
             origin: OriginFor<T>,
             token_id: TokenId

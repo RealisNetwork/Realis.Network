@@ -12,6 +12,7 @@ mod mock;
 mod tests;
 
 // Add benchmarking modules
+#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 pub mod weights;
 pub use weights::WeightInfoNft;

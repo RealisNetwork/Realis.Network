@@ -31,7 +31,7 @@ node-primitives = { git = "https://github.com/paritytech/substrate", rev = "e7b9
 pallet-nft = { version = "0.0.2", default-features = false, path="../nft" }
 pallet-nft-delegate = { default-features = false, path="../nft-delegate"}
 marketplace = { version = "0.0.1", default-features = false, path="../marketplace" }
-pallet-staking = { version = "4.0.0-dev", default-features = false, path="../staking-pool" }
+pallet-staking = { version = "0.0.2", default-features = false, path="../staking-pool" }
 realis-primitives = { version = "0.0.2", path = "../../primitives/realis", default-features = false}
 
 
