@@ -58,10 +58,6 @@ pub mod pallet {
     // Errors inform users that something went wrong.
     #[pallet::error]
     pub enum Error<T> {
-        /// Error names should be descriptive.
-        NoneValue,
-        /// Errors should have helpful documentation associated with them.
-        StorageOverflow,
         /// Token use now another wallet
         TokenExist,
         /// Not token owner
@@ -70,26 +66,16 @@ pub mod pallet {
         NonExistentToken,
         ///
         NotNftMaster,
-        ///
-        InvalidTokenId,
-        /// Transfer amount should be non-zero
-        AmountZero,
-        /// Account balance must be greater than or equal to the transfer amount
-        BalanceLow,
-        /// Vesting balance too high to send value
-        VestingBalance,
         /// Got an overflow after adding
         Overflow,
-        /// Balance too low to send value
-        InsufficientBalance,
-        /// Value too low to create account due to existential deposit
-        ExistentialDeposit,
         /// Nft Master was added early
         NftMasterWasAddedEarly,
 
         CannotTransferNftBecauseThisNftInMarketplace,
 
         CannotTransferNftBecauseThisNftOnAnotherUser,
+
+        NftAlreadyInUse,
     }
 
     /// Map where
@@ -111,7 +97,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn token_list)]
     pub type TokensList<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(Token, Status)>>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<(Token, Status)>, ValueQuery>;
 
     /// Contains vector of all accounts ???
     #[pallet::storage]
@@ -216,26 +202,9 @@ pub mod pallet {
             let origin = ensure_signed(origin)?;
             // Get owner by token_id
             let owner = Self::account_for_token(&token_id).ok_or(Error::<T>::NonExistentToken)?;
-
-            let tokens = TokensList::<T>::get(origin.clone()).unwrap();
-            for token in tokens {
-                if token.0.id == token_id {
-                    ensure!(
-                        token.1 == Status::OnSell,
-                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
-                    );
-                    ensure!(
-                        token.1 == Status::InDelegation,
-                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
-                    );
-                    ensure!(
-                        token.1 != Status::OnDelegateSell,
-                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
-                    );
-                };
-            }
             // Only owner can transfer token
             ensure!(origin == owner, Error::<T>::NotTokenOwner);
+            Self::is_nft_free(token_id)?;
             // Transfer token
             Self::transfer_nft(&dest_account, &owner, token_id)?;
             // Call transfer event
@@ -289,11 +258,7 @@ pub mod pallet {
             );
             Self::inc_total_for_account(target_account)?;
 
-            TokensList::<T>::mutate(&target_account, |tokens| {
-                tokens
-                    .get_or_insert(Vec::default())
-                    .push((token, Status::Free));
-            });
+            TokensList::<T>::append(&target_account, (token, Status::Free));
 
             AccountForToken::<T>::insert(token_id, &target_account);
 
@@ -304,10 +269,7 @@ pub mod pallet {
             Self::dec_total_for_account(owner)?;
 
             TokensList::<T>::mutate(&owner, |tuple_tokens| {
-                tuple_tokens
-                    .as_mut()
-                    .unwrap()
-                    .retain(|token| token.0.id != token_id);
+                tuple_tokens.retain(|token| token.0.id != token_id);
             });
 
             AccountForToken::<T>::remove(&token_id);
@@ -325,29 +287,17 @@ pub mod pallet {
                 Error::<T>::NonExistentToken
             );
 
-            Self::dec_total_for_account(owner)?;
             Self::inc_total_for_account(dest_account)?;
-
+            let token = Self::pop(token_id);
             AccountForToken::<T>::insert(token_id, dest_account);
-
-            // Remove token from current owner
-            let token = TokensList::<T>::mutate(&owner, |tokens| {
-                let tokens_mut = tokens.as_mut().unwrap();
-                let index = tokens_mut.iter().position(|token| token.0.id == token_id);
-                tokens_mut.remove(index.unwrap())
-            });
-
-            // Transfer token to dest_account
-            TokensList::<T>::mutate(dest_account, |tokens| {
-                tokens.get_or_insert(Vec::default()).push(token);
-            });
+            TokensList::<T>::append(dest_account, token);
 
             Ok(())
         }
 
         pub fn get_nft_status(token_id: TokenId) -> Option<Status> {
             let owner = AccountForToken::<T>::get(token_id).unwrap();
-            let tokens = TokensList::<T>::get(&owner)?;
+            let tokens = TokensList::<T>::get(&owner);
 
             tokens
                 .iter()
@@ -359,7 +309,7 @@ pub mod pallet {
             let owner = AccountForToken::<T>::get(token_id).unwrap();
 
             TokensList::<T>::mutate(owner, |tokens| {
-                tokens.as_mut().unwrap().into_iter().for_each(|(token, current_status)| {
+                tokens.into_iter().for_each(|(token, current_status)| {
                     if token.id == token_id {
                         *current_status = status;
                     }
@@ -367,7 +317,18 @@ pub mod pallet {
             });
         }
 
-        fn inc_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
+        pub fn pop(token_id: TokenId) -> (Token, Status) {
+            let owner = AccountForToken::<T>::get(token_id).unwrap();
+            let _result = Self::dec_total_for_account(&owner);
+
+            AccountForToken::<T>::remove(token_id);
+            TokensList::<T>::mutate(&owner, |tokens| {
+                let index = tokens.iter().position(|token| token.0.id == token_id);
+                tokens.remove(index.unwrap())
+            })
+        }
+
+        pub fn inc_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
             TotalForAccount::<T>::try_mutate(account, |cnt| {
                 cnt.checked_add(1)
                     .map_or(Err(ArithmeticError::Overflow), |new_cnt| {
@@ -377,7 +338,7 @@ pub mod pallet {
             })
         }
 
-        fn dec_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
+        pub fn dec_total_for_account(account: &T::AccountId) -> Result<(), ArithmeticError> {
             TotalForAccount::<T>::try_mutate(account, |cnt| {
                 cnt.checked_sub(1)
                     .map_or(Err(ArithmeticError::Overflow), |new_cnt| {
@@ -385,6 +346,16 @@ pub mod pallet {
                         Ok(())
                     })
             })
+        }
+
+        pub fn is_nft_free(token_id: TokenId) -> DispatchResult {
+            match Self::get_nft_status(token_id) {
+                None => Err(Error::<T>::NonExistentToken)?,
+                Some(Status::OnSell | Status::InDelegation | Status::OnDelegateSell) => Err(Error::<T>::NftAlreadyInUse)?,
+                Some(Status::Free) => {}
+            }
+
+            Ok(())
         }
     }
 }

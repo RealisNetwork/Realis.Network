@@ -9,6 +9,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 [dependencies]
 realis-primitives = { path = "../../primitives/realis", default-features = false }
 pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
+pallet-staking = { version = "0.0.2",  path="../staking-pool", default-features = false }
 
 frame-support = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
@@ -27,6 +28,7 @@ std = [
     "codec/std",
     "frame-support/std",
     "frame-system/std",
+    "pallet-staking/std",
     "frame-benchmarking/std",
     "pallet-nft/std",
     "realis-primitives/std",

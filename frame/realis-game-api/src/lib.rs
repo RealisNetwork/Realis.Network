@@ -25,8 +25,10 @@ pub mod pallet {
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use marketplace;
-    use sp_runtime::traits::{AccountIdConversion, Saturating};
+    use sp_runtime::traits::Saturating;
     use node_primitives::Balance;
+    use frame_support::sp_runtime::traits::AccountIdConversion;
+
 
     use pallet_nft as NFT;
     use realis_primitives::{Rarity, Status, String, TokenId, TokenType};
@@ -204,7 +206,7 @@ pub mod pallet {
                 Self::whitelist().contains(&from),
                 Error::<T>::UserNotFoundInWhitelist
             );
-            let tokens = NFT::TokensList::<T>::get(from.clone()).unwrap();
+            let tokens = NFT::TokensList::<T>::get(from.clone());
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
@@ -243,7 +245,7 @@ pub mod pallet {
                 Self::whitelist().contains(&dest),
                 Error::<T>::UserNotFoundInWhitelist
             );
-            let tokens = NFT::TokensList::<T>::get(from.clone()).unwrap();
+            let tokens = NFT::TokensList::<T>::get(from.clone());
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
@@ -487,7 +489,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            let tokens = NFT::TokensList::<T>::get(account_id.clone()).unwrap();
+            let tokens = NFT::TokensList::<T>::get(account_id.clone());
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
@@ -496,7 +498,7 @@ pub mod pallet {
                     );
 
                     let TokenType::Basic(rarity, _, _, _) = token.0.token_type;
-                    marketplace::Pallet::<T>::sell(account_id.clone(), token_id, rarity, amount)?;
+                    marketplace::Pallet::<T>::sell(account_id.clone(), token_id, rarity, amount);
                 };
             }
 
@@ -536,7 +538,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::change_price(account_id, token_id, amount)?;
+            marketplace::Pallet::<T>::change_price(account_id, token_id, amount);
             Ok(())
         }
 
@@ -554,7 +556,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::remove(account_id, token_id)?;
+            marketplace::Pallet::<T>::remove(account_id, token_id);
             Ok(())
         }
 

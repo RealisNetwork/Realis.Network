@@ -14,9 +14,12 @@ pub mod pallet {
     use frame_support::traits::{ExistenceRequirement, Currency};
     use node_primitives::{Balance};
     use core::convert::From;
+    use frame_support::sp_runtime::traits::AccountIdConversion;
 
     use realis_primitives::{Status, TokenId};
     use pallet_nft as PalletNft;
+
+    use realis_primitives::constants::COMMISSION;
 
 
     #[pallet::pallet]
@@ -25,7 +28,7 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-    pub trait Config: frame_system::Config + PalletNft::Config {
+    pub trait Config: frame_system::Config + PalletNft::Config + pallet_staking::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
@@ -250,10 +253,21 @@ pub mod pallet {
                 .find(|(id, _, _)| *id == token_id)
                 .ok_or(Error::<T>::NonExistentNft)?;
 
+            let to_blockchain = price * COMMISSION / 100;
+            let to_seller = price - to_blockchain;
+
+            let staking = Self::account_id_staking();
+            <T as pallet::Config>::Currency::transfer(
+                &buyer,
+                &staking,
+                to_blockchain,
+                ExistenceRequirement::KeepAlive,
+            )?;
+
             <T as pallet::Config>::Currency::transfer(
                 &buyer,
                 &owner,
-                price,
+                to_seller,
                 ExistenceRequirement::KeepAlive,
             )?;
 
@@ -307,13 +321,7 @@ pub mod pallet {
         }
 
         pub fn can_delegate_nft(token_id: TokenId) -> DispatchResult {
-            match PalletNft::Pallet::<T>::get_nft_status(token_id) {
-                None => Err(Error::<T>::NonExistentNft)?,
-                Some(Status::OnSell | Status::InDelegation | Status::OnDelegateSell) => Err(Error::<T>::NftAlreadyInUse)?,
-                Some(Status::Free) => {}
-            }
-
-            Ok(())
+            PalletNft::Pallet::<T>::is_nft_free(token_id)
         }
 
         pub fn can_buy_nft(token_id: TokenId) -> DispatchResult {
@@ -330,6 +338,9 @@ pub mod pallet {
             ensure!(time != 0, Error::<T>::DelegationTimeTooLow);
             Ok(())
         }
+
+        pub fn account_id_staking() -> T::AccountId {
+            <T as pallet_staking::Config>::PalletId::get().into_account()
 
         pub fn check_delegation_time(token_id: TokenId) -> DispatchResult {
             let end_delegation = DelegatedTokens::<T>::get(token_id).unwrap().1;
