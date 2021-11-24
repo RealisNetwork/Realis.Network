@@ -1,4 +1,4 @@
-#[cfg(feature = "runtime-benchmarks")]
+#![cfg(feature = "runtime-benchmarks")]
 
 mod benchmarking {
     use crate::Pallet as NftDelegate;

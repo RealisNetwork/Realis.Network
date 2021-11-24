@@ -208,6 +208,11 @@ runtime-benchmarks = [
 	"pallet-offences-benchmarking",
 	"pallet-session-benchmarking",
 	"frame-system-benchmarking",
+	"pallet-nft/runtime-benchmarks",
+	"pallet-nft-delegate/runtime-benchmarks",
+	"marketplace/runtime-benchmarks",
+	"realis-game-api/runtime-benchmarks",
+	"realis-bridge/runtime-benchmarks",
 	"hex-literal",
 ]
 try-runtime = [
