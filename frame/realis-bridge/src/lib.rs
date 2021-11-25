@@ -11,6 +11,9 @@ mod benchmarking;
 mod mock;
 mod tests;
 
+pub mod weights;
+pub use weights::WeightInfoBridge;
+
 pub use pallet::*;
 
 #[frame_support::pallet]
@@ -174,7 +177,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90000000)]
+        #[pallet::weight(10000)]
         pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(

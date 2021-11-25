@@ -39,7 +39,7 @@ realis-primitives = { version = "0.0.2", path = "../../primitives/realis", defau
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 sp-core = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 sp-io = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-#sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
+#sp-runtime = { versiopallen = "2.0.0", default-features = false, path = "../../primitives/runtime" }
 
 
 [features]

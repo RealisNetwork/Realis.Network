@@ -47,7 +47,6 @@ use super::{pallet::*, STAKING_ID};
 use core::result;
 use frame_support::traits::ExistenceRequirement;
 
-
 impl<T: Config> Pallet<T> {
     pub fn account_id() -> T::AccountId {
         T::PalletId::get().into_account()

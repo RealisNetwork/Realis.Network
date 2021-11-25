@@ -1,15 +1,15 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 mod benchmarking {
-    use pallet_nft::Pallet as Nft;
-    use pallet::Pallet as Marketplace;
     use crate::*;
     use frame_benchmarking::benchmarks;
+    use frame_support::traits::Currency;
     use frame_system::RawOrigin as SystemOrigin;
+    use pallet::Pallet as Marketplace;
+    use pallet_nft::NftMasters;
+    use pallet_nft::Pallet as Nft;
     use primitive_types::U256;
     use realis_primitives::*;
-    use pallet_nft::NftMasters;
-    use frame_support::traits::Currency;
 
     const ED_MULTIPLIER: u128 = 1_000_000_000_000_000;
 
@@ -23,8 +23,8 @@ mod benchmarking {
         sell_nft {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
-            T::Currency::make_free_balance_be(&caller, balance);
+            let balance = T::MarketCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::MarketCurrency::make_free_balance_be(&caller, balance);
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),
@@ -43,8 +43,8 @@ mod benchmarking {
         buy_nft {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
-            T::Currency::make_free_balance_be(&caller, balance);
+            let balance = T::MarketCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::MarketCurrency::make_free_balance_be(&caller, balance);
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),
@@ -67,8 +67,8 @@ mod benchmarking {
         change_price_nft {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
-            T::Currency::make_free_balance_be(&caller, balance);
+            let balance = T::MarketCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::MarketCurrency::make_free_balance_be(&caller, balance);
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),
@@ -92,8 +92,8 @@ mod benchmarking {
         remove_from_marketplace_nft {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
-            T::Currency::make_free_balance_be(&caller, balance);
+            let balance = T::MarketCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::MarketCurrency::make_free_balance_be(&caller, balance);
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),

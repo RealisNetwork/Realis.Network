@@ -4,12 +4,11 @@ mod benchmarking {
     use pallet_nft::Pallet as Nft;
     use pallet::Pallet as NftDelegate;
     use crate::*;
-    use frame_benchmarking::benchmarks;
+    use frame_benchmarking::{account, benchmarks};
     use frame_system::RawOrigin as SystemOrigin;
     use primitive_types::U256;
     use realis_primitives::*;
     use pallet_nft::NftMasters;
-    use frame_benchmarking::account;
     use frame_support::traits::Currency;
 
     const ED_MULTIPLIER: u128 = 1_000_000_000_000_000;
@@ -180,7 +179,7 @@ mod benchmarking {
                 b"QQ".to_vec(),
             )?;
             NftDelegate::<T>::sell_delegate (
-                owner_origin,
+                owner_origin.clone(),
                 U256([1, 0, 0, 0]),
                 2,
                 20

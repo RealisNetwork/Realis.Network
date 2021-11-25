@@ -88,7 +88,7 @@ pallet-transaction-payment = { default-features = false, git = "https://github.c
 pallet-transaction-payment-rpc-runtime-api = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 
-pallet-staking = { version = "0.0.2", default-features = false, path = "../../../frame/staking-pool" }
+pallet-staking = { version = "4.0.0-dev", default-features = false, path = "../../../frame/staking-pool" }
 pallet-nft = { version = "0.0.2", default-features = false, path = "../../../frame/nft" }
 pallet-nft-delegate = { version = "0.0.1", default-features = false, path = "../../../frame/nft-delegate" }
 realis-game-api = { version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api" }

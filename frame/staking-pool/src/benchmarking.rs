@@ -33,7 +33,7 @@ use sp_staking::SessionIndex;
 use sp_std::prelude::*;
 
 pub use frame_benchmarking::{
-    account, vec, benchmarks, impl_benchmark_test_suite, whitelist_account, whitelisted_caller,
+    account, benchmarks, impl_benchmark_test_suite, vec, whitelist_account, whitelisted_caller,
 };
 use frame_system::RawOrigin;
 use sp_runtime::traits::{Bounded, One};

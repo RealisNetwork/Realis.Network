@@ -58,8 +58,7 @@ use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::{
-    create_runtime_str,
-    generic, impl_opaque_keys,
+    create_runtime_str, generic, impl_opaque_keys,
     traits::{
         self, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys,
         SaturatedConversion, StaticLookup,
@@ -1234,7 +1233,7 @@ impl realis_game_api::Config for Runtime {
     type PalletId = GameApiPalletId;
     type ApiCurrency = Balances;
     type StakingPoolId = StakingPalletId;
-    // type WeightInfoOf = realis_game_api::weights::SubstrateWeight<Runtime>;
+    type WeightInfoRealis = realis_game_api::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {

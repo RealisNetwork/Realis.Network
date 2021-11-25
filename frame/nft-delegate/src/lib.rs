@@ -34,7 +34,7 @@ pub mod pallet {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-        type Currency: Currency<Self::AccountId, Balance = Balance>;
+        type DelegateCurrency: Currency<Self::AccountId, Balance=Balance>;
 
         type WeightInfoNftDelegate: WeightInfoNftDelegate;
     }
@@ -218,7 +218,7 @@ pub mod pallet {
             to: T::AccountId,
             token_id: TokenId,
             delegated_time_in_blocks: u32,
-        ){
+        ) {
             let current_block = CurrentBlock::<T>::get();
 
             let end_delegate_block = current_block + T::BlockNumber::from(delegated_time_in_blocks);

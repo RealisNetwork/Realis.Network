@@ -6,12 +6,10 @@ mod benchmarking {
     use pallet_nft_delegate::Pallet as NftDelegate;
     use primitive_types::U256;
 
-    use realis_primitives::*;
     use frame_benchmarking::{account, benchmarks};
     use frame_support::traits::Currency;
     use frame_system::RawOrigin as SystemOrigin;
-    use pallet_nft::NftMasters;
-
+    use realis_primitives::*;
     use sp_runtime::traits::Saturating;
 
     const SEED: u32 = 1;
@@ -21,7 +19,7 @@ mod benchmarking {
 
     // Get Alice AccountId
     fn alice<T: Config>() -> T::AccountId {
-        let alice = NftMasters::<T>::get();
+        let alice = ApiMasters::<T>::get();
         alice.get(0).unwrap().clone()
     }
 
@@ -57,7 +55,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -86,7 +84,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -102,10 +100,12 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             let recipient: T::AccountId = account("recipient", 1, SEED);
-            let recipient_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
+            let pallet_id = RealisGameApi::<T>::account_id();
+            let recipient_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(recipient.clone()).into();
             let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
-            let _ = T::ApiCurrency::make_free_balance_be(&recipient, balance);
-            let _ = T::ApiCurrency::make_free_balance_be(&caller, balance);
+            T::ApiCurrency::make_free_balance_be(&recipient, balance);
+            T::ApiCurrency::make_free_balance_be(&caller, balance);
+            T::ApiCurrency::make_free_balance_be(&pallet_id, balance);
             let transfer_amount = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER_2 - 1).into());
             RealisGameApi::<T>::add_to_whitelist(
                 owner_origin.clone(),
@@ -123,10 +123,12 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             let recipient: T::AccountId = account("recipient", 1, SEED);
-            let recipient_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
+             let pallet_id = RealisGameApi::<T>::account_id();
+            let recipient_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(recipient.clone()).into();
             let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
-            let _ = T::ApiCurrency::make_free_balance_be(&recipient, balance);
-            let _ = T::ApiCurrency::make_free_balance_be(&caller, balance);
+            T::ApiCurrency::make_free_balance_be(&recipient, balance);
+            T::ApiCurrency::make_free_balance_be(&caller, balance);
+            T::ApiCurrency::make_free_balance_be(&pallet_id, balance);
             let transfer_amount = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER_2 - 1).into());
             RealisGameApi::<T>::add_to_whitelist(
                 owner_origin.clone(),
@@ -144,10 +146,10 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             let recipient: T::AccountId = account("recipient", 1, SEED);
-            let recipient_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
+            let recipient_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(recipient.clone()).into();
             let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
-            let _ = T::ApiCurrency::make_free_balance_be(&recipient, balance);
-            let _ = T::ApiCurrency::make_free_balance_be(&caller, balance);
+            T::ApiCurrency::make_free_balance_be(&recipient, balance);
+            T::ApiCurrency::make_free_balance_be(&caller, balance);
             let transfer_amount = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER_2 - 1).into());
             RealisGameApi::<T>::add_to_whitelist(
                 owner_origin.clone(),
@@ -166,10 +168,14 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             let recipient: T::AccountId = account("recipient", 1, SEED);
-            let recipient_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
+            let recipient_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(recipient.clone()).into();
             let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
+            let pallet_game_api_id = RealisGameApi::<T>::account_id();
+            let pallet_staking_id = RealisGameApi::<T>::account_id_staking();
             T::ApiCurrency::make_free_balance_be(&caller, balance);
             T::ApiCurrency::make_free_balance_be(&recipient, balance);
+            T::ApiCurrency::make_free_balance_be(&pallet_game_api_id, balance);
+            T::ApiCurrency::make_free_balance_be(&pallet_game_api_id, balance);
 
             let transfer_amount = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER_2 - 1).into());
             RealisGameApi::<T>::add_to_whitelist(
@@ -219,7 +225,7 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
              let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER - 1).into());
-            let _ = T::ApiCurrency::make_free_balance_be(&caller, balance);
+            T::ApiCurrency::make_free_balance_be(&caller, balance);
             RealisGameApi::<T>::add_to_validator_whitelist(
                 owner_origin.clone(),
                 caller.clone()
@@ -241,7 +247,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -294,7 +300,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -324,7 +330,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -359,7 +365,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -375,29 +381,23 @@ mod benchmarking {
         sell_delegate_nft {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            let seller: T::AccountId = account("seller", 0, 1);
-            let seller_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(seller.clone()).into();
             let balance = T::ApiCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
             T::ApiCurrency::make_free_balance_be(&caller, balance);
-            T::ApiCurrency::make_free_balance_be(&seller, balance);
             RealisGameApi::<T>::add_to_whitelist(
                 owner_origin.clone(),
-            )?;
-            RealisGameApi::<T>::add_to_whitelist(
-                seller_origin.clone(),
             )?;
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
             )?;
         }: _(
             SystemOrigin::Signed(caller.clone()),
-            seller.clone(),
+            caller.clone(),
             U256([1, 0, 0, 0]),
             10,
             100
@@ -421,7 +421,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -450,7 +450,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -480,7 +480,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -510,7 +510,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -518,7 +518,7 @@ mod benchmarking {
             NftDelegate::<T>::sell_delegate (
                 owner_origin.clone(),
                 U256([1, 0, 0, 0]),
-                2,
+                1,
                 20
             )?;
         }: _(
@@ -545,7 +545,7 @@ mod benchmarking {
                 owner_origin.clone(),
                 caller.clone(),
                 b"QQ".to_vec(),
-                U256([1, 1, 0, 0]),
+                U256([1, 0, 0, 0]),
                 1,
                 Rarity::Common,
                 b"QQ".to_vec()
@@ -554,11 +554,12 @@ mod benchmarking {
                 owner_origin.clone(),
                 buyer.clone(),
                 U256([1, 0, 0, 0]),
-                20
+                1
             )?;
+            pallet_nft_delegate::CurrentBlock::<T>::mutate(|x| *x = T::BlockNumber::from(2_u32));
         }: _(
             SystemOrigin::Signed(caller.clone()),
-            buyer,
+            caller.clone(),
             U256([1, 0, 0, 0])
         )
     }
