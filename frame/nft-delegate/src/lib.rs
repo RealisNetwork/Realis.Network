@@ -261,14 +261,14 @@ pub mod pallet {
             let to_seller = price - to_blockchain;
 
             let staking = Self::account_id_staking();
-            <T as pallet::Config>::Currency::transfer(
+            <T as pallet::Config>::DelegateCurrency::transfer(
                 &buyer,
                 &staking,
                 to_blockchain,
                 ExistenceRequirement::KeepAlive,
             )?;
 
-            <T as pallet::Config>::Currency::transfer(
+            <T as pallet::Config>::DelegateCurrency::transfer(
                 &buyer,
                 &owner,
                 to_seller,

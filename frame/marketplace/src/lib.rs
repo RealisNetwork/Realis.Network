@@ -3,7 +3,7 @@
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 pub mod weights;
-use weights::WeightInfo;
+use weights::WeightInfoMarketplace;
 
 use frame_support::dispatch;
 pub use pallet::*;
@@ -13,13 +13,13 @@ use sp_std::prelude::*;
 pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
+    use frame_support::sp_runtime::traits::AccountIdConversion;
     use frame_support::traits::{Currency, ExistenceRequirement};
     use frame_system::pallet_prelude::*;
     use node_primitives::Balance;
     use pallet_nft as Nft;
-    use realis_primitives::*;
     use realis_primitives::constants::COMMISSION;
-    use frame_support::sp_runtime::traits::AccountIdConversion;
+    use realis_primitives::*;
 
     #[pallet::pallet]
     #[pallet::generate_store(pub (super) trait Store)]
@@ -31,7 +31,9 @@ pub mod pallet {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-        type Currency: Currency<Self::AccountId, Balance = Balance>;
+        type MarketCurrency: Currency<Self::AccountId, Balance = Balance>;
+
+        type WeightInfoMarketplace: WeightInfoMarketplace;
     }
 
     // Pallets use events to inform users when important changes are made.
@@ -70,14 +72,15 @@ pub mod pallet {
     >;
 
     #[pallet::storage]
-    pub(super) type AllNFTForSale<T: Config> = StorageValue<_, Vec<(TokenId, Rarity, Balance)>, ValueQuery>;
+    pub(super) type AllNFTForSale<T: Config> =
+        StorageValue<_, Vec<(TokenId, Rarity, Balance)>, ValueQuery>;
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(T::WeightInfo::sell_nft())]
+        #[pallet::weight(T::WeightInfoMarketplace::sell_nft())]
         pub fn sell_nft(origin: OriginFor<T>, token_id: TokenId, price: Balance) -> DispatchResult {
             let who = ensure_signed(origin)?;
             let owner = pallet_nft::AccountForToken::<T>::get(token_id)
@@ -96,7 +99,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfo::buy_nft())]
+        #[pallet::weight(T::WeightInfoMarketplace::buy_nft())]
         pub fn buy_nft(origin: OriginFor<T>, token_id: TokenId) -> DispatchResult {
             let who = ensure_signed(origin)?;
             // if token_in_storage[0].1 == Status::InDelegation || token_in_storage[0].1 == Status::OnSell {
@@ -109,7 +112,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfo::change_price_nft())]
+        #[pallet::weight(T::WeightInfoMarketplace::change_price_nft())]
         pub fn change_price_nft(
             origin: OriginFor<T>,
             token_id: TokenId,
@@ -127,7 +130,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfo::remove_from_marketplace_nft())]
+        #[pallet::weight(T::WeightInfoMarketplace::remove_from_marketplace_nft())]
         pub fn remove_from_marketplace_nft(
             origin: OriginFor<T>,
             token_id: TokenId,
@@ -183,14 +186,14 @@ pub mod pallet {
             let to_seller = price - to_blockchain;
 
             let staking = Self::account_id_staking();
-            <T as pallet::Config>::Currency::transfer(
+            <T as pallet::Config>::MarketCurrency::transfer(
                 &buyer,
                 &staking,
                 to_blockchain,
                 ExistenceRequirement::KeepAlive,
             )?;
 
-            <T as pallet::Config>::Currency::transfer(
+            <T as pallet::Config>::MarketCurrency::transfer(
                 &buyer,
                 &owner,
                 to_seller,
@@ -198,12 +201,13 @@ pub mod pallet {
             )?;
 
             NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
-                tokens.as_mut().unwrap().retain(|(id, _, _)| *id == token_id)
+                tokens
+                    .as_mut()
+                    .unwrap()
+                    .retain(|(id, _, _)| *id == token_id)
             });
 
-            AllNFTForSale::<T>::mutate(|tokens| {
-                tokens.retain(|(id, _, _)| *id == token_id)
-            });
+            AllNFTForSale::<T>::mutate(|tokens| tokens.retain(|(id, _, _)| *id == token_id));
 
             let (token, _) = Nft::Pallet::<T>::pop(token_id);
 
@@ -220,27 +224,32 @@ pub mod pallet {
             new_price: Balance,
         ) {
             NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
-                tokens.as_mut().unwrap().into_iter().find(|(id, _, _)| *id == token_id)
+                tokens
+                    .as_mut()
+                    .unwrap()
+                    .into_iter()
+                    .find(|(id, _, _)| *id == token_id)
                     .map(|(_, _, price)| *price = new_price.clone());
             });
             AllNFTForSale::<T>::mutate(|tokens| {
-                tokens.into_iter().find(|(id, _, _)| *id == token_id)
+                tokens
+                    .into_iter()
+                    .find(|(id, _, _)| *id == token_id)
                     .map(|(_, _, price)| *price = new_price);
             });
         }
 
-        pub fn remove(
-            owner: <T as frame_system::Config>::AccountId,
-            token_id: TokenId,
-        ) {
+        pub fn remove(owner: <T as frame_system::Config>::AccountId, token_id: TokenId) {
             NFTForSaleInAccount::<T>::mutate(&owner, |tokens| {
-                tokens.as_mut().unwrap().retain(|(id, _, _)| *id != token_id);
+                tokens
+                    .as_mut()
+                    .unwrap()
+                    .retain(|(id, _, _)| *id != token_id);
             });
 
             AllNFTForSale::<T>::mutate(|tokens| {
                 tokens.retain(|(id, _, _)| *id != token_id);
             });
-
 
             Nft::Pallet::<T>::set_nft_status(token_id, Status::Free);
         }

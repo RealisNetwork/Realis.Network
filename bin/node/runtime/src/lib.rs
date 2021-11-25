@@ -1249,13 +1249,13 @@ impl realis_bridge::Config for Runtime {
 
 impl marketplace::Config for Runtime {
     type Event = Event;
-    type Currency = Balances;
-    type WeightInfo = marketplace::weights::SubstrateWeight<Runtime>;
+    type MarketCurrency = Balances;
+    type WeightInfoMarketplace = marketplace::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_nft_delegate::Config for Runtime {
     type Event = Event;
-    type Currency = Balances;
+    type DelegateCurrency = Balances;
     type WeightInfoNftDelegate = pallet_nft_delegate::weights::SubstrateWeight<Runtime>;
 }
 

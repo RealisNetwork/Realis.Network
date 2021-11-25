@@ -329,6 +329,12 @@ mod benchmarking {
                 Rarity::Common,
                 b"QQ".to_vec()
             )?;
+            RealisGameApi::<T>::sell_nft(
+                owner_origin.clone(),
+                caller.clone(),
+                U256([1, 0, 0, 0]),
+                10
+            )?;
         }: _(
             SystemOrigin::Signed(caller.clone()),
             caller.clone(),

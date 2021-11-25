@@ -25,9 +25,9 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             let buyer: T::AccountId = account("buyer", 0, 1);
-            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
-            T::Currency::make_free_balance_be(&caller, balance);
-            T::Currency::make_free_balance_be(&buyer, balance);
+            let balance = T::DelegateCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::DelegateCurrency::make_free_balance_be(&caller, balance);
+            T::DelegateCurrency::make_free_balance_be(&buyer, balance);
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),
@@ -67,9 +67,9 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             let buyer: T::AccountId = account("buyer", 0, 1);
-            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
-            T::Currency::make_free_balance_be(&caller, balance);
-            T::Currency::make_free_balance_be(&buyer, balance);
+            let balance = T::DelegateCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::DelegateCurrency::make_free_balance_be(&caller, balance);
+            T::DelegateCurrency::make_free_balance_be(&buyer, balance);
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),
@@ -88,9 +88,9 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             let buyer: T::AccountId = account("buyer", 0, 1);
-            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
-            T::Currency::make_free_balance_be(&caller, balance);
-            T::Currency::make_free_balance_be(&buyer, balance);
+            let balance = T::DelegateCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::DelegateCurrency::make_free_balance_be(&caller, balance);
+            T::DelegateCurrency::make_free_balance_be(&buyer, balance);
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),
@@ -140,9 +140,9 @@ mod benchmarking {
             let caller = alice::<T>();
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
             let buyer: T::AccountId = account("buyer", 0, 1);
-            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
-            T::Currency::make_free_balance_be(&caller, balance);
-            T::Currency::make_free_balance_be(&buyer, balance);
+            let balance = T::DelegateCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::DelegateCurrency::make_free_balance_be(&caller, balance);
+            T::DelegateCurrency::make_free_balance_be(&buyer, balance);
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),
@@ -167,9 +167,9 @@ mod benchmarking {
             let caller = alice::<T>();
             let buyer: T::AccountId = account("buyer", 0, 1);
             let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            let balance = T::Currency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
-            T::Currency::make_free_balance_be(&caller, balance);
-            T::Currency::make_free_balance_be(&buyer, balance);
+            let balance = T::DelegateCurrency::minimum_balance().saturating_mul((ED_MULTIPLIER * 10).into());
+            T::DelegateCurrency::make_free_balance_be(&caller, balance);
+            T::DelegateCurrency::make_free_balance_be(&buyer, balance);
             Nft::<T>::mint(
                 owner_origin.clone(),
                 caller.clone(),
