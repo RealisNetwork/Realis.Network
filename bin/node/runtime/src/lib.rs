@@ -1245,6 +1245,7 @@ impl realis_bridge::Config for Runtime {
     type Event = Event;
     type BridgeCurrency = Balances;
     type PalletId = RealisBridgePalletId;
+    type WeightInfoBridge = realis_bridge::weights::SubstrateWeight<Runtime>;
 }
 
 impl marketplace::Config for Runtime {

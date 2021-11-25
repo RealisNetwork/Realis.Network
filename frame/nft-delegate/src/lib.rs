@@ -345,6 +345,7 @@ pub mod pallet {
 
         pub fn account_id_staking() -> T::AccountId {
             <T as pallet_staking::Config>::PalletId::get().into_account()
+        }
 
         pub fn check_delegation_time(token_id: TokenId) -> DispatchResult {
             let end_delegation = DelegatedTokens::<T>::get(token_id).unwrap().1;
