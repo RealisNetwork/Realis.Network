@@ -3747,7 +3747,7 @@ dependencies = [
  "pallet-transaction-payment",
  "parity-scale-codec",
  "parking_lot 0.11.2",
- "platforms",
+ "platforms 2.0.0",
  "rand 0.8.4",
  "regex",
  "sc-authority-discovery",
@@ -5092,6 +5092,12 @@ name = "platforms"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "989d43012e2ca1c4a02507c67282691a0a3207f9dc67cec596b43fe925b3d325"
+
+[[package]]
+name = "platforms"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8d0eef3571242013a0d5dc84861c3ae4a652e56e12adf8bdc26ff5f8cb34c94"
 
 [[package]]
 name = "polling"
@@ -8088,7 +8094,7 @@ name = "substrate-build-script-utils"
 version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate.git?rev=e7b93e1b1abcf0865824c68d10850bbb451e295f#e7b93e1b1abcf0865824c68d10850bbb451e295f"
 dependencies = [
- "platforms",
+ "platforms 1.1.0",
 ]
 
 [[package]]
