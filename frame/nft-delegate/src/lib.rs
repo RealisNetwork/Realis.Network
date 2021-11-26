@@ -17,6 +17,7 @@ pub mod pallet {
     use node_primitives::{Balance};
     use core::convert::From;
     use frame_support::sp_runtime::traits::AccountIdConversion;
+    use frame_support::sp_runtime::traits::BlockNumberProvider;
 
     use realis_primitives::{Status, TokenId};
     use pallet_nft as PalletNft;
@@ -68,9 +69,6 @@ pub mod pallet {
     #[pallet::storage]
     pub type DelegateForSale<T: Config> = StorageValue<_, Vec<(TokenId, u32, Balance)>, ValueQuery>;
 
-    #[pallet::storage]
-    pub type CurrentBlock<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
-
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_finalize(n: BlockNumberFor<T>) {
@@ -81,14 +79,6 @@ pub mod pallet {
                     Self::deposit_event(Event::EndNftDelegation(token_id));
                     DelegatedTokens::<T>::remove(token_id);
                 });
-        }
-
-        fn on_initialize(n: BlockNumberFor<T>) -> Weight {
-            let n = T::BlockNumber::from(n);
-
-            CurrentBlock::<T>::put(n);
-
-            T::DbWeight::get().writes(1)
         }
     }
 
@@ -218,8 +208,8 @@ pub mod pallet {
             to: T::AccountId,
             token_id: TokenId,
             delegated_time_in_blocks: u32,
-        ) {
-            let current_block = CurrentBlock::<T>::get();
+        ){
+            let current_block: T::BlockNumber = frame_system::Pallet::<T>::current_block_number();
 
             let end_delegate_block = current_block + T::BlockNumber::from(delegated_time_in_blocks);
 
@@ -349,7 +339,7 @@ pub mod pallet {
 
         pub fn check_delegation_time(token_id: TokenId) -> DispatchResult {
             let end_delegation = DelegatedTokens::<T>::get(token_id).unwrap().1;
-            let current_block = CurrentBlock::<T>::get();
+            let current_block: T::BlockNumber = frame_system::Pallet::<T>::current_block_number();
 
             ensure!(current_block >= end_delegation, Error::<T>::NftStillDelegated);
             Ok(())
