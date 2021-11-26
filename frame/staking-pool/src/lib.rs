@@ -153,6 +153,7 @@
 //! use frame_support::{decl_module, dispatch};
 //! use frame_system::ensure_signed;
 //! use pallet_staking::{self as staking};
+//! use frame_benchmarking::vec;
 //!
 //! pub trait Config: staking::Config {}
 //!
@@ -670,6 +671,24 @@ impl<Balance: Default> EraPayout<Balance> for () {
     }
 }
 
+/// NEW
+pub struct NewConvertCurve<T>(sp_std::marker::PhantomData<T>);
+impl<Balance: AtLeast32BitUnsigned + Clone, T: Config> EraPayout<Balance> for NewConvertCurve<T> {
+    fn era_payout(
+        _total_staked: Balance,
+        total_issuance: Balance,
+        _era_duration_millis: u64,
+    ) -> (Balance, Balance) {
+        let total_percent_per_era = Perbill::from_rational(175_u32, 100_000);
+
+        let validator_payout = total_percent_per_era * total_issuance;
+        let rest = Balance::from(0_u8);
+
+        (validator_payout, rest)
+    }
+}
+
+/// ORIGINAL
 /// Adaptor to turn a `PiecewiseLinear` curve definition into an `EraPayout` impl, used for
 /// backwards compatibility.
 pub struct ConvertCurve<T>(sp_std::marker::PhantomData<T>);

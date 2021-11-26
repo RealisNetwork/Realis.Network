@@ -1,5 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+pub mod constants;
+
 use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
 #[cfg(feature = "std")]
@@ -26,6 +28,7 @@ pub enum TokenType {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Status {
     OnSell,
+    OnDelegateSell,
     InDelegation,
     Free,
 }

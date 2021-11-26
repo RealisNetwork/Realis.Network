@@ -4,10 +4,10 @@ cargo build --release --features runtime-benchmarks
 --chain dev \
 --execution wasm \
 --wasm-execution compiled \
---pallet realis-bridge \
+--pallet pallet-nft-delegate \
 --extrinsic '*' \
 --steps 20 \
 --repeat 10 \
 --raw \
---output=./frame/realis-bridge/src/weights.rs \
+--output=./frame/nft-delegate/src/weights.rs \
 --template=./.maintain/frame-weight-template.hbs

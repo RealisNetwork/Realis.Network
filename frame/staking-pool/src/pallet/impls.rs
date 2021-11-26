@@ -124,6 +124,17 @@ impl<T: Config> Pallet<T> {
 
         <Ledger<T>>::insert(&controller, &ledger);
 
+        // NEW era payout
+        // let total_percent_per_era = Perbill::from_rational(175_u32, 100_000);
+        //
+        // let account_id = Self::account_id();
+        // let total_balance =
+        //     T::Currency::free_balance(&account_id)
+        //         .saturating_sub(T::Currency::minimum_balance());
+
+        // Total era payout
+        let era_payout_new = era_payout;
+
         // Get Era reward points. It has TOTAL and INDIVIDUAL
         // Find the fraction of the era reward that belongs to the validator
         // Take that fraction of the eras rewards to split to nominator and validator
@@ -131,47 +142,71 @@ impl<T: Config> Pallet<T> {
         // Then look at the validator, figure out the proportion of their reward
         // which goes to them and each of their nominators.
 
-        let era_reward_points = <ErasRewardPoints<T>>::get(&era);
-        let total_reward_points = era_reward_points.total;
-        let validator_reward_points = era_reward_points
-            .individual
-            .get(&ledger.stash)
-            .map(|points| *points)
-            .unwrap_or_else(|| Zero::zero());
-
-        // Nothing to do if they have no reward points.
-        if validator_reward_points.is_zero() {
-            return Ok(Some(T::WeightInfo::payout_stakers_alive_staked(0)).into());
-        }
+        // ORIGINAL
+        // let era_reward_points = <ErasRewardPoints<T>>::get(&era);
+        // let total_reward_points = era_reward_points.total; // TOTAL_STAKED = A(10) + B(30) + C(40)
+        // let validator_reward_points = era_reward_points
+        //     .individual
+        //     .get(&ledger.stash)
+        //     .map(|points| *points)
+        //     .unwrap_or_else(|| Zero::zero()); // VALIDATOR_STAKE
+        //
+        // // Nothing to do if they have no reward points.
+        // if validator_reward_points.is_zero() {
+        //     return Ok(Some(T::WeightInfo::payout_stakers_alive_staked(0)).into());
+        // }
+        // NEW
+        let total_staked = Self::eras_total_stake(current_era);
+        let validator_staked = ledger.total;
 
         // This is the fraction of the total reward that the validator and the
         // nominators will get.
-        let validator_total_reward_part =
-            Perbill::from_rational(validator_reward_points, total_reward_points);
+        // ORIGINAL
+        // let validator_total_reward_part =
+        //     Perbill::from_rational(validator_reward_points, total_reward_points);
+        // NEW
+        let validator_total_reward_part_new =
+            Perbill::from_rational(validator_staked, total_staked);
 
         // This is how much validator + nominators are entitled to.
-        let validator_total_payout = validator_total_reward_part * era_payout;
+        // ORIGINAL
+        // let validator_total_payout = validator_total_reward_part * era_payout;
+        // NEW
+        let validator_total_payout_new = validator_total_reward_part_new * era_payout_new;
 
         let validator_prefs = Self::eras_validator_prefs(&era, &validator_stash);
         // Validator first gets a cut off the top.
         let validator_commission = validator_prefs.commission;
-        let validator_commission_payout = validator_commission * validator_total_payout;
 
-        let validator_leftover_payout = validator_total_payout - validator_commission_payout;
+        // ORIGINAL
+        // let validator_commission_payout = validator_commission * validator_total_payout;
+        // NEW
+        let validator_commission_payout_new = validator_commission * validator_total_payout_new;
+
+        // ORIGINAL
+        // let validator_leftover_payout = validator_total_payout - validator_commission_payout;
+        // NEW
+        // Выплата с учетом коммисии валидатора
+        let validator_leftover_payout_new =
+            validator_total_payout_new - validator_commission_payout_new;
+
         // Now let's calculate how this is split to the validator.
         let validator_exposure_part = Perbill::from_rational(exposure.own, exposure.total);
-        let validator_staking_payout = validator_exposure_part * validator_leftover_payout;
+        // ORIGINAL
+        // let validator_staking_payout = validator_exposure_part * validator_leftover_payout;
+        // NEW
+        let validator_staking_payout_new = validator_exposure_part * validator_leftover_payout_new;
 
         Self::deposit_event(Event::<T>::PayoutStarted(era, ledger.stash.clone()));
 
         // We can now make total validator payout:
         if Self::make_payout(
             &ledger.stash,
-            validator_staking_payout + validator_commission_payout,
+            validator_staking_payout_new + validator_commission_payout_new,
         )
         .is_ok()
         {
-            Self::deposit_event(Event::Rewarded(ledger.stash, validator_leftover_payout));
+            Self::deposit_event(Event::Rewarded(ledger.stash, validator_leftover_payout_new));
         }
 
         // Track the number of payout ops to nominators. Note:
@@ -185,9 +220,10 @@ impl<T: Config> Pallet<T> {
             let nominator_exposure_part = Perbill::from_rational(nominator.value, exposure.total);
 
             let nominator_reward: BalanceOf<T> =
-                nominator_exposure_part * validator_leftover_payout;
+                nominator_exposure_part * validator_leftover_payout_new;
             // We can now make nominator payout:
             if Self::make_payout(&nominator.who, nominator_reward).is_ok() {
+                // TODO nominator_payout_count += 1 ???
                 Self::deposit_event(Event::Rewarded(nominator.who.clone(), nominator_reward));
             }
         }
@@ -392,8 +428,11 @@ impl<T: Config> Pallet<T> {
 
             let era_duration = (now_as_millis_u64 - active_era_start).saturated_into::<u64>();
             let staked = Self::eras_total_stake(&active_era.index);
-            let issuance = T::Currency::total_issuance();
-            let (validator_payout, rest) = T::EraPayout::era_payout(staked, issuance, era_duration);
+            let account_id = T::PalletId::get().into_account();
+            let total_balance = T::Currency::free_balance(&account_id)
+                .saturating_sub(T::Currency::minimum_balance());
+            let (validator_payout, rest) =
+                T::EraPayout::era_payout(staked, total_balance, era_duration);
 
             Self::deposit_event(Event::<T>::EraPaid(
                 active_era.index,
