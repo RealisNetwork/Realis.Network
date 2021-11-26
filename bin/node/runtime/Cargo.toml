@@ -16,7 +16,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 # third-party dependencies
 codec = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ["derive", "max-encoded-len"] }
 static_assertions = "1.1.0"
-hex-literal = { version = "0.3.3", optional = true }
+hex-literal = { version = "0.3.4", optional = true }
 log = { version = "0.4.14", default-features = false }
 primitive-types = { version = "0.10.1", default-features = false }
 
@@ -76,7 +76,7 @@ pallet-randomness-collective-flip = { default-features = false, git = "https://g
 pallet-recovery = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 pallet-session = { features = ["historical"], git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 pallet-session-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false, optional = true }
-pallet-staking-reward-curve = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
+pallet-staking-reward-curve = { version = "3.0.0",  path = "../../../frame/staking-pool/reward-curve" }
 pallet-scheduler = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 #pallet-society = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 pallet-sudo = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
@@ -88,10 +88,10 @@ pallet-transaction-payment = { default-features = false, git = "https://github.c
 pallet-transaction-payment-rpc-runtime-api = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 
-pallet-staking = { version = "0.0.2", default-features = false, path = "../../../frame/staking-pool" }
+pallet-staking = { version = "4.0.0-dev", default-features = false, path = "../../../frame/staking-pool" }
 pallet-nft = { version = "0.0.2", default-features = false, path = "../../../frame/nft" }
+pallet-nft-delegate = { version = "0.0.1", default-features = false, path = "../../../frame/nft-delegate" }
 realis-game-api = { version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api" }
-runtime-common = {version = "0.0.1", default-features = false, path = "../runtime-common"}
 realis-primitives = { version = "0.0.2", default-features = false, path = "../../../primitives/realis"}
 realis-bridge = { version = "0.0.1", default-features = false, path = "../../../frame/realis-bridge" }
 marketplace = { version = "0.0.1", default-features = false, path = "../../../frame/marketplace" }
@@ -171,7 +171,6 @@ std = [
 	"pallet-nft/std",
 	"realis-game-api/std",
 	"realis-bridge/std",
-	"runtime-common/std",
 #	"marketplace/std"
 ]
 runtime-benchmarks = [
@@ -209,6 +208,11 @@ runtime-benchmarks = [
 	"pallet-offences-benchmarking",
 	"pallet-session-benchmarking",
 	"frame-system-benchmarking",
+	"pallet-nft/runtime-benchmarks",
+	"pallet-nft-delegate/runtime-benchmarks",
+	"marketplace/runtime-benchmarks",
+	"realis-game-api/runtime-benchmarks",
+	"realis-bridge/runtime-benchmarks",
 	"hex-literal",
 ]
 try-runtime = [

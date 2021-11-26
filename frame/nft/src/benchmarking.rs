@@ -1,9 +1,9 @@
-#[cfg(feature = "runtime-benchmarks")]
+#![cfg(feature = "runtime-benchmarks")]
 
 mod benchmarking {
     use crate::Pallet as Nft;
     use crate::*;
-    use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
+    use frame_benchmarking::{account, benchmarks};
     use frame_system::RawOrigin as SystemOrigin;
     use primitive_types::U256;
     use realis_primitives::*;
@@ -22,57 +22,31 @@ mod benchmarking {
         }: _(
             SystemOrigin::Signed(caller.clone()),
             caller.clone(),
-            U256([1, 0, 0, 0]),
+            b"QQ".to_vec(),
+            U256([1, 1, 1, 0]),
+            1,
             Rarity::Common,
-            Socket::Head,
-            Params {
-                strength: 1,
-                agility: 1,
-                intelligence: 1
-            }
+            b"QQ".to_vec()
         )
 
-        mint_basic {
-            let caller = alice::<T>();
-        }: _(
-            SystemOrigin::Signed(caller.clone()),
-            caller.clone(),
-            U256([1, 0, 0, 0]),
-            1
-        )
-
-        burn {
-            let caller = alice::<T>();
-            let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            Nft::<T>::mint(
-            owner_origin,
-            caller.clone(),
-            U256([1, 0, 0, 0]),
-            Rarity::Common,
-            Socket::Head,
-            Params {
-                strength: 1,
-                agility: 1,
-                intelligence: 1
-            });
-        }: _(
-            SystemOrigin::Signed(caller.clone()),
-            U256([1, 0, 0, 0])
-        )
-
-        burn_basic {
-            let caller = alice::<T>();
-            let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            Nft::<T>::mint_basic(
-                owner_origin,
-                caller.clone(),
-                U256([1, 0, 0, 0]),
-                1
-            );
-        }: _(
-            SystemOrigin::Signed(caller.clone()),
-            U256([1, 0, 0, 0])
-        )
+        // burn {
+        //     let caller = alice::<T>();
+        //     let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
+        //     Nft::<T>::mint(
+        //     owner_origin,
+        //     caller.clone(),
+        //     U256([1, 0, 0, 0]),
+        //     Rarity::Common,
+        //     Socket::Head,
+        //     Params {
+        //         strength: 1,
+        //         agility: 1,
+        //         intelligence: 1
+        //     });
+        // }: _(
+        //     SystemOrigin::Signed(caller.clone()),
+        //     U256([1, 0, 0, 0])
+        // )
 
         transfer {
             let caller = alice::<T>();
@@ -81,42 +55,16 @@ mod benchmarking {
             Nft::<T>::mint(
                 owner_origin,
                 caller.clone(),
-                U256([1, 0, 0, 0]),
+                b"QQ".to_vec(),
+                U256([1, 1, 1, 0]),
+                1,
                 Rarity::Common,
-                Socket::Head,
-                Params {
-                    strength: 1,
-                    agility: 1,
-                    intelligence: 1
-                }
-            );
+                b"QQ".to_vec()
+                )?;
         }: _(
             SystemOrigin::Signed(caller.clone()),
             recipient,
-            U256([1, 0, 0, 0])
+            U256([1, 1, 1, 0])
         )
-
-        transfer_basic {
-            let caller = alice::<T>();
-            let owner_origin: <T as frame_system::Config>::Origin = SystemOrigin::Signed(caller.clone()).into();
-            let recipient: T::AccountId = account("recipient", 1, SEED);
-            Nft::<T>::mint_basic(
-                owner_origin,
-                caller.clone(),
-                U256([1, 0, 0, 0]),
-                1
-            );
-        }: _(
-            SystemOrigin::Signed(caller.clone()),
-            recipient,
-            U256([1, 0, 0, 0])
-        )
-
     }
-
-    impl_benchmark_test_suite!(
-        PalletModule,
-        crate::mock::new_test_ext(vec![1, 2, 3]),
-        crate::mock::Test
-    );
 }

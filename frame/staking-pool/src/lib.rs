@@ -153,6 +153,7 @@
 //! use frame_support::{decl_module, dispatch};
 //! use frame_system::ensure_signed;
 //! use pallet_staking::{self as staking};
+//! use frame_benchmarking::vec;
 //!
 //! pub trait Config: staking::Config {}
 //!

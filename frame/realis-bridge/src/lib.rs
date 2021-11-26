@@ -6,9 +6,13 @@ use frame_system::ensure_signed;
 pub use realis_primitives::{Status, TokenId, TokenType};
 use sp_std::prelude::*;
 
+#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 mod mock;
 mod tests;
+
+pub mod weights;
+pub use weights::WeightInfoBridge;
 
 pub use pallet::*;
 
@@ -40,6 +44,8 @@ pub mod pallet {
         type BridgeCurrency: Currency<Self::AccountId, Balance = Self::Balance>;
 
         type PalletId: Get<PalletId>;
+
+        type WeightInfoBridge: WeightInfoBridge;
     }
 
     #[pallet::event]
@@ -125,7 +131,7 @@ pub mod pallet {
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(10000)]
+        #[pallet::weight(T::WeightInfoBridge::transfer_token_to_bsc())]
         pub fn transfer_token_to_bsc(
             origin: OriginFor<T>,
             to: H160,
@@ -147,7 +153,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(10000)]
+        #[pallet::weight(T::WeightInfoBridge::transfer_token_to_realis())]
         pub fn transfer_token_to_realis(
             origin: OriginFor<T>,
             from: H160,
@@ -171,7 +177,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90000000)]
+        #[pallet::weight(10000)]
         pub fn balance_pallet(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(
@@ -185,7 +191,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(10000)]
+        #[pallet::weight(T::WeightInfoBridge::transfer_nft_to_bsc())]
         #[allow(irrefutable_let_patterns)]
         pub fn transfer_nft_to_bsc(
             origin: OriginFor<T>,
@@ -194,7 +200,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
-            let tokens = Nft::TokensList::<T>::get(who.clone()).unwrap();
+            let tokens = Nft::TokensList::<T>::get(who.clone());
             for token in tokens {
                 if token.0.id == value {
                     ensure!(
@@ -203,6 +209,10 @@ pub mod pallet {
                     );
                     ensure!(
                         token.1 != Status::InDelegation,
+                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
+                    );
+                    ensure!(
+                        token.1 != Status::OnDelegateSell,
                         Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
                 };
@@ -216,7 +226,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(10000)]
+        #[pallet::weight(T::WeightInfoBridge::transfer_nft_to_realis())]
         pub fn transfer_nft_to_realis(
             origin: OriginFor<T>,
             from: H160,

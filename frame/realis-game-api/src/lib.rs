@@ -10,22 +10,25 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 pub mod weights;
 
-pub use weights::WeightInfoOf;
+pub use weights::WeightInfoRealis;
 
 #[frame_support::pallet]
 pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
+    use frame_support::sp_runtime::traits::AccountIdConversion;
     use frame_support::traits::Imbalance;
     use frame_support::traits::{Currency, ExistenceRequirement, WithdrawReasons};
     use frame_support::weights::Pays;
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use marketplace;
-    use sp_runtime::traits::{AccountIdConversion, Saturating};
+    use node_primitives::Balance;
+    use sp_runtime::traits::Saturating;
 
     use pallet_nft as NFT;
     use realis_primitives::{Rarity, Status, String, TokenId, TokenType};
@@ -44,6 +47,7 @@ pub mod pallet {
         + pallet_staking::Config
         + pallet_balances::Config
         + marketplace::Config
+        + pallet_nft_delegate::Config
     {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
@@ -54,7 +58,7 @@ pub mod pallet {
 
         type StakingPoolId: From<<Self as pallet_staking::Config>::PalletId>;
 
-        type WeightInfoOf: WeightInfoOf;
+        type WeightInfoRealis: WeightInfoRealis;
     }
 
     #[pallet::event]
@@ -74,6 +78,8 @@ pub mod pallet {
         Balance(T::AccountId, BalanceOf<T>),
         ///
         AddToWhiteList(T::AccountId),
+        /// NFT delegated from player to player
+        NftDelegated(T::AccountId, T::AccountId, TokenId),
     }
 
     #[pallet::error]
@@ -98,6 +104,8 @@ pub mod pallet {
         CannotTransferNftBecauseThisNftOnAnotherUser,
 
         CannotTransferNftBecauseThisNftInMarketplace,
+
+        CannotBuyOwnNft,
     }
 
     #[pallet::storage]
@@ -150,7 +158,7 @@ pub mod pallet {
     // Functions that are callable from outside the runtime.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight((T::WeightInfoOf::mint_basic_nft(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::mint_nft())]
         pub fn mint_nft(
             origin: OriginFor<T>,
             target_account: T::AccountId,
@@ -186,7 +194,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::burn_basic_nft(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::burn_nft())]
         pub fn burn_nft(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -198,7 +206,7 @@ pub mod pallet {
                 Self::whitelist().contains(&from),
                 Error::<T>::UserNotFoundInWhitelist
             );
-            let tokens = NFT::TokensList::<T>::get(from.clone()).unwrap();
+            let tokens = NFT::TokensList::<T>::get(from.clone());
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
@@ -209,6 +217,10 @@ pub mod pallet {
                         token.1 != Status::InDelegation,
                         Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
+                    ensure!(
+                        token.1 != Status::OnDelegateSell,
+                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
+                    );
                 };
             }
             NFT::Pallet::<T>::burn_nft(token_id, &from)?;
@@ -216,7 +228,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::transfer_basic_nft(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::transfer_nft())]
         pub fn transfer_nft(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -233,7 +245,7 @@ pub mod pallet {
                 Self::whitelist().contains(&dest),
                 Error::<T>::UserNotFoundInWhitelist
             );
-            let tokens = NFT::TokensList::<T>::get(from.clone()).unwrap();
+            let tokens = NFT::TokensList::<T>::get(from.clone());
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
@@ -244,6 +256,10 @@ pub mod pallet {
                         token.1 != Status::InDelegation,
                         Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
                     );
+                    ensure!(
+                        token.1 != Status::OnDelegateSell,
+                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
+                    );
                 };
             }
 
@@ -252,7 +268,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::transfer_from_pallet(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::transfer_from_pallet())]
         pub fn transfer_from_pallet(
             origin: OriginFor<T>,
             dest: T::AccountId,
@@ -275,7 +291,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::transfer_to_pallet(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::transfer_to_pallet())]
         pub fn transfer_to_pallet(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -298,7 +314,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::transfer_from_ptp(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::transfer_from_ptp())]
         pub fn transfer_from_ptp(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -321,7 +337,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::spend_in_game())]
         pub fn spend_in_game(
             origin: OriginFor<T>,
             dest: T::AccountId,
@@ -360,7 +376,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn add_api_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -378,7 +394,7 @@ pub mod pallet {
         }
 
         /// Remove api_master
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(90_000_000)]
         pub fn remove_api_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -392,7 +408,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::add_to_whitelist())]
         pub fn add_to_whitelist(origin: OriginFor<T>) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -412,7 +428,7 @@ pub mod pallet {
         }
 
         /// Remove api_master
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::remove_from_whitelist())]
         pub fn remove_from_whitelist(origin: OriginFor<T>) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -424,7 +440,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::add_to_validator_whitelist())]
         pub fn add_to_validator_whitelist(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -443,7 +459,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::remove_from_validator_whitelist())]
         pub fn remove_from_validator_whitelist(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -458,7 +474,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::sell_nft())]
         pub fn sell_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -473,7 +489,7 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            let tokens = NFT::TokensList::<T>::get(account_id.clone()).unwrap();
+            let tokens = NFT::TokensList::<T>::get(account_id.clone());
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
@@ -482,14 +498,14 @@ pub mod pallet {
                     );
 
                     let TokenType::Basic(rarity, _, _, _) = token.0.token_type;
-                    marketplace::Pallet::<T>::sell(account_id.clone(), token_id, rarity, amount)?;
+                    marketplace::Pallet::<T>::sell(account_id.clone(), token_id, rarity, amount);
                 };
             }
 
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::buy_nft())]
         pub fn buy_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -507,7 +523,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::change_price_nft())]
         pub fn change_price_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -522,11 +538,11 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::change_price(account_id, token_id, amount)?;
+            marketplace::Pallet::<T>::change_price(account_id, token_id, amount);
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoOf::spend_in_game(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::remove_nft())]
         pub fn remove_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -540,7 +556,174 @@ pub mod pallet {
                 Error::<T>::UserNotFoundInWhitelist
             );
 
-            marketplace::Pallet::<T>::remove(account_id, token_id)?;
+            marketplace::Pallet::<T>::remove(account_id, token_id);
+            Ok(())
+        }
+
+        #[pallet::weight(T::WeightInfoRealis::delegate_nft())]
+        pub fn delegate_nft(
+            origin: OriginFor<T>,
+            from: T::AccountId,
+            to: T::AccountId,
+            token_id: TokenId,
+            delegated_time: u32,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&from),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner =
+                NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(from == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::check_time(delegated_time)?;
+            pallet_nft_delegate::Pallet::<T>::can_delegate_nft(token_id)?;
+
+            pallet_nft_delegate::Pallet::<T>::delegate_nft(owner, to, token_id, delegated_time);
+
+            Ok(())
+        }
+
+        #[pallet::weight(T::WeightInfoRealis::sell_delegate_nft())]
+        pub fn sell_delegate_nft(
+            origin: OriginFor<T>,
+            seller: T::AccountId,
+            token_id: TokenId,
+            delegated_time: u32,
+            price: Balance,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&seller),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner =
+                NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(seller == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::check_time(delegated_time)?;
+            pallet_nft_delegate::Pallet::<T>::can_delegate_nft(token_id)?;
+
+            pallet_nft_delegate::Pallet::<T>::sale_delegate_nft(
+                owner,
+                token_id,
+                delegated_time,
+                price,
+            );
+
+            Ok(())
+        }
+
+        #[pallet::weight(T::WeightInfoRealis::buy_delegate_nft())]
+        pub fn buy_delegate_nft(
+            origin: OriginFor<T>,
+            buyer: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&buyer),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner =
+                NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(buyer != owner, Error::<T>::CannotBuyOwnNft);
+
+            pallet_nft_delegate::Pallet::<T>::buy_delegate_nft(buyer, token_id)
+        }
+
+        #[pallet::weight(T::WeightInfoRealis::change_price_delegate_nft())]
+        pub fn change_price_delegate_nft(
+            origin: OriginFor<T>,
+            seller: T::AccountId,
+            token_id: TokenId,
+            new_price: Balance,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&seller),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner =
+                NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(seller == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::change_price_delegate_nft(token_id, new_price);
+
+            Ok(())
+        }
+
+        #[pallet::weight(T::WeightInfoRealis::change_delegate_nft_time_on_sale())]
+        pub fn change_delegate_nft_time_on_sale(
+            origin: OriginFor<T>,
+            seller: T::AccountId,
+            token_id: TokenId,
+            new_time: u32,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&seller),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner =
+                NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(seller == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::check_time(new_time)?;
+
+            pallet_nft_delegate::Pallet::<T>::change_delegate_nft_time_on_sale(token_id, new_time);
+
+            Ok(())
+        }
+
+        #[pallet::weight(T::WeightInfoRealis::remove_from_sell())]
+        pub fn remove_from_sell(
+            origin: OriginFor<T>,
+            seller: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&seller),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+            let owner =
+                NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+            ensure!(seller == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::remove_nft_from_sell(token_id);
+
+            Ok(())
+        }
+
+        #[pallet::weight(T::WeightInfoRealis::remove_delegate())]
+        pub fn remove_delegate(
+            origin: OriginFor<T>,
+            delegator: T::AccountId,
+            token_id: TokenId,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin.clone())?;
+
+            ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
+            ensure!(
+                Self::whitelist().contains(&delegator),
+                Error::<T>::UserNotFoundInWhitelist
+            );
+
+            let owner =
+                NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
+
+            ensure!(delegator == owner, Error::<T>::NotTokenOwner);
+
+            pallet_nft_delegate::Pallet::<T>::remove_delegate(origin, token_id)?;
+
             Ok(())
         }
     }

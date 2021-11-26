@@ -19,23 +19,27 @@ frame-system = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
-pallet-staking-reward-curve = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
+pallet-staking-reward-curve = { version = "3.0.0",  path = "../staking-pool/reward-curve" }
 pallet-session = { default-features = false, features = ["historical"], git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f"}
 pallet-authorship = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 sp-staking = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 frame-election-provider-support = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false  }
 primitive-types = { version = "0.10.1", default-features = false }
-pallet-nft = { version = "0.0.2", default-features = false, path="../nft" }
-marketplace = { version = "0.0.1", default-features = false, path="../marketplace" }
-pallet-staking = {version = "0.0.2", default-features = false, path="../staking-pool" }
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", version = "4.0.0-dev", default-features = false, optional = true }
+node-primitives = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
+
+pallet-nft = { version = "0.0.2", default-features = false, path="../nft" }
+pallet-nft-delegate = { default-features = false, path="../nft-delegate"}
+marketplace = { version = "0.0.1", default-features = false, path="../marketplace" }
+pallet-staking = { version = "4.0.0-dev", default-features = false, path="../staking-pool" }
 realis-primitives = { version = "0.0.2", path = "../../primitives/realis", default-features = false}
+
 
 [dev-dependencies]
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 sp-core = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 sp-io = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-#sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
+#sp-runtime = { versiopallen = "2.0.0", default-features = false, path = "../../primitives/runtime" }
 
 
 [features]

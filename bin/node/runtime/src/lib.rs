@@ -58,9 +58,7 @@ use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::{
-    create_runtime_str,
-    curve::PiecewiseLinear,
-    generic, impl_opaque_keys,
+    create_runtime_str, generic, impl_opaque_keys,
     traits::{
         self, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys,
         SaturatedConversion, StaticLookup,
@@ -117,9 +115,9 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
     spec_version: 277,
-    impl_version: 2,
+    impl_version: 3,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 6,
+    transaction_version: 7,
 };
 
 /// The BABE epoch configuration at genesis.
@@ -1190,23 +1188,11 @@ impl pallet_nft::Config for Runtime {
     type WeightInfoNft = pallet_nft::weights::SubstrateWeight<Runtime>;
 }
 
-pallet_staking_reward_curve::build! {
-    const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-        min_inflation: 0_025_000,
-        max_inflation: 0_200_000,
-        ideal_stake: 0_500_000,
-        falloff: 0_050_000,
-        max_piece_count: 40,
-        test_precision: 0_005_000,
-    );
-}
-
 parameter_types! {
     pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
     pub const SessionsPerEra: sp_staking::SessionIndex = 1;
     pub const BondingDuration: pallet_staking::EraIndex = 28;
-    pub const SlashDeferDuration: pallet_staking::EraIndex = 27; // 1/4 the bonding duration.
-    pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
+    pub const SlashDeferDuration: pallet_staking::EraIndex = 27;
     pub const MaxNominatorRewardedPerValidator: u32 = 256;
     pub OffchainRepeat: BlockNumber = 5;
 }
@@ -1247,20 +1233,7 @@ impl realis_game_api::Config for Runtime {
     type PalletId = GameApiPalletId;
     type ApiCurrency = Balances;
     type StakingPoolId = StakingPalletId;
-    type WeightInfoOf = realis_game_api::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-    pub Prefix: &'static [u8] = b"Pay LIS to the Realis account:";
-}
-
-impl runtime_common::Config for Runtime {
-    type Event = Event;
-    type VestingSchedule = Vesting;
-    type Prefix = Prefix;
-    /// At least 3/4 of the council must agree to a claim move before it can happen.
-    type MoveClaimOrigin = EnsureRoot<AccountId>;
-    type WeightInfo = runtime_common::weights::WeightInfo<Runtime>;
+    type WeightInfoRealis = realis_game_api::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -1271,11 +1244,19 @@ impl realis_bridge::Config for Runtime {
     type Event = Event;
     type BridgeCurrency = Balances;
     type PalletId = RealisBridgePalletId;
+    type WeightInfoBridge = realis_bridge::weights::SubstrateWeight<Runtime>;
 }
 
 impl marketplace::Config for Runtime {
     type Event = Event;
-    type Currency = Balances;
+    type MarketCurrency = Balances;
+    type WeightInfoMarketplace = marketplace::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_nft_delegate::Config for Runtime {
+    type Event = Event;
+    type DelegateCurrency = Balances;
+    type WeightInfoNftDelegate = pallet_nft_delegate::weights::SubstrateWeight<Runtime>;
 }
 
 construct_runtime!(
@@ -1326,9 +1307,9 @@ construct_runtime!(
         // TransactionStorage: pallet_transaction_storage::{Pallet, Call, Storage, Inherent, Config<T>, Event<T>},
         RealisBridge: realis_bridge::{Pallet, Call, Event<T>, Config<T>, Storage},
         Nft: pallet_nft::{Pallet, Call, Storage, Event<T>, Config<T>},
+        NftDelegate: pallet_nft_delegate::{Pallet, Call, Storage, Event<T>},
         RealisGameApi: realis_game_api::{Pallet, Call, Event<T>, Config<T>, Storage},
         Marketplace: marketplace::{Pallet, Call, Event<T>, Storage},
-        Claims: runtime_common::{Pallet, Call, Storage, Event<T>, Config<T>, ValidateUnsigned},
     }
 );
 
@@ -1663,34 +1644,40 @@ impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_assets, Assets);
             list_benchmark!(list, extra, pallet_babe, Babe);
             list_benchmark!(list, extra, pallet_balances, Balances);
-            list_benchmark!(list, extra, pallet_bounties, Bounties);
-            list_benchmark!(list, extra, pallet_collective, Council);
+            // list_benchmark!(list, extra, pallet_bounties, Bounties);
+            // list_benchmark!(list, extra, pallet_collective, Council);
             list_benchmark!(list, extra, pallet_contracts, Contracts);
-            list_benchmark!(list, extra, pallet_democracy, Democracy);
+            // list_benchmark!(list, extra, pallet_democracy, Democracy);
             list_benchmark!(list, extra, pallet_election_provider_multi_phase, ElectionProviderMultiPhase);
-            list_benchmark!(list, extra, pallet_elections_phragmen, Elections);
+            // list_benchmark!(list, extra, pallet_elections_phragmen, Elections);
             list_benchmark!(list, extra, pallet_gilt, Gilt);
             list_benchmark!(list, extra, pallet_grandpa, Grandpa);
             list_benchmark!(list, extra, pallet_identity, Identity);
             list_benchmark!(list, extra, pallet_im_online, ImOnline);
             list_benchmark!(list, extra, pallet_indices, Indices);
             list_benchmark!(list, extra, pallet_lottery, Lottery);
-            list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
+            // list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
             list_benchmark!(list, extra, pallet_mmr, Mmr);
             list_benchmark!(list, extra, pallet_multisig, Multisig);
             list_benchmark!(list, extra, pallet_offences, OffencesBench::<Runtime>);
-            list_benchmark!(list, extra, pallet_proxy, Proxy);
+            // list_benchmark!(list, extra, pallet_proxy, Proxy);
             list_benchmark!(list, extra, pallet_scheduler, Scheduler);
             list_benchmark!(list, extra, pallet_session, SessionBench::<Runtime>);
             list_benchmark!(list, extra, pallet_staking, Staking);
             list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
             list_benchmark!(list, extra, pallet_timestamp, Timestamp);
-            list_benchmark!(list, extra, pallet_tips, Tips);
-            list_benchmark!(list, extra, pallet_transaction_storage, TransactionStorage);
-            list_benchmark!(list, extra, pallet_treasury, Treasury);
-            list_benchmark!(list, extra, pallet_uniques, Uniques);
+            // list_benchmark!(list, extra, pallet_tips, Tips);
+            // list_benchmark!(list, extra, pallet_transaction_storage, TransactionStorage);
+            // list_benchmark!(list, extra, pallet_treasury, Treasury);
+            // list_benchmark!(list, extra, pallet_uniques, Uniques);
             list_benchmark!(list, extra, pallet_utility, Utility);
             list_benchmark!(list, extra, pallet_vesting, Vesting);
+
+            list_benchmark!(list, extra, pallet_nft, Nft);
+            list_benchmark!(list, extra, pallet_nft_delegate, NftDelegate);
+            list_benchmark!(list, extra, marketplace, Marketplace);
+            list_benchmark!(list, extra, realis_game_api, RealisGameApi);
+            list_benchmark!(list, extra, realis_bridge, RealisBridge);
 
             let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -1736,34 +1723,41 @@ impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_assets, Assets);
             add_benchmark!(params, batches, pallet_babe, Babe);
             add_benchmark!(params, batches, pallet_balances, Balances);
-            add_benchmark!(params, batches, pallet_bounties, Bounties);
-            add_benchmark!(params, batches, pallet_collective, Council);
+            // add_benchmark!(params, batches, pallet_bounties, Bounties);
+            // add_benchmark!(params, batches, pallet_collective, Council);
             add_benchmark!(params, batches, pallet_contracts, Contracts);
-            add_benchmark!(params, batches, pallet_democracy, Democracy);
+            // add_benchmark!(params, batches, pallet_democracy, Democracy);
             add_benchmark!(params, batches, pallet_election_provider_multi_phase, ElectionProviderMultiPhase);
-            add_benchmark!(params, batches, pallet_elections_phragmen, Elections);
+            // add_benchmark!(params, batches, pallet_elections_phragmen, Elections);
             add_benchmark!(params, batches, pallet_gilt, Gilt);
             add_benchmark!(params, batches, pallet_grandpa, Grandpa);
             add_benchmark!(params, batches, pallet_identity, Identity);
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
             add_benchmark!(params, batches, pallet_indices, Indices);
             add_benchmark!(params, batches, pallet_lottery, Lottery);
-            add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
+            // add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
             add_benchmark!(params, batches, pallet_mmr, Mmr);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
-            add_benchmark!(params, batches, pallet_proxy, Proxy);
+            //add_benchmark!(params, batches, pallet_proxy, Proxy);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
             add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
             add_benchmark!(params, batches, pallet_staking, Staking);
             add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
-            add_benchmark!(params, batches, pallet_tips, Tips);
-            add_benchmark!(params, batches, pallet_transaction_storage, TransactionStorage);
-            add_benchmark!(params, batches, pallet_treasury, Treasury);
-            add_benchmark!(params, batches, pallet_uniques, Uniques);
+            // add_benchmark!(params, batches, pallet_tips, Tips);
+            // add_benchmark!(params, batches, pallet_transaction_storage, TransactionStorage);
+            // add_benchmark!(params, batches, pallet_treasury, Treasury);
+            //add_benchmark!(params, batches, pallet_uniques, Uniques);
             add_benchmark!(params, batches, pallet_utility, Utility);
             add_benchmark!(params, batches, pallet_vesting, Vesting);
+
+
+            add_benchmark!(params, batches, pallet_nft, Nft);
+            add_benchmark!(params, batches, pallet_nft_delegate, NftDelegate);
+            add_benchmark!(params, batches, marketplace, Marketplace);
+            add_benchmark!(params, batches, realis_game_api, RealisGameApi);
+            add_benchmark!(params, batches, realis_bridge, RealisBridge);
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)
