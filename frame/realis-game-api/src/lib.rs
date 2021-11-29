@@ -158,7 +158,7 @@ pub mod pallet {
     // Functions that are callable from outside the runtime.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(T::WeightInfoRealis::mint_nft())]
+        #[pallet::weight((T::WeightInfoRealis::mint_nft(), Pays::No))]
         pub fn mint_nft(
             origin: OriginFor<T>,
             target_account: T::AccountId,
@@ -194,7 +194,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::burn_nft())]
+        #[pallet::weight((T::WeightInfoRealis::burn_nft(), Pays::No))]
         pub fn burn_nft(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -228,7 +228,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::transfer_nft())]
+        #[pallet::weight((T::WeightInfoRealis::transfer_nft(), Pays::No))]
         pub fn transfer_nft(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -268,7 +268,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::transfer_from_pallet())]
+        #[pallet::weight((T::WeightInfoRealis::transfer_from_pallet(), Pays::No))]
         pub fn transfer_from_pallet(
             origin: OriginFor<T>,
             dest: T::AccountId,
@@ -291,7 +291,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::transfer_to_pallet())]
+        #[pallet::weight((T::WeightInfoRealis::transfer_to_pallet(), Pays::No))]
         pub fn transfer_to_pallet(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -314,7 +314,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::transfer_from_ptp())]
+        #[pallet::weight((T::WeightInfoRealis::transfer_from_ptp(), Pays::No))]
         pub fn transfer_from_ptp(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -337,7 +337,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::spend_in_game())]
+        #[pallet::weight((T::WeightInfoRealis::spend_in_game(), Pays::No))]
         pub fn spend_in_game(
             origin: OriginFor<T>,
             dest: T::AccountId,
@@ -376,7 +376,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight((90_000_000, Pays::No))]
         pub fn add_api_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -394,7 +394,7 @@ pub mod pallet {
         }
 
         /// Remove api_master
-        #[pallet::weight(90_000_000)]
+        #[pallet::weight((90_000_000, Pays::No))]
         pub fn remove_api_master(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -408,7 +408,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight((T::WeightInfoRealis::add_to_whitelist(), Pays::No))]
+        #[pallet::weight(T::WeightInfoRealis::add_to_whitelist())]
         pub fn add_to_whitelist(origin: OriginFor<T>) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
@@ -474,7 +474,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::sell_nft())]
+        #[pallet::weight((T::WeightInfoRealis::sell_nft(), Pays::No))]
         pub fn sell_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -505,7 +505,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::buy_nft())]
+        #[pallet::weight((T::WeightInfoRealis::buy_nft(), Pays::No))]
         pub fn buy_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -523,7 +523,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::change_price_nft())]
+        #[pallet::weight((T::WeightInfoRealis::change_price_nft(), Pays::No))]
         pub fn change_price_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -542,7 +542,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::remove_nft())]
+        #[pallet::weight((T::WeightInfoRealis::remove_nft(), Pays::No))]
         pub fn remove_nft(
             origin: OriginFor<T>,
             account_id: T::AccountId,
@@ -560,7 +560,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::delegate_nft())]
+        #[pallet::weight((T::WeightInfoRealis::delegate_nft(), Pays::No))]
         pub fn delegate_nft(
             origin: OriginFor<T>,
             from: T::AccountId,
@@ -586,7 +586,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::sell_delegate_nft())]
+        #[pallet::weight((T::WeightInfoRealis::sell_delegate_nft(), Pays::No))]
         pub fn sell_delegate_nft(
             origin: OriginFor<T>,
             seller: T::AccountId,
@@ -617,7 +617,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::buy_delegate_nft())]
+        #[pallet::weight((T::WeightInfoRealis::buy_delegate_nft(), Pays::No))]
         pub fn buy_delegate_nft(
             origin: OriginFor<T>,
             buyer: T::AccountId,
@@ -636,7 +636,7 @@ pub mod pallet {
             pallet_nft_delegate::Pallet::<T>::buy_delegate_nft(buyer, token_id)
         }
 
-        #[pallet::weight(T::WeightInfoRealis::change_price_delegate_nft())]
+        #[pallet::weight((T::WeightInfoRealis::change_price_delegate_nft(), Pays::No))]
         pub fn change_price_delegate_nft(
             origin: OriginFor<T>,
             seller: T::AccountId,
@@ -658,7 +658,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::change_delegate_nft_time_on_sale())]
+        #[pallet::weight((T::WeightInfoRealis::change_delegate_nft_time_on_sale(), Pays::No))]
         pub fn change_delegate_nft_time_on_sale(
             origin: OriginFor<T>,
             seller: T::AccountId,
@@ -682,7 +682,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::remove_from_sell())]
+        #[pallet::weight((T::WeightInfoRealis::remove_from_sell(), Pays::No))]
         pub fn remove_from_sell(
             origin: OriginFor<T>,
             seller: T::AccountId,
@@ -703,7 +703,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::remove_delegate())]
+        #[pallet::weight((T::WeightInfoRealis::remove_delegate(), Pays::No))]
         pub fn remove_delegate(
             origin: OriginFor<T>,
             delegator: T::AccountId,
