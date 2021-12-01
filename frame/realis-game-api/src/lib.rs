@@ -408,7 +408,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::weight(T::WeightInfoRealis::add_to_whitelist())]
+        #[pallet::weight((T::WeightInfoRealis::add_to_whitelist(), Pays::No))]
         pub fn add_to_whitelist(origin: OriginFor<T>) -> DispatchResult {
             // Check is signed correct
             let who = ensure_signed(origin)?;
