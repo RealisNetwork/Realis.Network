@@ -200,23 +200,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
-            let tokens = Nft::TokensList::<T>::get(who.clone());
-            for token in tokens {
-                if token.0.id == value {
-                    ensure!(
-                        token.1 != Status::OnSell,
-                        Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
-                    );
-                    ensure!(
-                        token.1 != Status::InDelegation,
-                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
-                    );
-                    ensure!(
-                        token.1 != Status::OnDelegateSell,
-                        Error::<T>::CannotTransferNftBecauseThisNftOnAnotherUser
-                    );
-                };
-            }
+            Self::can_transfer_nft(value)?;
 
             let pallet_id = Self::account_id();
 
@@ -289,6 +273,9 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         pub fn account_id() -> T::AccountId {
             <T as Config>::PalletId::get().into_account()
+        }
+        pub fn can_transfer_nft(token_id: TokenId) -> DispatchResult {
+            Nft::Pallet::<T>::is_nft_free(token_id)
         }
     }
 }

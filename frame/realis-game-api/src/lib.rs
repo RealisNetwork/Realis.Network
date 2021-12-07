@@ -482,6 +482,7 @@ pub mod pallet {
             );
 
             let tokens = NFT::TokensList::<T>::get(account_id.clone());
+            let mut rarity = vec![];
             for token in tokens {
                 if token.0.id == token_id {
                     ensure!(
@@ -489,10 +490,11 @@ pub mod pallet {
                         Error::<T>::CannotTransferNftBecauseThisNftInMarketplace
                     );
 
-                    let TokenType::Basic(rarity, _, _, _) = token.0.token_type;
-                    marketplace::Pallet::<T>::sell(account_id.clone(), token_id, rarity, amount);
+                    let TokenType::Basic(rare, _, _, _) = token.0.token_type;
+                    rarity.insert(0, rare);
                 };
             }
+            marketplace::Pallet::<T>::sell(account_id.clone(), token_id, rarity[0], amount);
 
             Ok(())
         }
