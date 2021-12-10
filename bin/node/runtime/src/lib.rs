@@ -40,6 +40,7 @@ use frame_system::{
     EnsureRoot,
 };
 pub use node_primitives::{AccountId, Signature};
+pub use marketplace;
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 pub use pallet_balances;
 use pallet_contracts::weights::WeightInfo;
