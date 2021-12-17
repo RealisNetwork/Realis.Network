@@ -11,7 +11,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 [dependencies]
 codec = { package = 'parity-scale-codec', version = '2.3.0', default-features = false, features = ['derive'] }
 primitive-types = { version = "0.10.1", default-features = false }
-serde = { version = "1.0.131", default-features = false }
+serde = { version = "1.0.132", default-features = false }
 serde_json = { version = "1.0.73", default-features = false }
 pallet-staking = { version = "4.0.0-dev",  path="../staking-pool", default-features = false }
 
