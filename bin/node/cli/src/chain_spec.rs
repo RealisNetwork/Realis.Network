@@ -785,7 +785,7 @@ pub fn realis_config() -> Result<ChainSpec, String> {
 fn development_config_genesis() -> GenesisConfig {
     let sudo_1: AccountId =
         hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
-    let sudo_2: AccountId = 
+    let sudo_2: AccountId =
         sp_core::sr25519::Public::from_str("5D54XGhtRwffGsmrsaMyUdy3cZhtECnCGpxJgHto8e9csKEc")
             .unwrap()
             .into();
@@ -798,7 +798,7 @@ fn development_config_genesis() -> GenesisConfig {
             .unwrap()
             .into();
     let sudo_5: AccountId =
-        sp_core::sr25519::Public::from_str("5EU1u5MaJLfB1hneKf7oPuZUa1PoSDBqpH6wU2E2yaB3h7Vi")
+        sp_core::sr25519::Public::from_str("5EKqhiruvSw3etmTccRcVT3dahwhMNutAyQEkhT3NoYeVkBf")
             .unwrap()
             .into();
 
