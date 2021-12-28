@@ -39,8 +39,8 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot,
 };
-pub use node_primitives::{AccountId, Signature};
 pub use marketplace;
+pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
 pub use pallet_balances;
 use pallet_contracts::weights::WeightInfo;
@@ -115,10 +115,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 285,
-    impl_version: 3,
+    spec_version: 290,
+    impl_version: 4,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 7,
+    transaction_version: 8,
 };
 
 /// The BABE epoch configuration at genesis.
@@ -379,7 +379,7 @@ impl pallet_indices::Config for Runtime {
 }
 
 parameter_types! {
-    pub const ExistentialDeposit: Balance = 1 * MILLICENTS * 10;
+    pub const ExistentialDeposit: Balance = 1 * MILLICENTS / 1_000;
     // For weight estimation, we assume that the most locks on an individual account will be 50.
     // This number may need to be adjusted in the future if this assumption no longer holds true.
     pub const MaxLocks: u32 = 50;
@@ -1191,7 +1191,7 @@ impl pallet_nft::Config for Runtime {
 
 parameter_types! {
     pub const StakingPalletId: PalletId = PalletId(*b"da/staki");
-    pub const SessionsPerEra: sp_staking::SessionIndex = 1;
+    pub const SessionsPerEra: sp_staking::SessionIndex = 6;
     pub const BondingDuration: pallet_staking::EraIndex = 28;
     pub const SlashDeferDuration: pallet_staking::EraIndex = 27;
     pub const MaxNominatorRewardedPerValidator: u32 = 256;
