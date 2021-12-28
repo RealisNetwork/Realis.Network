@@ -18,6 +18,7 @@
 
 //! Substrate chain configurations.
 
+use std::str::FromStr;
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
 use node_runtime::{
@@ -206,7 +207,17 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
     ]
     .into()];
 
-    let endowed_accounts: Vec<AccountId> = vec![root_key.clone()];
+    let white_list: Vec<AccountId> = vec![hex![
+        // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
+        "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
+    ]
+        .into()];
+
+    let endowed_accounts: Vec<AccountId> = vec![
+        root_key.clone(),
+        realis_game_api::Pallet::<Runtime>::account_id(),
+        pallet_staking::Pallet::<Runtime>::account_id(),
+    ];
 
     testnet_genesis(
         initial_authorities,
@@ -214,6 +225,7 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
         root_key,
         nft_master,
         api_master,
+        white_list,
         bridge_master,
         Some(endowed_accounts),
     )
@@ -288,6 +300,7 @@ pub fn testnet_genesis(
     root_key: AccountId,
     nft_master: Vec<AccountId>,
     api_master: Vec<AccountId>,
+    white_list: Vec<AccountId>,
     bridge_master: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
@@ -347,8 +360,8 @@ pub fn testnet_genesis(
     let _num_endowed_accounts = endowed_accounts.len();
 
     const ENDOWMENT: Balance = 30_000 * DOLLARS / 10;
-    const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
-    const STAKING_POOL: Balance = 30_000 * DOLLARS / 10;
+    const GAME_WALLET: Balance = 10_000_000 * DOLLARS / 10;
+    const STAKING_POOL: Balance = 30_000_000 * DOLLARS / 10;
     const STASH: Balance = ENDOWMENT / 1000;
 
     let pallet_id_staking = pallet_staking::Pallet::<Runtime>::account_id();
@@ -441,6 +454,7 @@ pub fn testnet_genesis(
         },
         realis_game_api: RealisGameApiConfig {
             api_masters: api_master,
+            whitelist: white_list,
         },
         realis_bridge: RealisBridgeConfig {
             bridge_masters: bridge_master,
@@ -462,6 +476,7 @@ pub fn realis_genesis(
     root_key: AccountId,
     nft_master: Vec<AccountId>,
     api_master: Vec<AccountId>,
+    white_list: Vec<AccountId>,
     bridge_master: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
@@ -516,12 +531,12 @@ pub fn realis_genesis(
     let _num_endowed_accounts = endowed_accounts.len();
 
     const ENDOWMENT: Balance = 900_000 * DOLLARS / 12 * 100;
-    const GAME_WALLET: Balance = 10_000 * DOLLARS / 10;
-    const STAKING_POOL: Balance = 30_000 * DOLLARS / 10;
+    const GAME_WALLET: Balance = 10_000_000 * DOLLARS / 10;
+    const STAKING_POOL: Balance = 30_000_000 * DOLLARS / 10;
     const STASH: Balance = ENDOWMENT / 1000;
 
-    let pallet_id_staking = pallet_staking::Pallet::<Runtime>::account_id();
-    let game_wallet = realis_game_api::Pallet::<Runtime>::account_id();
+    let pallet_id_staking = pallet_staking::Pallet::<Runtime>::account_id().clone();
+    let game_wallet = realis_game_api::Pallet::<Runtime>::account_id().clone();
 
     GenesisConfig {
         system: SystemConfig {
@@ -610,6 +625,7 @@ pub fn realis_genesis(
         },
         realis_game_api: RealisGameApiConfig {
             api_masters: api_master,
+            whitelist: white_list,
         },
         realis_bridge: RealisBridgeConfig {
             bridge_masters: bridge_master,
@@ -680,20 +696,82 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
     //sudo account
     let root_key = hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
     //NFT Master
-    let nft_master =
-        vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
-    let api_master =
-        vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
-    let bridge_master =
-        vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
+    let sudo_1: AccountId =
+        hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
+    let sudo_2: AccountId =
+        hex!["1aa0d5c594a4581ec17069ec9631cd6225d5fb403fe4d85c8ec8aa51833fdf7f"].into();
+    let sudo_3: AccountId =
+        hex!["cc32b24b66c8636b31394dce95949a27022c901d2597c5584554aa5d81db7416"].into();
+    let sudo_4: AccountId =
+        hex!["24c42c17c4f95987c9916fc7e9bcd0c9385b6724f72658d943b643b6c3d83b73"].into();
+    let sudo_5: AccountId =
+        hex!["a662140fcc5ff36f191a4f8ce6fd314a33c0149a5864060d50fd06c44535b777"].into();
+
+    let test_acc_1: AccountId =
+        sp_core::sr25519::Public::from_str("5CFvFsZy7ViPUdEuuK19QuUqqCApVr2wbRWkHjcvQGsgzQmv")
+            .unwrap()
+            .into();
+    let test_acc_2: AccountId =
+        sp_core::sr25519::Public::from_str("5DHasdJm8bVxqxuAu5p8QfDMFfABtt3Rgf8feWSDP8KmYVAL")
+            .unwrap()
+            .into();
+    let test_acc_3: AccountId =
+        sp_core::sr25519::Public::from_str("5EAH4UrLxaNM6Kz1pH9bNSkKxAe21DkdDfyPahoj6KFN79Ax")
+            .unwrap()
+            .into();
+    let test_acc_4: AccountId =
+        sp_core::sr25519::Public::from_str("5HnBcUqsgjBKD5cpAi4wDrTBhftFjt1ZFG8pXLmN5u1zozRk")
+            .unwrap()
+            .into();
+
     let endowed_accounts =
-        vec![hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into()];
+        vec![sudo_1.clone(),
+             sudo_2.clone(),
+             sudo_3.clone(),
+             sudo_4.clone(),
+             sudo_5.clone(),
+             realis_game_api::Pallet::<Runtime>::account_id(),
+             pallet_staking::Pallet::<Runtime>::account_id(),
+    ];
+
+    let nft_master = vec![
+        sudo_1.clone(),
+        sudo_2.clone(),
+        sudo_3.clone(),
+        sudo_4.clone(),
+        sudo_5.clone()
+    ];
+
+    let api_master = vec![
+        sudo_1.clone(),
+        sudo_2.clone(),
+        sudo_3.clone(),
+        sudo_4.clone(),
+        sudo_5.clone()
+    ];
+
+    let bridge_master = vec![
+        sudo_1.clone(),
+        sudo_2.clone(),
+        sudo_3.clone(),
+        sudo_4.clone(),
+        sudo_5.clone()
+    ];
+
+    let white_list = vec![
+        test_acc_1.clone(),
+        test_acc_2.clone(),
+        test_acc_3.clone(),
+        test_acc_4.clone()
+    ];
+
     realis_genesis(
         initial_authorities,
         vec![],
         root_key,
         nft_master,
         api_master,
+        white_list,
         bridge_master,
         Some(endowed_accounts),
     )
@@ -707,14 +785,62 @@ pub fn realis_config() -> Result<ChainSpec, String> {
 fn development_config_genesis() -> GenesisConfig {
     let sudo_1: AccountId =
         hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
-    // let sudo_2: AccountId =
-    // let sudo_3: AccountId =
-    // let sudo_4: AccountId =
-    // let sudo_5: AccountId =
+    let sudo_2: AccountId =
+        hex!["1aa0d5c594a4581ec17069ec9631cd6225d5fb403fe4d85c8ec8aa51833fdf7f"].into();
+    let sudo_3: AccountId =
+        hex!["cc32b24b66c8636b31394dce95949a27022c901d2597c5584554aa5d81db7416"].into();
+    let sudo_4: AccountId =
+        hex!["24c42c17c4f95987c9916fc7e9bcd0c9385b6724f72658d943b643b6c3d83b73"].into();
+    let sudo_5: AccountId =
+        hex!["a662140fcc5ff36f191a4f8ce6fd314a33c0149a5864060d50fd06c44535b777"].into();
 
-    let nft_master = vec![sudo_1.clone()];
-    let api_master = vec![sudo_1.clone()];
-    let bridge_master = vec![sudo_1.clone()];
+    let test_acc_1: AccountId =
+        sp_core::sr25519::Public::from_str("5CFvFsZy7ViPUdEuuK19QuUqqCApVr2wbRWkHjcvQGsgzQmv")
+            .unwrap()
+            .into();
+    let test_acc_2: AccountId =
+        sp_core::sr25519::Public::from_str("5DHasdJm8bVxqxuAu5p8QfDMFfABtt3Rgf8feWSDP8KmYVAL")
+            .unwrap()
+            .into();
+    let test_acc_3: AccountId =
+        sp_core::sr25519::Public::from_str("5EAH4UrLxaNM6Kz1pH9bNSkKxAe21DkdDfyPahoj6KFN79Ax")
+            .unwrap()
+            .into();
+    let test_acc_4: AccountId =
+        sp_core::sr25519::Public::from_str("5HnBcUqsgjBKD5cpAi4wDrTBhftFjt1ZFG8pXLmN5u1zozRk")
+            .unwrap()
+            .into();
+
+    let nft_master = vec![
+        sudo_1.clone(),
+        sudo_2.clone(),
+        sudo_3.clone(),
+        sudo_4.clone(),
+        sudo_5.clone()
+    ];
+
+    let api_master = vec![
+        sudo_1.clone(),
+        sudo_2.clone(),
+        sudo_3.clone(),
+        sudo_4.clone(),
+        sudo_5.clone()
+    ];
+
+    let bridge_master = vec![
+        sudo_1.clone(),
+        sudo_2.clone(),
+        sudo_3.clone(),
+        sudo_4.clone(),
+        sudo_5.clone()
+    ];
+
+    let white_list = vec![
+        test_acc_1.clone(),
+        test_acc_2.clone(),
+        test_acc_3.clone(),
+        test_acc_4.clone()
+    ];
 
     testnet_genesis(
         vec![authority_keys_from_seed("Alice")],
@@ -722,6 +848,7 @@ fn development_config_genesis() -> GenesisConfig {
         get_account_id_from_seed::<sr25519::Public>("Alice"),
         nft_master,
         api_master,
+        white_list,
         bridge_master,
         None,
     )
@@ -755,6 +882,7 @@ fn local_testnet_genesis() -> GenesisConfig {
         ],
         vec![],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
+        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],

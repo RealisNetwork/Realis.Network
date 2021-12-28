@@ -4,6 +4,7 @@
 pub use frame_support::traits::Currency;
 pub use pallet::*;
 use sp_std::prelude::*;
+use pallet_nft_delegate::Pallet as NftDelegate;
 
 #[cfg(test)]
 mod mock;
@@ -123,6 +124,7 @@ pub mod pallet {
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
         pub api_masters: Vec<T::AccountId>,
+        pub whitelist: Vec<T::AccountId>,
     }
 
     #[cfg(feature = "std")]
@@ -130,6 +132,7 @@ pub mod pallet {
         fn default() -> Self {
             Self {
                 api_masters: Default::default(),
+                whitelist: Default::default(),
             }
         }
     }
@@ -138,6 +141,9 @@ pub mod pallet {
     impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
         fn build(&self) {
             ApiMasters::<T>::put(&self.api_masters);
+            for account in &self.whitelist {
+                Whitelist::<T>::insert(account, ());
+            }
         }
     }
 
@@ -572,10 +578,10 @@ pub mod pallet {
                 NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
             ensure!(from == owner, Error::<T>::NotTokenOwner);
 
-            pallet_nft_delegate::Pallet::<T>::check_time(delegated_time)?;
-            pallet_nft_delegate::Pallet::<T>::can_delegate_nft(token_id)?;
+            NftDelegate::<T>::check_time(delegated_time)?;
+            NftDelegate::<T>::can_delegate_nft(token_id)?;
 
-            pallet_nft_delegate::Pallet::<T>::delegate_nft(owner, to, token_id, delegated_time);
+            NftDelegate::<T>::delegate_nft(owner, to, token_id, delegated_time);
 
             Ok(())
         }
@@ -598,10 +604,10 @@ pub mod pallet {
                 NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
             ensure!(seller == owner, Error::<T>::NotTokenOwner);
 
-            pallet_nft_delegate::Pallet::<T>::check_time(delegated_time)?;
-            pallet_nft_delegate::Pallet::<T>::can_delegate_nft(token_id)?;
+            NftDelegate::<T>::check_time(delegated_time)?;
+            NftDelegate::<T>::can_delegate_nft(token_id)?;
 
-            pallet_nft_delegate::Pallet::<T>::sale_delegate_nft(
+            NftDelegate::<T>::sale_delegate_nft(
                 owner,
                 token_id,
                 delegated_time,
@@ -627,7 +633,7 @@ pub mod pallet {
                 NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
             ensure!(buyer != owner, Error::<T>::CannotBuyOwnNft);
 
-            pallet_nft_delegate::Pallet::<T>::buy_delegate_nft(buyer, token_id)
+            NftDelegate::<T>::buy_delegate_nft(buyer, token_id)
         }
 
         #[pallet::weight((T::WeightInfoRealis::change_price_delegate_nft(), Pays::No))]
@@ -647,7 +653,7 @@ pub mod pallet {
                 NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
             ensure!(seller == owner, Error::<T>::NotTokenOwner);
 
-            pallet_nft_delegate::Pallet::<T>::change_price_delegate_nft(token_id, new_price);
+            NftDelegate::<T>::change_price_delegate_nft(token_id, new_price);
 
             Ok(())
         }
@@ -669,9 +675,9 @@ pub mod pallet {
                 NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
             ensure!(seller == owner, Error::<T>::NotTokenOwner);
 
-            pallet_nft_delegate::Pallet::<T>::check_time(new_time)?;
+            NftDelegate::<T>::check_time(new_time)?;
 
-            pallet_nft_delegate::Pallet::<T>::change_delegate_nft_time_on_sale(token_id, new_time);
+            NftDelegate::<T>::change_delegate_nft_time_on_sale(token_id, new_time);
 
             Ok(())
         }
@@ -692,7 +698,7 @@ pub mod pallet {
                 NFT::AccountForToken::<T>::get(token_id).ok_or(Error::<T>::NonExistentToken)?;
             ensure!(seller == owner, Error::<T>::NotTokenOwner);
 
-            pallet_nft_delegate::Pallet::<T>::remove_nft_from_sell(token_id);
+            NftDelegate::<T>::remove_nft_from_sell(token_id);
 
             Ok(())
         }
@@ -716,7 +722,7 @@ pub mod pallet {
 
             ensure!(delegator == owner, Error::<T>::NotTokenOwner);
 
-            pallet_nft_delegate::Pallet::<T>::remove_delegate(origin, token_id)?;
+            NftDelegate::<T>::remove_delegate(origin, token_id)?;
 
             Ok(())
         }
