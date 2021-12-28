@@ -785,14 +785,22 @@ pub fn realis_config() -> Result<ChainSpec, String> {
 fn development_config_genesis() -> GenesisConfig {
     let sudo_1: AccountId =
         hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
-    let sudo_2: AccountId =
-        hex!["1aa0d5c594a4581ec17069ec9631cd6225d5fb403fe4d85c8ec8aa51833fdf7f"].into();
+    let sudo_2: AccountId = 
+        sp_core::sr25519::Public::from_str("5D54XGhtRwffGsmrsaMyUdy3cZhtECnCGpxJgHto8e9csKEc")
+            .unwrap()
+            .into();
     let sudo_3: AccountId =
-        hex!["cc32b24b66c8636b31394dce95949a27022c901d2597c5584554aa5d81db7416"].into();
+        sp_core::sr25519::Public::from_str("5C7odVdth9qyssQi81XHjkF8hWeLhMpnN27U24QgMB2YNJ6T")
+            .unwrap()
+            .into();
     let sudo_4: AccountId =
-        hex!["24c42c17c4f95987c9916fc7e9bcd0c9385b6724f72658d943b643b6c3d83b73"].into();
+        sp_core::sr25519::Public::from_str("5EU1u5MaJLfB1hneKf7oPuZUa1PoSDBqpH6wU2E2yaB3h7Vi")
+            .unwrap()
+            .into();
     let sudo_5: AccountId =
-        hex!["a662140fcc5ff36f191a4f8ce6fd314a33c0149a5864060d50fd06c44535b777"].into();
+        sp_core::sr25519::Public::from_str("5EU1u5MaJLfB1hneKf7oPuZUa1PoSDBqpH6wU2E2yaB3h7Vi")
+            .unwrap()
+            .into();
 
     let test_acc_1: AccountId =
         sp_core::sr25519::Public::from_str("5CFvFsZy7ViPUdEuuK19QuUqqCApVr2wbRWkHjcvQGsgzQmv")
