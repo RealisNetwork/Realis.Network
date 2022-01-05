@@ -115,7 +115,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 292,
+    spec_version: 293,
     impl_version: 4,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 8,
@@ -527,7 +527,7 @@ parameter_types! {
     pub const SignedDepositByte: Balance = 1 * CENTS;
 
     // fallback: no on-chain fallback.
-    pub const Fallback: FallbackStrategy = FallbackStrategy::Nothing;
+    pub const Fallback: FallbackStrategy = FallbackStrategy::OnChain;
 
     pub SolutionImprovementThreshold: Perbill = Perbill::from_rational(1u32, 10_000);
 
