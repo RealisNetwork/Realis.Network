@@ -204,10 +204,10 @@ pub mod pallet {
                 tokens
                     .as_mut()
                     .unwrap()
-                    .retain(|(id, _, _)| *id == token_id)
+                    .retain(|(id, _, _)| *id != token_id)
             });
 
-            AllNFTForSale::<T>::mutate(|tokens| tokens.retain(|(id, _, _)| *id == token_id));
+            AllNFTForSale::<T>::mutate(|tokens| tokens.retain(|(id, _, _)| *id != token_id));
 
             let (token, _) = Nft::Pallet::<T>::pop(token_id);
 
