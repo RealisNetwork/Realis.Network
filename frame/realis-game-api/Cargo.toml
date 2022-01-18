@@ -61,7 +61,6 @@ std = [
     "pallet-nft/std",
     "pallet-staking/std",
     "realis-primitives/std",
-    "marketplace/std"
 ]
 
 runtime-benchmarks = ["frame-benchmarking"]

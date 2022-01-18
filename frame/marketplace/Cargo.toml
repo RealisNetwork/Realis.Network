@@ -50,10 +50,6 @@ std = [
     "node-primitives/std",
     "realis-primitives/std",
     "pallet-nft/std",
-    "sp-core/std",
-    "sp-io/std",
-    "serde_json/std"
-#    "realis-game-api/std"
 ]
 
 runtime-benchmarks = ["frame-benchmarking"]
