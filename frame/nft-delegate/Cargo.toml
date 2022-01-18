@@ -1,22 +1,23 @@
 [package]
 name = "pallet-nft-delegate"
 version = "0.0.1"
-edition = "2018"
+edition = "2021"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-realis-primitives = { path = "../../primitives/realis", default-features = false }
+codec = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ["derive"] }
+scale-info = "1.0.0"
 pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
-pallet-staking = { version = "4.0.0-dev",  path="../staking-pool", default-features = false }
+pallet-staking = { version = "4.1.0-dev",  path="../staking-pool", default-features = false }
+realis-primitives = { path = "../../primitives/realis", default-features = false }
 
-frame-support = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-frame-system = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", version = "4.0.0-dev", default-features = false, optional = true }
-node-primitives = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-std = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-primitive-types = { version = "0.10.1", default-features = false }
+frame-support = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+frame-system = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", version = "4.0.0-dev", default-features = false, optional = true }
+node-primitives = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+sp-std = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 
 
 
@@ -25,12 +26,15 @@ primitive-types = { version = "0.10.1", default-features = false }
 default = ["std"]
 std = [
     "codec/std",
+    "scale-info/std",
+    "pallet-nft/std",
+    "pallet-staking/std",
+    "realis-primitives/std",
     "frame-support/std",
     "frame-system/std",
-    "pallet-staking/std",
     "frame-benchmarking/std",
-    "pallet-nft/std",
-    "realis-primitives/std",
+    "node-primitives/std",
+    "sp-std/std",
 ]
 
 runtime-benchmarks = ["frame-benchmarking"]

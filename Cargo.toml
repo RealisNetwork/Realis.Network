@@ -17,16 +17,16 @@ members = [
 
 # Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.
 # `node-executor` is a dependecy of a `node-cli` at `bin/node/cli`.
-[patch.'https://github.com/paritytech/substrate']
-node-cli = { path = "bin/node/cli" }
-node-runtime = { path = "bin/node/runtime" }
-pallet-staking = { path = "frame/staking-pool" }
-pallet-nft = { path = "frame/nft" }
-pallet-nft-delegate = { path = "frame/nft-delegate" }
-realis-bridge = {path = "frame/realis-bridge"}
-
-[profile.dev]
-split-debuginfo = "unpacked"
-
-[profile.release]
-panic = "unwind"
+#[patch.'https://github.com/paritytech/substrate']
+#node-cli = { path = "bin/node/cli" }
+#node-runtime = { path = "bin/node/runtime" }
+#pallet-staking = { path = "frame/staking-pool" }
+#pallet-nft = { path = "frame/nft" }
+#pallet-nft-delegate = { path = "frame/nft-delegate" }
+#realis-bridge = {path = "frame/realis-bridge"}
+#
+#[profile.dev]
+#split-debuginfo = "unpacked"
+#
+#[profile.release]
+#panic = "unwind"

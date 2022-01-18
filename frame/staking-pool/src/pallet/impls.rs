@@ -32,7 +32,7 @@ use sp_runtime::{
     Perbill,
 };
 use sp_staking::{
-    offence::{OffenceDetails, OnOffenceHandler},
+    offence::{DisableStrategy, OffenceDetails, OnOffenceHandler},
     SessionIndex,
 };
 use sp_std::{collections::btree_map::BTreeMap, prelude::*};
@@ -854,7 +854,7 @@ impl<T: Config> Pallet<T> {
     }
 }
 
-impl<T: Config> frame_election_provider_support::ElectionDataProvider<T::AccountId, T::BlockNumber>
+impl<T: Config> frame_election_provider_support::ElectionDataProvider
     for Pallet<T>
 {
     const MAXIMUM_VOTES_PER_VOTER: u32 = T::MAX_NOMINATIONS;
@@ -1043,6 +1043,9 @@ impl<T: Config> frame_election_provider_support::ElectionDataProvider<T::Account
             );
         });
     }
+
+    type AccountId = T::AccountId;
+    type BlockNumber = T::BlockNumber;
 }
 
 /// In this implementation `new_session(session)` must be called before `end_session(session-1)`
@@ -1129,11 +1132,12 @@ where
     fn note_author(author: T::AccountId) {
         Self::reward_by_ids(vec![(author, 20)])
     }
-    fn note_uncle(author: T::AccountId, _age: T::BlockNumber) {
-        Self::reward_by_ids(vec![
-            (<pallet_authorship::Pallet<T>>::author(), 2),
-            (author, 1),
-        ])
+    fn note_uncle(uncle_author: T::AccountId, _age: T::BlockNumber) {
+        if let Some(block_author) = <pallet_authorship::Pallet<T>>::author() {
+            Self::reward_by_ids(vec![(block_author, 2), (uncle_author, 1)])
+        } else {
+            crate::log!(warn, "block author not set, this should never happen");
+        }
     }
 }
 
@@ -1161,6 +1165,7 @@ where
         >],
         slash_fraction: &[Perbill],
         slash_session: SessionIndex,
+        disable_strategy: DisableStrategy,
     ) -> Weight {
         let reward_proportion = SlashRewardFraction::<T>::get();
         let mut consumed_weight: Weight = 0;
@@ -1237,6 +1242,7 @@ where
                 window_start,
                 now: active_era,
                 reward_proportion,
+                disable_strategy,
             });
 
             if let Some(mut unapplied) = unapplied {

@@ -82,16 +82,16 @@ pub mod pallet {
 
         /// Something that provides the election functionality.
         type ElectionProvider: frame_election_provider_support::ElectionProvider<
-            Self::AccountId,
-            Self::BlockNumber,
+            AccountId = Self::AccountId,
+            BlockNumber = Self::BlockNumber,
             // we only accept an election provider that has staking as data provider.
             DataProvider = Pallet<Self>,
         >;
 
         /// Something that provides the election functionality at genesis.
         type GenesisElectionProvider: frame_election_provider_support::ElectionProvider<
-            Self::AccountId,
-            Self::BlockNumber,
+            AccountId = Self::AccountId,
+            BlockNumber = Self::BlockNumber,
             DataProvider = Pallet<Self>,
         >;
 
@@ -146,6 +146,10 @@ pub mod pallet {
         /// claim their reward. This used to limit the i/o cost for the nominator payout.
         #[pallet::constant]
         type MaxNominatorRewardedPerValidator: Get<u32>;
+
+        /// The fraction of the validator set that is safe to be offending.
+        /// After the threshold is reached a new era will be forced.
+        type OffendingValidatorsThreshold: Get<Perbill>;
 
         /// Weight information for extrinsics in this pallet.
         type WeightInfo: WeightInfo;
@@ -438,6 +442,19 @@ pub mod pallet {
     #[pallet::getter(fn current_planned_session)]
     pub type CurrentPlannedSession<T> = StorageValue<_, SessionIndex, ValueQuery>;
 
+    /// Indices of validators that have offended in the active era and whether they are currently
+    /// disabled.
+    ///
+    /// This value should be a superset of disabled validators since not all offences lead to the
+    /// validator being disabled (if there was no slash). This is needed to track the percentage of
+    /// validators that have offended in the current era, ensuring a new era is forced if
+    /// `OffendingValidatorsThreshold` is reached. The vec is always kept sorted so that we can find
+    /// whether a given validator has previously offended using binary search. It gets cleared when
+    /// the era ends.
+    #[pallet::storage]
+    #[pallet::getter(fn offending_validators)]
+    pub type OffendingValidators<T: Config> = StorageValue<_, Vec<(u32, bool)>, ValueQuery>;
+
     /// True if network has been upgraded to this version.
     /// Storage version of the pallet.
     ///
@@ -533,7 +550,7 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(crate) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T> = "Balance")]
+    // #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T> = "Balance")]
     pub enum Event<T: Config> {
         /// The era payout has been set; the first balance is the validator-payout; the second is
         /// the remainder from the maximum amount of reward.

@@ -2,7 +2,7 @@
 name = "pallet-staking-reward-curve"
 version = "3.0.0"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 homepage = "https://substrate.dev"
 repository = "https://github.com/paritytech/substrate/"
@@ -21,4 +21,4 @@ proc-macro2 = "1.0.6"
 proc-macro-crate = "1.0.0"
 
 [dev-dependencies]
-sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }

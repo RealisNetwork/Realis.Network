@@ -348,12 +348,16 @@ pub struct ActiveEraInfo {
 /// Reward points of an era. Used to split era total payout between validators.
 ///
 /// This points will be used to reward validators and their respective nominators.
-#[derive(PartialEq, Encode, Decode, Default, RuntimeDebug)]
+#[derive(PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct EraRewardPoints<AccountId: Ord> {
     /// Total number of points. Equals the sum of reward points for each validator.
     total: RewardPoint,
     /// The reward points earned by a given validator.
     individual: BTreeMap<AccountId, RewardPoint>,
+}
+
+impl<AccountId: Ord> Default for EraRewardPoints<AccountId> {
+    fn default() -> Self { EraRewardPoints { total: Default::default(), individual: BTreeMap::new() } }
 }
 
 /// Indicates the initial status of the staker.
@@ -389,8 +393,9 @@ impl<AccountId> Default for RewardDestination<AccountId> {
     }
 }
 
+use scale_info::TypeInfo;
 /// Preference of what happens regarding validation.
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct ValidatorPrefs {
     /// Reward that validator takes up-front; only the rest is split between themselves and
     /// nominators.
@@ -589,6 +594,12 @@ pub struct Exposure<AccountId, Balance: HasCompact> {
     pub others: Vec<IndividualExposure<AccountId, Balance>>,
 }
 
+impl<AccountId, Balance: Default + HasCompact> Default for Exposure<AccountId, Balance> {
+    fn default() -> Self {
+        Self { total: Default::default(), own: Default::default(), others: vec![] }
+    }
+}
+
 /// A pending slash record. The value of the slash has been computed but not applied yet,
 /// rather deferred for several eras.
 #[derive(Encode, Decode, Default, RuntimeDebug, TypeInfo)]
@@ -614,7 +625,7 @@ pub trait SessionInterface<AccountId>: frame_system::Config {
     /// Returns `true` if new era should be forced at the end of this session.
     /// This allows preventing a situation where there is too many validators
     /// disabled and block production stalls.
-    fn disable_validator(validator: &AccountId) -> Result<bool, ()>;
+    fn disable_validator(validator_index: u32) -> bool;
     /// Get the validators from session.
     fn validators() -> Vec<AccountId>;
     /// Prune historical session tries up to but not including the given index.
@@ -635,8 +646,8 @@ where
         Option<<T as frame_system::Config>::AccountId>,
     >,
 {
-    fn disable_validator(validator: &<T as frame_system::Config>::AccountId) -> Result<bool, ()> {
-        <pallet_session::Pallet<T>>::disable(validator)
+    fn disable_validator(validator_index: u32) -> bool {
+        <pallet_session::Pallet<T>>::disable_index(validator_index)
     }
 
     fn validators() -> Vec<<T as frame_system::Config>::AccountId> {

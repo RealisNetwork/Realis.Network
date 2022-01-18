@@ -2,7 +2,7 @@
 name = "nft"
 version = "0.1.0"
 authors = ["Allan allanperlee@hotmail.com"]
-edition = "2018"
+edition = "2021"
 
 
 [dependencies]

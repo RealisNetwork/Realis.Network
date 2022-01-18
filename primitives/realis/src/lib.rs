@@ -8,11 +8,12 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 use sp_std::fmt::{Display, Formatter};
 use sp_std::vec::Vec;
+use frame_support::pallet_prelude::TypeInfo;
 
 pub type TokenId = U256;
 pub type String = Vec<u8>;
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, TypeInfo)]
 pub struct Token {
     pub id: TokenId,
     pub token_type: TokenType,
