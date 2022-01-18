@@ -45,13 +45,19 @@ sp-io = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0
 [features]
 default = ["std"]
 std = [
-    "serde",
+    "serde/std",
     "codec/std",
-    "frame-benchmarking/std",
     "frame-support/std",
     "frame-system/std",
     "sp-runtime/std",
     "sp-std/std",
+    "pallet-balances/std",
+    "pallet-session/std",
+    "pallet-authorship/std",
+    "sp-staking/std",
+    "frame-benchmarking/std",
+    "node-primitives/std",
+    "scale-info/std",
     "pallet-nft/std",
     "pallet-staking/std",
     "realis-primitives/std",

@@ -18,7 +18,6 @@ codec = { package = "parity-scale-codec", version = "2.2.0", default-features = 
 static_assertions = "1.1.0"
 hex-literal = { version = "0.3.4", optional = true }
 log = { version = "0.4.14", default-features = false }
-primitive-types = { version = "0.10.1", default-features = false }
 
 # primitives
 sp-authority-discovery = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }

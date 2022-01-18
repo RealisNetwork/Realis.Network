@@ -333,12 +333,6 @@ fn kick_out_if_recent<T: Config>(params: SlashParams<T>) {
     if spans.era_span(params.slash_era).map(|s| s.index) == Some(spans.span_index()) {
         spans.end_span(params.now);
         <Pallet<T>>::chill_stash(params.stash);
-
-        // make sure to disable validator till the end of this session
-        if T::SessionInterface::disable_validator(params.stash).unwrap_or(false) {
-            // force a new era, to select a new validator set
-            <Pallet<T>>::ensure_new_era()
-        }
     }
 }
 

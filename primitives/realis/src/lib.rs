@@ -18,13 +18,13 @@ pub struct Token {
     pub token_type: TokenType,
 }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum TokenType {
     Basic(Rarity, String, u32, String),
 }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Status {
     OnSell,
@@ -33,14 +33,14 @@ pub enum Status {
     Free,
 }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy, TypeInfo)]
 pub enum Stackable {
     Silver,
     Gold,
     Diamond,
 }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, PartialOrd, Ord, Debug, Copy, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Rarity {
     Common,

@@ -27,6 +27,7 @@ pallet-balances = { default-features = false, git = "https://github.com/parityte
 node-primitives = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
 
 realis-primitives = { path = "../../primitives/realis", default-features = false }
+pallet-staking = { version = "4.1.0-dev",  path="../staking-pool", default-features = false }
 pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
 #realis-game-api = { path = "../realis-game-api", default-features = false }
 
