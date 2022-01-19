@@ -83,7 +83,7 @@ pallet-transaction-payment = { version = "4.0.0-dev", git = "https://github.com/
 pallet-im-online = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 
 # node-specific dependencies
-node-runtime = { version = "3.0.0-dev", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
+node-runtime = { version = "3.0.0-dev", path = "../runtime"}
 node-rpc = { version = "3.0.0-dev", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 node-primitives = { version = "2.0.0", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 node-executor = { version = "3.0.0-dev", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
