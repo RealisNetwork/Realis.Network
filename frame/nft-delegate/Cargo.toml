@@ -10,7 +10,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 codec = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ["derive"] }
 scale-info = "1.0.0"
 pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
-pallet-staking = { version = "4.1.0-dev",  path="../staking-pool", default-features = false }
+pallet-staking = { version = "4.0.0-dev",  path="../staking-pool", default-features = false }
 realis-primitives = { path = "../../primitives/realis", default-features = false }
 
 frame-support = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
