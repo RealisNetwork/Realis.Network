@@ -558,17 +558,17 @@ pub fn realis_genesis(
         grandpa: GrandpaConfig {
             authorities: vec![],
         },
-        technical_membership: Default::default(),
-        treasury: Default::default(),
-        society: SocietyConfig {
-            members: endowed_accounts
-                .iter()
-                .take((num_endowed_accounts + 1) / 2)
-                .cloned()
-                .collect(),
-            pot: 0,
-            max_members: 999,
-        },
+        // technical_membership: Default::default(),
+        // treasury: Default::default(),
+        // society: SocietyConfig {
+        //     members: endowed_accounts
+        //         .iter()
+        //         .take((num_endowed_accounts + 1) / 2)
+        //         .cloned()
+        //         .collect(),
+        //     pot: 0,
+        //     max_members: 999,
+        // },
         vesting: Default::default(),
         assets: Default::default(),
         gilt: Default::default(),

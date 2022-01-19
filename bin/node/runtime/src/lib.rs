@@ -1344,13 +1344,13 @@ construct_runtime!(
         ElectionProviderMultiPhase: pallet_election_provider_multi_phase,
         Staking: pallet_staking,
         Session: pallet_session,
-        Democracy: pallet_democracy,
-        Council: pallet_collective::<Instance1>,
-        TechnicalCommittee: pallet_collective::<Instance2>,
-        Elections: pallet_elections_phragmen,
-        TechnicalMembership: pallet_membership::<Instance1>,
+        // Democracy: pallet_democracy,
+        // Council: pallet_collective::<Instance1>,
+        // TechnicalCommittee: pallet_collective::<Instance2>,
+        // Elections: pallet_elections_phragmen,
+        // TechnicalMembership: pallet_membership::<Instance1>,
         Grandpa: pallet_grandpa,
-        Treasury: pallet_treasury,
+        // Treasury: pallet_treasury,
         Contracts: pallet_contracts,
         Sudo: pallet_sudo,
         ImOnline: pallet_im_online,
@@ -1359,23 +1359,23 @@ construct_runtime!(
         Historical: pallet_session_historical::{Pallet},
         RandomnessCollectiveFlip: pallet_randomness_collective_flip,
         Identity: pallet_identity,
-        Society: pallet_society,
+        // Society: pallet_society,
         Recovery: pallet_recovery,
         Vesting: pallet_vesting,
         Scheduler: pallet_scheduler,
         Preimage: pallet_preimage,
-        Proxy: pallet_proxy,
+        // Proxy: pallet_proxy,
         Multisig: pallet_multisig,
-        Bounties: pallet_bounties,
-        Tips: pallet_tips,
+        // Bounties: pallet_bounties,
+        // Tips: pallet_tips,
         Assets: pallet_assets,
         Mmr: pallet_mmr,
         Lottery: pallet_lottery,
         Gilt: pallet_gilt,
-        Uniques: pallet_uniques,
+        // Uniques: pallet_uniques,
         TransactionStorage: pallet_transaction_storage,
         BagsList: pallet_bags_list,
-        ChildBounties: pallet_child_bounties,
+        // ChildBounties: pallet_child_bounties,
 
         Nft: pallet_nft,
         RealisBridge: realis_bridge,
@@ -1773,8 +1773,8 @@ impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_babe, Babe);
             list_benchmark!(list, extra, pallet_bags_list, BagsList);
             list_benchmark!(list, extra, pallet_balances, Balances);
-            list_benchmark!(list, extra, pallet_bounties, Bounties);
-            list_benchmark!(list, extra, pallet_child_bounties, ChildBounties);
+            // list_benchmark!(list, extra, pallet_bounties, Bounties);
+            // list_benchmark!(list, extra, pallet_child_bounties, ChildBounties);
             list_benchmark!(list, extra, pallet_collective, Council);
             list_benchmark!(list, extra, pallet_contracts, Contracts);
             list_benchmark!(list, extra, pallet_democracy, Democracy);
@@ -1858,8 +1858,8 @@ impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_babe, Babe);
             add_benchmark!(params, batches, pallet_balances, Balances);
             add_benchmark!(params, batches, pallet_bags_list, BagsList);
-            add_benchmark!(params, batches, pallet_bounties, Bounties);
-            add_benchmark!(params, batches, pallet_child_bounties, ChildBounties);
+            // add_benchmark!(params, batches, pallet_bounties, Bounties);
+            // add_benchmark!(params, batches, pallet_child_bounties, ChildBounties);
             add_benchmark!(params, batches, pallet_collective, Council);
             add_benchmark!(params, batches, pallet_contracts, Contracts);
             add_benchmark!(params, batches, pallet_democracy, Democracy);
