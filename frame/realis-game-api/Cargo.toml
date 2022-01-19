@@ -38,7 +38,7 @@ pallet-staking-reward-curve = { version = "3.0.0",  path = "../staking-pool/rewa
 [dev-dependencies]
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 sp-core = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
-sp-io = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+#sp-io = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 #sp-runtime = { versiopallen = "2.0.0", default-features = false, path = "../../primitives/runtime" }
 
 

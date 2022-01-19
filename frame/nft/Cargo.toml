@@ -29,7 +29,7 @@ hex-literal = "0.3.4"
 
 [dev-dependencies]
 node-primitives = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
-sp-io ={ git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+#sp-io ={ git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 #sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
 
 

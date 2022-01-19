@@ -19,7 +19,7 @@ frame-support = { git = "https://github.com/paritytech/substrate", rev = "7e87c0
 frame-system = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
-sp-io = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+#sp-io = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 sp-core = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 sp-arithmetic = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
@@ -47,7 +47,7 @@ std = [
     "frame-system/std",
     "sp-std/std",
     "sp-runtime/std",
-    "sp-io/std",
+#    "sp-io/std",
     "sp-core/std",
     "sp-arithmetic/std",
     "pallet-balances/std",
