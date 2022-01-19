@@ -2,29 +2,28 @@
 name = 'realis-bridge'
 version = '0.0.1'
 authors = ['exlead@gmail.com']
-edition = '2018'
+edition = "2021"
 
 [dependencies]
 # third-party dependencies
 codec = { package = 'parity-scale-codec', version = '2.0.0', default-features = false, features = ['derive'] }
 serde = { version = '1.0.133', optional = true }
-primitive-types = { version = "0.10.1", default-features = false }
+scale-info = { version = "1.0", default-features = false, features = ["derive"] }
 
-frame-support = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-frame-system = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-std = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", version = "4.0.0-dev", default-features = false, optional = true }
-sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-io = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-core = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-arithmetic = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", version = "4.0.0-dev", default-features = false, optional = true }
+frame-support = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+frame-system = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+sp-std = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+sp-io = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+sp-core = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+sp-arithmetic = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 realis-primitives = { path = "../../primitives/realis", default-features = false }
 pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
-realis-game-api = { version = "0.0.1", path = "../realis-game-api", default-features = false }
 
 [dev-dependencies]
-pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
+pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 [build-dependencies]
 wasm-builder-runner = { version = '3.0.0', package = 'substrate-wasm-builder-runner' }
 [features]
@@ -32,17 +31,18 @@ default = ['std']
 std = [
 	'codec/std',
 	'serde',
+	"scale-info/std",
+	"frame-benchmarking/std",
+	'frame-support/std',
+	'frame-system/std',
 	'sp-std/std',
 	'sp-runtime/std',
-	"frame-benchmarking/std",
 	'sp-io/std',
 	'sp-core/std',
 	'sp-arithmetic/std',
-	'frame-support/std',
-	'frame-system/std',
-	'pallet-nft/std',
+	"pallet-balances/std",
 	"realis-primitives/std",
-	"realis-game-api/std"
+	'pallet-nft/std',
 ]
 
 runtime-benchmarks = ["frame-benchmarking"]

@@ -24,7 +24,6 @@ pub mod pallet {
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use pallet_nft as Nft;
-    pub use realis_game_api::*;
     use sp_core::H160;
     use sp_runtime::traits::{AccountIdConversion, Saturating};
 
