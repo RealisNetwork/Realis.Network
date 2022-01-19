@@ -40,7 +40,7 @@ futures = { version = "0.3.19", features = ["compat"] }
 hex-literal = "0.3.4"
 log = "0.4.8"
 rand = "0.8.4"
-structopt = { version = "0.3.25", optional = true }
+structopt = { version = "0.3.26", optional = true }
 parking_lot = "0.11.2"
 
 # primitives
@@ -125,7 +125,7 @@ async-std = { version = "1.6.5", features = ["attributes"] }
 soketto = "0.7.1"
 
 [build-dependencies]
-structopt = { version = "0.3.25", optional = true }
+structopt = { version = "0.3.26", optional = true }
 node-inspect = { version = "0.9.0-dev", optional = true, git = "https://github.com/paritytech/substrate.git", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 frame-benchmarking-cli = { version = "4.0.0-dev", optional = true, git = "https://github.com/paritytech/substrate.git", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
 substrate-build-script-utils = { version = "3.0.0", optional = true, git = "https://github.com/paritytech/substrate.git", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
