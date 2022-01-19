@@ -20,6 +20,7 @@
 
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
+use node_runtime::Runtime;
 use node_runtime::{
     constants::currency::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
     BalancesConfig, Block, CouncilConfig, DemocracyConfig, ElectionsConfig, GrandpaConfig,
@@ -40,7 +41,6 @@ use sp_runtime::{
     Perbill,
 };
 use std::str::FromStr;
-use node_runtime::Runtime;
 
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::GenesisConfig;
@@ -406,6 +406,7 @@ pub fn testnet_genesis(
     }
 }
 
+#[allow(missing_docs)]
 pub fn realis_genesis(
     initial_authorities: Vec<(
         AccountId,
@@ -491,7 +492,6 @@ pub fn realis_genesis(
             code: wasm_binary_unwrap().to_vec(),
         },
         balances: BalancesConfig {
-
             balances: endowed_accounts
                 .iter()
                 .cloned()
