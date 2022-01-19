@@ -34,7 +34,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 # third-party dependencies
-codec = { package = "parity-scale-codec", version = "2.2.0" }
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
 serde = { version = "1.0.133", features = ["derive"] }
 futures = { version = "0.3.19", features = ["compat"] }
 hex-literal = "0.3.4"
@@ -48,6 +48,7 @@ sp-authority-discovery = { version = "4.0.0-dev", git = "https://github.com/pari
 sp-consensus-babe = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 grandpa-primitives = { version = "4.0.0-dev", package = "sp-finality-grandpa", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 sp-core = { version = "4.1.0-dev", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
+sp-api = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 sp-runtime = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 sp-timestamp = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 sp-authorship = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }

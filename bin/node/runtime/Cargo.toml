@@ -14,7 +14,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 [dependencies]
 
 # third-party dependencies
-codec = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = [
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = [
 	"derive",
 	"max-encoded-len",
 ] }
@@ -178,6 +178,11 @@ std = [
 	"sp-npos-elections/std",
 	"sp-io/std",
 	"pallet-child-bounties/std",
+	"pallet-nft/std",
+	"realis-bridge/std",
+	"pallet-nft-delegate/std",
+	"marketplace/std",
+	"realis-game-api/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
@@ -220,6 +225,11 @@ runtime-benchmarks = [
 	"pallet-session-benchmarking",
 	"frame-system-benchmarking",
 	"hex-literal",
+	"pallet-nft/runtime-benchmarks",
+	"pallet-nft-delegate/runtime-benchmarks",
+	"realis-bridge/runtime-benchmarks",
+	"marketplace/runtime-benchmarks",
+	"realis-game-api/runtime-benchmarks",
 ]
 try-runtime = [
 	"frame-executive/try-runtime",
@@ -263,6 +273,11 @@ try-runtime = [
 	"pallet-uniques/try-runtime",
 	"pallet-vesting/try-runtime",
 	"pallet-gilt/try-runtime",
+	"pallet-nft/try-runtime",
+	"pallet-nft-delegate/try-runtime",
+	"realis-bridge/try-runtime",
+	"marketplace/try-runtime",
+	"realis-game-api/try-runtime",
 ]
 # Make contract callable functions marked as __unstable__ available. Do not enable
 # on live chains as those are subject to change.

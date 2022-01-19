@@ -4,13 +4,13 @@ version = "0.0.2"
 edition = "2021"
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
 primitive-types = { version = "0.10.1", default-features = false }
 serde = { version = "1.0.133", default-features = false }
+scale-info = { version = "1.0", default-features = false, features = ["derive"] }
 impl-trait-for-tuples = "0.2"
 derive_more = "0.99.17"
 serde_repr = "0.1.7"
-scale-info = "1.0.0"
 
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false}
 frame-support = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
@@ -29,4 +29,5 @@ std = [
     "frame-system/std",
     "sp-core/std",
     "sp-std/std",
+    "scale-info/std",
 ]

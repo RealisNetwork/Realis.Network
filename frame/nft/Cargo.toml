@@ -13,15 +13,14 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 serde = { version = "1.0.133", optional = true }
-codec = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
+scale-info = { version = "1.0", default-features = false, features = ["derive"] }
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", version = "4.0.0-dev", default-features = false, optional = true }
 frame-support = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
-scale-info = "1.0.0"
 pallet-balances = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 sp-std = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
-sp-core = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 node-primitives = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 realis-primitives = { path = "../../primitives/realis", default-features = false }
 
@@ -29,7 +28,7 @@ hex-literal = "0.3.4"
 
 [dev-dependencies]
 node-primitives = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
-#sp-io ={ git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
+sp-io = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false }
 #sp-runtime = { version = "2.0.0", default-features = false, path = "../../primitives/runtime" }
 
 
@@ -38,17 +37,15 @@ default = ["std"]
 std = [
     "serde",
     "codec/std",
-    "frame-benchmarking/std",
+    "scale-info/std",
     "frame-support/std",
     "frame-system/std",
-    "scale-info/std",
     "pallet-balances/std",
     "sp-runtime/std",
     "sp-std/std",
-    "sp-core/std",
+    "realis-primitives/std",
     "node-primitives/std",
-    "realis-primitives/std"
 ]
 
-runtime-benchmarks = ["frame-benchmarking"]
+runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
 try-runtime = ["frame-support/try-runtime"]
