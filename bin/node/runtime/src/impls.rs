@@ -111,8 +111,8 @@ mod multiplier_tests {
     }
 
     fn run_with_system_weight<F>(w: Weight, assertions: F)
-        where
-            F: Fn() -> (),
+    where
+        F: Fn() -> (),
     {
         let mut t: sp_io::TestExternalities = frame_system::GenesisConfig::default()
             .build_storage::<Runtime>()
@@ -138,11 +138,11 @@ mod multiplier_tests {
         test_set.into_iter().for_each(|(w, fm)| {
             run_with_system_weight(w, || {
                 assert_eq_error_rate!(
-					truth_value_update(w, fm),
-					runtime_multiplier_update(fm),
-					// Error is only 1 in 100^18
-					Multiplier::from_inner(100),
-				);
+                    truth_value_update(w, fm),
+                    runtime_multiplier_update(fm),
+                    // Error is only 1 in 100^18
+                    Multiplier::from_inner(100),
+                );
             })
         })
     }
@@ -153,7 +153,12 @@ mod multiplier_tests {
         // the weight is 1/100th bigger than target.
         run_with_system_weight(target() * 101 / 100, || {
             let next = runtime_multiplier_update(min_multiplier());
-            assert!(next > min_multiplier(), "{:?} !>= {:?}", next, min_multiplier());
+            assert!(
+                next > min_multiplier(),
+                "{:?} !>= {:?}",
+                next,
+                min_multiplier()
+            );
         })
     }
 
@@ -186,7 +191,7 @@ mod multiplier_tests {
                 let next = runtime_multiplier_update(fm);
                 fm = next;
                 if fm == min_multiplier() {
-                    break
+                    break;
                 }
                 iterations += 1;
             }
@@ -214,7 +219,11 @@ mod multiplier_tests {
         // `cargo test congested_chain_simulation -- --nocapture` to get some insight.
 
         // almost full. The entire quota of normal transactions is taken.
-        let block_weight = BlockWeights::get().get(DispatchClass::Normal).max_total.unwrap() - 100;
+        let block_weight = BlockWeights::get()
+            .get(DispatchClass::Normal)
+            .max_total
+            .unwrap()
+            - 100;
 
         // Default substrate weight.
         let tx_weight = frame_support::weights::constants::ExtrinsicBaseWeight::get();
@@ -256,10 +265,10 @@ mod multiplier_tests {
         run_with_system_weight(target() / 4, || {
             let next = runtime_multiplier_update(fm);
             assert_eq_error_rate!(
-				next,
-				truth_value_update(target() / 4, fm),
-				Multiplier::from_inner(100),
-			);
+                next,
+                truth_value_update(target() / 4, fm),
+                Multiplier::from_inner(100),
+            );
 
             // Light block. Multiplier is reduced a little.
             assert!(next < fm);
@@ -268,20 +277,20 @@ mod multiplier_tests {
         run_with_system_weight(target() / 2, || {
             let next = runtime_multiplier_update(fm);
             assert_eq_error_rate!(
-				next,
-				truth_value_update(target() / 2, fm),
-				Multiplier::from_inner(100),
-			);
+                next,
+                truth_value_update(target() / 2, fm),
+                Multiplier::from_inner(100),
+            );
             // Light block. Multiplier is reduced a little.
             assert!(next < fm);
         });
         run_with_system_weight(target(), || {
             let next = runtime_multiplier_update(fm);
             assert_eq_error_rate!(
-				next,
-				truth_value_update(target(), fm),
-				Multiplier::from_inner(100),
-			);
+                next,
+                truth_value_update(target(), fm),
+                Multiplier::from_inner(100),
+            );
             // ideal. No changes.
             assert_eq!(next, fm)
         });
@@ -289,10 +298,10 @@ mod multiplier_tests {
             // More than ideal. Fee is increased.
             let next = runtime_multiplier_update(fm);
             assert_eq_error_rate!(
-				next,
-				truth_value_update(target() * 2, fm),
-				Multiplier::from_inner(100),
-			);
+                next,
+                truth_value_update(target() * 2, fm),
+                Multiplier::from_inner(100),
+            );
 
             // Heavy block. Fee is increased a little.
             assert!(next > fm);
@@ -308,10 +317,10 @@ mod multiplier_tests {
             (0..1_000).for_each(|_| {
                 next = runtime_multiplier_update(original);
                 assert_eq_error_rate!(
-					next,
-					truth_value_update(target() * 2, original),
-					Multiplier::from_inner(100),
-				);
+                    next,
+                    truth_value_update(target() * 2, original),
+                    Multiplier::from_inner(100),
+                );
                 // must always increase
                 assert!(next > original, "{:?} !>= {:?}", next, original);
                 original = next;
@@ -358,14 +367,14 @@ mod multiplier_tests {
             Weight::max_value() / 2,
             Weight::max_value(),
         ]
-            .into_iter()
-            .for_each(|i| {
-                run_with_system_weight(i, || {
-                    let next = runtime_multiplier_update(Multiplier::one());
-                    let truth = truth_value_update(i, Multiplier::one());
-                    assert_eq_error_rate!(truth, next, Multiplier::from_inner(50_000_000));
-                });
+        .into_iter()
+        .for_each(|i| {
+            run_with_system_weight(i, || {
+                let next = runtime_multiplier_update(Multiplier::one());
+                let truth = truth_value_update(i, Multiplier::one());
+                assert_eq_error_rate!(truth, next, Multiplier::from_inner(50_000_000));
             });
+        });
 
         // Some values that are all above the target and will cause an increase.
         let t = target();

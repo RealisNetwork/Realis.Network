@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2019-2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,25 +47,24 @@
 //! has multiple misbehaviors. However, accounting for such cases is necessary
 //! to deter a class of "rage-quit" attacks.
 //!
-//! Based on research at <https://w3f-research.readthedocs.io/en/latest/polkadot/slashing/npos.html>
+//! Based on research at <https://research.web3.foundation/en/latest/polkadot/slashing/npos.html>
 
 use crate::{
-    BalanceOf, Config, EraIndex, Error, Exposure, NegativeImbalanceOf, Pallet, Perbill,
-    SessionInterface, Store, UnappliedSlash,
+    BalanceOf, Config, Error, Exposure, NegativeImbalanceOf, Pallet, Perbill, SessionInterface,
+    Store, UnappliedSlash,
 };
 use codec::{Decode, Encode};
 use frame_support::{
     ensure,
-    traits::{Currency, Imbalance, OnUnbalanced},
+    traits::{Currency, Get, Imbalance, OnUnbalanced},
 };
+use scale_info::TypeInfo;
 use sp_runtime::{
     traits::{Saturating, Zero},
     DispatchResult, RuntimeDebug,
 };
+use sp_staking::{offence::DisableStrategy, EraIndex};
 use sp_std::vec::Vec;
-use scale_info::TypeInfo;
-use sp_staking::offence::DisableStrategy;
-use frame_support::traits::Get;
 
 /// The proportion of the slashing reward to be paid out on the first slashing detection.
 /// This is f_1 in the paper.
@@ -75,7 +74,7 @@ const REWARD_F1: Perbill = Perbill::from_percent(50);
 pub type SpanIndex = u32;
 
 // A range of start..end eras for a slashing span.
-#[derive(Encode, Decode)]
+#[derive(Encode, Decode, TypeInfo)]
 #[cfg_attr(test, derive(Debug, PartialEq))]
 pub(crate) struct SlashingSpan {
     pub(crate) index: SpanIndex,
@@ -203,7 +202,7 @@ pub(crate) struct SpanRecord<Balance> {
 impl<Balance> SpanRecord<Balance> {
     /// The value of stash balance slashed in this span.
     #[cfg(test)]
-    pub(crate) fn amount_slashed(&self) -> &Balance {
+    pub(crate) fn amount(&self) -> &Balance {
         &self.slashed
     }
 }
@@ -248,7 +247,7 @@ pub(crate) fn compute_slash<T: Config>(
         // kick out the validator even if they won't be slashed,
         // as long as the misbehavior is from their most recent slashing span.
         kick_out_if_recent::<T>(params);
-        return None
+        return None;
     }
 
     let (prior_slash_p, _era_slash) =
@@ -271,7 +270,7 @@ pub(crate) fn compute_slash<T: Config>(
         // pays out some reward even if the latest report is not max-in-era.
         // we opt to avoid the nominator lookups and edits and leave more rewards
         // for more drastic misbehavior.
-        return None
+        return None;
     }
 
     // apply slash to validator.
@@ -296,6 +295,9 @@ pub(crate) fn compute_slash<T: Config>(
             <Pallet<T>>::chill_stash(params.stash);
         }
     }
+
+    let disable_when_slashed = params.disable_strategy != DisableStrategy::Never;
+    add_offending_validator::<T>(params.stash, disable_when_slashed);
 
     let mut nominators_slashed = Vec::new();
     reward_payout += slash_nominators::<T>(params.clone(), prior_slash_p, &mut nominators_slashed);
@@ -361,7 +363,7 @@ fn add_offending_validator<T: Config>(stash: &T::AccountId, disable: bool) {
                 if disable {
                     T::SessionInterface::disable_validator(validator_index_u32);
                 }
-            },
+            }
             Ok(index) => {
                 if disable && !offending[index].1 {
                     // the validator had previously offended without being disabled,
@@ -369,7 +371,7 @@ fn add_offending_validator<T: Config>(stash: &T::AccountId, disable: bool) {
                     offending[index].1 = true;
                     T::SessionInterface::disable_validator(validator_index_u32);
                 }
-            },
+            }
         }
     });
 }

@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2018-2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2018-2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -18,16 +18,14 @@
 
 //! Substrate chain configurations.
 
-use std::str::FromStr;
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
 use node_runtime::{
-    wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
-    BalancesConfig, /*CouncilConfig,*/
-    /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
-    NftConfig, RealisBridgeConfig, RealisGameApiConfig, SessionConfig, SessionKeys,
-    /*SocietyConfig,*/ StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-    /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
+    constants::currency::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
+    BalancesConfig, Block, CouncilConfig, DemocracyConfig, ElectionsConfig, GrandpaConfig,
+    ImOnlineConfig, IndicesConfig, NftConfig, RealisBridgeConfig, RealisGameApiConfig,
+    SessionConfig, SessionKeys, SocietyConfig, StakerStatus, StakingConfig, SudoConfig,
+    SystemConfig, TechnicalCommitteeConfig, MAX_NOMINATIONS,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
@@ -41,13 +39,11 @@ use sp_runtime::{
     traits::{IdentifyAccount, Verify},
     Perbill,
 };
+use std::str::FromStr;
+use node_runtime::Runtime;
 
 pub use node_primitives::{AccountId, Balance, Signature};
-use node_runtime::constants::currency::DOLLARS;
-use node_runtime::pallet_staking;
-use node_runtime::realis_game_api;
-use node_runtime::Runtime;
-pub use node_runtime::{Block, GenesisConfig};
+pub use node_runtime::GenesisConfig;
 use sc_telemetry::serde_json::Map;
 
 type AccountPublic = <Signature as Verify>::Signer;
@@ -189,44 +185,12 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
     ]
     .into();
 
-    let nft_master: Vec<AccountId> = vec![hex![
-        // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
-        "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
-    ]
-    .into()];
-
-    let api_master: Vec<AccountId> = vec![hex![
-        // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
-        "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
-    ]
-    .into()];
-
-    let bridge_master: Vec<AccountId> = vec![hex![
-        // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
-        "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
-    ]
-    .into()];
-
-    let white_list: Vec<AccountId> = vec![hex![
-        // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
-        "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
-    ]
-        .into()];
-
-    let endowed_accounts: Vec<AccountId> = vec![
-        root_key.clone(),
-        realis_game_api::Pallet::<Runtime>::account_id(),
-        pallet_staking::Pallet::<Runtime>::account_id(),
-    ];
+    let endowed_accounts: Vec<AccountId> = vec![root_key.clone()];
 
     testnet_genesis(
         initial_authorities,
         vec![],
         root_key,
-        nft_master,
-        api_master,
-        white_list,
-        bridge_master,
         Some(endowed_accounts),
     )
 }
@@ -244,6 +208,7 @@ pub fn staging_testnet_config() -> ChainSpec {
             TelemetryEndpoints::new(vec![(STAGING_TELEMETRY_URL.to_string(), 0)])
                 .expect("Staging telemetry url is valid; qed"),
         ),
+        None,
         None,
         None,
         Default::default(),
@@ -298,11 +263,165 @@ pub fn testnet_genesis(
     )>,
     initial_nominators: Vec<AccountId>,
     root_key: AccountId,
+    endowed_accounts: Option<Vec<AccountId>>,
+) -> GenesisConfig {
+    let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
+        vec![
+            get_account_id_from_seed::<sr25519::Public>("Alice"),
+            get_account_id_from_seed::<sr25519::Public>("Bob"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie"),
+            get_account_id_from_seed::<sr25519::Public>("Dave"),
+            get_account_id_from_seed::<sr25519::Public>("Eve"),
+            get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+            get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+        ]
+    });
+    // endow all authorities and nominators.
+    initial_authorities
+        .iter()
+        .map(|x| &x.0)
+        .chain(initial_nominators.iter())
+        .for_each(|x| {
+            if !endowed_accounts.contains(x) {
+                endowed_accounts.push(x.clone())
+            }
+        });
+
+    // stakers: all validators and nominators.
+    let mut rng = rand::thread_rng();
+    let stakers = initial_authorities
+        .iter()
+        .map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+        .chain(initial_nominators.iter().map(|x| {
+            use rand::{seq::SliceRandom, Rng};
+            let limit = (MAX_NOMINATIONS as usize).min(initial_authorities.len());
+            let count = rng.gen::<usize>() % limit;
+            let nominations = initial_authorities
+                .as_slice()
+                .choose_multiple(&mut rng, count)
+                .into_iter()
+                .map(|choice| choice.0.clone())
+                .collect::<Vec<_>>();
+            (
+                x.clone(),
+                x.clone(),
+                STASH,
+                StakerStatus::Nominator(nominations),
+            )
+        }))
+        .collect::<Vec<_>>();
+
+    let num_endowed_accounts = endowed_accounts.len();
+
+    const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
+    const STASH: Balance = ENDOWMENT / 1000;
+
+    GenesisConfig {
+        system: SystemConfig {
+            code: wasm_binary_unwrap().to_vec(),
+        },
+        balances: BalancesConfig {
+            balances: endowed_accounts
+                .iter()
+                .cloned()
+                .map(|x| (x, ENDOWMENT))
+                .collect(),
+        },
+        indices: IndicesConfig { indices: vec![] },
+        session: SessionConfig {
+            keys: initial_authorities
+                .iter()
+                .map(|x| {
+                    (
+                        x.0.clone(),
+                        x.0.clone(),
+                        session_keys(x.2.clone(), x.3.clone(), x.4.clone(), x.5.clone()),
+                    )
+                })
+                .collect::<Vec<_>>(),
+        },
+        staking: StakingConfig {
+            validator_count: initial_authorities.len() as u32,
+            minimum_validator_count: initial_authorities.len() as u32,
+            invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
+            slash_reward_fraction: Perbill::from_percent(10),
+            stakers,
+            ..Default::default()
+        },
+        democracy: DemocracyConfig::default(),
+        elections: ElectionsConfig {
+            members: endowed_accounts
+                .iter()
+                .take((num_endowed_accounts + 1) / 2)
+                .cloned()
+                .map(|member| (member, STASH))
+                .collect(),
+        },
+        council: CouncilConfig::default(),
+        technical_committee: TechnicalCommitteeConfig {
+            members: endowed_accounts
+                .iter()
+                .take((num_endowed_accounts + 1) / 2)
+                .cloned()
+                .collect(),
+            phantom: Default::default(),
+        },
+        sudo: SudoConfig {
+            key: Some(root_key),
+        },
+        babe: BabeConfig {
+            authorities: vec![],
+            epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
+        },
+        im_online: ImOnlineConfig { keys: vec![] },
+        authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },
+        grandpa: GrandpaConfig {
+            authorities: vec![],
+        },
+        technical_membership: Default::default(),
+        treasury: Default::default(),
+        society: SocietyConfig {
+            members: endowed_accounts
+                .iter()
+                .take((num_endowed_accounts + 1) / 2)
+                .cloned()
+                .collect(),
+            pot: 0,
+            max_members: 999,
+        },
+        vesting: Default::default(),
+        assets: Default::default(),
+        gilt: Default::default(),
+        transaction_storage: Default::default(),
+        scheduler: Default::default(),
+        transaction_payment: Default::default(),
+        nft: Default::default(),
+        realis_bridge: Default::default(),
+        realis_game_api: Default::default(),
+    }
+}
+
+pub fn realis_genesis(
+    initial_authorities: Vec<(
+        AccountId,
+        AccountId,
+        GrandpaId,
+        BabeId,
+        ImOnlineId,
+        AuthorityDiscoveryId,
+    )>,
+    initial_nominators: Vec<AccountId>,
+    root_key: AccountId,
+    endowed_accounts: Option<Vec<AccountId>>,
     nft_master: Vec<AccountId>,
     api_master: Vec<AccountId>,
     white_list: Vec<AccountId>,
     bridge_master: Vec<AccountId>,
-    endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
     let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
         vec![
@@ -328,7 +447,7 @@ pub fn testnet_genesis(
         .map(|x| &x.0)
         .chain(initial_nominators.iter())
         .for_each(|x| {
-            if !endowed_accounts.contains(&x) {
+            if !endowed_accounts.contains(x) {
                 endowed_accounts.push(x.clone())
             }
         });
@@ -357,9 +476,9 @@ pub fn testnet_genesis(
         }))
         .collect::<Vec<_>>();
 
-    let _num_endowed_accounts = endowed_accounts.len();
+    let num_endowed_accounts = endowed_accounts.len();
 
-    const ENDOWMENT: Balance = 30_000 * DOLLARS / 10;
+    const ENDOWMENT: Balance = 900_000 * DOLLARS / 12 * 100;
     const GAME_WALLET: Balance = 10_000_000 * DOLLARS / 10;
     const STAKING_POOL: Balance = 30_000_000 * DOLLARS / 10;
     const STASH: Balance = ENDOWMENT / 1000;
@@ -370,9 +489,9 @@ pub fn testnet_genesis(
     GenesisConfig {
         system: SystemConfig {
             code: wasm_binary_unwrap().to_vec(),
-            changes_trie_config: Default::default(),
         },
         balances: BalancesConfig {
+
             balances: endowed_accounts
                 .iter()
                 .cloned()
@@ -408,196 +527,27 @@ pub fn testnet_genesis(
             stakers,
             ..Default::default()
         },
-        // democracy: DemocracyConfig::default(),
-        // elections: ElectionsConfig {
-        //     members: endowed_accounts
-        //         .iter()
-        //         .take((num_endowed_accounts + 1) / 2)
-        //         .cloned()
-        //         .map(|member| (member, STASH))
-        //         .collect(),
-        // },
-        // council: CouncilConfig::default(),
-        // technical_committee: TechnicalCommitteeConfig {
-        //     members: endowed_accounts
-        //         .iter()
-        //         .take((num_endowed_accounts + 1) / 2)
-        //         .cloned()
-        //         .collect(),
-        //     phantom: Default::default(),
-        // },
-        sudo: SudoConfig { key: root_key },
-        babe: BabeConfig {
-            authorities: vec![],
-            epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
-        },
-        im_online: ImOnlineConfig { keys: vec![] },
-        authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },
-        grandpa: GrandpaConfig {
-            authorities: vec![],
-        },
-        // technical_membership: Default::default(),
-        // treasury: Default::default(),
-        // society: SocietyConfig {
-        //     members: endowed_accounts
-        //         .iter()
-        //         .take((num_endowed_accounts + 1) / 2)
-        //         .cloned()
-        //         .collect(),
-        //     pot: 0,
-        //     max_members: 999,
-        // },
-        vesting: Default::default(),
-        gilt: Default::default(),
-        nft: NftConfig {
-            nft_masters: nft_master,
-        },
-        realis_game_api: RealisGameApiConfig {
-            api_masters: api_master,
-            whitelist: white_list,
-        },
-        realis_bridge: RealisBridgeConfig {
-            bridge_masters: bridge_master,
-        },
-    }
-}
-
-///Realis chain-spec
-pub fn realis_genesis(
-    initial_authorities: Vec<(
-        AccountId,
-        AccountId,
-        GrandpaId,
-        BabeId,
-        ImOnlineId,
-        AuthorityDiscoveryId,
-    )>,
-    initial_nominators: Vec<AccountId>,
-    root_key: AccountId,
-    nft_master: Vec<AccountId>,
-    api_master: Vec<AccountId>,
-    white_list: Vec<AccountId>,
-    bridge_master: Vec<AccountId>,
-    endowed_accounts: Option<Vec<AccountId>>,
-) -> GenesisConfig {
-    let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
-        vec![
-            hex!["781f4331933557680355932ef7f39b88e938fcb4338cc0e03edb3c523e47fd09"].into(),
-            hex!["fe8823fb870f61eed24638a228adbe5885de6e945bb1375ca6a7415a4824756e"].into(),
-            hex!["bc95bdafa3582b0ecbf5caf1e30b00412fa7c2dfbccd518f3b842c63890cc979"].into(),
-            hex!["08bdc3547dc26a647391b509960b00adafa550496e9a95339a2faa02343be20f"].into(),
-            hex!["d4c2ffb1322efb7fe78463ad6f24301751454685edd96640197cab2c44e1b16c"].into(),
-            hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into(),
-            hex!["d671cde125c8b7f42afbf40fb9d0d93d4d80c888cd34824c99ab292b589dbe75"].into(),
-            hex!["d4c2ffb1322efb7fe78463ad6f24301751454685edd96640197cab2c44e1b16c"].into(),
-            pallet_staking::Pallet::<Runtime>::account_id(),
-            realis_game_api::Pallet::<Runtime>::account_id(),
-        ]
-    });
-    // endow all authorities and nominators.
-    initial_authorities
-        .iter()
-        .map(|x| &x.0)
-        .chain(initial_nominators.iter())
-        .for_each(|x| {
-            if !endowed_accounts.contains(&x) {
-                endowed_accounts.push(x.clone())
-            }
-        });
-
-    // stakers: all validators and nominators.
-    let mut rng = rand::thread_rng();
-    let stakers = initial_authorities
-        .iter()
-        .map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
-        .chain(initial_nominators.iter().map(|x| {
-            use rand::{seq::SliceRandom, Rng};
-            let limit = (MAX_NOMINATIONS as usize).min(initial_authorities.len());
-            let count = rng.gen::<usize>() % limit;
-            let nominations = initial_authorities
-                .as_slice()
-                .choose_multiple(&mut rng, count)
-                .into_iter()
-                .map(|choice| choice.0.clone())
-                .collect::<Vec<_>>();
-            (
-                x.clone(),
-                x.clone(),
-                STASH,
-                StakerStatus::Nominator(nominations),
-            )
-        }))
-        .collect::<Vec<_>>();
-    let _num_endowed_accounts = endowed_accounts.len();
-
-    const ENDOWMENT: Balance = 900_000 * DOLLARS / 12 * 100;
-    const GAME_WALLET: Balance = 10_000_000 * DOLLARS / 10;
-    const STAKING_POOL: Balance = 30_000_000 * DOLLARS / 10;
-    const STASH: Balance = ENDOWMENT / 1000;
-
-    let pallet_id_staking = pallet_staking::Pallet::<Runtime>::account_id().clone();
-    let game_wallet = realis_game_api::Pallet::<Runtime>::account_id().clone();
-
-    GenesisConfig {
-        system: SystemConfig {
-            code: wasm_binary_unwrap().to_vec(),
-            changes_trie_config: Default::default(),
-        },
-        balances: BalancesConfig {
-            balances: endowed_accounts
+        democracy: DemocracyConfig::default(),
+        elections: ElectionsConfig {
+            members: endowed_accounts
                 .iter()
+                .take((num_endowed_accounts + 1) / 2)
                 .cloned()
-                .map(|x| {
-                    if x == pallet_id_staking {
-                        (x, STAKING_POOL)
-                    } else if x == game_wallet {
-                        (x, GAME_WALLET)
-                    } else {
-                        (x, ENDOWMENT)
-                    }
-                })
+                .map(|member| (member, STASH))
                 .collect(),
         },
-        indices: IndicesConfig { indices: vec![] },
-        session: SessionConfig {
-            keys: initial_authorities
+        council: CouncilConfig::default(),
+        technical_committee: TechnicalCommitteeConfig {
+            members: endowed_accounts
                 .iter()
-                .map(|x| {
-                    (
-                        x.0.clone(),
-                        x.0.clone(),
-                        session_keys(x.2.clone(), x.3.clone(), x.4.clone(), x.5.clone()),
-                    )
-                })
-                .collect::<Vec<_>>(),
+                .take((num_endowed_accounts + 1) / 2)
+                .cloned()
+                .collect(),
+            phantom: Default::default(),
         },
-        staking: StakingConfig {
-            validator_count: initial_authorities.len() as u32,
-            minimum_validator_count: initial_authorities.len() as u32,
-            invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-            slash_reward_fraction: Perbill::from_percent(10),
-            stakers,
-            ..Default::default()
+        sudo: SudoConfig {
+            key: Some(root_key),
         },
-        // democracy: DemocracyConfig::default(),
-        // elections: ElectionsConfig {
-        //     members: endowed_accounts
-        //         .iter()
-        //         .take((num_endowed_accounts + 1) / 2)
-        //         .cloned()
-        //         .map(|member| (member, STASH))
-        //         .collect(),
-        // },
-        // council: CouncilConfig::default(),
-        // technical_committee: TechnicalCommitteeConfig {
-        //     members: endowed_accounts
-        //         .iter()
-        //         .take((num_endowed_accounts + 1) / 2)
-        //         .cloned()
-        //         .collect(),
-        //     phantom: Default::default(),
-        // },
-        sudo: SudoConfig { key: root_key },
         babe: BabeConfig {
             authorities: vec![],
             epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
@@ -607,28 +557,32 @@ pub fn realis_genesis(
         grandpa: GrandpaConfig {
             authorities: vec![],
         },
-        // technical_membership: Default::default(),
-        // treasury: Default::default(),
-        // society: SocietyConfig {
-        //     members: endowed_accounts
-        //         .iter()
-        //         .take((num_endowed_accounts + 1) / 2)
-        //         .cloned()
-        //         .collect(),
-        //     pot: 0,
-        //     max_members: 999,
-        // },
+        technical_membership: Default::default(),
+        treasury: Default::default(),
+        society: SocietyConfig {
+            members: endowed_accounts
+                .iter()
+                .take((num_endowed_accounts + 1) / 2)
+                .cloned()
+                .collect(),
+            pot: 0,
+            max_members: 999,
+        },
         vesting: Default::default(),
+        assets: Default::default(),
         gilt: Default::default(),
+        transaction_storage: Default::default(),
+        scheduler: Default::default(),
+        transaction_payment: Default::default(),
         nft: NftConfig {
             nft_masters: nft_master,
         },
-        realis_game_api: RealisGameApiConfig {
-            api_masters: api_master,
-            whitelist: white_list,
-        },
         realis_bridge: RealisBridgeConfig {
             bridge_masters: bridge_master,
+        },
+        realis_game_api: RealisGameApiConfig {
+            whitelist: white_list,
+            api_masters: api_master,
         },
     }
 }
@@ -646,8 +600,12 @@ pub fn realis_testnet_config() -> ChainSpec {
         ChainType::Live,
         realis_testnet_genesis,
         vec![],
+        Some(
+            TelemetryEndpoints::new(vec![(STAGING_TELEMETRY_URL.to_string(), 0)])
+                .expect("Staging telemetry url is valid; qed"),
+        ),
         None,
-        None,
+        Default::default(),
         Some(properties),
         Default::default(),
     )
@@ -724,14 +682,14 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
             .unwrap()
             .into();
 
-    let endowed_accounts =
-        vec![sudo_1.clone(),
-             sudo_2.clone(),
-             sudo_3.clone(),
-             sudo_4.clone(),
-             sudo_5.clone(),
-             realis_game_api::Pallet::<Runtime>::account_id(),
-             pallet_staking::Pallet::<Runtime>::account_id(),
+    let endowed_accounts = vec![
+        sudo_1.clone(),
+        sudo_2.clone(),
+        sudo_3.clone(),
+        sudo_4.clone(),
+        sudo_5.clone(),
+        // realis_game_api::Pallet::<Runtime>::account_id(),
+        // pallet_staking::Pallet::<Runtime>::account_id(),
     ];
 
     let nft_master = vec![
@@ -739,7 +697,7 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         sudo_2.clone(),
         sudo_3.clone(),
         sudo_4.clone(),
-        sudo_5.clone()
+        sudo_5.clone(),
     ];
 
     let api_master = vec![
@@ -747,7 +705,7 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         sudo_2.clone(),
         sudo_3.clone(),
         sudo_4.clone(),
-        sudo_5.clone()
+        sudo_5.clone(),
     ];
 
     let bridge_master = vec![
@@ -755,25 +713,25 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         sudo_2.clone(),
         sudo_3.clone(),
         sudo_4.clone(),
-        sudo_5.clone()
+        sudo_5.clone(),
     ];
 
     let white_list = vec![
         test_acc_1.clone(),
         test_acc_2.clone(),
         test_acc_3.clone(),
-        test_acc_4.clone()
+        test_acc_4.clone(),
     ];
 
     realis_genesis(
         initial_authorities,
         vec![],
         root_key,
+        Some(endowed_accounts),
         nft_master,
         api_master,
         white_list,
         bridge_master,
-        Some(endowed_accounts),
     )
 }
 
@@ -783,92 +741,16 @@ pub fn realis_config() -> Result<ChainSpec, String> {
 }
 
 fn development_config_genesis() -> GenesisConfig {
-    let sudo_1: AccountId =
-        hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
-    let sudo_2: AccountId =
-        sp_core::sr25519::Public::from_str("5D54XGhtRwffGsmrsaMyUdy3cZhtECnCGpxJgHto8e9csKEc")
-            .unwrap()
-            .into();
-    let sudo_3: AccountId =
-        sp_core::sr25519::Public::from_str("5C7odVdth9qyssQi81XHjkF8hWeLhMpnN27U24QgMB2YNJ6T")
-            .unwrap()
-            .into();
-    let sudo_4: AccountId =
-        sp_core::sr25519::Public::from_str("5EU1u5MaJLfB1hneKf7oPuZUa1PoSDBqpH6wU2E2yaB3h7Vi")
-            .unwrap()
-            .into();
-    let sudo_5: AccountId =
-        sp_core::sr25519::Public::from_str("5EKqhiruvSw3etmTccRcVT3dahwhMNutAyQEkhT3NoYeVkBf")
-            .unwrap()
-            .into();
-
-    let test_acc_1: AccountId =
-        sp_core::sr25519::Public::from_str("5CFvFsZy7ViPUdEuuK19QuUqqCApVr2wbRWkHjcvQGsgzQmv")
-            .unwrap()
-            .into();
-    let test_acc_2: AccountId =
-        sp_core::sr25519::Public::from_str("5DHasdJm8bVxqxuAu5p8QfDMFfABtt3Rgf8feWSDP8KmYVAL")
-            .unwrap()
-            .into();
-    let test_acc_3: AccountId =
-        sp_core::sr25519::Public::from_str("5EAH4UrLxaNM6Kz1pH9bNSkKxAe21DkdDfyPahoj6KFN79Ax")
-            .unwrap()
-            .into();
-    let test_acc_4: AccountId =
-        sp_core::sr25519::Public::from_str("5HnBcUqsgjBKD5cpAi4wDrTBhftFjt1ZFG8pXLmN5u1zozRk")
-            .unwrap()
-            .into();
-
-    let nft_master = vec![
-        sudo_1.clone(),
-        sudo_2.clone(),
-        sudo_3.clone(),
-        sudo_4.clone(),
-        sudo_5.clone()
-    ];
-
-    let api_master = vec![
-        sudo_1.clone(),
-        sudo_2.clone(),
-        sudo_3.clone(),
-        sudo_4.clone(),
-        sudo_5.clone()
-    ];
-
-    let bridge_master = vec![
-        sudo_1.clone(),
-        sudo_2.clone(),
-        sudo_3.clone(),
-        sudo_4.clone(),
-        sudo_5.clone()
-    ];
-
-    let white_list = vec![
-        test_acc_1.clone(),
-        test_acc_2.clone(),
-        test_acc_3.clone(),
-        test_acc_4.clone()
-    ];
-
     testnet_genesis(
         vec![authority_keys_from_seed("Alice")],
         vec![],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
-        nft_master,
-        api_master,
-        white_list,
-        bridge_master,
         None,
     )
 }
 
 /// Development config (single validator Alice)
 pub fn development_config() -> ChainSpec {
-    let mut properties = Map::new();
-    properties.insert("tokenDecimals".into(), 12.into());
-    properties.insert("tokenSymbol".into(), "LIS".into());
-    properties.insert("ss58Format".into(), 42.into());
-
     ChainSpec::from_genesis(
         "Development",
         "dev",
@@ -877,7 +759,8 @@ pub fn development_config() -> ChainSpec {
         vec![],
         None,
         None,
-        Some(properties),
+        None,
+        None,
         Default::default(),
     )
 }
@@ -890,10 +773,6 @@ fn local_testnet_genesis() -> GenesisConfig {
         ],
         vec![],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         None,
     )
 }
@@ -909,6 +788,7 @@ pub fn local_testnet_config() -> ChainSpec {
         None,
         None,
         None,
+        None,
         Default::default(),
     )
 }
@@ -916,7 +796,7 @@ pub fn local_testnet_config() -> ChainSpec {
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
-    use crate::service::{new_full_base, new_light_base, NewFullBase};
+    use crate::service::{new_full_base, NewFullBase};
     use sc_service_test;
     use sp_runtime::BuildStorage;
 
@@ -925,9 +805,6 @@ pub(crate) mod tests {
             vec![authority_keys_from_seed("Alice")],
             vec![],
             get_account_id_from_seed::<sr25519::Public>("Alice"),
-            vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-            vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-            vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
             None,
         )
     }
@@ -940,6 +817,7 @@ pub(crate) mod tests {
             ChainType::Development,
             local_testnet_genesis_instant_single,
             vec![],
+            None,
             None,
             None,
             None,
@@ -958,6 +836,7 @@ pub(crate) mod tests {
             None,
             None,
             None,
+            None,
             Default::default(),
         )
     }
@@ -965,33 +844,23 @@ pub(crate) mod tests {
     #[test]
     #[ignore]
     fn test_connectivity() {
-        sc_service_test::connectivity(
-            integration_test_config_with_two_authorities(),
-            |config| {
-                let NewFullBase {
-                    task_manager,
-                    client,
-                    network,
-                    transaction_pool,
-                    ..
-                } = new_full_base(config, |_, _| ())?;
-                Ok(sc_service_test::TestNetComponents::new(
-                    task_manager,
-                    client,
-                    network,
-                    transaction_pool,
-                ))
-            },
-            |config| {
-                let (keep_alive, _, client, network, transaction_pool) = new_light_base(config)?;
-                Ok(sc_service_test::TestNetComponents::new(
-                    keep_alive,
-                    client,
-                    network,
-                    transaction_pool,
-                ))
-            },
-        );
+        sp_tracing::try_init_simple();
+
+        sc_service_test::connectivity(integration_test_config_with_two_authorities(), |config| {
+            let NewFullBase {
+                task_manager,
+                client,
+                network,
+                transaction_pool,
+                ..
+            } = new_full_base(config, |_, _| ())?;
+            Ok(sc_service_test::TestNetComponents::new(
+                task_manager,
+                client,
+                network,
+                transaction_pool,
+            ))
+        });
     }
 
     #[test]

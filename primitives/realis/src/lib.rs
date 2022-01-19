@@ -2,13 +2,13 @@
 
 pub mod constants;
 
+use frame_support::pallet_prelude::TypeInfo;
 use frame_support::pallet_prelude::{Decode, Encode};
 use primitive_types::U256;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_std::fmt::{Display, Formatter};
 use sp_std::vec::Vec;
-use frame_support::pallet_prelude::TypeInfo;
 
 pub type TokenId = U256;
 pub type String = Vec<u8>;

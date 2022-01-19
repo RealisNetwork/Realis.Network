@@ -33,7 +33,7 @@ pallet-staking = { version = "4.0.0-dev", default-features = false, path="../sta
 realis-primitives = { version = "0.0.2", path = "../../primitives/realis", default-features = false}
 
 frame-election-provider-support = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2", default-features = false  }
-pallet-staking-reward-curve = { version = "3.0.0",  path = "../staking-pool/reward-curve" }
+pallet-staking-reward-curve = { version = "4.0.0-dev",  path = "../staking-pool/reward-curve" }
 
 [dev-dependencies]
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
