@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
 primitive-types = { version = "0.10.1", default-features = false }
-serde = { version = "1.0.135", default-features = false }
+serde = { version = "1.0.136", default-features = false }
 scale-info = { version = "1.0", default-features = false, features = ["derive"] }
 impl-trait-for-tuples = "0.2"
 derive_more = "0.99.17"
