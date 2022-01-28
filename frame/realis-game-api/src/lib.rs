@@ -3,8 +3,8 @@
 // 1. Imports and Dependencies
 pub use frame_support::traits::Currency;
 pub use pallet::*;
-use sp_std::prelude::*;
 use pallet_nft_delegate::Pallet as NftDelegate;
+use sp_std::prelude::*;
 
 #[cfg(test)]
 mod mock;
@@ -607,12 +607,7 @@ pub mod pallet {
             NftDelegate::<T>::check_time(delegated_time)?;
             NftDelegate::<T>::can_delegate_nft(token_id)?;
 
-            NftDelegate::<T>::sale_delegate_nft(
-                owner,
-                token_id,
-                delegated_time,
-                price,
-            );
+            NftDelegate::<T>::sale_delegate_nft(owner, token_id, delegated_time, price);
 
             Ok(())
         }

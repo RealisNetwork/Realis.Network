@@ -18,7 +18,6 @@
 
 //! Substrate chain configurations.
 
-use std::str::FromStr;
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
 use node_runtime::{
@@ -41,6 +40,7 @@ use sp_runtime::{
     traits::{IdentifyAccount, Verify},
     Perbill,
 };
+use std::str::FromStr;
 
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::constants::currency::DOLLARS;
@@ -211,7 +211,7 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
         // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
         "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
     ]
-        .into()];
+    .into()];
 
     let endowed_accounts: Vec<AccountId> = vec![
         root_key.clone(),
@@ -724,14 +724,14 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
             .unwrap()
             .into();
 
-    let endowed_accounts =
-        vec![sudo_1.clone(),
-             sudo_2.clone(),
-             sudo_3.clone(),
-             sudo_4.clone(),
-             sudo_5.clone(),
-             realis_game_api::Pallet::<Runtime>::account_id(),
-             pallet_staking::Pallet::<Runtime>::account_id(),
+    let endowed_accounts = vec![
+        sudo_1.clone(),
+        sudo_2.clone(),
+        sudo_3.clone(),
+        sudo_4.clone(),
+        sudo_5.clone(),
+        realis_game_api::Pallet::<Runtime>::account_id(),
+        pallet_staking::Pallet::<Runtime>::account_id(),
     ];
 
     let nft_master = vec![
@@ -739,7 +739,7 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         sudo_2.clone(),
         sudo_3.clone(),
         sudo_4.clone(),
-        sudo_5.clone()
+        sudo_5.clone(),
     ];
 
     let api_master = vec![
@@ -747,7 +747,7 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         sudo_2.clone(),
         sudo_3.clone(),
         sudo_4.clone(),
-        sudo_5.clone()
+        sudo_5.clone(),
     ];
 
     let bridge_master = vec![
@@ -755,14 +755,14 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         sudo_2.clone(),
         sudo_3.clone(),
         sudo_4.clone(),
-        sudo_5.clone()
+        sudo_5.clone(),
     ];
 
     let white_list = vec![
         test_acc_1.clone(),
         test_acc_2.clone(),
         test_acc_3.clone(),
-        test_acc_4.clone()
+        test_acc_4.clone(),
     ];
 
     realis_genesis(
@@ -824,7 +824,7 @@ fn development_config_genesis() -> GenesisConfig {
         sudo_2.clone(),
         sudo_3.clone(),
         sudo_4.clone(),
-        sudo_5.clone()
+        sudo_5.clone(),
     ];
 
     let api_master = vec![
@@ -832,7 +832,7 @@ fn development_config_genesis() -> GenesisConfig {
         sudo_2.clone(),
         sudo_3.clone(),
         sudo_4.clone(),
-        sudo_5.clone()
+        sudo_5.clone(),
     ];
 
     let bridge_master = vec![
@@ -840,14 +840,14 @@ fn development_config_genesis() -> GenesisConfig {
         sudo_2.clone(),
         sudo_3.clone(),
         sudo_4.clone(),
-        sudo_5.clone()
+        sudo_5.clone(),
     ];
 
     let white_list = vec![
         test_acc_1.clone(),
         test_acc_2.clone(),
         test_acc_3.clone(),
-        test_acc_4.clone()
+        test_acc_4.clone(),
     ];
 
     testnet_genesis(

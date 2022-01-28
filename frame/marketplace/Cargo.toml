@@ -15,24 +15,24 @@ serde = { version = "1.0.133", default-features = false }
 serde_json = { version = "1.0.74", default-features = false }
 pallet-staking = { version = "4.0.0-dev",  path="../staking-pool", default-features = false }
 
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", version = "4.0.0-dev", default-features = false, optional = true }
-frame-support = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-frame-system = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-std = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-runtime = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-io = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-core = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-arithmetic = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f" }
-node-primitives = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
+frame-benchmarking = { git = "https://github.com/RealisNetwork/substrate", branch = "master", version = "4.0.0-dev", default-features = false, optional = true }
+frame-support = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
+frame-system = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
+sp-std = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
+sp-runtime = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
+sp-io = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
+sp-core = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
+sp-arithmetic = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
+pallet-balances = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "master" }
+node-primitives = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
 
 realis-primitives = { path = "../../primitives/realis", default-features = false }
 pallet-nft = { version = "0.0.2", path = "../nft", default-features = false }
 #realis-game-api = { path = "../realis-game-api", default-features = false }
 
 [dev-dependencies]
-node-primitives = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
-sp-io = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", default-features = false }
+node-primitives = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
+sp-io = { git = "https://github.com/RealisNetwork/substrate", branch = "master", default-features = false }
 
 
 [features]
