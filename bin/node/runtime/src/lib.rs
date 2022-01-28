@@ -1199,6 +1199,11 @@ parameter_types! {
 }
 
 use frame_election_provider_support::onchain;
+impl onchain::Config for Runtime {
+    type Accuracy = Perbill;
+    type DataProvider = Staking;
+}
+
 impl pallet_staking::Config for Runtime {
     const MAX_NOMINATIONS: u32 = MAX_NOMINATIONS;
     type Currency = Balances;
@@ -1219,9 +1224,7 @@ impl pallet_staking::Config for Runtime {
     type NextNewSession = Session;
     type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
     type ElectionProvider = ElectionProviderMultiPhase;
-    type GenesisElectionProvider = onchain::OnChainSequentialPhragmen<
-        pallet_election_provider_multi_phase::OnChainConfig<Self>,
-    >;
+    type GenesisElectionProvider = onchain::OnChainSequentialPhragmen<Self>;
     type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
 
