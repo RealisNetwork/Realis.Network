@@ -12,7 +12,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 codec = { package = 'parity-scale-codec', version = '2.3.0', default-features = false, features = ['derive'] }
 primitive-types = { version = "0.10.1", default-features = false }
 serde = { version = "1.0.133", default-features = false }
-serde_json = { version = "1.0.74", default-features = false }
+serde_json = { version = "1.0.78", default-features = false }
 pallet-staking = { version = "4.0.0-dev",  path="../staking-pool", default-features = false }
 
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", rev = "e7b93e1b1abcf0865824c68d10850bbb451e295f", version = "4.0.0-dev", default-features = false, optional = true }
