@@ -41,7 +41,7 @@ hex-literal = "0.3.4"
 log = "0.4.8"
 rand = "0.8.4"
 structopt = { version = "0.3.26", optional = true }
-parking_lot = "0.11.2"
+parking_lot = "0.12.0"
 
 # primitives
 sp-authority-discovery = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "master" }
