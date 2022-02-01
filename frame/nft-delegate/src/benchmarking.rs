@@ -1,15 +1,15 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 mod benchmarking {
+    use pallet_nft::Pallet as Nft;
+    use pallet::Pallet as NftDelegate;
     use crate::*;
     use frame_benchmarking::{account, benchmarks};
-    use frame_support::traits::Currency;
     use frame_system::RawOrigin as SystemOrigin;
-    use pallet::Pallet as NftDelegate;
-    use pallet_nft::NftMasters;
-    use pallet_nft::Pallet as Nft;
     use primitive_types::U256;
     use realis_primitives::*;
+    use pallet_nft::NftMasters;
+    use frame_support::traits::Currency;
 
     const ED_MULTIPLIER: u128 = 1_000_000_000_000_000;
 

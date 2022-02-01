@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright (C) 2019-2021 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,31 +17,13 @@
 
 //! Some configurable implementations as associated type for the substrate runtime.
 
-use crate::{AccountId, Assets, Authorship, Balances, NegativeImbalance, Runtime};
-use frame_support::traits::{
-    fungibles::{Balanced, CreditOf},
-    Currency, OnUnbalanced,
-};
-use pallet_asset_tx_payment::HandleCredit;
+use crate::{Authorship, Balances, NegativeImbalance};
+use frame_support::traits::{Currency, OnUnbalanced};
 
 pub struct Author;
 impl OnUnbalanced<NegativeImbalance> for Author {
     fn on_nonzero_unbalanced(amount: NegativeImbalance) {
-        if let Some(author) = Authorship::author() {
-            Balances::resolve_creating(&author, amount);
-        }
-    }
-}
-
-/// A `HandleCredit` implementation that naively transfers the fees to the block author.
-/// Will drop and burn the assets in case the transfer fails.
-pub struct CreditToBlockAuthor;
-impl HandleCredit<AccountId, Assets> for CreditToBlockAuthor {
-    fn handle_credit(credit: CreditOf<AccountId, Assets>) {
-        if let Some(author) = pallet_authorship::Pallet::<Runtime>::author() {
-            // Drop the result which will trigger the `OnDrop` of the imbalance in case of error.
-            let _ = Assets::resolve(&author, credit);
-        }
+        Balances::resolve_creating(&Authorship::author(), amount);
     }
 }
 
@@ -79,11 +61,11 @@ mod multiplier_tests {
     // update based on runtime impl.
     fn runtime_multiplier_update(fm: Multiplier) -> Multiplier {
         TargetedFeeAdjustment::<
-            Runtime,
-            TargetBlockFullness,
-            AdjustmentVariable,
-            MinimumMultiplier,
-        >::convert(fm)
+			Runtime,
+			TargetBlockFullness,
+			AdjustmentVariable,
+			MinimumMultiplier,
+		>::convert(fm)
     }
 
     // update based on reference impl.
@@ -200,6 +182,7 @@ mod multiplier_tests {
     }
 
     #[test]
+    #[ignore]
     fn min_change_per_day() {
         run_with_system_weight(max_normal(), || {
             let mut fm = Multiplier::one();
@@ -347,7 +330,7 @@ mod multiplier_tests {
     fn weight_to_fee_should_not_overflow_on_large_weights() {
         let kb = 1024 as Weight;
         let mb = kb * kb;
-        let max_fm = Multiplier::saturating_from_integer(i128::MAX);
+        let max_fm = Multiplier::saturating_from_integer(i128::max_value());
 
         // check that for all values it can compute, correctly.
         vec![
