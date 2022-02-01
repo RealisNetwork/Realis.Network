@@ -44,11 +44,11 @@ pub mod pallet {
     // https://substrate.dev/docs/en/knowledgebase/runtime/events
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
-    #[pallet::metadata(
-        T::AccountId = "AccountId",
-        TokenBalance = "Balance",
-        RealisTokenId = "T::RealisTokenId"
-    )]
+    // #[pallet::metadata(
+    //     T::AccountId = "AccountId",
+    //     TokenBalance = "Balance",
+    //     RealisTokenId = "T::RealisTokenId"
+    // )]
     pub enum Event<T: Config> {
         NftMinted(T::AccountId, TokenId),
         NftBurned(),
@@ -279,13 +279,14 @@ pub mod pallet {
 
         pub fn transfer_nft(
             dest_account: &T::AccountId,
-            owner: &T::AccountId,
+            _owner: &T::AccountId,
             token_id: TokenId,
         ) -> dispatch::DispatchResult {
-            ensure!(
-                *owner != T::AccountId::default(),
-                Error::<T>::NonExistentToken
-            );
+            //FIXME
+            // ensure!(
+            //     *owner != T::AccountId::default(),
+            //     Error::<T>::NonExistentToken
+            // );
 
             Self::inc_total_for_account(dest_account)?;
             let token = Self::pop(token_id);
