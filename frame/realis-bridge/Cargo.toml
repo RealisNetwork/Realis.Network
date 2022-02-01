@@ -27,6 +27,7 @@ realis-game-api = { version = "0.0.1", path = "../realis-game-api", default-feat
 pallet-balances = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "master" }
 [build-dependencies]
 wasm-builder-runner = { version = '3.0.0', package = 'substrate-wasm-builder-runner' }
+
 [features]
 default = ['std']
 std = [
