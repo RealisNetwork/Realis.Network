@@ -1,0 +1,24 @@
+FROM ubuntu:18.04 as rust
+RUN apt update && apt install curl build-essential libclang-dev clang git -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN . $HOME/.cargo/env && \
+    rustup install nightly && \
+    rustup target add wasm32-unknown-unknown --toolchain nightly
+COPY . .
+RUN . $HOME/.cargo/env && \  
+      cargo build --release
+
+
+FROM ubuntu:18.04
+WORKDIR /realis
+COPY --from=rust ./target/release/realis /realis/realis
+COPY --from=rust ./realis.json /realis/realis.json
+EXPOSE 9945 9934 30334
+
+RUN apt update && apt install ca-certificates -y
+CMD /realis/realis --chain /realis/realis.json --port 30334 --ws-port 9945 --rpc-port 9934 \
+    --validator --rpc-methods=Unsafe --name NodeName \
+    --reserved-nodes /ip4/135.181.18.215/tcp/30333/p2p/12D3KooW9poizzemF6kb6iSbkoJynMhswa4oJe5W9v34eFuRcU47 \
+    --unsafe-ws-external --unsafe-rpc-external --rpc-cors '*' -d /realis/database \ 
+    --telemetry-url 'wss://telemetry.polkadot.io/submit 0'
+
