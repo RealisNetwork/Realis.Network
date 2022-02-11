@@ -154,6 +154,7 @@ std = [
 	"frame-benchmarking/std",
 	"frame-system-rpc-runtime-api/std",
 	"frame-system/std",
+	"frame-election-provider-support/std",
 	"pallet-election-provider-multi-phase/std",
 	"pallet-timestamp/std",
 	#	"pallet-tips/std",
