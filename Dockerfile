@@ -17,7 +17,7 @@ FROM ubuntu:20.04
 RUN apt-get update && apt-get install ca-certificates -y && update-ca-certificates
 
 ENV NODENAME=REALIS-NODE
-ENV RESERVEDNODES=/ip4/135.181.18.215/tcp/30333/p2p/12D3KooW9poizzemF6kb6iSbkoJynMhswa4oJe5W9v34eFuRcU47
+ENV RPCHOST=135.181.18.215
 
 RUN mkdir -p /realis-blockchain/data
 WORKDIR /realis-blockchain
@@ -29,7 +29,7 @@ ENTRYPOINT ["/realis-blockchain/realis", \
             "--ws-port=9944", \
             "--rpc-port=9933", \
             "--validator", \
-            "--reserved-nodes=$RESERVEDNODES", \
+            "--reserved-nodes", "/ip4/${RPCHOST}/tcp/30333/p2p/12D3KooW9poizzemF6kb6iSbkoJynMhswa4oJe5W9v34eFuRcU47", \
             "--rpc-methods=Unsafe", \
             "--name=$NODENAME", \
             "--unsafe-ws-external", \
