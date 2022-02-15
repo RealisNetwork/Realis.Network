@@ -16,11 +16,8 @@ RUN . $HOME/.cargo/env && \
 FROM ubuntu:20.04
 RUN apt-get update && apt-get install ca-certificates -y && update-ca-certificates
 
-ARG NODENAME REALIS-NODE
-ARG RESERVEDNODES /ip4/135.181.18.215/tcp/30333/p2p/12D3KooW9poizzemF6kb6iSbkoJynMhswa4oJe5W9v34eFuRcU47
-
-ENV NODENAME $NODENAME
-ENV RESERVEDNODES $RESERVEDNODES
+ENV NODENAME=REALIS-NODE
+ENV RESERVEDNODES=/ip4/135.181.18.215/tcp/30333/p2p/12D3KooW9poizzemF6kb6iSbkoJynMhswa4oJe5W9v34eFuRcU47
 
 RUN mkdir -p /realis-blockchain/data
 WORKDIR /realis-blockchain
