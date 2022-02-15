@@ -1,4 +1,5 @@
-FROM ubuntu:18.04
+###
+FROM ubuntu:18.04 as builder
 RUN apt update && apt install curl build-essential libclang-dev clang git -y
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
@@ -10,17 +11,31 @@ COPY . .
 RUN . $HOME/.cargo/env && \  
       cargo build --release
 
+###
 
+FROM ubuntu:20.04
+RUN apt-get update && apt-get install ca-certificates -y && update-ca-certificates
 
+ARG NODENAME REALIS-NODE
+ARG RESERVEDNODES /ip4/135.181.18.215/tcp/30333/p2p/12D3KooW9poizzemF6kb6iSbkoJynMhswa4oJe5W9v34eFuRcU47
 
+ENV NODENAME $NODENAME
+ENV RESERVEDNODES $RESERVEDNODES
 
-#ADD /blockchain_soul/ReAlis-Network/target/release/realis /realis/realis0
-#ENTRYPOINT ["bash","entrypoint.prod.sh"]tttt
-#ADD ./realis /realis/realis
-#RUN chmod +x /realis/realis
-#RUN apt-get update
-#RUN apt-get install ca-certificates -y
-#RUN update-ca-certificates
-#ADD ./realis.json /realis/realis.json
-#WORKDIR /realis/chain
-#EXPOSE 9944 9044 9033
+RUN mkdir -p /realis-blockchain/data
+WORKDIR /realis-blockchain
+COPY realis.json /realis-blockchain/realis.json
+COPY --from=builder ./target/release/realis /realis-blockchain/realis
+
+ENTRYPOINT ["/realis-blockchain/realis", \
+            "--chain=/realis-blockchain/realis.json", \
+            "--ws-port=9944", \
+            "--rpc-port=9933", \
+            "--validator", \
+            "--reserved-nodes=$RESERVEDNODES", \
+            "--rpc-methods=Unsafe", \
+            "--name=$NODENAME", \
+            "--unsafe-ws-external", \
+            "--unsafe-rpc-external", \
+            "--rpc-cors='*'", \
+            "--base-path=/realis-blockchain/data"]
