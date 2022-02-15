@@ -29,7 +29,6 @@ ENTRYPOINT ["/realis-blockchain/realis", \
             "--ws-port=9944", \
             "--rpc-port=9933", \
             "--validator", \
-            "--reserved-nodes", "/ip4/${RPCHOST}/tcp/30333/p2p/12D3KooW9poizzemF6kb6iSbkoJynMhswa4oJe5W9v34eFuRcU47", \
             "--rpc-methods=Unsafe", \
             "--name=$NODENAME", \
             "--unsafe-ws-external", \
