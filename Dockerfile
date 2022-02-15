@@ -16,22 +16,28 @@ RUN . $HOME/.cargo/env && \
 FROM ubuntu:20.04
 RUN apt-get update && apt-get install ca-certificates -y && update-ca-certificates
 
-ENV NODENAME=REALIS-NODE
-ENV RPCHOST=135.181.18.215
+ARG NODENAME=REALIS-NODE
+ARG DISCOVERY_HOST=135.181.18.215
+
+ENV NODENAME=$NODENAME
+ENV DISCOVERY_HOST=$DISCOVERY_HOST
+
 
 RUN mkdir -p /realis-blockchain/data
 WORKDIR /realis-blockchain
 COPY realis.json /realis-blockchain/realis.json
 COPY --from=builder ./target/release/realis /realis-blockchain/realis
 
-ENTRYPOINT ["/realis-blockchain/realis", \
-            "--chain=/realis-blockchain/realis.json", \
-            "--ws-port=9944", \
-            "--rpc-port=9933", \
-            "--validator", \
-            "--rpc-methods=Unsafe", \
-            "--name=$NODENAME", \
-            "--unsafe-ws-external", \
-            "--unsafe-rpc-external", \
-            "--rpc-cors='*'", \
-            "--base-path=/realis-blockchain/data"]
+ENTRYPOINT ["/bin/bash", "-c", \
+            "/realis-blockchain/realis \
+            --chain=/realis-blockchain/realis.json \
+            --reserved-nodes /ip4/${DISCOVERY_HOST}/tcp/30333/p2p/12D3KooW9poizzemF6kb6iSbkoJynMhswa4oJe5W9v34eFuRcU47 \
+            --ws-port=9944 \
+            --rpc-port=9933 \
+            --validator \
+            --rpc-methods=Unsafe \
+            --name=${NODENAME} \
+            --unsafe-ws-external \
+            --unsafe-rpc-external \
+            --rpc-cors='*' \
+            --base-path=/realis-blockchain/data"]
