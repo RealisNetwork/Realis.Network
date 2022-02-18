@@ -17,10 +17,10 @@ FROM ubuntu:20.04
 RUN apt-get update && apt-get install ca-certificates -y && update-ca-certificates
 
 ARG NODENAME=REALIS-NODE
-ARG DISCOVERY_HOST=65.21.121.115
+ARG RESERVEDNODES=/ip4/65.21.121.115/tcp/30333/p2p/12D3KooWHdKTMJdPQjofKFnFXYANZE8eheuEq2uQgmqVdNAYXnVa
 
 ENV NODENAME=$NODENAME
-ENV DISCOVERY_HOST=$DISCOVERY_HOST
+ENV RESERVEDNODES=$RESERVEDNODES
 
 
 RUN mkdir -p /realis-blockchain/data
@@ -31,7 +31,7 @@ COPY --from=builder ./target/release/realis /realis-blockchain/realis
 ENTRYPOINT ["/bin/bash", "-c", \
             "/realis-blockchain/realis \
             --chain=/realis-blockchain/realis.json \
-            --reserved-nodes /ip4/${DISCOVERY_HOST}/tcp/30333/p2p/12D3KooW9poizzemF6kb6iSbkoJynMhswa4oJe5W9v34eFuRcU47 \
+            --reserved-nodes ${RESERVEDNODES} \
             --ws-port=9944 \
             --rpc-port=9933 \
             --validator \
