@@ -17,7 +17,7 @@ FROM ubuntu:20.04
 RUN apt-get update && apt-get install ca-certificates -y && update-ca-certificates
 
 ARG NODENAME=REALIS-NODE
-ARG DISCOVERY_HOST=135.181.18.215
+ARG DISCOVERY_HOST=rpc.realis.network
 
 ENV NODENAME=$NODENAME
 ENV DISCOVERY_HOST=$DISCOVERY_HOST
