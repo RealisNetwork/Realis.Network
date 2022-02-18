@@ -21,12 +21,11 @@
 //! Service implementation. Specialized wrapper over substrate service.
 
 use futures::prelude::*;
-use node_executor::ExecutorDispatch;
+use node_executor::Executor;
 use node_primitives::Block;
 use node_runtime::RuntimeApi;
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use sc_consensus_babe::{self, SlotProportion};
-use sc_executor::NativeElseWasmExecutor;
 use sc_network::{Event, NetworkService};
 use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandlers, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
@@ -34,13 +33,13 @@ use sp_runtime::traits::Block as BlockT;
 use std::sync::Arc;
 
 type FullClient =
-    sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
+    sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 type FullGrandpaBlockImport =
     grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>;
 type LightClient =
-    sc_service::TLightClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
+    sc_service::TLightClient<Block, RuntimeApi, Executor>;
 
 pub fn new_partial(
     config: &Configuration,
@@ -78,17 +77,17 @@ pub fn new_partial(
         })
         .transpose()?;
 
-    let executor = NativeElseWasmExecutor::<ExecutorDispatch>::new(
-        config.wasm_method,
-        config.default_heap_pages,
-        config.max_runtime_instances,
-    );
+    // let executor = NativeElseWasmExecutor::<Executor>::new(
+    //     config.wasm_method,
+    //     config.default_heap_pages,
+    //     config.max_runtime_instances,
+    // );
 
     let (client, backend, keystore_container, task_manager) =
-        sc_service::new_full_parts::<Block, RuntimeApi, _>(
+        sc_service::new_full_parts::<Block, RuntimeApi, Executor>(
             &config,
             telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
-            executor,
+            // executor,
         )?;
     let client = Arc::new(client);
 
@@ -473,17 +472,17 @@ pub fn new_light_base(
         })
         .transpose()?;
 
-    let executor = NativeElseWasmExecutor::<ExecutorDispatch>::new(
-        config.wasm_method,
-        config.default_heap_pages,
-        config.max_runtime_instances,
-    );
+    // let executor = NativeElseWasmExecutor::<Executor>::new(
+    //     config.wasm_method,
+    //     config.default_heap_pages,
+    //     config.max_runtime_instances,
+    // );
 
     let (client, backend, keystore_container, mut task_manager, on_demand) =
         sc_service::new_light_parts::<Block, RuntimeApi, _>(
             &config,
             telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
-            executor,
+            // executor,
         )?;
 
     let mut telemetry = telemetry.map(|(worker, telemetry)| {

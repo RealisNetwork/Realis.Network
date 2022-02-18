@@ -2,6 +2,7 @@ use hex_literal::hex;
 use sc_service::ChainType;
 use sp_core::crypto::UncheckedInto;
 use std::str::FromStr;
+use cumulus_primitives_core::ParaId;
 
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::pallet_staking;
@@ -144,6 +145,8 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         test_acc_4.clone(),
     ];
 
+    let para_id = ParaId::new(2000);
+
     realis_genesis(
         initial_authorities,
         vec![],
@@ -153,5 +156,6 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         white_list,
         bridge_master,
         Some(endowed_accounts),
+        para_id,
     )
 }

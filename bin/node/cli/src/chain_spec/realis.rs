@@ -1,12 +1,13 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
+use cumulus_primitives_core::ParaId;
 use hex_literal::hex;
 use node_runtime::{
     wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
-    BalancesConfig, /*CouncilConfig,*/
-    /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
+    BalancesConfig, CouncilConfig,
+    DemocracyConfig, /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
     NftConfig, RealisBridgeConfig, RealisGameApiConfig, SessionConfig,
     /*SocietyConfig,*/ StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-    /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
+    TechnicalCommitteeConfig, MAX_NOMINATIONS,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
@@ -45,6 +46,7 @@ pub fn realis_genesis(
     white_list: Vec<AccountId>,
     bridge_master: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
+    id: ParaId,
 ) -> GenesisConfig {
     let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
         vec![
@@ -94,7 +96,7 @@ pub fn realis_genesis(
             )
         }))
         .collect::<Vec<_>>();
-    let _num_endowed_accounts = endowed_accounts.len();
+    let num_endowed_accounts = endowed_accounts.len();
 
     const ENDOWMENT: Balance = 900_000 * DOLLARS / 12 * 100;
     const GAME_WALLET: Balance = 10_000_000 * DOLLARS / 10;
@@ -145,7 +147,7 @@ pub fn realis_genesis(
             stakers,
             ..Default::default()
         },
-        // democracy: DemocracyConfig::default(),
+        democracy: DemocracyConfig::default(),
         // elections: ElectionsConfig {
         //     members: endowed_accounts
         //         .iter()
@@ -154,15 +156,15 @@ pub fn realis_genesis(
         //         .map(|member| (member, STASH))
         //         .collect(),
         // },
-        // council: CouncilConfig::default(),
-        // technical_committee: TechnicalCommitteeConfig {
-        //     members: endowed_accounts
-        //         .iter()
-        //         .take((num_endowed_accounts + 1) / 2)
-        //         .cloned()
-        //         .collect(),
-        //     phantom: Default::default(),
-        // },
+        council: CouncilConfig::default(),
+        technical_committee: TechnicalCommitteeConfig {
+            members: endowed_accounts
+                .iter()
+                .take((num_endowed_accounts + 1) / 2)
+                .cloned()
+                .collect(),
+            phantom: Default::default(),
+        },
         sudo: SudoConfig { key: root_key },
         babe: BabeConfig {
             authorities: vec![],
@@ -173,8 +175,10 @@ pub fn realis_genesis(
         grandpa: GrandpaConfig {
             authorities: vec![],
         },
-        // technical_membership: Default::default(),
-        // treasury: Default::default(),
+        parachain_system: Default::default(),
+        parachain_info: parachain_runtime::ParachainInfoConfig { parachain_id: id },
+        technical_membership: Default::default(),
+        treasury: Default::default(),
         // society: SocietyConfig {
         //     members: endowed_accounts
         //         .iter()

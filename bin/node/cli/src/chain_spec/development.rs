@@ -2,6 +2,7 @@ use hex_literal::hex;
 use sc_service::ChainType;
 use sp_core::sr25519;
 use std::str::FromStr;
+use cumulus_primitives_core::ParaId;
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::{Block, GenesisConfig};
 use sc_telemetry::serde_json::Map;
@@ -97,6 +98,8 @@ fn development_config_genesis() -> GenesisConfig {
         test_acc_4.clone(),
     ];
 
+    let para_id = ParaId::new(2000);
+
     testnet_genesis(
         vec![authority_keys_from_seed("Alice")],
         vec![],
@@ -106,5 +109,6 @@ fn development_config_genesis() -> GenesisConfig {
         white_list,
         bridge_master,
         None,
+        para_id,
     )
 }

@@ -24,6 +24,7 @@ pub mod development;
 pub mod realis_testnet;
 pub mod realis;
 
+use cumulus_primitives_core::ParaId;
 pub use testnet::testnet_genesis;
 pub use local_testnet::local_testnet_config;
 pub use development::development_config;
@@ -229,6 +230,7 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
         white_list,
         bridge_master,
         Some(endowed_accounts),
+        ParaId::new(2000),
     )
 }
 

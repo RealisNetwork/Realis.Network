@@ -8,11 +8,11 @@ codec = { package = "parity-scale-codec", version = "2.0.1", default-features = 
 serde = { version = "1.0.133", default-features = false }
 primitive-types = { version = "0.10.1", default-features = false }
 derive_more = "0.99.17"
-sp-runtime = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9", default-features = false}
-frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9", default-features = false }
-frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9", default-features = false }
-sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9", default-features = false }
-sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9", default-features = false }
+sp-runtime = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", branch = "apopiak/polkadot-v0.9.9-compilation-fix", default-features = false}
+frame-support = { git = "https://github.com/paritytech/substrate", branch = "apopiak/polkadot-v0.9.9-compilation-fix", default-features = false }
+frame-system = { git = "https://github.com/paritytech/substrate", branch = "apopiak/polkadot-v0.9.9-compilation-fix", default-features = false }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "apopiak/polkadot-v0.9.9-compilation-fix", default-features = false }
+sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", branch = "apopiak/polkadot-v0.9.9-compilation-fix", default-features = false }
 impl-trait-for-tuples = "0.2"
 serde_repr = "0.1.7"
 

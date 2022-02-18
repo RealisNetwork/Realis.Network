@@ -1,11 +1,13 @@
+use cumulus_primitives_core::ParaId;
 use grandpa_primitives::AuthorityId as GrandpaId;
 use node_runtime::{
     wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
-    BalancesConfig, /*CouncilConfig,*/
-    /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
+    BalancesConfig, Block, CouncilConfig,
+    DemocracyConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig,
     NftConfig, RealisBridgeConfig, RealisGameApiConfig, SessionConfig,
-    /*SocietyConfig,*/ StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-    /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
+    StakerStatus, StakingConfig, SudoConfig, SystemConfig,
+    TechnicalCommitteeConfig, MAX_NOMINATIONS,
+    pallet_staking, realis_game_api, Runtime
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
@@ -14,10 +16,7 @@ use sp_core::sr25519;
 use sp_runtime::Perbill;
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::constants::currency::DOLLARS;
-use node_runtime::pallet_staking;
-use node_runtime::realis_game_api;
-use node_runtime::Runtime;
-pub use node_runtime::{Block, GenesisConfig};
+pub use node_runtime::GenesisConfig;
 use crate::chain_spec::{session_keys, get_account_id_from_seed};
 
 /// Helper function to create GenesisConfig for testing
@@ -37,6 +36,7 @@ pub fn testnet_genesis(
     white_list: Vec<AccountId>,
     bridge_master: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
+    id: ParaId,
 ) -> GenesisConfig {
     let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
         vec![
@@ -91,7 +91,7 @@ pub fn testnet_genesis(
         }))
         .collect::<Vec<_>>();
 
-    let _num_endowed_accounts = endowed_accounts.len();
+    let num_endowed_accounts = endowed_accounts.len();
 
     const ENDOWMENT: Balance = 30_000 * DOLLARS / 10;
     const GAME_WALLET: Balance = 10_000_000 * DOLLARS / 10;
@@ -142,7 +142,7 @@ pub fn testnet_genesis(
             stakers,
             ..Default::default()
         },
-        // democracy: DemocracyConfig::default(),
+        democracy: DemocracyConfig::default(),
         // elections: ElectionsConfig {
         //     members: endowed_accounts
         //         .iter()
@@ -151,15 +151,15 @@ pub fn testnet_genesis(
         //         .map(|member| (member, STASH))
         //         .collect(),
         // },
-        // council: CouncilConfig::default(),
-        // technical_committee: TechnicalCommitteeConfig {
-        //     members: endowed_accounts
-        //         .iter()
-        //         .take((num_endowed_accounts + 1) / 2)
-        //         .cloned()
-        //         .collect(),
-        //     phantom: Default::default(),
-        // },
+        council: CouncilConfig::default(),
+        technical_committee: TechnicalCommitteeConfig {
+            members: endowed_accounts
+                .iter()
+                .take((num_endowed_accounts + 1) / 2)
+                .cloned()
+                .collect(),
+            phantom: Default::default(),
+        },
         sudo: SudoConfig { key: root_key },
         babe: BabeConfig {
             authorities: vec![],
@@ -170,8 +170,10 @@ pub fn testnet_genesis(
         grandpa: GrandpaConfig {
             authorities: vec![],
         },
-        // technical_membership: Default::default(),
-        // treasury: Default::default(),
+        parachain_info: parachain_runtime::ParachainInfoConfig { parachain_id: id },
+        parachain_system: Default::default(),
+        technical_membership: Default::default(),
+        treasury: Default::default(),
         // society: SocietyConfig {
         //     members: endowed_accounts
         //         .iter()

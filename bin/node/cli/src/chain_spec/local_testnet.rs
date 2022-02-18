@@ -1,3 +1,4 @@
+use cumulus_primitives_core::ParaId;
 use sc_service::ChainType;
 use sp_core::sr25519;
 use crate::chain_spec::ChainSpec;
@@ -22,17 +23,17 @@ pub fn local_testnet_config() -> ChainSpec {
 }
 
 fn local_testnet_genesis() -> GenesisConfig {
-    testnet_genesis(
-        vec![
-            authority_keys_from_seed("Alice"),
-            authority_keys_from_seed("Bob"),
-        ],
-        vec![],
-        get_account_id_from_seed::<sr25519::Public>("Alice"),
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-        None,
+    testnet_genesis(vec![
+        authority_keys_from_seed("Alice"),
+        authority_keys_from_seed("Bob"),
+    ],
+                    vec![],
+                    get_account_id_from_seed::<sr25519::Public>("Alice"),
+                    vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+                    vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+                    vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+                    vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+                    None,
+                    ParaId::new(2000),
     )
 }
