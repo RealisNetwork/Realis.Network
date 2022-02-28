@@ -39,7 +39,7 @@ serde = { version = "1.0.133", features = ["derive"] }
 futures = { version = "0.3.21", features = ["compat"] }
 hex-literal = "0.3.4"
 log = "0.4.8"
-rand = "0.8.4"
+rand = "0.8.5"
 structopt = { version = "0.3.26", optional = true }
 parking_lot = "0.12.0"
 

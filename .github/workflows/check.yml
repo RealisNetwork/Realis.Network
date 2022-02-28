@@ -3,8 +3,8 @@ name: Check Set-Up & Build
 # Controls when the action will run. 
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [ ngubin, main, develop, bridges, dkireev ]
+  # push:
+  #  branches: [ ngubin, main, develop, bridges, dkireev ]
   pull_request:
     branches: [ ngubin, main, develop, bridges, dkireev ]
 
