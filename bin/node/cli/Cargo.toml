@@ -36,7 +36,7 @@ crate-type = ["cdylib", "rlib"]
 # third-party dependencies
 codec = { package = "parity-scale-codec", version = "2.0.0" }
 serde = { version = "1.0.133", features = ["derive"] }
-futures = { version = "0.3.19", features = ["compat"] }
+futures = { version = "0.3.21", features = ["compat"] }
 hex-literal = "0.3.4"
 log = "0.4.8"
 rand = "0.8.5"
@@ -115,7 +115,7 @@ sc-consensus = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork
 sc-consensus-babe = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "master" }
 sc-consensus-epochs = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "master" }
 sc-service-test = { version = "2.0.0", git = "https://github.com/RealisNetwork/substrate", branch = "master" }
-futures = "0.3.19"
+futures = "0.3.21"
 tempfile = "3.1.0"
 assert_cmd = "2.0"
 nix = "0.23"
