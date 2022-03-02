@@ -39,9 +39,9 @@ spec:
                 withCredentials([string(credentialsId: 'dockerhub-token', variable: 'dockerhub')]) {
                    sh '''
                       env
-                      docker build . -t realisnetwrok/blockchain:test3
+                      docker build . -t realisnetwrok/blockchain:${GIT_COMMIT}
                       echo $dockerhub | docker login -u realisnetwrok --password-stdin
-                      docker push realisnetwrok/blockchain:test3
+                      docker push realisnetwrok/blockchain:${GIT_COMMIT}
                      '''
                 }   
               }    
