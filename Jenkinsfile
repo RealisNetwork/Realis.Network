@@ -37,21 +37,14 @@ spec:
                 git branch: 'stable', credentialsId: 'github-token', 
                     url: 'https://github.com/RealisNetwork/Realis.Network.git'
                 withCredentials([string(credentialsId: 'dockerhub-token', variable: 'dockerhub')]) {
-                   sh 'docker build . -t realisnetwrok/blockchain:${GIT_COMMIT}'
+                   sh '''
+                       docker build . -t realisnetwrok/blockchain:${GIT_COMMIT}
+                       echo $dockerhub | docker login -u realisnetwrok --password-stdin
+                       docker push realisnetwrok/blockchain:${GIT_COMMIT}
+                      '''
                 }
-              }
-            }
-        }
-        stage('PUSH IMAGE') {
-            steps {
-              script {
-                sh '''
-                   echo $dockerhub | docker login -u realisnetwrok --password-stdin
-                   docker push realisnetwrok/blockchain:${GIT_COMMIT}
-                   '''
               }
             }
         }
     }
 }
-
