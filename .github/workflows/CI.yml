@@ -1,0 +1,59 @@
+name: CI
+on:
+#  push:
+#    branches:
+#      - ngubin
+#      - main
+#      - develop
+#      - bridges
+#      - dkireev
+  pull_request:
+    branches:
+      - ngubin
+      - main
+      - develop
+      - bridges
+      - dkireev
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2021-05-11
+          override: true
+          target: wasm32-unknown-unknown
+
+      - name: Overall test
+        run: cargo test
+
+  dvm-rpc-test:
+    name: Run DVM RPC Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2021-03-01
+          override: true
+          target: wasm32-unknown-unknown
+
+      - name: Build and Run node
+        run: |
+          cargo build
+          ./target/debug/drml --dev --tmp &
+          sleep 60
+      - name: Set up node env
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10

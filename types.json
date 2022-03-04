@@ -1,0 +1,40 @@
+{
+  "Rarity": {
+    "_enum": {
+      "Common": 1,
+      "Uncommon": 2,
+      "Rare": 3,
+      "Epic": 4,
+      "Legendary": 5,
+      "Relic": 6
+    }
+  },
+  "Basic": "u8",
+  "TokenId": "U256",
+  "Stackable": {
+    "_enum": [
+      "Silver",
+      "Gold",
+      "Diamond"
+    ]
+  },
+  "TokenType": {
+    "_enum": {
+      "Basic": "(Basic, Rarity)"
+    }
+  },
+  "Token": {
+    "token_id": "TokenId",
+    "token": "TokenType"
+ },
+ "String": "Vec<u8>",
+   "Status": {
+    "_enum": [
+      "OnSell",
+      "OnDelegateSell",
+      "InDelegation",
+      "Free"
+    ]
+  }
+}
+
