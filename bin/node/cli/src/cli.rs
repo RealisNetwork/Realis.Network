@@ -17,7 +17,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 use sc_cli::{KeySubcommand, RunCmd, SignCmd, VanityCmd, VerifyCmd};
-use structopt::StructOpt;
+use sc_cli::structopt::StructOpt;
 
 /// An overarching CLI command definition.
 #[derive(Debug, StructOpt)]
@@ -38,8 +38,8 @@ pub enum Subcommand {
 
     /// The custom inspect subcommmand for decoding blocks and extrinsics.
     #[structopt(
-        name = "inspect",
-        about = "Decode given block or extrinsic using current native runtime."
+    name = "inspect",
+    about = "Decode given block or extrinsic using current native runtime."
     )]
     Inspect(node_inspect::cli::InspectCmd),
 

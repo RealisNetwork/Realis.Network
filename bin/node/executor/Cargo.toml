@@ -36,7 +36,7 @@ pallet-timestamp = { version = "4.0.0-dev", git = "https://github.com/paritytech
 pallet-treasury = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2"}
 sp-application-crypto = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 sp-consensus-babe = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
-sp-runtime = { version = "4.0.0", git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
+sp-runtime = { version = "4.1.0", git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 sp-externalities = { version = "0.10.0", git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 sp-keyring = { version = "4.1.0-dev", git = "https://github.com/paritytech/substrate", rev = "7e87c08b71ce2247b504fb2ea7d1f979f98705a2" }
 wat = "1.0"

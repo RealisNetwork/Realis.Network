@@ -17,14 +17,14 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{chain_spec, service, service::new_partial, Cli, Subcommand};
-use node_executor::ExecutorDispatch;
+use node_executor::Executor;
 use node_runtime::{Block, RuntimeApi};
 use sc_cli::{ChainSpec, Result, Role, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
-        "Realis Node".into()
+        "Substrate Node".into()
     }
 
     fn impl_version() -> String {
@@ -44,26 +44,22 @@ impl SubstrateCli for Cli {
     }
 
     fn copyright_start_year() -> i32 {
-        2021
+        2017
     }
 
     fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
         let spec = match id {
-            "" => {
+            "" =>
                 return Err(
                     "Please specify which chain you want to run, e.g. --dev or --chain=local"
                         .into(),
-                )
-            }
+                ),
             "dev" => Box::new(chain_spec::development_config()),
             "local" => Box::new(chain_spec::local_testnet_config()),
-            "realis" => Box::new(chain_spec::realis_config()?),
-            "realis2" => Box::new(chain_spec::realis_testnet_config()),
             "fir" | "flaming-fir" => Box::new(chain_spec::flaming_fir_config()?),
             "staging" => Box::new(chain_spec::staging_testnet_config()),
-            path => Box::new(chain_spec::ChainSpec::from_json_file(
-                std::path::PathBuf::from(path),
-            )?),
+            path =>
+                Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
         };
         Ok(spec)
     }
@@ -85,25 +81,24 @@ pub fn run() -> Result<()> {
                     Role::Light => service::new_light(config),
                     _ => service::new_full(config),
                 }
-                .map_err(sc_cli::Error::Service)
+                    .map_err(sc_cli::Error::Service)
             })
-        }
+        },
         Some(Subcommand::Inspect(cmd)) => {
             let runner = cli.create_runner(cmd)?;
 
-            runner.sync_run(|config| cmd.run::<Block, RuntimeApi, ExecutorDispatch>(config))
-        }
-        Some(Subcommand::Benchmark(cmd)) => {
+            runner.sync_run(|config| cmd.run::<Block, RuntimeApi, Executor>(config))
+        },
+        Some(Subcommand::Benchmark(cmd)) =>
             if cfg!(feature = "runtime-benchmarks") {
                 let runner = cli.create_runner(cmd)?;
 
-                runner.sync_run(|config| cmd.run::<Block, ExecutorDispatch>(config))
+                runner.sync_run(|config| cmd.run::<Block, Executor>(config))
             } else {
                 Err("Benchmarking wasn't enabled when building the node. \
 				You can enable it with `--features runtime-benchmarks`."
                     .into())
-            }
-        }
+            },
         Some(Subcommand::Key(cmd)) => cmd.run(&cli),
         Some(Subcommand::Sign(cmd)) => cmd.run(),
         Some(Subcommand::Verify(cmd)) => cmd.run(),
@@ -111,69 +106,48 @@ pub fn run() -> Result<()> {
         Some(Subcommand::BuildSpec(cmd)) => {
             let runner = cli.create_runner(cmd)?;
             runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
-        }
+        },
         Some(Subcommand::CheckBlock(cmd)) => {
             let runner = cli.create_runner(cmd)?;
             runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    import_queue,
-                    ..
-                } = new_partial(&config)?;
+                let PartialComponents { client, task_manager, import_queue, .. } =
+                    new_partial(&config)?;
                 Ok((cmd.run(client, import_queue), task_manager))
             })
-        }
+        },
         Some(Subcommand::ExportBlocks(cmd)) => {
             let runner = cli.create_runner(cmd)?;
             runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    ..
-                } = new_partial(&config)?;
+                let PartialComponents { client, task_manager, .. } = new_partial(&config)?;
                 Ok((cmd.run(client, config.database), task_manager))
             })
-        }
+        },
         Some(Subcommand::ExportState(cmd)) => {
             let runner = cli.create_runner(cmd)?;
             runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    ..
-                } = new_partial(&config)?;
+                let PartialComponents { client, task_manager, .. } = new_partial(&config)?;
                 Ok((cmd.run(client, config.chain_spec), task_manager))
             })
-        }
+        },
         Some(Subcommand::ImportBlocks(cmd)) => {
             let runner = cli.create_runner(cmd)?;
             runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    import_queue,
-                    ..
-                } = new_partial(&config)?;
+                let PartialComponents { client, task_manager, import_queue, .. } =
+                    new_partial(&config)?;
                 Ok((cmd.run(client, import_queue), task_manager))
             })
-        }
+        },
         Some(Subcommand::PurgeChain(cmd)) => {
             let runner = cli.create_runner(cmd)?;
             runner.sync_run(|config| cmd.run(config.database))
-        }
+        },
         Some(Subcommand::Revert(cmd)) => {
             let runner = cli.create_runner(cmd)?;
             runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    backend,
-                    ..
-                } = new_partial(&config)?;
+                let PartialComponents { client, task_manager, backend, .. } = new_partial(&config)?;
                 Ok((cmd.run(client, backend), task_manager))
             })
-        }
+        },
         #[cfg(feature = "try-runtime")]
         Some(Subcommand::TryRuntime(cmd)) => {
             let runner = cli.create_runner(cmd)?;
@@ -185,9 +159,9 @@ pub fn run() -> Result<()> {
                     sc_service::TaskManager::new(config.task_executor.clone(), registry)
                         .map_err(|e| sc_cli::Error::Service(sc_service::Error::Prometheus(e)))?;
 
-                Ok((cmd.run::<Block, ExecutorDispatch>(config), task_manager))
+                Ok((cmd.run::<Block, Executor>(config), task_manager))
             })
-        }
+        },
         #[cfg(not(feature = "try-runtime"))]
         Some(Subcommand::TryRuntime) => Err("TryRuntime wasn't enabled when building the node. \
 				You can enable it with `--features try-runtime`."

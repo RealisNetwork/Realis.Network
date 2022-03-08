@@ -484,7 +484,7 @@ impl<T: Config> Pallet<T> {
         start_session_index: SessionIndex,
         is_genesis: bool,
     ) -> Option<Vec<T::AccountId>> {
-        let election_result = if is_genesis {
+        let (election_result, _) = if is_genesis {
             T::GenesisElectionProvider::elect().map_err(|e| {
                 log!(warn, "genesis election provider failed due to {:?}", e);
                 Self::deposit_event(Event::StakingElectionFailed);
@@ -858,43 +858,43 @@ impl<T: Config> frame_election_provider_support::ElectionDataProvider<T::Account
     for Pallet<T>
 {
     const MAXIMUM_VOTES_PER_VOTER: u32 = T::MAX_NOMINATIONS;
-    fn desired_targets() -> data_provider::Result<u32> {
-        Self::register_weight(T::DbWeight::get().reads(1));
-        Ok(Self::validator_count())
+    fn desired_targets() -> data_provider::Result<(u32, Weight)> {
+        Ok((Self::validator_count(), <T as frame_system::Config>::DbWeight::get().reads(1)))
     }
 
     fn voters(
         maybe_max_len: Option<usize>,
-    ) -> data_provider::Result<Vec<(T::AccountId, VoteWeight, Vec<T::AccountId>)>> {
+    ) -> data_provider::Result<(Vec<(T::AccountId, VoteWeight, Vec<T::AccountId>)>, Weight)> {
         let nominator_count = CounterForNominators::<T>::get();
         let validator_count = CounterForValidators::<T>::get();
-
         let voter_count = nominator_count.saturating_add(validator_count) as usize;
         debug_assert!(<Nominators<T>>::iter().count() as u32 == CounterForNominators::<T>::get());
         debug_assert!(<Validators<T>>::iter().count() as u32 == CounterForValidators::<T>::get());
 
-        // register the extra 2 reads
-        Self::register_weight(T::DbWeight::get().reads(2));
-
         if maybe_max_len.map_or(false, |max_len| voter_count > max_len) {
-            return Err("Voter snapshot too big");
+            return Err("Voter snapshot too big")
         }
 
-        Ok(Self::get_npos_voters())
+        let slashing_span_count = <SlashingSpans<T>>::iter().count();
+        let weight = T::WeightInfo::get_npos_voters(
+            nominator_count,
+            validator_count,
+            slashing_span_count as u32,
+        );
+        Ok((Self::get_npos_voters(), weight))
     }
 
-    fn targets(maybe_max_len: Option<usize>) -> data_provider::Result<Vec<T::AccountId>> {
+    fn targets(maybe_max_len: Option<usize>) -> data_provider::Result<(Vec<T::AccountId>, Weight)> {
         let target_count = CounterForValidators::<T>::get() as usize;
 
-        // register the extra 1 read
-        Self::register_weight(T::DbWeight::get().reads(1));
-
         if maybe_max_len.map_or(false, |max_len| target_count > max_len) {
-            return Err("Target snapshot too big");
+            return Err("Target snapshot too big")
         }
 
-        Ok(Self::get_npos_targets())
+        let weight = <T as frame_system::Config>::DbWeight::get().reads(target_count as u64);
+        Ok((Self::get_npos_targets(), weight))
     }
+
 
     fn next_election_prediction(now: T::BlockNumber) -> T::BlockNumber {
         let current_era = Self::current_era().unwrap_or(0);
