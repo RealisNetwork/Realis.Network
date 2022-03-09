@@ -34,15 +34,15 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 # third-party dependencies
-structopt = { version = "0.3.8" }
 codec = { package = "parity-scale-codec", version = "2.0.0" }
 serde = { version = "1.0.133", features = ["derive"] }
 futures = { version = "0.3.21", features = ["compat"] }
 hex-literal = "0.3.4"
 log = "0.4.8"
 rand = "0.8.5"
+structopt = { version = "0.3.8", optional = true }
+parking_lot = "0.12.0"
 getrandom = { version = "0.2.5", features = ["js"] }
-#parking_lot = "0.12.0"
 
 # primitives
 sp-authority-discovery = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
@@ -55,6 +55,7 @@ sp-authorship = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork
 sp-inherents = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-keyring = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-keystore = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
+sp-io = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-consensus = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-transaction-pool = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-transaction-storage-proof = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
@@ -70,11 +71,14 @@ sc-consensus-slots = { version = "0.10.0-dev", git = "https://github.com/RealisN
 sc-consensus-babe = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sc-consensus-uncles = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 grandpa = { version = "0.10.0-dev", package = "sc-finality-grandpa", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9"}
+
+
 sc-rpc = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sc-basic-authorship = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sc-service = { version = "0.10.0-dev", default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
+
 sc-telemetry = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
-sc-executor = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
+#sc-executor = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sc-authority-discovery = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sc-sync-state-rpc = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 
@@ -91,7 +95,7 @@ node-primitives = { version = "2.0.0", git = "https://github.com/RealisNetwork/s
 node-executor = { version = "3.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 
 # CLI-specific dependencies
-sc-cli = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
+sc-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 frame-benchmarking-cli = { version = "4.0.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 node-inspect = { version = "0.9.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 try-runtime-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
@@ -127,13 +131,13 @@ async-std = { version = "1.6.5", features = ["attributes"] }
 soketto = "0.7.1"
 
 [build-dependencies]
+structopt = { version = "0.3.8", optional = true }
 node-inspect = { version = "0.9.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 frame-benchmarking-cli = { version = "4.0.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 substrate-build-script-utils = { version = "3.0.0", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 substrate-frame-cli = { version = "4.0.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 try-runtime-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
-sc-cli = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
-structopt = { version = "0.3.8", optional = true }
+sc-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 
 [features]
 default = [ "cli" ]
@@ -147,6 +151,7 @@ cli = [
 	"structopt",
 	"substrate-build-script-utils",
 	"try-runtime-cli",
+	"node-runtime/std",
 ]
 runtime-benchmarks = [
 	"node-runtime/runtime-benchmarks",
