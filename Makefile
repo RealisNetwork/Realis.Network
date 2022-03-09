@@ -16,7 +16,7 @@ run:
 
 .PHONY: build
 build:
-	SKIP_WASM_BUILD=1 cargo build --release
+	cargo build --release
 
 .PHONY: clean
 clean:

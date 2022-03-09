@@ -15,10 +15,9 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 # third-party dependencies
 codec = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ["derive", "max-encoded-len"] }
+log = { version = "0.4.14", default-features = false }
 static_assertions = "1.1.0"
 hex-literal = { version = "0.3.4", optional = true }
-log = { version = "0.4.14", default-features = false }
-primitive-types = { version = "0.10.1", default-features = false }
 getrandom = { version = "0.2.5", features = ["js"] }
 
 # primitives
@@ -34,9 +33,9 @@ sp-api = { default-features = false, git = "https://github.com/RealisNetwork/sub
 sp-io = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-runtime = {default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-staking = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
-sp-keyring = { optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
+#sp-keyring = { optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-session = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
-sp-transaction-pool = {default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
+sp-transaction-pool = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-version = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-npos-elections = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 
@@ -49,6 +48,8 @@ frame-system-benchmarking = { default-features = false, git = "https://github.co
 frame-election-provider-support = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 frame-system-rpc-runtime-api = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 frame-try-runtime = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", optional = true }
+
+# pallet dependencies
 pallet-assets = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 pallet-authority-discovery = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 pallet-authorship = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
@@ -90,7 +91,7 @@ pallet-transaction-payment-rpc-runtime-api = { default-features = false, git = "
 pallet-vesting = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 
 pallet-staking = { version = "4.0.0-dev", default-features = false, path = "../../../frame/staking-pool" }
-pallet-staking-reward-curve = { version = "3.0.0", default-features = false,  path = "../../../frame/staking-pool/reward-curve" }
+pallet-staking-reward-curve = { version = "3.0.0", path = "../../../frame/staking-pool/reward-curve" }
 pallet-nft = { version = "0.0.2", default-features = false, path = "../../../frame/nft" }
 pallet-nft-delegate = { version = "0.0.1", default-features = false, path = "../../../frame/nft-delegate" }
 realis-game-api = { version = "0.0.1", default-features = false, path = "../../../frame/realis-game-api" }
@@ -102,83 +103,88 @@ marketplace = { version = "0.0.1", default-features = false, path = "../../../fr
 substrate-wasm-builder = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9"}
 
 [dev-dependencies]
-sp-io = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
+sp-io = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 
 [features]
 default = ["std"]
 with-tracing = [ "frame-executive/with-tracing" ]
 std = [
-#	"pallet-offences-benchmarking/std",
-	"sp-authority-discovery/std",
-	"pallet-assets/std",
-	"pallet-authority-discovery/std",
-	"pallet-authorship/std",
-	"sp-consensus-babe/std",
-	"pallet-babe/std",
-	"pallet-balances/std",
-#	"pallet-bounties/std",
-	"sp-block-builder/std",
-	"frame-election-provider-support/std",
 	"codec/std",
-#	"pallet-collective/std",
-	"pallet-contracts/std",
-	"pallet-contracts-primitives/std",
-	"pallet-contracts-rpc-runtime-api/std",
-#	"pallet-democracy/std",
-#	"pallet-elections-phragmen/std",
-	"frame-executive/std",
-	"pallet-gilt/std",
-	"pallet-grandpa/std",
-	"pallet-im-online/std",
-	"pallet-indices/std",
+	"log/std",
+
+	"sp-authority-discovery/std",
+	"sp-consensus-babe/std",
+	"sp-block-builder/std",
 	"sp-inherents/std",
-	"pallet-lottery/std",
-#	"pallet-membership/std",
-	"pallet-mmr/std",
-	"pallet-multisig/std",
-	"pallet-identity/std",
-	"pallet-scheduler/std",
 	"node-primitives/std",
 	"sp-offchain/std",
-	"pallet-offences/std",
-#	"pallet-proxy/std",
 	"sp-core/std",
-	"pallet-randomness-collective-flip/std",
 	"sp-std/std",
-	"pallet-session/std",
 	"sp-api/std",
 	"sp-io/std",
 	"sp-runtime/std",
 	"sp-staking/std",
-	"sp-keyring",
+	#	"sp-keyring",
 	"sp-session/std",
-	"pallet-sudo/std",
+	"sp-transaction-pool/std",
+	"sp-version/std",
+	"sp-npos-elections/std",
+
+	"frame-executive/std",
+	#	"frame-benchmarking/std",
 	"frame-support/std",
-	"frame-benchmarking/std",
-	"frame-system-rpc-runtime-api/std",
 	"frame-system/std",
+	#	"frame-system-benchmarking/std",
+	"frame-election-provider-support/std",
+	"frame-system-rpc-runtime-api/std",
+	"frame-try-runtime/std",
+
+	"pallet-assets/std",
+	"pallet-authority-discovery/std",
+	"pallet-authorship/std",
+	"pallet-babe/std",
+	"pallet-balances/std",
+	#	"pallet-bounties/std",
+	#	"pallet-collective/std",
+	"pallet-contracts/std",
+	"pallet-contracts-primitives/std",
+	"pallet-contracts-rpc-runtime-api/std",
+	#	"pallet-democracy/std",
 	"pallet-election-provider-multi-phase/std",
+	#	"pallet-elections-phragmen/std",
+	"pallet-gilt/std",
+	"pallet-grandpa/std",
+	"pallet-im-online/std",
+	"pallet-indices/std",
+	"pallet-identity/std",
+	"pallet-lottery/std",
+	#	"pallet-membership/std",
+	"pallet-mmr/std",
+	"pallet-multisig/std",
+	"pallet-offences/std",
+	#	"pallet-proxy/std",
+	"pallet-randomness-collective-flip/std",
+	"pallet-recovery/std",
+	"pallet-session/std",
+	"pallet-scheduler/std",
+	#	"pallet-society/std",
+	"pallet-sudo/std",
 	"pallet-timestamp/std",
 	#	"pallet-tips/std",
-	"pallet-transaction-payment-rpc-runtime-api/std",
-	"pallet-transaction-payment/std",
 	#	"pallet-treasury/std",
-	"sp-transaction-pool/std",
 	"pallet-utility/std",
-	"sp-version/std",
-	#	"pallet-society/std",
-	"pallet-recovery/std",
+	"pallet-transaction-payment/std",
+	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-vesting/std",
-	"log/std",
-	"frame-try-runtime/std",
-	"sp-npos-elections/std",
-	"pallet-nft-delegate/std",
+
+
 	"pallet-staking/std",
 	"pallet-nft/std",
+	"pallet-nft-delegate/std",
 	"realis-game-api/std",
+	"realis-primitives/std",
 	"realis-bridge/std",
 	"marketplace/std",
-	"realis-primitives/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",
