@@ -108,7 +108,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 /// Runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("realis"),
+    spec_name: create_runtime_str!("node"),
     impl_name: create_runtime_str!("realis-node"),
     authoring_version: 10,
     // Per convention: if the runtime behavior changes, increment spec_version
@@ -379,7 +379,7 @@ impl pallet_indices::Config for Runtime {
 }
 
 parameter_types! {
-    pub const ExistentialDeposit: Balance = 1 * MILLICENTS / 1_000;
+    pub const ExistentialDeposit: Balance = PICO;
     // For weight estimation, we assume that the most locks on an individual account will be 50.
     // This number may need to be adjusted in the future if this assumption no longer holds true.
     pub const MaxLocks: u32 = 50;
