@@ -18,7 +18,7 @@ pub fn development_config() -> ChainSpec {
 
     ChainSpec::from_genesis(
         "Development",
-        "dev",
+        "realis",
         ChainType::Development,
         development_config_genesis,
         vec![],

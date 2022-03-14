@@ -28,6 +28,11 @@ pub mod currency {
     pub const fn deposit(items: u32, bytes: u32) -> Balance {
         items as Balance * 15 * CENTS + (bytes as Balance) * 6 * CENTS
     }
+
+    pub const MILLI: Balance = MICRO * 1_000; // 10^(-3)
+    pub const MICRO: Balance = NANO * 1_000; // 10^(-6)
+    pub const NANO: Balance = PICO * 1_000; // 10^(-9)
+    pub const PICO: Balance = 1; // 10^(-12)
 }
 
 /// Time.

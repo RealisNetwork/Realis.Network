@@ -18,12 +18,6 @@ wasm-opt = false
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
-[badges]
-travis-ci = { repository = "paritytech/substrate" }
-maintenance = { status = "actively-developed" }
-is-it-maintained-issue-resolution = { repository = "paritytech/substrate" }
-is-it-maintained-open-issues = { repository = "paritytech/substrate" }
-
 [[bin]]
 name = "realis"
 path = "bin/main.rs"
@@ -101,15 +95,6 @@ node-inspect = { version = "0.9.0-dev", optional = true, git = "https://github.c
 try-runtime-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 
 [target.'cfg(target_arch="x86_64")'.dependencies]
-node-executor = { version = "3.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", features = [
-	"wasmtime",
-] }
-sc-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", features = [
-	"wasmtime",
-] }
-sc-service = { version = "0.10.0-dev", default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", features = [
-	"wasmtime",
-] }
 sp-trie = { version = "4.0.0-dev", default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", features = [
 	"memory-tracker",
 ] }

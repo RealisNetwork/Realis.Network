@@ -16,7 +16,7 @@ run:
 
 .PHONY: build
 build:
-	cargo build --release -j 1
+	cargo build --release
 
 .PHONY: clean
 clean:
