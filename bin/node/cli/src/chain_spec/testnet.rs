@@ -15,7 +15,7 @@ use sp_runtime::Perbill;
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::constants::currency::DOLLARS;
 use node_runtime::pallet_staking;
-use node_runtime::realis_game_api;
+// use node_runtime::realis_game_api;
 use node_runtime::Runtime;
 pub use node_runtime::{Block, GenesisConfig};
 use crate::chain_spec::{session_keys, get_account_id_from_seed};
@@ -52,7 +52,7 @@ pub fn testnet_genesis(
             get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
             get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
             get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-            realis_game_api::Pallet::<Runtime>::account_id(),
+            // realis_game_api::Pallet::<Runtime>::account_id(),
             pallet_staking::Pallet::<Runtime>::account_id(),
         ]
     });
@@ -99,12 +99,12 @@ pub fn testnet_genesis(
     const STASH: Balance = ENDOWMENT / 1000;
 
     let pallet_id_staking = pallet_staking::Pallet::<Runtime>::account_id();
-    let game_wallet = realis_game_api::Pallet::<Runtime>::account_id();
+    // let game_wallet = realis_game_api::Pallet::<Runtime>::account_id();
 
     GenesisConfig {
         system: SystemConfig {
             code: wasm_binary_unwrap().to_vec(),
-            changes_trie_config: Default::default(),
+            // changes_trie_config: Default::default(),
         },
         balances: BalancesConfig {
             balances: endowed_accounts
@@ -113,9 +113,9 @@ pub fn testnet_genesis(
                 .map(|x| {
                     if x == pallet_id_staking {
                         (x, STAKING_POOL)
-                    } else if x == game_wallet {
+                    } /*else if x == game_wallet {
                         (x, GAME_WALLET)
-                    } else {
+                    }*/ else {
                         (x, ENDOWMENT)
                     }
                 })

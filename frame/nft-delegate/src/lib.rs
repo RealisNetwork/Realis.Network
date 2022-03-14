@@ -42,7 +42,7 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", TokenId = "T::TokenId", Balance = "Balance")]
+    // #[pallet::metadata(T::AccountId = "AccountId", TokenId = "T::TokenId", Balance = "Balance")]
     pub enum Event<T: Config> {
         NftDelegated(T::AccountId, T::AccountId, TokenId, T::BlockNumber),
         EndNftDelegation(TokenId),

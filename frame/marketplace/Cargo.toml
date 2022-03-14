@@ -14,6 +14,7 @@ primitive-types = { version = "0.10.1", default-features = false }
 serde = { version = "1.0.133", default-features = false }
 serde_json = { version = "1.0.79", default-features = false }
 pallet-staking = { version = "4.0.0-dev",  path="../staking-pool", default-features = false }
+scale-info = { version = "1.0", default-features = false, features = ["derive"] }
 
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", version = "4.0.0-dev", default-features = false, optional = true }
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }

@@ -47,7 +47,7 @@ use sp_runtime::{
 
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::pallet_staking;
-use node_runtime::realis_game_api;
+// use node_runtime::realis_game_api;
 use node_runtime::Runtime;
 pub use node_runtime::{Block, GenesisConfig};
 
@@ -216,7 +216,7 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
 
     let endowed_accounts: Vec<AccountId> = vec![
         root_key.clone(),
-        realis_game_api::Pallet::<Runtime>::account_id(),
+        // realis_game_api::Pallet::<Runtime>::account_id(),
         pallet_staking::Pallet::<Runtime>::account_id(),
     ];
 

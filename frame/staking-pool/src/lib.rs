@@ -265,15 +265,16 @@
 //! - [Session](../pallet_session/index.html): Used to manage sessions. Also, a list of new
 //!   validators is stored in the Session pallet's `Validators` at the end of each era.
 
-#![recursion_limit = "128"]
 #![cfg_attr(not(feature = "std"), no_std)]
+#![recursion_limit = "256"]
 
 #[cfg(feature = "runtime-benchmarks")]
 pub mod benchmarking;
-#[cfg(test)]
-mod mock;
 #[cfg(any(feature = "runtime-benchmarks", test))]
 pub mod testing_utils;
+
+#[cfg(test)]
+pub(crate) mod mock;
 #[cfg(test)]
 mod tests;
 
@@ -289,6 +290,7 @@ use frame_support::{
     traits::{Currency, Get},
     weights::Weight,
 };
+use scale_info::TypeInfo;
 use sp_runtime::{
     curve::PiecewiseLinear,
     traits::{AtLeast32BitUnsigned, Convert, Saturating, Zero},
@@ -423,6 +425,7 @@ pub struct UnlockChunk<Balance: HasCompact> {
 }
 
 /// The ledger of a (bonded) stash.
+#[cfg_attr(feature = "runtime-benchmarks", derive(Default))]
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 pub struct StakingLedger<AccountId, Balance: HasCompact> {
     /// The stash account whose balance is actually locked and at stake.
@@ -473,7 +476,7 @@ impl<AccountId, Balance: HasCompact + Copy + Saturating + AtLeast32BitUnsigned>
     }
 
     /// Re-bond funds that were scheduled for unlocking.
-    fn rebond(mut self, value: Balance) -> Self {
+    fn rebond(mut self, value: Balance) -> (Self, Balance) {
         let mut unlocking_balance: Balance = Zero::zero();
 
         while let Some(last) = self.unlocking.last_mut() {
@@ -490,11 +493,11 @@ impl<AccountId, Balance: HasCompact + Copy + Saturating + AtLeast32BitUnsigned>
             }
 
             if unlocking_balance >= value {
-                break;
+                break
             }
         }
 
-        self
+        (self, unlocking_balance)
     }
 }
 
@@ -614,7 +617,7 @@ pub trait SessionInterface<AccountId>: frame_system::Config {
     /// Returns `true` if new era should be forced at the end of this session.
     /// This allows preventing a situation where there is too many validators
     /// disabled and block production stalls.
-    fn disable_validator(validator: &AccountId) -> Result<bool, ()>;
+    fn disable_validator(validator: u32) -> bool;
     /// Get the validators from session.
     fn validators() -> Vec<AccountId>;
     /// Prune historical session tries up to but not including the given index.
@@ -622,21 +625,21 @@ pub trait SessionInterface<AccountId>: frame_system::Config {
 }
 
 impl<T: Config> SessionInterface<<T as frame_system::Config>::AccountId> for T
-where
-    T: pallet_session::Config<ValidatorId = <T as frame_system::Config>::AccountId>,
-    T: pallet_session::historical::Config<
-        FullIdentification = Exposure<<T as frame_system::Config>::AccountId, BalanceOf<T>>,
-        FullIdentificationOf = ExposureOf<T>,
-    >,
-    T::SessionHandler: pallet_session::SessionHandler<<T as frame_system::Config>::AccountId>,
-    T::SessionManager: pallet_session::SessionManager<<T as frame_system::Config>::AccountId>,
-    T::ValidatorIdOf: Convert<
-        <T as frame_system::Config>::AccountId,
-        Option<<T as frame_system::Config>::AccountId>,
-    >,
+    where
+        T: pallet_session::Config<ValidatorId = <T as frame_system::Config>::AccountId>,
+        T: pallet_session::historical::Config<
+            FullIdentification = Exposure<<T as frame_system::Config>::AccountId, BalanceOf<T>>,
+            FullIdentificationOf = ExposureOf<T>,
+        >,
+        T::SessionHandler: pallet_session::SessionHandler<<T as frame_system::Config>::AccountId>,
+        T::SessionManager: pallet_session::SessionManager<<T as frame_system::Config>::AccountId>,
+        T::ValidatorIdOf: Convert<
+            <T as frame_system::Config>::AccountId,
+            Option<<T as frame_system::Config>::AccountId>,
+        >,
 {
-    fn disable_validator(validator: &<T as frame_system::Config>::AccountId) -> Result<bool, ()> {
-        Ok(<pallet_session::Pallet<T>>::disable(validator))
+    fn disable_validator(validator_index: u32) -> bool {
+        <pallet_session::Pallet<T>>::disable_index(validator_index)
     }
 
     fn validators() -> Vec<<T as frame_system::Config>::AccountId> {
@@ -746,11 +749,12 @@ enum Releases {
     V5_0_0, // blockable validators.
     V6_0_0, // removal of all storage associated with offchain phragmen.
     V7_0_0, // keep track of number of nominators / validators in map
+    V8_0_0, // populate `SortedListProvider`.
 }
 
 impl Default for Releases {
     fn default() -> Self {
-        Releases::V7_0_0
+        Releases::V8_0_0
     }
 }
 

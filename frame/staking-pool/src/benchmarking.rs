@@ -134,6 +134,83 @@ pub fn create_validator_with_nominators<T: Config>(
     Ok((v_stash, nominators))
 }
 
+struct ListScenario<T: Config> {
+    /// Stash that is expected to be moved.
+    origin_stash1: T::AccountId,
+    /// Controller of the Stash that is expected to be moved.
+    origin_controller1: T::AccountId,
+    dest_weight: BalanceOf<T>,
+}
+
+impl<T: Config> ListScenario<T> {
+    /// An expensive scenario for bags-list implementation:
+    ///
+    /// - the node to be updated (r) is the head of a bag that has at least one other node. The bag
+    ///   itself will need to be read and written to update its head. The node pointed to by r.next
+    ///   will need to be read and written as it will need to have its prev pointer updated. Note
+    ///   that there are two other worst case scenarios for bag removal: 1) the node is a tail and
+    ///   2) the node is a middle node with prev and next; all scenarios end up with the same number
+    ///   of storage reads and writes.
+    ///
+    /// - the destination bag has at least one node, which will need its next pointer updated.
+    ///
+    /// NOTE: while this scenario specifically targets a worst case for the bags-list, it should
+    /// also elicit a worst case for other known `SortedListProvider` implementations; although
+    /// this may not be true against unknown `SortedListProvider` implementations.
+    fn new(origin_weight: BalanceOf<T>, is_increase: bool) -> Result<Self, &'static str> {
+        ensure!(!origin_weight.is_zero(), "origin weight must be greater than 0");
+
+        // burn the entire issuance.
+        let i = T::Currency::burn(T::Currency::total_issuance());
+        sp_std::mem::forget(i);
+
+        // create accounts with the origin weight
+
+        let (origin_stash1, origin_controller1) = create_stash_controller_with_balance::<T>(
+            USER_SEED + 2,
+            origin_weight,
+            Default::default(),
+        )?;
+        Staking::<T>::nominate(
+            RawOrigin::Signed(origin_controller1.clone()).into(),
+            // NOTE: these don't really need to be validators.
+            vec![T::Lookup::unlookup(account("random_validator", 0, SEED))],
+        )?;
+
+        let (_origin_stash2, origin_controller2) = create_stash_controller_with_balance::<T>(
+            USER_SEED + 3,
+            origin_weight,
+            Default::default(),
+        )?;
+        Staking::<T>::nominate(
+            RawOrigin::Signed(origin_controller2.clone()).into(),
+            vec![T::Lookup::unlookup(account("random_validator", 0, SEED))].clone(),
+        )?;
+
+        // find a destination weight that will trigger the worst case scenario
+        let dest_weight_as_vote =
+            T::SortedListProvider::weight_update_worst_case(&origin_stash1, is_increase);
+
+        let total_issuance = T::Currency::total_issuance();
+
+        let dest_weight =
+            T::CurrencyToVote::to_currency(dest_weight_as_vote as u128, total_issuance);
+
+        // create an account with the worst case destination weight
+        let (_dest_stash1, dest_controller1) = create_stash_controller_with_balance::<T>(
+            USER_SEED + 1,
+            dest_weight,
+            Default::default(),
+        )?;
+        Staking::<T>::nominate(
+            RawOrigin::Signed(dest_controller1).into(),
+            vec![T::Lookup::unlookup(account("random_validator", 0, SEED))],
+        )?;
+
+        Ok(ListScenario { origin_stash1, origin_controller1, dest_weight })
+    }
+}
+
 const USER_SEED: u32 = 999666;
 
 benchmarks! {

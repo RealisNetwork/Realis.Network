@@ -1,3 +1,4 @@
+
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
 use node_runtime::{
@@ -107,7 +108,7 @@ pub fn realis_genesis(
     GenesisConfig {
         system: SystemConfig {
             code: wasm_binary_unwrap().to_vec(),
-            changes_trie_config: Default::default(),
+            // changes_trie_config: Default::default(),
         },
         balances: BalancesConfig {
             balances: endowed_accounts

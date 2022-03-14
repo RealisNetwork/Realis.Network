@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-
+#![recursion_limit="256"]
 // 1. Imports and Dependencies
 pub use frame_support::traits::Currency;
 pub use pallet::*;

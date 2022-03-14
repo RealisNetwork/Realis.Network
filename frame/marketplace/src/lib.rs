@@ -40,7 +40,7 @@ pub mod pallet {
     // https://substrate.dev/docs/en/knowledgebase/runtime/events
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", TokenBalance = "Balance")]
+    // #[pallet::metadata(T::AccountId = "AccountId", TokenBalance = "Balance")]
     pub enum Event<T: Config> {
         /// This TokenId on sale in Marketplace!
         NftForSale(TokenId, Balance, TokenId),

@@ -17,7 +17,9 @@
 
 //! Implementations for the Staking FRAME Pallet.
 
-use frame_election_provider_support::{data_provider, ElectionProvider, Supports, VoteWeight};
+use frame_election_provider_support::{
+    data_provider, ElectionProvider, SortedListProvider,
+    Supports, VoteWeight, VoteWeightProvider};
 use frame_support::{
     pallet_prelude::*,
     traits::{
@@ -39,14 +41,13 @@ use sp_std::{collections::btree_map::BTreeMap, prelude::*};
 
 use crate::{
     log, slashing, weights::WeightInfo, ActiveEraInfo, BalanceOf, EraIndex, EraPayout, Exposure,
-    ExposureOf, Forcing, IndividualExposure, Nominations, RewardDestination, SessionInterface,
-    StakingLedger, ValidatorPrefs,
+    ExposureOf, Forcing, IndividualExposure, Nominations, PositiveImbalanceOf, RewardDestination,
+    SessionInterface, StakingLedger, ValidatorPrefs,
 };
 
 use super::{pallet::*, STAKING_ID};
 use core::result;
 use frame_support::traits::ExistenceRequirement;
-use frame_system::pallet_prelude::BlockNumberFor;
 use sp_staking::offence::DisableStrategy;
 
 impl<T: Config> Pallet<T> {
@@ -74,13 +75,19 @@ impl<T: Config> Pallet<T> {
     ///
     /// This prevents call sites from repeatedly requesting `total_issuance` from backend. But it is
     /// important to be only used while the total issuance is not changing.
-    pub fn slashable_balance_of_fn() -> Box<dyn Fn(&T::AccountId) -> VoteWeight> {
+    pub fn weight_of_fn() -> Box<dyn Fn(&T::AccountId) -> VoteWeight> {
         // NOTE: changing this to unboxed `impl Fn(..)` return type and the pallet will still
         // compile, while some types in mock fail to resolve.
         let issuance = T::Currency::total_issuance();
         Box::new(move |who: &T::AccountId| -> VoteWeight {
             Self::slashable_balance_of_vote_weight(who, issuance)
         })
+    }
+
+    /// Same as `weight_of_fn`, but made for one time use.
+    pub fn weight_of(who: &T::AccountId) -> VoteWeight {
+        let issuance = T::Currency::total_issuance();
+        Self::slashable_balance_of_vote_weight(who, issuance)
     }
 
     pub(super) fn do_payout_stakers(
@@ -202,11 +209,11 @@ impl<T: Config> Pallet<T> {
         Self::deposit_event(Event::<T>::PayoutStarted(era, ledger.stash.clone()));
 
         // We can now make total validator payout:
-        if Self::make_payout(
+        if let Some(imbalance) =
+        Self::make_payout(
             &ledger.stash,
             validator_staking_payout_new + validator_commission_payout_new,
         )
-        .is_ok()
         {
             Self::deposit_event(Event::Rewarded(ledger.stash, validator_leftover_payout_new));
         }
@@ -224,9 +231,11 @@ impl<T: Config> Pallet<T> {
             let nominator_reward: BalanceOf<T> =
                 nominator_exposure_part * validator_leftover_payout_new;
             // We can now make nominator payout:
-            if Self::make_payout(&nominator.who, nominator_reward).is_ok() {
+            if let Some(imbalance) =
+            Self::make_payout(&nominator.who, nominator_reward) {
                 // TODO nominator_payout_count += 1 ???
-                Self::deposit_event(Event::Rewarded(nominator.who.clone(), nominator_reward));
+                let e = Event::<T>::Rewarded(nominator.who.clone(), imbalance.peek());
+                Self::deposit_event(e);
             }
         }
 
@@ -264,41 +273,32 @@ impl<T: Config> Pallet<T> {
 
     /// Actually make a payment to a staker. This uses the currency's reward function
     /// to pay the right payee for the given staker account.
-    fn make_payout(stash: &T::AccountId, amount: BalanceOf<T>) -> result::Result<(), ()> {
+    fn make_payout(stash: &T::AccountId, amount: BalanceOf<T>) -> Option<PositiveImbalanceOf<T>> {
         let imbalance = T::Currency::withdraw(
             &Self::account_id(),
             amount,
             WithdrawReasons::all(),
             ExistenceRequirement::KeepAlive,
         )
-        .map_err(|_| ())?;
+        .map_err(|_| ())
+            .ok()?;
         let dest = Self::payee(stash);
         match dest {
-            RewardDestination::Controller => match Self::bonded(stash) {
-                Some(controller) => Ok(T::Currency::resolve_creating(&controller, imbalance)),
-                None => Err(()),
-            },
-            RewardDestination::Stash => {
-                T::Currency::resolve_into_existing(stash, imbalance).map_err(|_| ())
-            }
-            RewardDestination::Staked => {
-                match Self::bonded(stash).and_then(|c| Self::ledger(&c).map(|l| (c, l))) {
-                    Some((controller, mut l)) => {
-                        l.active += imbalance.peek();
-                        l.total += imbalance.peek();
-                        let r =
-                            T::Currency::resolve_into_existing(stash, imbalance).map_err(|_| ());
-                        Self::update_ledger(&controller, &l);
-                        r
-                    }
-                    None => Err(()),
-                }
-            }
-            RewardDestination::Account(dest_account) => {
-                T::Currency::resolve_creating(&dest_account, imbalance);
-                Ok(())
-            }
-            RewardDestination::None => Err(()),
+            RewardDestination::Controller => Self::bonded(stash)
+                .and_then(|controller| Some(T::Currency::deposit_creating(&controller, amount))),
+            RewardDestination::Stash => T::Currency::deposit_into_existing(stash, amount).ok(),
+            RewardDestination::Staked => Self::bonded(stash)
+                .and_then(|c| Self::ledger(&c).map(|l| (c, l)))
+                .and_then(|(controller, mut l)| {
+                    l.active += amount;
+                    l.total += amount;
+                    let r = T::Currency::deposit_into_existing(stash, amount).ok();
+                    Self::update_ledger(&controller, &l);
+                    r
+                }),
+            RewardDestination::Account(dest_account) =>
+                Some(T::Currency::deposit_creating(&dest_account, amount)),
+            RewardDestination::None => None,
         }
     }
 
@@ -362,6 +362,13 @@ impl<T: Config> Pallet<T> {
                 // pallet.
                 frame_support::print("Warning: A session appears to have been skipped.");
                 Self::start_era(start_session);
+            }
+        }
+
+        // disable all offending validators that have been disabled for the whole era
+        for (index, disabled) in <OffendingValidators<T>>::get() {
+            if disabled {
+                T::SessionInterface::disable_validator(index);
             }
         }
     }
@@ -430,11 +437,12 @@ impl<T: Config> Pallet<T> {
 
             let era_duration = (now_as_millis_u64 - active_era_start).saturated_into::<u64>();
             let staked = Self::eras_total_stake(&active_era.index);
-            let account_id = T::PalletId::get().into_account();
-            let total_balance = T::Currency::free_balance(&account_id)
-                .saturating_sub(T::Currency::minimum_balance());
+            // let account_id = T::PalletId::get().into_account();
+            // let total_balance = T::Currency::free_balance(&account_id)
+            //     .saturating_sub(T::Currency::minimum_balance());
+            let issuance = T::Currency::total_issuance();
             let (validator_payout, rest) =
-                T::EraPayout::era_payout(staked, total_balance, era_duration);
+                T::EraPayout::era_payout(staked, issuance, era_duration);
 
             Self::deposit_event(Event::<T>::EraPaid(
                 active_era.index,
@@ -445,6 +453,9 @@ impl<T: Config> Pallet<T> {
             // Set ending era reward.
             <ErasValidatorReward<T>>::insert(&active_era.index, validator_payout);
             T::RewardRemainder::on_unbalanced(T::Currency::issue(rest));
+
+            // Clear offending validators.
+            <OffendingValidators<T>>::kill();
         }
     }
 
@@ -727,54 +738,91 @@ impl<T: Config> Pallet<T> {
     ///
     /// All nominations that have been submitted before the last non-zero slash of the validator are
     /// auto-chilled.
-    pub fn get_npos_voters() -> Vec<(T::AccountId, VoteWeight, Vec<T::AccountId>)> {
-        let weight_of = Self::slashable_balance_of_fn();
-        let mut all_voters = Vec::new();
+    pub fn get_npos_voters(
+        maybe_max_len: Option<usize>,
+    ) -> Vec<(T::AccountId, VoteWeight, Vec<T::AccountId>)> {
+        let max_allowed_len = {
+            let nominator_count = CounterForNominators::<T>::get() as usize;
+            let validator_count = CounterForValidators::<T>::get() as usize;
+            let all_voter_count = validator_count.saturating_add(nominator_count);
+            maybe_max_len.unwrap_or(all_voter_count).min(all_voter_count)
+        };
 
-        let mut validator_count = 0u32;
-        for (validator, _) in <Validators<T>>::iter() {
+        let mut all_voters = Vec::<_>::with_capacity(max_allowed_len);
+
+        let mut validators_taken = 0u32;
+        for (validator, _) in <Validators<T>>::iter().take(max_allowed_len) {
             // Append self vote.
             let self_vote = (
                 validator.clone(),
-                weight_of(&validator),
+                Self::weight_of(&validator),
                 vec![validator.clone()],
             );
             all_voters.push(self_vote);
-            validator_count.saturating_inc();
+            validators_taken.saturating_inc();
         }
 
         // Collect all slashing spans into a BTreeMap for further queries.
+        let nominators_quota = (max_allowed_len as u32).saturating_sub(validators_taken);
         let slashing_spans = <SlashingSpans<T>>::iter().collect::<BTreeMap<_, _>>();
 
-        let mut nominator_count = 0u32;
-        for (nominator, nominations) in Nominators::<T>::iter() {
-            let Nominations {
-                submitted_in,
-                mut targets,
-                suppressed: _,
-            } = nominations;
+        // track the count of nominators added to `all_voters
+        let mut nominators_taken = 0u32;
+        // track every nominator iterated over, but not necessarily added to `all_voters`
+        let mut nominators_seen = 0u32;
 
-            // Filter out nomination targets which were nominated before the most recent
-            // slashing span.
-            targets.retain(|stash| {
-                slashing_spans
-                    .get(stash)
-                    .map_or(true, |spans| submitted_in >= spans.last_nonzero_slash())
-            });
+        // cache the total-issuance once in this function
+        let weight_of = Self::weight_of_fn();
 
-            if !targets.is_empty() {
-                let vote_weight = weight_of(&nominator);
-                all_voters.push((nominator, vote_weight, targets));
-                nominator_count.saturating_inc();
+        let mut nominators_iter = T::SortedListProvider::iter();
+        while nominators_taken < nominators_quota && nominators_seen < nominators_quota * 2 {
+            let nominator = match nominators_iter.next() {
+                Some(nominator) => {
+                    nominators_seen.saturating_inc();
+                    nominator
+                },
+                None => break,
+            };
+
+            if let Some(Nominations { submitted_in, mut targets, suppressed: _ }) =
+            <Nominators<T>>::get(&nominator)
+            {
+                log!(
+					trace,
+					"fetched nominator {:?} with weight {:?}",
+					nominator,
+					weight_of(&nominator)
+				);
+                targets.retain(|stash| {
+                    slashing_spans
+                        .get(stash)
+                        .map_or(true, |spans| submitted_in >= spans.last_nonzero_slash())
+                });
+                if !targets.len().is_zero() {
+                    all_voters.push((nominator.clone(), weight_of(&nominator), targets));
+                    nominators_taken.saturating_inc();
+                }
+            } else {
+                log!(error, "DEFENSIVE: invalid item in `SortedListProvider`: {:?}", nominator)
             }
         }
 
+        // all_voters should have not re-allocated.
+        debug_assert!(all_voters.capacity() == max_allowed_len);
+
         Self::register_weight(T::WeightInfo::get_npos_voters(
-            validator_count,
-            nominator_count,
+            validators_taken,
+            nominators_taken,
             slashing_spans.len() as u32,
         ));
 
+        log!(
+			info,
+			"generated {} npos voters, {} from validators and {} nominators",
+			all_voters.len(),
+			validators_taken,
+			nominators_taken
+		);
         all_voters
     }
 
@@ -870,21 +918,19 @@ impl<T: Config> frame_election_provider_support::ElectionDataProvider<T::Account
     fn voters(
         maybe_max_len: Option<usize>,
     ) -> data_provider::Result<Vec<(T::AccountId, VoteWeight, Vec<T::AccountId>)>> {
-        let nominator_count = CounterForNominators::<T>::get();
-        let validator_count = CounterForValidators::<T>::get();
-
-        let voter_count = nominator_count.saturating_add(validator_count) as usize;
         debug_assert!(<Nominators<T>>::iter().count() as u32 == CounterForNominators::<T>::get());
         debug_assert!(<Validators<T>>::iter().count() as u32 == CounterForValidators::<T>::get());
+        debug_assert_eq!(
+            CounterForNominators::<T>::get(),
+            T::SortedListProvider::count(),
+            "voter_count must be accurate",
+        );
 
-        // register the extra 2 reads
-        Self::register_weight(T::DbWeight::get().reads(2));
+        // This can never fail -- if `maybe_max_len` is `Some(_)` we handle it.
+        let voters = Self::get_npos_voters(maybe_max_len);
+        debug_assert!(maybe_max_len.map_or(true, |max| voters.len() <= max));
 
-        if maybe_max_len.map_or(false, |max_len| voter_count > max_len) {
-            return Err("Voter snapshot too big");
-        }
-
-        Ok(Self::get_npos_voters())
+        Ok(voters)
     }
 
     fn targets(maybe_max_len: Option<usize>) -> data_provider::Result<Vec<T::AccountId>> {
@@ -1178,7 +1224,7 @@ where
             add_db_reads_writes(1, 0);
             if active_era.is_none() {
                 // This offence need not be re-submitted.
-                return consumed_weight;
+                return consumed_weight
             }
             active_era
                 .expect("value checked not to be `None`; qed")
@@ -1242,6 +1288,7 @@ where
                 window_start,
                 now: active_era,
                 reward_proportion,
+                disable_strategy
             });
 
             if let Some(mut unapplied) = unapplied {
@@ -1278,5 +1325,78 @@ where
         }
 
         consumed_weight
+    }
+}
+
+impl<T: Config> VoteWeightProvider<T::AccountId> for Pallet<T> {
+    fn vote_weight(who: &T::AccountId) -> VoteWeight {
+        Self::weight_of(who)
+    }
+
+    #[cfg(feature = "runtime-benchmarks")]
+    fn set_vote_weight_of(who: &T::AccountId, weight: VoteWeight) {
+        // this will clearly results in an inconsistent state, but it should not matter for a
+        // benchmark.
+        let active: BalanceOf<T> = weight.try_into().map_err(|_| ()).unwrap();
+        let mut ledger = Self::ledger(who).unwrap_or_default();
+        ledger.active = active;
+        <Ledger<T>>::insert(who, ledger);
+        <Bonded<T>>::insert(who, who);
+
+        // also, we play a trick to make sure that a issuance based-`CurrencyToVote` behaves well:
+        // This will make sure that total issuance is zero, thus the currency to vote will be a 1-1
+        // conversion.
+        let imbalance = T::Currency::burn(T::Currency::total_issuance());
+        // kinda ugly, but gets the job done. The fact that this works here is a HUGE exception.
+        // Don't try this pattern in other places.
+        sp_std::mem::forget(imbalance);
+    }
+}
+
+/// A simple voter list implementation that does not require any additional pallets. Note, this
+/// does not provided nominators in sorted ordered. If you desire nominators in a sorted order take
+/// a look at [`pallet-bags-list].
+pub struct UseNominatorsMap<T>(sp_std::marker::PhantomData<T>);
+impl<T: Config> SortedListProvider<T::AccountId> for UseNominatorsMap<T> {
+    type Error = ();
+
+    /// Returns iterator over voter list, which can have `take` called on it.
+    fn iter() -> Box<dyn Iterator<Item = T::AccountId>> {
+        Box::new(Nominators::<T>::iter().map(|(n, _)| n))
+    }
+    fn count() -> u32 {
+        CounterForNominators::<T>::get()
+    }
+    fn contains(id: &T::AccountId) -> bool {
+        Nominators::<T>::contains_key(id)
+    }
+    fn on_insert(_: T::AccountId, _weight: VoteWeight) -> Result<(), Self::Error> {
+        // nothing to do on insert.
+        Ok(())
+    }
+    fn on_update(_: &T::AccountId, _weight: VoteWeight) {
+        // nothing to do on update.
+    }
+    fn on_remove(_: &T::AccountId) {
+        // nothing to do on remove.
+    }
+    fn regenerate(
+        _: impl IntoIterator<Item = T::AccountId>,
+        _: Box<dyn Fn(&T::AccountId) -> VoteWeight>,
+    ) -> u32 {
+        // nothing to do upon regenerate.
+        0
+    }
+    fn sanity_check() -> Result<(), &'static str> {
+        Ok(())
+    }
+    fn clear(maybe_count: Option<u32>) -> u32 {
+        Nominators::<T>::remove_all(maybe_count);
+        if let Some(count) = maybe_count {
+            CounterForNominators::<T>::mutate(|noms| *noms - count);
+            count
+        } else {
+            CounterForNominators::<T>::take()
+        }
     }
 }

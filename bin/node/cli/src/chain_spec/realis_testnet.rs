@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::pallet_staking;
-use node_runtime::realis_game_api;
+// use node_runtime::realis_game_api;
 use node_runtime::Runtime;
 pub use node_runtime::{Block, GenesisConfig};
 use sc_telemetry::serde_json::Map;
@@ -109,7 +109,7 @@ pub fn realis_testnet_genesis() -> GenesisConfig {
         sudo_3.clone(),
         sudo_4.clone(),
         sudo_5.clone(),
-        realis_game_api::Pallet::<Runtime>::account_id(),
+        // realis_game_api::Pallet::<Runtime>::account_id(),
         pallet_staking::Pallet::<Runtime>::account_id(),
     ];
 
