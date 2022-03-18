@@ -87,7 +87,7 @@ polkadot-runtime-parachains = { default-features = false, git = "https://github.
 polkadot-node-network-protocol = { default-features = false, git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.13" }
 
 # Polkadot Runtimes
-node-runtime = { path = "../runtime", optional = true }
+node-runtime = { path = "../runtime", package = "realis-node-runtime", optional = true }
 node-primitives = { version = "2.0.0", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 
 # Polkadot Subsystems

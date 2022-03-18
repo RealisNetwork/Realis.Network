@@ -86,7 +86,7 @@ pallet-im-online = { version = "4.0.0-dev", default-features = false, git = "htt
 
 # node-specific dependencies
 #node-runtime = { version = "3.0.0-dev", git = "https://github.com/RealisNetwork/subs1trate", branch = "master" }
-node-runtime = { version = "3.0.0-dev", path = "../runtime" }
+node-runtime = { version = "3.0.0-dev", path = "../runtime", package = "realis-node-runtime" }
 node-rpc = { version = "3.0.0-dev", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 node-primitives = { version = "2.0.0", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 node-executor = { version = "3.0.0-dev", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }

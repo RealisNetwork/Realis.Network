@@ -32,7 +32,7 @@ pallet-mmr-primitives = { git = "https://github.com/paritytech/substrate", branc
 beefy-primitives = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 
 # Polkadot Runtimes
-node-runtime = { path = "../runtime", optional = true }
+node-runtime = { path = "../runtime", package = "realis-node-runtime", optional = true }
 
 polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.13" }
 
