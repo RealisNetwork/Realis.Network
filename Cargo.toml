@@ -5,7 +5,7 @@ resolver = "2"
 
 members = [
 	"bin/node/cli",
-    "bin/node/runtime",
+#    "bin/node/runtime",
     "primitives/realis",
     "frame/nft",
     "frame/nft-delegate",
