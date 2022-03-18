@@ -282,10 +282,10 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::api_masters().contains(&who), Error::<T>::NotApiMaster);
-            // ensure!(
-            //     Whitelist::<T>::contains_key(&dest),
-            //     Error::<T>::UserNotFoundInWhitelist
-            // );
+            ensure!(
+                Whitelist::<T>::contains_key(&dest),
+                Error::<T>::UserNotFoundInWhitelist
+            );
             let pallet_id = Self::account_id();
             <T as Config>::ApiCurrency::transfer(
                 &pallet_id,

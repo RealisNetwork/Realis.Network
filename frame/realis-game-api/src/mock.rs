@@ -225,7 +225,7 @@ impl onchain::Config for Test {
 
 impl pallet_staking::Config for Test {
     type RewardRemainder = ();
-    const MAX_NOMINATIONS: u32 = 16;
+    const MaxNominations: u32 = 16;
     type Currency = Balances;
     type UnixTime = Timestamp;
     type PalletId = StakingPalletId;

@@ -17,9 +17,7 @@
 
 //! Implementations for the Staking FRAME Pallet.
 
-use frame_election_provider_support::{
-    data_provider, ElectionProvider, SortedListProvider,
-    Supports, VoteWeight, VoteWeightProvider};
+use frame_election_provider_support::{data_provider, ElectionProvider, SortedListProvider, Supports, VoteWeight, VoteWeightProvider};
 use frame_support::{
     pallet_prelude::*,
     traits::{
@@ -46,7 +44,6 @@ use crate::{
 };
 
 use super::{pallet::*, STAKING_ID};
-use core::result;
 use frame_support::traits::ExistenceRequirement;
 use sp_staking::offence::DisableStrategy;
 
@@ -209,7 +206,7 @@ impl<T: Config> Pallet<T> {
         Self::deposit_event(Event::<T>::PayoutStarted(era, ledger.stash.clone()));
 
         // We can now make total validator payout:
-        if let Some(imbalance) =
+        if let Some(_imbalance) =
         Self::make_payout(
             &ledger.stash,
             validator_staking_payout_new + validator_commission_payout_new,
@@ -274,7 +271,7 @@ impl<T: Config> Pallet<T> {
     /// Actually make a payment to a staker. This uses the currency's reward function
     /// to pay the right payee for the given staker account.
     fn make_payout(stash: &T::AccountId, amount: BalanceOf<T>) -> Option<PositiveImbalanceOf<T>> {
-        let imbalance = T::Currency::withdraw(
+        let _imbalance = T::Currency::withdraw(
             &Self::account_id(),
             amount,
             WithdrawReasons::all(),
@@ -756,7 +753,9 @@ impl<T: Config> Pallet<T> {
             let self_vote = (
                 validator.clone(),
                 Self::weight_of(&validator),
-                vec![validator.clone()],
+                vec![validator.clone()]
+                    .try_into()
+                    .expect("`MaxVotesPerVoter` must be greater than or equal to 1"),
             );
             all_voters.push(self_vote);
             validators_taken.saturating_inc();

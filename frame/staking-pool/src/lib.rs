@@ -290,7 +290,6 @@ use frame_support::{
     traits::{Currency, Get},
     weights::Weight,
 };
-use scale_info::TypeInfo;
 use sp_runtime::{
     curve::PiecewiseLinear,
     traits::{AtLeast32BitUnsigned, Convert, Saturating, Zero},
@@ -359,7 +358,7 @@ pub struct EraRewardPoints<AccountId: Ord> {
 }
 
 /// Indicates the initial status of the staker.
-#[derive(RuntimeDebug)]
+#[derive(RuntimeDebug, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 pub enum StakerStatus<AccountId> {
     /// Chilling.
@@ -425,7 +424,6 @@ pub struct UnlockChunk<Balance: HasCompact> {
 }
 
 /// The ledger of a (bonded) stash.
-#[cfg_attr(feature = "runtime-benchmarks", derive(Default))]
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 pub struct StakingLedger<AccountId, Balance: HasCompact> {
     /// The stash account whose balance is actually locked and at stake.
@@ -449,6 +447,17 @@ pub struct StakingLedger<AccountId, Balance: HasCompact> {
 impl<AccountId, Balance: HasCompact + Copy + Saturating + AtLeast32BitUnsigned>
     StakingLedger<AccountId, Balance>
 {
+    /// Initializes the default object using the given `validator`.
+    pub fn default_from(stash: AccountId) -> Self {
+        Self {
+            stash,
+            total: Zero::zero(),
+            active: Zero::zero(),
+            unlocking: Default::default(),
+            claimed_rewards: vec![],
+        }
+    }
+
     /// Remove entries from `unlocking` that are sufficiently old and reduce the
     /// total by the sum of their balances.
     fn consolidate_unlocked(self, current_era: EraIndex) -> Self {
@@ -580,7 +589,7 @@ pub struct IndividualExposure<AccountId, Balance: HasCompact> {
 }
 
 /// A snapshot of the stake backing a single validator in the system.
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, Default, RuntimeDebug, scale_info::TypeInfo)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 pub struct Exposure<AccountId, Balance: HasCompact> {
     /// The total balance backing this validator.
     #[codec(compact)]
@@ -590,6 +599,12 @@ pub struct Exposure<AccountId, Balance: HasCompact> {
     pub own: Balance,
     /// The portions of nominators stashes that are exposed.
     pub others: Vec<IndividualExposure<AccountId, Balance>>,
+}
+
+impl<AccountId, Balance: Default + HasCompact> Default for Exposure<AccountId, Balance> {
+    fn default() -> Self {
+        Self { total: Default::default(), own: Default::default(), others: vec![] }
+    }
 }
 
 /// A pending slash record. The value of the slash has been computed but not applied yet,
@@ -606,6 +621,19 @@ pub struct UnappliedSlash<AccountId, Balance: HasCompact> {
     reporters: Vec<AccountId>,
     /// The amount of payout.
     payout: Balance,
+}
+
+impl<AccountId, Balance: HasCompact + Zero> UnappliedSlash<AccountId, Balance> {
+    /// Initializes the default object using the given `validator`.
+    pub fn default_from(validator: AccountId) -> Self {
+        Self {
+            validator,
+            own: Zero::zero(),
+            others: vec![],
+            reporters: vec![],
+            payout: Zero::zero(),
+        }
+    }
 }
 
 /// Means for interacting with a specialized version of the `session` trait.
@@ -817,3 +845,9 @@ where
         R::is_known_offence(offenders, time_slot)
     }
 }
+//
+// impl<T: Config> Pallet<T> {
+//     pub fn account_id() -> T::AccountId {
+//         <T as Config>::PalletId::get().into_account()
+//     }
+// }

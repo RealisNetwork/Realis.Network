@@ -41,7 +41,7 @@ mod impls;
 pub use impls::*;
 
 use crate::{
-    migrations, slashing, weights::WeightInfo, ActiveEraInfo, BalanceOf, EraIndex, EraPayout,
+    log, migrations, slashing, weights::WeightInfo, ActiveEraInfo, BalanceOf, EraIndex, EraPayout,
     EraRewardPoints, Exposure, Forcing, NegativeImbalanceOf, Nominations, PositiveImbalanceOf,
     Releases, RewardDestination, SessionInterface, StakerStatus, StakingLedger, UnappliedSlash,
     UnlockChunk, ValidatorPrefs,
@@ -487,7 +487,7 @@ pub mod pallet {
             T::AccountId,
             T::AccountId,
             BalanceOf<T>,
-            StakerStatus<T::AccountId>,
+            crate::StakerStatus<T::AccountId>,
         )>,
         pub min_nominator_bond: BalanceOf<T>,
         pub min_validator_bond: BalanceOf<T>,
@@ -526,8 +526,15 @@ pub mod pallet {
             MinValidatorBond::<T>::put(self.min_validator_bond);
 
             for &(ref stash, ref controller, balance, ref status) in &self.stakers {
+                crate::log!(
+                    trace,
+					"inserting genesis staker: {:?} => {:?} => {:?}",
+					stash,
+					balance,
+					status
+				);
                 assert!(
-                    T::Currency::free_balance(&stash) >= balance,
+                    T::Currency::free_balance(&stash) <= balance,
                     "Stash does not have enough balance to bond."
                 );
                 frame_support::assert_ok!(<Pallet<T>>::bond(
@@ -770,7 +777,7 @@ pub mod pallet {
                 stash,
                 total: value,
                 active: value,
-                unlocking: vec![],
+                unlocking: Default::default(),
                 claimed_rewards: (last_reward_era..current_era).collect(),
             };
             Self::update_ledger(&controller, &item);
@@ -1010,7 +1017,7 @@ pub mod pallet {
         ///
         /// # <weight>
         /// - The transaction's complexity is proportional to the size of `targets` (N)
-        /// which is capped at CompactAssignments::LIMIT (MAX_NOMINATIONS).
+        /// which is capped at CompactAssignments::LIMIT (MaxNominations).
         /// - Both the reads and writes follow a similar pattern.
         /// # </weight>
         #[pallet::weight(T::WeightInfo::nominate(targets.len() as u32))]
@@ -1411,7 +1418,7 @@ pub mod pallet {
             ensure!(!ledger.unlocking.is_empty(), Error::<T>::NoUnlockChunk);
 
             let initial_unlocking = ledger.unlocking.len() as u32;
-            let (ledger, rebonded_value) = ledger.rebond(value);
+            let (ledger, _rebonded_value) = ledger.rebond(value);
             // Last check: the new active amount of ledger must be more than ED.
             ensure!(
                 ledger.active >= T::Currency::minimum_balance(),

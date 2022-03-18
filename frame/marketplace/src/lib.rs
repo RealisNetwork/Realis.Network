@@ -13,7 +13,6 @@ use sp_std::prelude::*;
 pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
-    use frame_support::sp_runtime::traits::AccountIdConversion;
     use frame_support::traits::{Currency, ExistenceRequirement};
     use frame_system::pallet_prelude::*;
     use node_primitives::Balance;
@@ -185,13 +184,13 @@ pub mod pallet {
             let to_blockchain = price * COMMISSION / 100;
             let to_seller = price - to_blockchain;
 
-            let staking = Self::account_id_staking();
-            <T as pallet::Config>::MarketCurrency::transfer(
-                &buyer,
-                &staking,
-                to_blockchain,
-                ExistenceRequirement::KeepAlive,
-            )?;
+            // let staking = Self::account_id_staking();
+            // <T as pallet::Config>::MarketCurrency::transfer(
+            //     &buyer,
+            //     &staking,
+            //     to_blockchain,
+            //     ExistenceRequirement::KeepAlive,
+            // )?;
 
             <T as pallet::Config>::MarketCurrency::transfer(
                 &buyer,
@@ -254,8 +253,8 @@ pub mod pallet {
             Nft::Pallet::<T>::set_nft_status(token_id, Status::Free);
         }
 
-        pub fn account_id_staking() -> T::AccountId {
-            <T as pallet_staking::Config>::PalletId::get().into_account()
-        }
+        // pub fn account_id_staking() -> T::AccountId {
+        //     <T as pallet_staking::Config>::PalletId::get().into_account()
+        // }
     }
 }

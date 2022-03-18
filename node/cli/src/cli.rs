@@ -1,0 +1,113 @@
+// This file is part of Substrate.
+
+// Copyright (C) 2018-2021 Parity Technologies (UK) Ltd.
+// SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+use sc_cli::{KeySubcommand, SignCmd, VanityCmd, VerifyCmd};
+use structopt::StructOpt;
+
+/// Possible subcommands of the main binary.
+#[derive(Debug, StructOpt)]
+pub enum Subcommand {
+    /// Key management cli utilities
+    Key(KeySubcommand),
+
+    /// The custom inspect subcommmand for decoding blocks and extrinsics.
+    #[structopt(
+        name = "inspect",
+        about = "Decode given block or extrinsic using current native runtime."
+    )]
+    Inspect(node_inspect::cli::InspectCmd),
+
+    /// The custom benchmark subcommmand benchmarking runtime pallets.
+    #[structopt(name = "benchmark", about = "Benchmark runtime pallets.")]
+    Benchmark(frame_benchmarking_cli::BenchmarkCmd),
+
+    /// Try some command against runtime state.
+    #[cfg(feature = "try-runtime")]
+    TryRuntime(try_runtime_cli::TryRuntimeCmd),
+
+    /// Try some command against runtime state. Note: `try-runtime` feature must be enabled.
+    #[cfg(not(feature = "try-runtime"))]
+    TryRuntime,
+
+    /// Verify a signature for a message, provided on STDIN, with a given (public or secret) key.
+    Verify(VerifyCmd),
+
+    /// Generate a seed that provides a vanity address.
+    Vanity(VanityCmd),
+
+    /// Sign a message, with a given (secret) key.
+    Sign(SignCmd),
+
+    /// Build a chain specification.
+    BuildSpec(sc_cli::BuildSpecCmd),
+
+    /// Validate blocks.
+    CheckBlock(sc_cli::CheckBlockCmd),
+
+    /// Export blocks.
+    ExportBlocks(sc_cli::ExportBlocksCmd),
+
+    /// Export the state of a given block into a chain spec.
+    ExportState(sc_cli::ExportStateCmd),
+
+    /// Import blocks.
+    ImportBlocks(sc_cli::ImportBlocksCmd),
+
+    /// Remove the whole chain.
+    PurgeChain(sc_cli::PurgeChainCmd),
+
+    /// Revert the chain to a previous state.
+    Revert(sc_cli::RevertCmd),
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, StructOpt)]
+pub struct RunCmd {
+    #[allow(missing_docs)]
+    #[structopt(flatten)]
+    pub base: sc_cli::RunCmd,
+
+    /// Setup a GRANDPA scheduled voting pause.
+    ///
+    /// This parameter takes two values, namely a block number and a delay (in
+    /// blocks). After the given block number is finalized the GRANDPA voter
+    /// will temporarily stop voting for new blocks until the given delay has
+    /// elapsed (i.e. until a block at height `pause_block + delay` is imported).
+    #[structopt(long = "grandpa-pause", number_of_values(2))]
+    pub grandpa_pause: Vec<u32>,
+
+    /// Disable BEEFY gadget.
+    #[structopt(long)]
+    pub no_beefy: bool,
+
+    /// Add the destination address to the jaeger agent.
+    ///
+    /// Must be valid socket address, of format `IP:Port`
+    /// commonly `127.0.0.1:6831`.
+    #[structopt(long)]
+    pub jaeger_agent: Option<std::net::SocketAddr>,
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, StructOpt)]
+pub struct Cli {
+    #[structopt(subcommand)]
+    pub subcommand: Option<Subcommand>,
+    #[structopt(flatten)]
+    pub run: RunCmd,
+}

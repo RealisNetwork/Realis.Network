@@ -307,11 +307,11 @@ benchmarks! {
 
         // these are the other validators; there are `T::MAX_NOMINATIONS - 1` of them, so
         // there are a total of `T::MAX_NOMINATIONS` validators in the system.
-        let rest_of_validators = create_validators::<T>(T::MAX_NOMINATIONS - 1, 100)?;
+        let rest_of_validators = create_validators::<T>(T::MaxNominations - 1, 100)?;
 
         // this is the validator that will be kicking.
         let (stash, controller) = create_stash_controller::<T>(
-            T::MAX_NOMINATIONS - 1,
+            T::MaxNominations - 1,
             100,
             Default::default(),
         )?;
@@ -326,7 +326,7 @@ benchmarks! {
         for i in 0 .. k {
             // create a nominator stash.
             let (n_stash, n_controller) = create_stash_controller::<T>(
-                T::MAX_NOMINATIONS + i,
+                T::MaxNominations + i,
                 100,
                 Default::default(),
             )?;
@@ -363,7 +363,7 @@ benchmarks! {
 
     // Worst case scenario, T::MAX_NOMINATIONS
     nominate {
-        let n in 1 .. T::MAX_NOMINATIONS;
+        let n in 1 .. T::MaxNominations;
         let (stash, controller) = create_stash_controller::<T>(n + 1, 100, Default::default())?;
         let validators = create_validators::<T>(n, 100)?;
         whitelist_account!(controller);
@@ -581,7 +581,7 @@ benchmarks! {
         create_validators_with_nominators_for_era::<T>(
             v,
             n,
-            <T as Config>::MAX_NOMINATIONS as usize,
+            <T as Config>::MaxNominations as usize,
             false,
             None,
         )?;
@@ -599,7 +599,7 @@ benchmarks! {
         create_validators_with_nominators_for_era::<T>(
             v,
             n,
-            <T as Config>::MAX_NOMINATIONS as usize,
+            <T as Config>::MaxNominations as usize,
             false,
             None,
         )?;
@@ -672,7 +672,7 @@ benchmarks! {
         // total number of slashing spans. Assigned to validators randomly.
         let s in 1 .. 20;
 
-        let validators = create_validators_with_nominators_for_era::<T>(v, n, T::MAX_NOMINATIONS as usize, false, None)?
+        let validators = create_validators_with_nominators_for_era::<T>(v, n, T::MaxNominations as usize, false, None)?
             .into_iter()
             .map(|v| T::Lookup::lookup(v).unwrap())
             .collect::<Vec<_>>();
@@ -691,7 +691,7 @@ benchmarks! {
         // number of nominator intention.
         let n = MAX_NOMINATORS;
 
-        let _ = create_validators_with_nominators_for_era::<T>(v, n, T::MAX_NOMINATIONS as usize, false, None)?;
+        let _ = create_validators_with_nominators_for_era::<T>(v, n, T::MaxNominations as usize, false, None)?;
     }: {
         let targets = <Staking<T>>::get_npos_targets();
         assert_eq!(targets.len() as u32, v);
@@ -749,7 +749,7 @@ mod tests {
                 create_validators_with_nominators_for_era::<Test>(
                     v,
                     n,
-                    <Test as Config>::MAX_NOMINATIONS as usize,
+                    <Test as Config>::MaxNominations as usize,
                     false,
                     None,
                 )

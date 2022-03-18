@@ -16,7 +16,6 @@ pub mod pallet {
     use frame_support::traits::{ExistenceRequirement, Currency};
     use node_primitives::{Balance};
     use core::convert::From;
-    use frame_support::sp_runtime::traits::AccountIdConversion;
     use frame_support::sp_runtime::traits::BlockNumberProvider;
 
     use realis_primitives::{Status, TokenId};
@@ -250,13 +249,13 @@ pub mod pallet {
             let to_blockchain = price * COMMISSION / 100;
             let to_seller = price - to_blockchain;
 
-            let staking = Self::account_id_staking();
-            <T as pallet::Config>::DelegateCurrency::transfer(
-                &buyer,
-                &staking,
-                to_blockchain,
-                ExistenceRequirement::KeepAlive,
-            )?;
+            // let staking = Self::account_id_staking();
+            // <T as pallet::Config>::DelegateCurrency::transfer(
+            //     &buyer,
+            //     &staking,
+            //     to_blockchain,
+            //     ExistenceRequirement::KeepAlive,
+            // )?;
 
             <T as pallet::Config>::DelegateCurrency::transfer(
                 &buyer,
@@ -333,9 +332,9 @@ pub mod pallet {
             Ok(())
         }
 
-        pub fn account_id_staking() -> T::AccountId {
-            <T as pallet_staking::Config>::PalletId::get().into_account()
-        }
+        // pub fn account_id_staking() -> T::AccountId {
+        //     <T as pallet_staking::Config>::PalletId::get().into_account()
+        // }
 
         pub fn check_delegation_time(token_id: TokenId) -> DispatchResult {
             let end_delegation = DelegatedTokens::<T>::get(token_id).unwrap().1;
