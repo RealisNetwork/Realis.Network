@@ -1285,6 +1285,8 @@ fn testnet_accounts() -> Vec<AccountId> {
         get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
         get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
         get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+        realis_game_api::Pallet::<Runtime>::account_id(),
+        pallet_staking::Pallet::<Runtime>::account_id(),
     ]
 }
 
@@ -1477,14 +1479,33 @@ pub fn polkadot_testnet_genesis(
         test_acc_4.clone(),
     ];
 
-    const ENDOWMENT: u128 = 1_000_000 * DOT;
-    const STASH: u128 = 100 * DOT;
+    // const ENDOWMENT: u128 = 1_000_000 * DOT;
+    // const STASH: u128 = 100 * DOT;
+    const ENDOWMENT: node_primitives::Balance = 30_000 * node_runtime::constants::currency::DOLLARS / 10;
+    const GAME_WALLET: node_primitives::Balance = 10_000_000 * node_runtime::constants::currency::DOLLARS / 10;
+    const STAKING_POOL: node_primitives::Balance = 30_000_000 * node_runtime::constants::currency::DOLLARS / 10;
+    const STASH: node_primitives::Balance = ENDOWMENT / 1000;
+
+    let pallet_id_staking = pallet_staking::Pallet::<Runtime>::account_id();
+    let game_wallet = realis_game_api::Pallet::<Runtime>::account_id();
 
     polkadot::GenesisConfig {
         system: polkadot::SystemConfig { code: wasm_binary.to_vec() },
         indices: polkadot::IndicesConfig { indices: vec![] },
         balances: polkadot::BalancesConfig {
-            balances: endowed_accounts.iter().map(|k| (k.clone(), ENDOWMENT)).collect(),
+            balances: endowed_accounts
+                .iter()
+                .cloned()
+                .map(|x| {
+                    if x == pallet_id_staking {
+                        (x, STAKING_POOL)
+                    } else if x == game_wallet {
+                        (x, GAME_WALLET)
+                    } else {
+                        (x, ENDOWMENT)
+                    }
+                })
+                .collect(),
         },
         session: polkadot::SessionConfig {
             keys: initial_authorities
@@ -1809,7 +1830,7 @@ pub fn rococo_testnet_genesis(
     }
 }
 
-#[cfg(feature = "polkadot-native")]
+// #[cfg(feature = "polkadot-native")]
 fn polkadot_development_config_genesis(wasm_binary: &[u8]) -> polkadot::GenesisConfig {
     polkadot_testnet_genesis(
         wasm_binary,

@@ -80,7 +80,7 @@ impl SubstrateCli for Cli {
             "dev" => Box::new(service::chain_spec::polkadot_development_config()?),
             "local" => Box::new(service::chain_spec::polkadot_local_testnet_config()?),
             "realis" => Box::new(service::chain_spec::polkadot_config()?),
-            // "realis2" => Box::new(service::chain_spec::po_testnet_config()),
+            // "realis2" => Box::new(service::chain_spec::polkadot_local_testnet_config()),
             "fir" | "flaming-fir" => Box::new(service::chain_spec::flaming_fir_config()?),
             "staging" => Box::new(service::chain_spec::polkadot_staging_testnet_config()?),
             path => Box::new(service::RealisChainSpec::from_json_file(
