@@ -41,7 +41,7 @@ mod impls;
 pub use impls::*;
 
 use crate::{
-    log, migrations, slashing, weights::WeightInfo, ActiveEraInfo, BalanceOf, EraIndex, EraPayout,
+    migrations, slashing, weights::WeightInfo, ActiveEraInfo, BalanceOf, EraIndex, EraPayout,
     EraRewardPoints, Exposure, Forcing, NegativeImbalanceOf, Nominations, PositiveImbalanceOf,
     Releases, RewardDestination, SessionInterface, StakerStatus, StakingLedger, UnappliedSlash,
     UnlockChunk, ValidatorPrefs,

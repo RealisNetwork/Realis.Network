@@ -279,9 +279,10 @@ pub mod pallet {
 
         pub fn transfer_nft(
             dest_account: &T::AccountId,
-            owner: &T::AccountId,
+            _owner: &T::AccountId,
             token_id: TokenId,
         ) -> dispatch::DispatchResult {
+            // FIXME
             // ensure!(
             //     *owner != T::AccountId::default(),
             //     Error::<T>::NonExistentToken

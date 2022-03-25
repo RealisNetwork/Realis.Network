@@ -12,11 +12,11 @@ test:
 
 .PHONY: run
 run:
-	 ./target/release/realis --dev --tmp --ws-port 9943  --rpc-port 9922  --validator  --rpc-methods=Unsafe  --listen-addr /ip4/0.0.0.0/tcp/30333 --name MyNode01 --unsafe-ws-external --unsafe-rpc-external --rpc-cors '*'
+	 ./target/release/realis --dev --tmp --ws-port 9943  --rpc-port 9922  --alice  --rpc-methods=Unsafe  --listen-addr /ip4/0.0.0.0/tcp/30333 --unsafe-ws-external --unsafe-rpc-external --rpc-cors '*'
 
 .PHONY: build
 build:
-	SKIP_WASM_BUILD=1 cargo build --release
+	cargo build --release
 
 .PHONY: clean
 clean:

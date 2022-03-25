@@ -141,10 +141,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // is and increment impl_version.
     spec_version: 9130,
     impl_version: 0,
-    #[cfg(not(feature = "disable-runtime-api"))]
     apis: RUNTIME_API_VERSIONS,
-    #[cfg(feature = "disable-runtime-api")]
-    apis: version::create_apis_vec![[]],
     transaction_version: 9,
 };
 
@@ -164,7 +161,7 @@ pub fn native_version() -> NativeVersion {
     }
 }
 
-type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
+// type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 
 // pub struct DealWithFees;
 // impl OnUnbalanced<NegativeImbalance> for DealWithFees {
@@ -188,7 +185,7 @@ const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 /// We allow `Normal` extrinsics to fill up the block up to 75%, the rest can be used
 /// by  Operational  extrinsics.
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
-/// We allow for 2 seconds of compute with a 6 second average block time.
+// /// We allow for 2 seconds of compute with a 6 second average block time.
 // const MAXIMUM_BLOCK_WEIGHT: Weight = 2 * WEIGHT_PER_SECOND;
 
 pub struct BaseFilter;
