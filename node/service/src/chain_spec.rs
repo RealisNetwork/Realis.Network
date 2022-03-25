@@ -34,7 +34,8 @@ use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, crypto::UncheckedInto, Pair, Public};
 use sp_runtime::{traits::IdentifyAccount, Perbill};
 use telemetry::TelemetryEndpoints;
-use node_runtime::{Runtime, realis_game_api};
+use node_runtime::{Runtime, realis_game_api, MAX_NOMINATIONS};
+use pallet_staking::StakerStatus;
 use crate::RealisChainSpec;
 
 #[cfg(feature = "polkadot-native")]
@@ -511,7 +512,7 @@ fn testnet_accounts() -> Vec<AccountId> {
 #[cfg(feature = "polkadot-native")]
 pub fn polkadot_testnet_genesis(
     wasm_binary: &[u8],
-    _initial_authorities: Vec<(
+    initial_authorities: Vec<(
         AccountId,
         AccountId,
         BabeId,
@@ -525,114 +526,6 @@ pub fn polkadot_testnet_genesis(
     endowed_accounts: Option<Vec<AccountId>>,
 ) -> polkadot::GenesisConfig {
     let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(testnet_accounts);
-
-    let initial_authorities: Vec<(
-        AccountId,
-        AccountId,
-        BabeId,
-        GrandpaId,
-        ImOnlineId,
-        ValidatorId,
-        AssignmentId,
-        AuthorityDiscoveryId,
-    )> = vec![
-        (
-            //5ERCqy118nnXDai8g4t3MjdX7ZC5PrQzQpe9vwex5cELWqbt
-            hex!["681af4f93073484e1acd6b27395d0d258f1a6b158c808846c8fd05ee2435056e"].into(),
-            //5GTS114cfQNBgpQULhMaNCPXGds6NokegCnikxDe1vqANhtn
-            hex!["c2463372598ebabd21ee5bc33e1d7e77f391d2df29ce2fbe6bed0d13be629a45"].into(),
-            //5FhGbceKeH7fuGogcBwd28ZCkAwDGYBADCTeHiYrvx2ztyRd
-            hex!["a097bfc6a33499ed843b711f52f523f8a7174f798a9f98620e52f4170dbe2948"]
-                .unchecked_into(),
-            //5Es7nDkJt2by5qVCCD7PZJdp76KJw1LdRCiNst5S5f4eecnz
-            hex!["7bde49dda82c2c9f082b807ef3ceebff96437d67b3e630c584db7a220ecafacf"]
-                .unchecked_into(),
-            //5D4e8zRjaYzFamqChGPPtu26PcKbKgUrhb7WqcNbKa2RDFUR
-            hex!["2c2fb730a7d9138e6d62fcf516f9ecc2d712af3f2f03ca330c9564b8c0c1bb33"]
-                .unchecked_into(),
-            //5DD3JY5ENkjcgVFbVSgUbZv7WmrnyJ8bxxu56ee6hZFiRdnh
-            hex!["3297a8622988cc23dd9c131e3fb8746d49e007f6e58a81d43420cd539e250e4c"]
-                .unchecked_into(),
-            //5Gpodowhud8FG9xENXR5YwTFbUAWyoEtw7sYFytFsG4z7SU6
-            hex!["d2932edf775088bd088dc5a112ad867c24cc95858f77f8a1ab014de8d4f96a3f"]
-                .unchecked_into(),
-            //5GUMj8tnjL3PJZgXoiWtgLCaMVNHBNeSeTqDsvcxmaVAjKn9
-            hex!["c2fb0f74591a00555a292bc4882d3158bafc4c632124cb60681f164ef81bcf72"]
-                .unchecked_into(),
-        ),
-        (
-            //5HgDCznTkHKUjzPkQoTZGWbvbyqB7sqHDBPDKdF1FyVYM7Er
-            hex!["f8418f189f84814fd40cc1b2e90873e72ea789487f3b98ed42811ba76d10fc37"].into(),
-            //5GQTryeFwuvgmZ2tH5ZeAKZHRM9ch5WGVGo6ND9P8f9uMsNY
-            hex!["c002bb4af4a1bd2f33d104aef8a41878fe1ac94ba007029c4dfdefa8b698d043"].into(),
-            //5C7YkWSVH1zrpsE5KwW1ua1qatyphzYxiZrL24mjkxz7mUbn
-            hex!["022b14fbcf65a93b81f453105b9892c3fc4aa74c22c53b4abab019e1d58fbd41"]
-                .unchecked_into(),
-            //5GwFC6Tmg4fhj4PxSqHycgJxi3PDfnC9RGDsNHoRwAvXvpnZ
-            hex!["d77cafd3b32c8b52b0e2780a586a6e527c94f1bdec117c4e4acb0a491461ffa3"]
-                .unchecked_into(),
-            //5DSVrGURuDuh8Luzo8FYq7o2NWiUSLSN6QAVNrj9BtswWH6R
-            hex!["3cdb36a5a14715999faffd06c5b9e5dcdc24d4b46bc3e4df1aaad266112a7b49"]
-                .unchecked_into(),
-            //5DLEG2AupawCXGwhJtrzBRc3zAhuP8V662dDrUTzAsCiB9Ec
-            hex!["38134245c9919ecb20bf2eedbe943b69ba92ceb9eb5477b92b0afd3cb6ce2858"]
-                .unchecked_into(),
-            //5D83o9fDgnHxaKPkSx59hk8zYzqcgzN2mrf7cp8fiVEi7V4E
-            hex!["2ec917690dc1d676002e3504c530b2595490aa5a4603d9cc579b9485b8d0d854"]
-                .unchecked_into(),
-            //5DwBJquZgncRWXFxj2ydbF8LBUPPUbiq86sXWXgm8Z38m8L2
-            hex!["52bae9b8dedb8058dda93ec6f57d7e5a517c4c9f002a4636fada70fed0acf376"]
-                .unchecked_into(),
-        ),
-        (
-            //5DMHpkRpQV7NWJFfn2zQxCLiAKv7R12PWFRPHKKk5X3JkYfP
-            hex!["38e280b35d08db46019a210a944e4b7177665232ab679df12d6a8bbb317a2276"].into(),
-            //5FbJpSHmFDe5FN3DVGe1R345ZePL9nhcC9V2Cczxo7q8q6rN
-            hex!["9c0bc0e2469924d718ae683737f818a47c46b0612376ecca06a2ac059fe1f870"].into(),
-            //5E5Pm3Udzxy26KGkLE5pc8JPfQrvkYHiaXWtuEfmQsBSgep9
-            hex!["58fecadc2df8182a27e999e7e1fd7c99f8ec18f2a81f9a0db38b3653613f3f4d"]
-                .unchecked_into(),
-            //5FxcystSLHtaWoy2HEgRNerj9PrUs452B6AvHVnQZm5ZQmqE
-            hex!["ac4d0c5e8f8486de05135c10a707f58aa29126d5eb28fdaaba00f9a505f5249d"]
-                .unchecked_into(),
-            //5E7KqVXaVGuAqiqMigpuH8oXHLVh4tmijmpJABLYANpjMkem
-            hex!["5a781385a0235fe8594dd101ec55ef9ba01883f8563a0cdd37b89e0303f6a578"]
-                .unchecked_into(),
-            //5H9AybjkpyZ79yN5nHuBqs6RKuZPgM7aAVVvTQsDFovgXb2A
-            hex!["e09570f62a062450d4406b4eb43e7f775ff954e37606646cd590d1818189501f"]
-                .unchecked_into(),
-            //5Ccgs7VwJKBawMbwMENDmj2eFAxhFdGksVHdk8aTAf4w7xox
-            hex!["1864832dae34df30846d5cc65973f58a2d01b337d094b1284ec3466ecc90251d"]
-                .unchecked_into(),
-            //5EsSaZZ7niJs7hmAtp4QeK19AcAuTp7WXB7N7gRipVooerq4
-            hex!["7c1d92535e6d94e21cffea6633a855a7e3c9684cd2f209e5ddbdeaf5111e395b"]
-                .unchecked_into(),
-        ),
-        (
-            //5Ea11qhmGRntQ7pyEkEydbwxvfrYwGMKW6rPERU4UiSBB6rd
-            hex!["6ed057d2c833c45629de2f14b9f6ce6df1edbf9421b7a638e1fb4828c2bd2651"].into(),
-            //5CZomCZwPB78BZMZsCiy7WSpkpHhdrN8QTSyjcK3FFEZHBor
-            hex!["1631ff446b3534d031adfc37b7f7aed26d2a6b3938d10496aab3345c54707429"].into(),
-            //5CSM6vppouFHzAVPkVFWN76DPRUG7B9qwJe892ccfSfJ8M5f
-            hex!["108188c43a7521e1abe737b343341c2179a3a89626c7b017c09a5b10df6f1c42"]
-                .unchecked_into(),
-            //5GwkG4std9KcjYi3ThSC7QWfhqokmYVvWEqTU9h7iswjhLnr
-            hex!["d7de8a43f7ee49fa3b3aaf32fb12617ec9ff7b246a46ab14e9c9d259261117fa"]
-                .unchecked_into(),
-            //5CoUk3wrCGJAWbiJEcsVjYhnd2JAHvR59jBRbSw77YrBtRL1
-            hex!["209f680bc501f9b59358efe3636c51fd61238a8659bac146db909aea2595284b"]
-                .unchecked_into(),
-            //5EcSu96wprFM7G2HfJTjYu8kMParnYGznSUNTsoEKXywEsgG
-            hex!["70adf80395b3f59e4cab5d9da66d5a286a0b6e138652a06f72542e46912df922"]
-                .unchecked_into(),
-            //5Ge3sjpD43Cuy7rNoJQmE9WctgCn6Faw89Pe7xPs3i55eHwJ
-            hex!["ca5f6b970b373b303f64801a0c2cadc4fc05272c6047a2560a27d0c65589ca1d"]
-                .unchecked_into(),
-            //5EFcjHLvB2z5vd5g63n4gABmhzP5iPsKvTwd8sjfvTehNNrk
-            hex!["60cae7fa5a079d9fc8061d715fbcc35ef57c3b00005694c2badce22dcc5a9f1b"]
-                .unchecked_into(),
-        ),
-    ];
 
     //sudo account
     let root_key = hex!["10f908b91793b30fc4870e255a0e102745e2a8f268814cd28389ba7f4220764d"].into();
@@ -798,7 +691,7 @@ fn polkadot_development_config_genesis(wasm_binary: &[u8]) -> polkadot::GenesisC
         wasm_binary,
         vec![get_authority_keys_from_seed_no_beefy("Alice")],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
-        None,
+        None
     )
 }
 
