@@ -26,7 +26,7 @@ use pallet_transaction_payment::CurrencyAdapter;
 use runtime_common::{
     auctions, claims, crowdloan, impls::DealWithFees, paras_registrar, slots, xcm_sender,
     BlockHashCount, BlockLength, BlockWeights, CurrencyToVote, OffchainSolutionLengthLimit,
-    OffchainSolutionWeightLimit, RocksDbWeight, SlowAdjustingFeeUpdate, ToAuthor,
+    OffchainSolutionWeightLimit, RocksDbWeight, SlowAdjustingFeeUpdate, ToAuthor, paras_sudo_wrapper
 };
 
 use runtime_parachains::{
@@ -190,60 +190,63 @@ const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
 pub struct BaseFilter;
 impl Contains<Call> for BaseFilter {
-    fn contains(call: &Call) -> bool {
-        match call {
-            Call::Democracy(_) |
-            Call::Council(_) |
-            Call::Sudo(_) |
-            Call::TechnicalCommittee(_) |
-            Call::TechnicalMembership(_) |
-            Call::Treasury(_) |
-            Call::PhragmenElection(_) |
-            Call::System(_) |
-            Call::Scheduler(_) |
-            Call::Indices(_) |
-            Call::Babe(_) |
-            Call::Timestamp(_) |
-            Call::Balances(_) |
-            Call::Authorship(_) |
-            Call::Staking(_) |
-            Call::Session(_) |
-            Call::Grandpa(_) |
-            Call::ImOnline(_) |
-            Call::Utility(_) |
-            Call::Claims(_) |
-            Call::Vesting(_) |
-            Call::Identity(_) |
-            Call::Proxy(_) |
-            Call::Multisig(_) |
-            Call::Bounties(_) |
-            Call::Tips(_) |
-            Call::ElectionProviderMultiPhase(_) |
-            Call::Configuration(_) |
-            Call::ParasShared(_) |
-            Call::ParaInclusion(_) |
-            Call::Paras(_) |
-            Call::Initializer(_) |
-            Call::ParaInherent(_) |
-            Call::Dmp(_) |
-            Call::Ump(_) |
-            Call::Hrmp(_) |
-            Call::Registrar(_) |
-            Call::Slots(_) |
-            Call::Auctions(_) |
-            Call::Crowdloan(_) |
-            Call::BagsList(_) |
-            Call::RealisBridge(_) |
-            Call::RealisGameApi(_) |
-            Call::Marketplace(_) |
-            Call::Nft(_) |
-            Call::NftDelegate(_) |
-            Call::XcmPallet(_) => true,
-            // These modules are all allowed to be called by transactions:
-            // All pallets are allowed, but exhaustive match is defensive
-            // in the case of adding new pallets.
-        }
+    fn contains(_call: &Call) -> bool {
+        true
     }
+    // fn contains(call: &Call) -> bool {
+    //     match call {
+    //         Call::Democracy(_) |
+    //         Call::Council(_) |
+    //         Call::Sudo(_) |
+    //         Call::TechnicalCommittee(_) |
+    //         Call::TechnicalMembership(_) |
+    //         Call::Treasury(_) |
+    //         Call::PhragmenElection(_) |
+    //         Call::System(_) |
+    //         Call::Scheduler(_) |
+    //         Call::Indices(_) |
+    //         Call::Babe(_) |
+    //         Call::Timestamp(_) |
+    //         Call::Balances(_) |
+    //         Call::Authorship(_) |
+    //         Call::Staking(_) |
+    //         Call::Session(_) |
+    //         Call::Grandpa(_) |
+    //         Call::ImOnline(_) |
+    //         Call::Utility(_) |
+    //         Call::Claims(_) |
+    //         Call::Vesting(_) |
+    //         Call::Identity(_) |
+    //         Call::Proxy(_) |
+    //         Call::Multisig(_) |
+    //         Call::Bounties(_) |
+    //         Call::Tips(_) |
+    //         Call::ElectionProviderMultiPhase(_) |
+    //         Call::Configuration(_) |
+    //         Call::ParasShared(_) |
+    //         Call::ParaInclusion(_) |
+    //         Call::Paras(_) |
+    //         Call::Initializer(_) |
+    //         Call::ParaInherent(_) |
+    //         Call::Dmp(_) |
+    //         Call::Ump(_) |
+    //         Call::Hrmp(_) |
+    //         Call::Registrar(_) |
+    //         Call::Slots(_) |
+    //         Call::Auctions(_) |
+    //         Call::Crowdloan(_) |
+    //         Call::BagsList(_) |
+    //         Call::RealisBridge(_) |
+    //         Call::RealisGameApi(_) |
+    //         Call::Marketplace(_) |
+    //         Call::Nft(_) |
+    //         Call::NftDelegate(_) |
+    //         Call::XcmPallet(_) => true,
+    //         // These modules are all allowed to be called by transactions:
+    //         // All pallets are allowed, but exhaustive match is defensive
+    //         // in the case of adding new pallets.
+    //     }
+    // }
 }
 
 parameter_types! {
@@ -1270,6 +1273,8 @@ impl parachains_initializer::Config for Runtime {
     type WeightInfo = weight::runtime_parachains_initializer::WeightInfo<Runtime>;
 }
 
+impl paras_sudo_wrapper::Config for Runtime {}
+
 parameter_types! {
 	// Mostly arbitrary deposit price, but should provide an adequate incentive not to spam reserve
 	// `ParaId`s.
@@ -1655,8 +1660,9 @@ frame_support::construct_runtime!(
         // Parachain Onboarding Pallets. Start indices at 70 to leave room.
 		Registrar: paras_registrar::{Pallet, Call, Storage, Event<T>} = 70,
         Slots: slots::{Pallet, Call, Storage, Event<T>} = 71,
-		Auctions: auctions::{Pallet, Call, Storage, Event<T>} = 72,
-		Crowdloan: crowdloan::{Pallet, Call, Storage, Event<T>} = 73,
+        ParasSudoWrapper: paras_sudo_wrapper::{Pallet, Call} = 72,
+		Auctions: auctions::{Pallet, Call, Storage, Event<T>} = 73,
+		Crowdloan: crowdloan::{Pallet, Call, Storage, Event<T>} = 74,
 
         // Pallet for sending XCM.
 		XcmPallet: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 99,
