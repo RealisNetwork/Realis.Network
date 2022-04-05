@@ -2054,7 +2054,7 @@ sp_api::impl_runtime_apis! {
             Vec<frame_benchmarking::BenchmarkList>,
             Vec<frame_support::traits::StorageInfo>,
         ) {
-            use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
+            use frame_benchmarking::{list_benchmark, baseline, Benchmarking, BenchmarkList};
             use frame_support::traits::StorageInfoTrait;
 
             // Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
@@ -2063,49 +2063,51 @@ sp_api::impl_runtime_apis! {
             use pallet_session_benchmarking::Pallet as SessionBench;
             use pallet_offences_benchmarking::Pallet as OffencesBench;
             use frame_system_benchmarking::Pallet as SystemBench;
+            use baseline::Pallet as BaselineBench;
 
             let mut list = Vec::<BenchmarkList>::new();
+            list_benchmarks!(list, extra);
 
-            list_benchmark!(list, extra, runtime_common::claims, Claims);
-			list_benchmark!(list, extra, runtime_common::crowdloan, Crowdloan);
-			list_benchmark!(list, extra, runtime_common::claims, Claims);
-			list_benchmark!(list, extra, runtime_common::slots, Slots);
-			list_benchmark!(list, extra, runtime_common::paras_registrar, Registrar);
-			list_benchmark!(list, extra, runtime_parachains::configuration, Configuration);
-			list_benchmark!(list, extra, runtime_parachains::initializer, Initializer);
-			list_benchmark!(list, extra, runtime_parachains::paras, Paras);
-			list_benchmark!(list, extra, runtime_parachains::paras_inherent, ParaInherent);
+            // list_benchmark!(list, extra, runtime_common::claims, Claims);
+			// list_benchmark!(list, extra, runtime_common::crowdloan, Crowdloan);
+			// list_benchmark!(list, extra, runtime_common::claims, Claims);
+			// list_benchmark!(list, extra, runtime_common::slots, Slots);
+			// list_benchmark!(list, extra, runtime_common::paras_registrar, Registrar);
+			// list_benchmark!(list, extra, runtime_parachains::configuration, Configuration);
+			// list_benchmark!(list, extra, runtime_parachains::initializer, Initializer);
+			// list_benchmark!(list, extra, runtime_parachains::paras, Paras);
+			// list_benchmark!(list, extra, runtime_parachains::paras_inherent, ParaInherent);
 			// Substrate
-			list_benchmark!(list, extra, pallet_bags_list, BagsList);
-			list_benchmark!(list, extra, pallet_balances, Balances);
-			list_benchmark!(list, extra, pallet_bounties, Bounties);
-			list_benchmark!(list, extra, pallet_collective, Council);
-			list_benchmark!(list, extra, pallet_collective, TechnicalCommittee);
-			list_benchmark!(list, extra, pallet_democracy, Democracy);
-			list_benchmark!(list, extra, pallet_elections_phragmen, PhragmenElection);
-			list_benchmark!(list, extra, pallet_election_provider_multi_phase, ElectionProviderMultiPhase);
-			list_benchmark!(list, extra, pallet_identity, Identity);
-			list_benchmark!(list, extra, pallet_im_online, ImOnline);
-			list_benchmark!(list, extra, pallet_indices, Indices);
-			list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
-			list_benchmark!(list, extra, pallet_multisig, Multisig);
-			list_benchmark!(list, extra, pallet_offences, OffencesBench::<Runtime>);
-			list_benchmark!(list, extra, pallet_proxy, Proxy);
-			list_benchmark!(list, extra, pallet_scheduler, Scheduler);
-			list_benchmark!(list, extra, pallet_session, SessionBench::<Runtime>);
-			list_benchmark!(list, extra, pallet_staking, Staking);
-			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
-			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
-			list_benchmark!(list, extra, pallet_tips, Tips);
-			list_benchmark!(list, extra, pallet_treasury, Treasury);
-			list_benchmark!(list, extra, pallet_utility, Utility);
-			list_benchmark!(list, extra, pallet_vesting, Vesting);
-
-            list_benchmark!(list, extra, pallet_nft, Nft);
-            list_benchmark!(list, extra, pallet_nft_delegate, NftDelegate);
-            list_benchmark!(list, extra, marketplace, Marketplace);
-            list_benchmark!(list, extra, realis_game_api, RealisGameApi);
-            list_benchmark!(list, extra, realis_bridge, RealisBridge);
+			// list_benchmark!(list, extra, pallet_bags_list, BagsList);
+			// list_benchmark!(list, extra, pallet_balances, Balances);
+			// list_benchmark!(list, extra, pallet_bounties, Bounties);
+			// list_benchmark!(list, extra, pallet_collective, Council);
+			// list_benchmark!(list, extra, pallet_collective, TechnicalCommittee);
+			// list_benchmark!(list, extra, pallet_democracy, Democracy);
+			// list_benchmark!(list, extra, pallet_elections_phragmen, PhragmenElection);
+			// list_benchmark!(list, extra, pallet_election_provider_multi_phase, ElectionProviderMultiPhase);
+			// list_benchmark!(list, extra, pallet_identity, Identity);
+			// list_benchmark!(list, extra, pallet_im_online, ImOnline);
+			// list_benchmark!(list, extra, pallet_indices, Indices);
+			// list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
+			// list_benchmark!(list, extra, pallet_multisig, Multisig);
+			// list_benchmark!(list, extra, pallet_offences, OffencesBench::<Runtime>);
+			// list_benchmark!(list, extra, pallet_proxy, Proxy);
+			// list_benchmark!(list, extra, pallet_scheduler, Scheduler);
+			// list_benchmark!(list, extra, pallet_session, SessionBench::<Runtime>);
+			// list_benchmark!(list, extra, pallet_staking, Staking);
+			// list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
+			// list_benchmark!(list, extra, pallet_timestamp, Timestamp);
+			// list_benchmark!(list, extra, pallet_tips, Tips);
+			// list_benchmark!(list, extra, pallet_treasury, Treasury);
+			// list_benchmark!(list, extra, pallet_utility, Utility);
+			// list_benchmark!(list, extra, pallet_vesting, Vesting);
+            //
+            // list_benchmark!(list, extra, pallet_nft, Nft);
+            // list_benchmark!(list, extra, pallet_nft_delegate, NftDelegate);
+            // list_benchmark!(list, extra, marketplace, Marketplace);
+            // list_benchmark!(list, extra, realis_game_api, RealisGameApi);
+            // list_benchmark!(list, extra, realis_bridge, RealisBridge);
 
             let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -2115,7 +2117,7 @@ sp_api::impl_runtime_apis! {
         fn dispatch_benchmark(
             config: frame_benchmarking::BenchmarkConfig
         ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-            use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
+            use frame_benchmarking::{baseline, Benchmarking, BenchmarkBatch, TrackedStorageKey};
 
             // Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
             // issues. To get around that, we separated the Session benchmarks into its own crate,
@@ -2123,10 +2125,12 @@ sp_api::impl_runtime_apis! {
             use pallet_session_benchmarking::Pallet as SessionBench;
             use pallet_offences_benchmarking::Pallet as OffencesBench;
             use frame_system_benchmarking::Pallet as SystemBench;
+            use baseline::Pallet as BaselineBench;
 
             impl pallet_session_benchmarking::Config for Runtime {}
             impl pallet_offences_benchmarking::Config for Runtime {}
             impl frame_system_benchmarking::Config for Runtime {}
+            impl baseline::Config for Runtime {}
 
             let whitelist: Vec<TrackedStorageKey> = vec![
                 // Block Number
@@ -2147,6 +2151,7 @@ sp_api::impl_runtime_apis! {
 
             let mut batches = Vec::<BenchmarkBatch>::new();
             let params = (&config, &whitelist);
+            // add_benchmarks!(params, batches);
             // Polkadot
 			// NOTE: Make sure to prefix these `runtime_common::` so that path resolves correctly
 			// in the generated file.
@@ -2159,7 +2164,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, runtime_parachains::initializer, Initializer);
 			add_benchmark!(params, batches, runtime_parachains::paras, Paras);
 			add_benchmark!(params, batches, runtime_parachains::paras_inherent, ParaInherent);
-			// Substrate
+			Substrate
 			add_benchmark!(params, batches, pallet_bags_list, BagsList);
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_bounties, Bounties);

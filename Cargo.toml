@@ -9,13 +9,13 @@ members = [
     "node/service",
     "node/client",
     "rpc",
-#    "primitives/realis",
-#    "frame/nft",
-#    "frame/nft-delegate",
-#    "frame/realis-game-api",
-#    "frame/staking-pool",
-#    "frame/realis-bridge",
-#    "frame/marketplace"
+    "primitives/realis",
+    "frame/nft",
+    "frame/nft-delegate",
+    "frame/realis-game-api",
+    "frame/staking-pool",
+    "frame/realis-bridge",
+    "frame/marketplace"
 ]
 
 # Override `node-runtime` dependency in `node-executor` dependencies with our local forked version.

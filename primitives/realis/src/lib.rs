@@ -3,7 +3,7 @@
 pub mod constants;
 
 use frame_support::pallet_prelude::{Decode, Encode};
-use primitive_types::U256;
+use sp_core::U256;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_std::fmt::{Display, Formatter};

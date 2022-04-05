@@ -286,10 +286,7 @@ pub mod weights;
 mod pallet;
 
 use codec::{Decode, Encode, HasCompact};
-use frame_support::{
-    traits::{Currency, Get},
-    weights::Weight,
-};
+use frame_support::{BoundedVec, parameter_types, traits::{Currency, Get}, weights::Weight};
 use sp_runtime::{
     curve::PiecewiseLinear,
     traits::{AtLeast32BitUnsigned, Convert, Saturating, Zero},
@@ -333,6 +330,10 @@ type PositiveImbalanceOf<T> = <<T as Config>::Currency as Currency<
 type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
     <T as frame_system::Config>::AccountId,
 >>::NegativeImbalance;
+
+parameter_types! {
+	pub MaxUnlockingChunks: u32 = 32;
+}
 
 /// Information regarding the active era (era in used in session).
 #[derive(Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
@@ -564,9 +565,9 @@ where
 
 /// A record of the nominations made by a specific account.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
-pub struct Nominations<AccountId> {
+pub struct Nominations<T: Config> {
     /// The targets of nomination.
-    pub targets: Vec<AccountId>,
+    pub targets: BoundedVec<T::AccountId, T::MaxNominations>,
     /// The era the nominations were submitted.
     ///
     /// Except for initial nominations which are considered submitted at era 0.

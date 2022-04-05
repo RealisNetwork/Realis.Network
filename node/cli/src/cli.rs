@@ -16,24 +16,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use sc_cli::{KeySubcommand, SignCmd, VanityCmd, VerifyCmd};
-use structopt::StructOpt;
-
 /// Possible subcommands of the main binary.
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::Subcommand)]
 pub enum Subcommand {
-    /// Key management cli utilities
-    Key(KeySubcommand),
-
     /// The custom inspect subcommmand for decoding blocks and extrinsics.
-    #[structopt(
+    #[clap(
         name = "inspect",
         about = "Decode given block or extrinsic using current native runtime."
     )]
     Inspect(node_inspect::cli::InspectCmd),
 
     /// The custom benchmark subcommmand benchmarking runtime pallets.
-    #[structopt(name = "benchmark", about = "Benchmark runtime pallets.")]
+    #[clap(name = "benchmark", about = "Benchmark runtime pallets.")]
     Benchmark(frame_benchmarking_cli::BenchmarkCmd),
 
     /// Try some command against runtime state.
@@ -44,14 +38,18 @@ pub enum Subcommand {
     #[cfg(not(feature = "try-runtime"))]
     TryRuntime,
 
+    /// Key management cli utilities
+    #[clap(subcommand)]
+    Key(sc_cli::KeySubcommand),
+
     /// Verify a signature for a message, provided on STDIN, with a given (public or secret) key.
-    Verify(VerifyCmd),
+    Verify(sc_cli::VerifyCmd),
 
     /// Generate a seed that provides a vanity address.
-    Vanity(VanityCmd),
+    Vanity(sc_cli::VanityCmd),
 
     /// Sign a message, with a given (secret) key.
-    Sign(SignCmd),
+    Sign(sc_cli::SignCmd),
 
     /// Build a chain specification.
     BuildSpec(sc_cli::BuildSpecCmd),
@@ -76,10 +74,10 @@ pub enum Subcommand {
 }
 
 #[allow(missing_docs)]
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::Parser)]
 pub struct RunCmd {
     #[allow(missing_docs)]
-    #[structopt(flatten)]
+    #[clap(flatten)]
     pub base: sc_cli::RunCmd,
 
     /// Setup a GRANDPA scheduled voting pause.
@@ -88,26 +86,28 @@ pub struct RunCmd {
     /// blocks). After the given block number is finalized the GRANDPA voter
     /// will temporarily stop voting for new blocks until the given delay has
     /// elapsed (i.e. until a block at height `pause_block + delay` is imported).
-    #[structopt(long = "grandpa-pause", number_of_values(2))]
+    #[clap(long = "grandpa-pause", number_of_values(2))]
     pub grandpa_pause: Vec<u32>,
 
     /// Disable BEEFY gadget.
-    #[structopt(long)]
+    #[clap(long)]
     pub no_beefy: bool,
 
     /// Add the destination address to the jaeger agent.
     ///
     /// Must be valid socket address, of format `IP:Port`
     /// commonly `127.0.0.1:6831`.
-    #[structopt(long)]
+    #[clap(long)]
     pub jaeger_agent: Option<std::net::SocketAddr>,
 }
 
 #[allow(missing_docs)]
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::Parser)]
 pub struct Cli {
-    #[structopt(subcommand)]
+    #[clap(subcommand)]
     pub subcommand: Option<Subcommand>,
-    #[structopt(flatten)]
+
+    #[allow(missing_docs)]
+    #[clap(flatten)]
     pub run: RunCmd,
 }
