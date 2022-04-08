@@ -266,6 +266,10 @@ pub mod pallet {
         }
 
         pub fn burn_nft(token_id: TokenId, owner: &T::AccountId) -> dispatch::DispatchResult {
+            ensure!(
+                AccountForToken::<T>::contains_key(token_id),
+                Error::<T>::NonExistentToken
+            );
             Self::dec_total_for_account(owner)?;
 
             TokensList::<T>::mutate(&owner, |tuple_tokens| {
