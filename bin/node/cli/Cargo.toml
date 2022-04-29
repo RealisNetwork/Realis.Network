@@ -41,7 +41,6 @@ getrandom = { version = "0.2.5", features = ["js"] }
 # primitives
 sp-authority-discovery = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-consensus-babe = { version = "0.10.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
-sp-consensus-aura = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 grandpa-primitives = { version = "4.0.0-dev", package = "sp-finality-grandpa", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-core = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-runtime = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }

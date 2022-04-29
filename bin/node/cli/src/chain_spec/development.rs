@@ -11,7 +11,7 @@ use crate::chain_spec::{authority_keys_from_seed, get_account_id_from_seed, sess
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::constants::currency::DOLLARS;
 use node_runtime::{
-    pallet_staking, realis_game_api, wasm_binary_unwrap, AuraConfig, AuthorityDiscoveryConfig,
+    pallet_staking, realis_game_api, wasm_binary_unwrap, AuthorityDiscoveryConfig,
     BabeConfig, BalancesConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, NftConfig,
     RealisBridgeConfig, RealisGameApiConfig, Runtime, SessionConfig, StakerStatus, StakingConfig,
     SudoConfig, SystemConfig, MAX_NOMINATIONS,
@@ -239,9 +239,6 @@ fn development_config_genesis() -> GenesisConfig {
         //     phantom: Default::default(),
         // },
         sudo: SudoConfig { key: root_key },
-        aura: AuraConfig {
-            authorities: vec![], //initial_authorities.iter().map(|x| (x.0.clone())).collect(),
-        },
         babe: BabeConfig {
             authorities: vec![],
             epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),

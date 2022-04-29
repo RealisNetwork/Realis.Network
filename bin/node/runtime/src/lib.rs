@@ -56,7 +56,6 @@ use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 pub use realis_game_api;
 use sp_api::impl_runtime_apis;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::{
@@ -116,7 +115,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 294,
+    spec_version: 293,
     impl_version: 4,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 8,
@@ -332,11 +331,6 @@ impl pallet_scheduler::Config for Runtime {
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type MaxScheduledPerBlock = MaxScheduledPerBlock;
     type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
-}
-
-impl pallet_aura::Config for Runtime {
-    type AuthorityId = AuraId;
-    type DisabledValidators = ();
 }
 
 parameter_types! {
@@ -1302,7 +1296,6 @@ construct_runtime!(
         System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
         Utility: pallet_utility::{Pallet, Call, Event},
         Babe: pallet_babe::{Pallet, Call, Storage, Config, ValidateUnsigned},
-        Aura: pallet_aura::{Pallet, Storage, Config<T>},
         Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
         Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent},
         Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
@@ -1479,16 +1472,6 @@ impl_runtime_apis! {
             Executive::offchain_worker(header)
         }
     }
-
-    // impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
-    // 	fn slot_duration() -> sp_consensus_aura::SlotDuration {
-    // 		sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
-    // 	}
-    //
-    // 	fn authorities() -> Vec<AuraId> {
-    // 		Aura::authorities().into_inner()
-    // 	}
-    // }
 
     impl fg_primitives::GrandpaApi<Block> for Runtime {
         fn grandpa_authorities() -> GrandpaAuthorityList {

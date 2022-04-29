@@ -3715,7 +3715,6 @@ dependencies = [
  "sp-authority-discovery",
  "sp-authorship",
  "sp-consensus",
- "sp-consensus-aura",
  "sp-consensus-babe",
  "sp-core",
  "sp-finality-grandpa",
@@ -4036,22 +4035,6 @@ dependencies = [
  "frame-support",
  "frame-system",
  "parity-scale-codec",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-aura"
-version = "4.0.0-dev"
-source = "git+https://github.com/RealisNetwork/substrate?branch=polkadot-v0.9.9#eed9afc00dff79aea8fafe82eea69f54489ae9d7"
-dependencies = [
- "frame-support",
- "frame-system",
- "pallet-session",
- "pallet-timestamp",
- "parity-scale-codec",
- "sp-application-crypto",
- "sp-consensus-aura",
  "sp-runtime",
  "sp-std",
 ]
@@ -5757,7 +5740,6 @@ dependencies = [
  "marketplace",
  "node-primitives",
  "pallet-assets",
- "pallet-aura",
  "pallet-authority-discovery",
  "pallet-authorship",
  "pallet-babe",
@@ -5797,7 +5779,6 @@ dependencies = [
  "sp-api",
  "sp-authority-discovery",
  "sp-block-builder",
- "sp-consensus-aura",
  "sp-consensus-babe",
  "sp-core",
  "sp-inherents",
