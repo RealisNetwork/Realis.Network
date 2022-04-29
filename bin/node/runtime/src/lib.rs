@@ -39,6 +39,7 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot,
 };
+use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use marketplace;
 pub use node_primitives::{AccountId, Signature};
 use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
@@ -108,14 +109,14 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 /// Runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("realis"),
+    spec_name: create_runtime_str!("node"),
     impl_name: create_runtime_str!("realis-node"),
     authoring_version: 10,
     // Per convention: if the runtime behavior changes, increment spec_version
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 293,
+    spec_version: 294,
     impl_version: 4,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 8,
@@ -333,6 +334,11 @@ impl pallet_scheduler::Config for Runtime {
     type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_aura::Config for Runtime {
+    type AuthorityId = AuraId;
+    type DisabledValidators = ();
+}
+
 parameter_types! {
     // NOTE: Currently it is not possible to change the epoch duration after the chain has started.
     //       Attempting to do so will brick block production.
@@ -527,7 +533,7 @@ parameter_types! {
     pub const SignedDepositByte: Balance = 1 * CENTS;
 
     // fallback: no on-chain fallback.
-	pub const Fallback: FallbackStrategy = FallbackStrategy::OnChain;
+	pub const Fallback: FallbackStrategy = FallbackStrategy::Nothing;
 
     pub SolutionImprovementThreshold: Perbill = Perbill::from_rational(1u32, 10_000);
 
@@ -1298,6 +1304,7 @@ construct_runtime!(
         System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
         Utility: pallet_utility::{Pallet, Call, Event},
         Babe: pallet_babe::{Pallet, Call, Storage, Config, ValidateUnsigned},
+        Aura: pallet_aura::{Pallet, Storage, Config<T>},
         Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
         Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent},
         Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
@@ -1474,6 +1481,16 @@ impl_runtime_apis! {
             Executive::offchain_worker(header)
         }
     }
+
+    // impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
+	// 	fn slot_duration() -> sp_consensus_aura::SlotDuration {
+	// 		sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
+	// 	}
+    //
+	// 	fn authorities() -> Vec<AuraId> {
+	// 		Aura::authorities().into_inner()
+	// 	}
+	// }
 
     impl fg_primitives::GrandpaApi<Block> for Runtime {
         fn grandpa_authorities() -> GrandpaAuthorityList {

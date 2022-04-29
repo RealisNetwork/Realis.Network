@@ -22,6 +22,7 @@ getrandom = { version = "0.2.5", features = ["js"] }
 
 # primitives
 sp-authority-discovery = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
+sp-consensus-aura = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-consensus-babe = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-block-builder = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-inherents = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
@@ -51,6 +52,7 @@ frame-try-runtime = { default-features = false, git = "https://github.com/Realis
 
 # pallet dependencies
 pallet-assets = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
+pallet-aura = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 pallet-authority-discovery = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 pallet-authorship = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 pallet-babe = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
@@ -113,6 +115,7 @@ std = [
 	"log/std",
 
 	"sp-authority-discovery/std",
+	"sp-consensus-aura/std",
 	"sp-consensus-babe/std",
 	"sp-block-builder/std",
 	"sp-inherents/std",
@@ -140,6 +143,7 @@ std = [
 	"frame-try-runtime/std",
 
 	"pallet-assets/std",
+	"pallet-aura/std",
 	"pallet-authority-discovery/std",
 	"pallet-authorship/std",
 	"pallet-babe/std",

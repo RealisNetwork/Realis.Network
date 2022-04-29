@@ -1,6 +1,6 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
 use node_runtime::{
-    wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
+    wasm_binary_unwrap, AuthorityDiscoveryConfig, AuraConfig, BabeConfig,
     BalancesConfig, /*CouncilConfig,*/
     /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
     NftConfig, RealisBridgeConfig, RealisGameApiConfig, SessionConfig,
@@ -161,6 +161,9 @@ pub fn testnet_genesis(
         //     phantom: Default::default(),
         // },
         sudo: SudoConfig { key: root_key },
+        aura: AuraConfig {
+            authorities: vec![], //initial_authorities.iter().map(|x| (x.0.clone())).collect(),
+        },
         babe: BabeConfig {
             authorities: vec![],
             epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
