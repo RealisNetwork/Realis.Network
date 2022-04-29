@@ -3,14 +3,14 @@ use sc_service::ChainType;
 use sp_core::crypto::UncheckedInto;
 use std::str::FromStr;
 
+use crate::chain_spec::realis::realis_genesis;
+use crate::chain_spec::ChainSpec;
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::pallet_staking;
 use node_runtime::realis_game_api;
 use node_runtime::Runtime;
 pub use node_runtime::{Block, GenesisConfig};
 use sc_telemetry::serde_json::Map;
-use crate::chain_spec::ChainSpec;
-use crate::chain_spec::realis::realis_genesis;
 
 ///Realis test chain-spec
 pub fn realis_testnet_config() -> ChainSpec {

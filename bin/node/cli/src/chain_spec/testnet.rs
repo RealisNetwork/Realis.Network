@@ -1,24 +1,24 @@
+use crate::chain_spec::{get_account_id_from_seed, session_keys};
 use grandpa_primitives::AuthorityId as GrandpaId;
+pub use node_primitives::{AccountId, Balance, Signature};
+use node_runtime::constants::currency::DOLLARS;
+use node_runtime::pallet_staking;
+use node_runtime::realis_game_api;
+use node_runtime::Runtime;
 use node_runtime::{
-    wasm_binary_unwrap, AuthorityDiscoveryConfig, AuraConfig, BabeConfig,
+    wasm_binary_unwrap, AuraConfig, AuthorityDiscoveryConfig, BabeConfig,
     BalancesConfig, /*CouncilConfig,*/
     /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
     NftConfig, RealisBridgeConfig, RealisGameApiConfig, SessionConfig,
     /*SocietyConfig,*/ StakerStatus, StakingConfig, SudoConfig, SystemConfig,
     /*TechnicalCommitteeConfig,*/ MAX_NOMINATIONS,
 };
+pub use node_runtime::{Block, GenesisConfig};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::sr25519;
 use sp_runtime::Perbill;
-pub use node_primitives::{AccountId, Balance, Signature};
-use node_runtime::constants::currency::DOLLARS;
-use node_runtime::pallet_staking;
-use node_runtime::realis_game_api;
-use node_runtime::Runtime;
-pub use node_runtime::{Block, GenesisConfig};
-use crate::chain_spec::{session_keys, get_account_id_from_seed};
 
 /// Helper function to create GenesisConfig for testing
 pub fn testnet_genesis(

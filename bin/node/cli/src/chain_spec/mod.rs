@@ -18,17 +18,17 @@
 
 //! Substrate chain configurations.
 
-pub mod testnet;
-pub mod local_testnet;
 pub mod development;
-pub mod realis_testnet;
+pub mod local_testnet;
 pub mod realis;
+pub mod realis_testnet;
+pub mod testnet;
 
-pub use testnet::testnet_genesis;
-pub use local_testnet::local_testnet_config;
 pub use development::development_config;
-pub use realis_testnet::realis_testnet_config;
+pub use local_testnet::local_testnet_config;
 pub use realis::realis_config;
+pub use realis_testnet::realis_testnet_config;
+pub use testnet::testnet_genesis;
 
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
@@ -41,9 +41,7 @@ use serde::{Deserialize, Serialize};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
-use sp_runtime::{
-    traits::{IdentifyAccount, Verify},
-};
+use sp_runtime::traits::{IdentifyAccount, Verify};
 
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::pallet_staking;
@@ -188,31 +186,31 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
         // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
         "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
     ]
-        .into();
+    .into();
 
     let nft_master: Vec<AccountId> = vec![hex![
         // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
         "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
     ]
-        .into()];
+    .into()];
 
     let api_master: Vec<AccountId> = vec![hex![
         // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
         "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
     ]
-        .into()];
+    .into()];
 
     let bridge_master: Vec<AccountId> = vec![hex![
         // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
         "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
     ]
-        .into()];
+    .into()];
 
     let white_list: Vec<AccountId> = vec![hex![
         // 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
         "9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
     ]
-        .into()];
+    .into()];
 
     let endowed_accounts: Vec<AccountId> = vec![
         root_key.clone(),
@@ -260,8 +258,8 @@ pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Pu
 
 /// Helper function to generate an account ID from seed
 pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
-    where
-        AccountPublic: From<<TPublic::Pair as Pair>::Public>,
+where
+    AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
     AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }

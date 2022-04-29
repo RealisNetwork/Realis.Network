@@ -1,10 +1,10 @@
-use sc_service::ChainType;
-use sp_core::sr25519;
+use crate::chain_spec::testnet::testnet_genesis;
 use crate::chain_spec::ChainSpec;
+use crate::chain_spec::{authority_keys_from_seed, get_account_id_from_seed};
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::{Block, GenesisConfig};
-use crate::chain_spec::{get_account_id_from_seed, authority_keys_from_seed};
-use crate::chain_spec::testnet::testnet_genesis;
+use sc_service::ChainType;
+use sp_core::sr25519;
 
 /// Local testnet config (multivalidator Alice + Bob)
 pub fn local_testnet_config() -> ChainSpec {

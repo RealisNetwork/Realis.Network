@@ -859,7 +859,10 @@ impl<T: Config> frame_election_provider_support::ElectionDataProvider<T::Account
 {
     const MAXIMUM_VOTES_PER_VOTER: u32 = T::MAX_NOMINATIONS;
     fn desired_targets() -> data_provider::Result<(u32, Weight)> {
-        Ok((Self::validator_count(), <T as frame_system::Config>::DbWeight::get().reads(1)))
+        Ok((
+            Self::validator_count(),
+            <T as frame_system::Config>::DbWeight::get().reads(1),
+        ))
     }
 
     fn voters(
@@ -872,7 +875,7 @@ impl<T: Config> frame_election_provider_support::ElectionDataProvider<T::Account
         debug_assert!(<Validators<T>>::iter().count() as u32 == CounterForValidators::<T>::get());
 
         if maybe_max_len.map_or(false, |max_len| voter_count > max_len) {
-            return Err("Voter snapshot too big")
+            return Err("Voter snapshot too big");
         }
 
         let slashing_span_count = <SlashingSpans<T>>::iter().count();
@@ -888,13 +891,12 @@ impl<T: Config> frame_election_provider_support::ElectionDataProvider<T::Account
         let target_count = CounterForValidators::<T>::get() as usize;
 
         if maybe_max_len.map_or(false, |max_len| target_count > max_len) {
-            return Err("Target snapshot too big")
+            return Err("Target snapshot too big");
         }
 
         let weight = <T as frame_system::Config>::DbWeight::get().reads(target_count as u64);
         Ok((Self::get_npos_targets(), weight))
     }
-
 
     fn next_election_prediction(now: T::BlockNumber) -> T::BlockNumber {
         let current_era = Self::current_era().unwrap_or(0);

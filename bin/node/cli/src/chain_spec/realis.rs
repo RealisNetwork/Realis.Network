@@ -1,7 +1,7 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
 use node_runtime::{
-    wasm_binary_unwrap, AuthorityDiscoveryConfig, AuraConfig, BabeConfig,
+    wasm_binary_unwrap, AuraConfig, AuthorityDiscoveryConfig, BabeConfig,
     BalancesConfig, /*CouncilConfig,*/
     /*DemocracyConfig,*/ /*ElectionsConfig,*/ GrandpaConfig, ImOnlineConfig, IndicesConfig,
     NftConfig, RealisBridgeConfig, RealisGameApiConfig, SessionConfig,
@@ -11,17 +11,15 @@ use node_runtime::{
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_runtime::{
-    Perbill,
-};
+use sp_runtime::Perbill;
 
+use crate::chain_spec::{session_keys, ChainSpec};
 pub use node_primitives::{AccountId, Balance, Signature};
 use node_runtime::constants::currency::DOLLARS;
 use node_runtime::pallet_staking;
 use node_runtime::realis_game_api;
 use node_runtime::Runtime;
 pub use node_runtime::{Block, GenesisConfig};
-use crate::chain_spec::{ChainSpec, session_keys};
 
 ///Realis chain-spec from realis.json
 pub fn realis_config() -> Result<ChainSpec, String> {
