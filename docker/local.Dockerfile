@@ -9,7 +9,7 @@ RUN . $HOME/.cargo/env && \
 
 COPY . .
 RUN . $HOME/.cargo/env && \
-      cargo build --release
+    cargo build --release
 
 ###
 
