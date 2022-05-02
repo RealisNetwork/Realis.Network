@@ -1,0 +1,25 @@
+version: "2.2"
+
+services:
+  blockchain:
+    build: 
+      context: .
+      dockerfile: local.Dockerfile
+    ports:
+      - 9944:9944
+      - 9044:9044
+      - 9033:9033
+  nats:
+    image: nats-streaming
+    ports:
+      - "4222:4222"
+    command: '--max_channels=2000'
+  
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres # username: postgres
+      POSTGRES_DB: # db name
+    ports:
+      - 5431:5432
