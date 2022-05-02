@@ -9,17 +9,25 @@ services:
       - 9944:9944
       - 9044:9044
       - 9033:9033
+
   nats:
     image: nats-streaming
     ports:
-      - "4222:4222"
+      - "${NATS_PORT}:4222"
     command: '--max_channels=2000'
+    env_file:
+      - .env
   
   db:
     image: postgres:latest
     restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: postgres # username: postgres
-      POSTGRES_DB: # db name
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD} # username: postgres
+      POSTGRES_DB: ${DATABASE_NAME} # db name
     ports:
-      - 5432:5432
+      - ${DATABASE_PORT}:5432
+    env_file:
+      - .env
+    # volumes:
+    #   - ${HOME}/.postgres:/root/.postgres
