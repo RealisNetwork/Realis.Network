@@ -27,7 +27,7 @@ pallet-session = { git = "https://github.com/RealisNetwork/substrate", branch = 
 pallet-authorship = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", default-features = false  }
 sp-application-crypto = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", default-features = false  }
 frame-election-provider-support = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", default-features = false  }
-log = { version = "0.4.14", default-features = false }
+log = { version = "0.4.17", default-features = false }
 paste = "1.0"
 
 # Optional imports for benchmarking
