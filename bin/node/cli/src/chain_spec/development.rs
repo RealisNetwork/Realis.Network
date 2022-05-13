@@ -100,6 +100,11 @@ fn development_config_genesis() -> GenesisConfig {
     ];
 
     let white_list = vec![
+        sudo_1.clone(),
+        sudo_2.clone(),
+        sudo_3.clone(),
+        sudo_4.clone(),
+        sudo_5.clone(),
         test_acc_1.clone(),
         test_acc_2.clone(),
         test_acc_3.clone(),
