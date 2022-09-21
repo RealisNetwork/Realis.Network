@@ -24,7 +24,7 @@ pallet-session = { default-features = false, features = ["historical"], git = "h
 pallet-authorship = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 sp-staking = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
 #frame-election-provider-support = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", default-features = false  }
-primitive-types = { version = "0.10.1", default-features = false }
+primitive-types = { version = "0.12.0", default-features = false }
 frame-benchmarking = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", version = "4.0.0-dev", default-features = false, optional = true }
 node-primitives = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", default-features = false }
 

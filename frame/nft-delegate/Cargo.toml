@@ -16,7 +16,7 @@ frame-system = { git = "https://github.com/RealisNetwork/substrate", branch = "p
 frame-benchmarking = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", version = "4.0.0-dev", default-features = false, optional = true }
 node-primitives = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", default-features = false }
 sp-std = { git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9", default-features = false }
-primitive-types = { version = "0.10.1", default-features = false }
+primitive-types = { version = "0.12.0", default-features = false }
 
 
 codec = { package = "parity-scale-codec", version = "2.0.1", default-features = false, features = ["derive"] }
