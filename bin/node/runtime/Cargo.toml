@@ -18,7 +18,7 @@ codec = { package = "parity-scale-codec", version = "2.2.0", default-features = 
 log = { version = "0.4.14", default-features = false }
 static_assertions = "1.1.0"
 hex-literal = { version = "0.3.4", optional = true }
-getrandom = { version = "0.2.5", features = ["js"] }
+getrandom = { version = "0.2.8", features = ["js"] }
 
 # primitives
 sp-authority-discovery = { default-features = false, git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }

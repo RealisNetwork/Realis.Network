@@ -36,7 +36,7 @@ log = "0.4.8"
 rand = "0.8.5"
 structopt = { version = "0.3.8", optional = true }
 parking_lot = "0.12.0"
-getrandom = { version = "0.2.5", features = ["js"] }
+getrandom = { version = "0.2.8", features = ["js"] }
 
 # primitives
 sp-authority-discovery = { version = "4.0.0-dev", git = "https://github.com/RealisNetwork/substrate", branch = "polkadot-v0.9.9" }
